@@ -1,0 +1,855 @@
+<?php
+    declare(strict_types=1);
+
+    /*
+     * Comments Fieldtype for storing user comments for a page
+     * This comments field is especially designed to work with the FrontendForms module
+     *
+     * Created by Jürgen K.
+     * https://github.com/juergenweb
+     * File name: FieldtypeFrontendComments.module
+     * Created: 23.06.2023
+     */
+
+    namespace ProcessWire;
+
+    use Exception;
+    use FrontendComments\CommentArray;
+    use FrontendComments\Comment;
+    use FrontendComments\configValues;
+    use PDO;
+
+    // include all necessary files
+    $dirname = dirname(__FILE__);
+    require_once($dirname . "/traits/configValues.php");
+    require_once($dirname . "/CommentArray.php");
+    require_once($dirname . "/CommentForm.php");
+    require_once($dirname . "/Comments.php");
+    require_once($dirname . "/Comment.php");
+    require_once($dirname . "/InputfieldFrontendComments.php");
+
+    class FieldtypeFrontendComments extends FieldtypeMulti
+    {
+
+        use configValues;
+
+        const moderateNone = 0; // no moderation - all comments will be published immediately
+        const moderateAll = 1; // all comments need to be approved
+        const moderateNew = 2; // only new comments need to be approved
+        protected FrontendForms $frontendForms;
+
+        // configuration values
+        protected string|int $input_fc_moderate = '0';
+        protected string $input_fc_emailTemplate = 'inherit';
+        protected string $input_fc_emailtype = 'text';
+        protected string $input_fc_email = '';
+        protected string $input_fc_sender = '';
+        protected string $input_fc_subject = '';
+        protected string $input_fc_title = '';
+        protected int $input_fc_depth = 3;
+        protected string|int $input_fc_sort = 0;
+        protected string|int $input_fc_spam = 3;
+        protected string $input_fc_captcha = 'inherit';
+        protected string|int $input_fc_outputorder = 0;
+        protected string|int $input_fc_removeCSS = 0;
+        protected string|int $input_fc_removeJS = 0;
+        protected string|int $input_fc_userimage = 'none';
+        protected string|int $input_fc_imagesize = 70;
+        protected string|int $input_fc_stars = 0;
+
+        // array of all fields inside the user template
+        protected array $userfields = [];
+        protected User $user;
+        protected WireDatabasePDO $database;
+
+        /**
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
+         */
+        public function __construct()
+        {
+            parent::__construct();
+
+            // grab FrontendForms module to be able to use some methods of it
+            $this->frontendForms = wire('modules')->get('FrontendForms');
+
+            // set database object
+            $this->database = $this->wire()->database;
+
+        }
+
+        /**
+         * Get the info data about this module
+         * @return array
+         */
+        public static function getModuleInfo(): array
+        {
+            return array(
+                'title' => __('FrontendComments', __FILE__),
+                'summary' => __('Field that let you store user comments on a page using the FrontendForms module.',
+                    __FILE__),
+                'href' => 'https://github.com/juergenweb/FieldtypeFrontendComments',
+                'icon' => 'comment',
+                'installs' => 'InputfieldFrontendComments',
+                'permanent' => false,
+                'version' => '1.0.0',
+                'requires' => [
+                    'FrontendForms>=2.1.45',
+                    'PHP>=8.0',
+                    'ProcessWire>=3'
+                ],
+                'author' => 'Jürgen Kern'
+            );
+        }
+
+        /**
+         * @return void
+         */
+        public function init(): void
+        {
+            // add CSS and JS to the frontend template
+            $this->addHookAfter('Page::render', $this, 'addAssets');
+            $this->addHookAfter('Page::render', $this, 'deleteSpam');
+
+        }
+
+        /**
+         * Delete comments marked as SPAM after a given time as set in the input field configuration
+         * @return void
+         * @throws \ProcessWire\WireException
+         */
+        protected function deleteSpam(): void
+        {
+            // get all FrontendComments Inputfields
+            $commentsFields = $this->wire('fields')->find('type=FieldtypeFrontendComments');
+            foreach ($commentsFields as $field) {
+
+                $table = $this->database->escapeTable($field->table);
+
+                // delete old spam after a given time in days
+                $expiredTime = time() - (86400 * $field->input_fc_spam);
+                $query = $this->database->prepare("DELETE FROM `$table` WHERE status=:status AND created < :expiredTime");
+                $query->bindValue(":status", InputfieldFrontendComments::spam, PDO::PARAM_INT);
+                $query->bindValue(":expiredTime", $expiredTime);
+                $query->execute();
+            }
+
+        }
+
+        /**
+         * Add the module javascript and CSS file to the frontend
+         * JS files will be added before the closing body tag
+         * CSS files are added before the closing head tag
+         * @param HookEvent $event
+         */
+        protected function addAssets(HookEvent $event): void
+        {
+            $page = $event->object;
+            //if(!$event->return) bd(Debug::backtrace());
+            // don't add this to the admin pages
+            if ($page->template->name === 'admin') return;
+            $hasField = false;
+            foreach ($page->template->fields as $field) {
+                if ($field->type == 'FieldtypeFrontendComments') {
+                    $hasField = true;
+                    break;
+                }
+            }
+            // add CSS and Javascript tags only on pages with a FieldtypeFrontendComments field
+            if ($hasField) {
+
+                /*
+
+             if (!$this->input_fc_removeJS) {
+                 $version = $this->getModuleInfo()['version'] . '-' . time();
+                 $js = '<script src="' . $this->wire('config')->urls->$this . 'frontendcomments.js?v=' . $version . '"></script>' . PHP_EOL;
+                 $event->return = str_replace('</body>', $js . PHP_EOL . '</body>', $event->return);
+             }
+             if (!$this->input_fc_removeCSS) {
+                 $css = '<link rel="stylesheet" type="text/css" href="' . $this->wire('config')->urls->$this . 'frontendcomments.css' . '"/>' . PHP_EOL;
+                 $event->return = str_replace('</head>', $css . PHP_EOL . '</head>', $event->return);
+             }
+             */
+            }
+        }
+
+        /**
+         * Get all fields inside the user template which can be selected to map form fields.
+         * Please note: Only user fields which are editable by the user will be taken into account
+         * @return array - key: field id, value: field name
+         * @throws WireException
+         * @throws WirePermissionException
+         */
+        protected function getUserFields():array
+        {
+            // get array of all editable user template fields
+
+            $fields = $this->wire('modules')->getModule('ProcessProfile', ['noPermissionCheck' => true]);
+            $all_userfields = $fields->data['profileFields'];
+            // ignore these fields from the user template
+            $ignoreFields = ['pass', 'roles', 'language', 'admin_theme', 'tfa_type'];
+            $userfields = array_diff($all_userfields, $ignoreFields);
+            $linkFields = [];
+            $linkFields['none'] = $this->_('none');
+            foreach ($userfields as $fieldname) {
+                $field = $this->wire('fields')->get($fieldname);
+                $linkFields[$field->id] = $field->name;
+            }
+            return $linkFields;
+        }
+
+        /**
+         * Select user fields depending on the Fieldtype (class name)
+         * @param string $classname
+         * @return array
+         * @throws WireException
+         * @throws WirePermissionException
+         */
+        protected function getUserfieldsOfType(string $classname):array
+        {
+            $fields = [];
+            foreach ($this->userfields as $id => $name) {
+                $field = $this->wire('fields')->get($id);
+                if (isset($field->type)) {
+                    $fields['none'] = $this->_('no selection'); // add an empty option
+                    if ($field->type->className() == $classname) {
+                        $fields[$id] = $name;
+                    }
+                }
+            }
+            $this->userimagefields = $fields;
+            return $fields;
+        }
+
+        /**
+         *  Return a blank ready-to-populate value
+         * @param Page $page
+         * @param Field $field
+         * @return CommentArray
+         * @throws WireException
+         */
+        public function getBlankValue(Page $page, Field $field): CommentArray
+        {
+            $commentArray = $this->wire(new CommentArray());
+            $commentArray->setPage($page);
+            $commentArray->setField($field);
+            $commentArray->setTrackChanges(); // enable tracking of changes
+            return $commentArray;
+        }
+
+        /**
+         * Given a value, make it clean and of the correct type for storage within a Page
+         *
+         * @param Page $page
+         * @param Field $field
+         * @param $value
+         * @return CommentArray
+         * @throws WireException
+         */
+        public function sanitizeValue(Page $page, Field $field, $value): CommentArray
+        {
+
+            // if the value is of type CommentArray -> return it
+            if ($value instanceof CommentArray) {
+                return $value;
+            }
+
+            // value is not of type CommentArray -> convert it to a Comment Array
+            /** @var CommentArray $commentArray */
+            $commentArray = $this->wire()->pages->get($field->name);
+
+            if (!$value) return $commentArray;
+
+            if ($value instanceof Comment) return $commentArray->add($value);
+            if (!is_array($value)) $value = array($value);
+
+            foreach ($value as $comment) $commentArray->add($comment);
+
+            return $commentArray;
+        }
+
+        /**
+         * Convert from DB storage to API value for displaying on a template page
+         *
+         * @param Page $page
+         * @param Field $field
+         * @param string|int|array $value
+         * @return CommentArray
+         * @throws WireException
+         */
+        public function ___wakeupValue(Page $page, Field $field, $value): CommentArray
+        {
+            // if value ist type of CommentArray -> return it
+            if ($value instanceof CommentArray) return $value;
+
+            // if no Comment Array value is present ->
+            // instantiate a new object with blank values if no value is present
+            $commentArray = $this->getBlankValue($page, $field);
+
+            if (empty($value)) return $commentArray;
+
+            if (!is_array($value)) $value = [$value];
+
+            foreach ($value as $item) {
+
+                // create a new comment instance from each item
+                $comment = $this->wire(new Comment($item, $commentArray));
+                $comment->page = $page; // set the page, where the comment belongs to
+                $comment->field = $field; // set the field, where the comment belongs to
+
+                foreach ($item as $name => $value) {
+                    if ($name === 'data')
+                        $name = 'text';
+                    $comment->set($name, $value);
+                }
+
+                $commentArray->add($comment);
+
+            }
+
+            $commentArray->resetTrackChanges();
+
+            // sort, according to the input field settings (newest to oldest or vice versa)
+            if ($this->input_fc_sort == 1) {
+                $commentArray->sort("-created"); // sort newest to oldest
+            }
+
+            return $commentArray;
+        }
+
+        /**
+         * Convert from API to DB storage value.
+         * Multi-value field contains an array as value
+         *
+         * @param Page $page
+         * @param Field $field
+         * @param string|int|array|object $value
+         * @return array
+         * @throws Exception
+         */
+        public function ___sleepValue(Page $page, Field $field, $value): array
+        {
+
+            $sleepValue = [];
+            if (!$value instanceof CommentArray) return $sleepValue;
+
+            $sanitizer = $this->wire()->sanitizer;
+
+            // convert each Comment to an array within sleepValue
+            foreach ($value as $comment) {
+
+                // sanitize especially values that will be submitted via the form
+                $a = array(
+                    'id' => $comment->id,
+                    'status' => $sanitizer->int($comment->status),
+                    'data' => $sanitizer->textarea($comment->text),
+                    'author' => $sanitizer->maxLength($comment->author, 128, 128 * 3),
+                    'email' => $sanitizer->maxLength($comment->email, 128, 128 * 3),
+                    'created' => $comment->created,
+                    'user_id' => $comment->user_id,
+                    'parent_id' => $sanitizer->int($comment->parent_id),
+                    'ip' => $comment->ip,
+                    'user_agent' => $comment->user_agent,
+                    'code' => $comment->code,
+                    'remote_flag' => $comment->remote_flag,
+                    'stars' => $comment->stars,
+                );
+
+                $sleepValue[] = $a;
+
+            }
+            return $sleepValue;
+        }
+
+        /**
+         * Take the sleep value and save the data (comment) to the database
+         * expects values as an array, so we convert the $value object to an array
+         * @param Page $page
+         * @param Field $field
+         * @return bool
+         * @throws WireException
+         * @noinspection SqlNoDataSourceInspection
+         */
+        public function ___savePageField(Page $page, Field $field): bool
+        {
+
+            // save the data only if the page and the field exist
+            if (!$page->id || !$field->id) return false;
+
+            // get all comments as a CommentArray, the database object and the table name
+            $allItems = $page->get($field->name); // returns CommentArray
+            $table = $this->database->escapeTable($field->table); // returns the database table name (fe field_my_comment-table)
+
+            // if there are no items (comments), stop the saving process here
+            if (!$allItems) return false;
+
+            // if there are no changes in the comments at all and no new comment -> stop the saving process here
+            if (!$allItems->isChanged() && !$page->isChanged($field->name)) return true;
+
+            $maxSort = 0;
+
+            // create a blank new CommentArray for saving
+            $items = $allItems->makeNew();
+
+            foreach ($allItems as $item) {
+                // check if an existing comment has been changed or a new comment was submitted
+                // if yes -> add this item to the newly created CommentArray for saving
+                if ($item->isChanged() || !$item->id) $items->add($item);
+                if ($item->sort > $maxSort) $maxSort = $item->sort;
+            }
+
+            // no new comments or updated comments inside the new CommentsArray -> stop the saving process here
+            if (!count($items)) return true;
+
+            // convert the values for storage in the database
+            $values = $this->sleepValue($page, $field, $items);
+            $value = reset($values); // Set the internal pointer of the array to its first element
+
+            // get all the col names as an array
+            $keys = is_array($value) ? array_keys($value) : array('data'); // get all array keys
+
+            // cycle through the values, executing an update or an insert query for each
+            foreach ($values as $value) {
+
+                $binds = array();
+
+                // check if it is a new entry or an update
+                $sql = $value['id'] ? "UPDATE " : "INSERT INTO ";
+                $sql .= "`$table` SET pages_id=:pages_id, ";
+                $binds['pages_id'] = $page->id;
+
+                // if the value is not an associative array, then force it to be one
+                if (!is_array($value)) $value = array('data' => $value);
+                // cycle through the keys, which represent DB fields (f.e. data, description, etc.) and generate the update query
+                foreach ($keys as $key) {
+                    if ($key == 'id') {
+                        continue;
+                    }
+                    if ($key == 'sort' && !$value['id']) {
+                        continue;
+                    }
+                    $v = $value[$key];
+
+                    $col = $this->database->escapeCol($key);
+                    if (!is_null($v)) {
+                        $sql .= "$col=:$col, ";
+                        $binds[$col] = $v;
+                    }
+                }
+                // old comment, which will be updated
+                if ($value['id']) {
+                    $sql = rtrim($sql, ', ') . " WHERE id=:id"; // . (int) $value['id'];
+                    $binds['id'] = (int)$value['id'];
+                } else {
+                    // new comment
+                    $sql .= "sort=:sort";
+                    $binds['sort'] = ++$maxSort;
+                }
+
+                // save the data to the database
+                try {
+
+                    $query = $this->database->prepare($sql); // create the query string
+
+                    // bind all values to the query string
+                    foreach ($binds as $k => $v) {
+                        $query->bindValue(":$k", $v);
+                    }
+
+                    // execute the query to save the comment in the database
+                    $result = $query->execute();
+                    $error = '';
+                } catch (Exception $e) {
+                    $result = false;
+                    $error = $e->getMessage();
+                }
+
+                // if an error occurs, display an error message and log the error
+                if (!$result) {
+                    $this->error("Error saving comment id $value[id]: $error", Notice::log);
+                }
+
+            }
+            return true;
+        }
+
+        /**
+         * User is not allowed to change this fieldtype to another fieldtype
+         *
+         * @param Field $field
+         * @return null
+         *
+         */
+        public function ___getCompatibleFieldtypes(Field $field): null
+        {
+            return null;
+        }
+
+        /**
+         * Database schema for the FrontendComments Fieldtype
+         * @param Field $field
+         * @return array
+         */
+        public function getDatabaseSchema(Field $field): array
+        {
+
+            $schema = parent::getDatabaseSchema($field);
+
+            $schema['id'] = "int unsigned NOT NULL auto_increment";
+            $schema['status'] = "tinyint(3) NOT NULL default '0'";
+            $schema['author'] = "varchar(128) NOT NULL default ''";
+            $schema['email'] = "varchar(255) NOT NULL default ''";
+            $schema['data'] = "text NOT NULL";
+            $schema['sort'] = "int unsigned NOT NULL";
+            $schema['created'] = "int unsigned NOT NULL";
+            $schema['user_id'] = "int unsigned NOT NULL";
+            $schema['ip'] = "varchar(15) NOT NULL default ''";
+            $schema['user_agent'] = "varchar(255) NOT NULL default ''";
+            $schema['parent_id'] = "int unsigned NOT NULL default 0";
+            $schema['code'] = "varchar(128) NOT NULL default ''";
+            $schema['remote_flag'] = "tinyint(3) NOT NULL default '0'";
+            $schema['stars'] = "tinyint(3) unsigned default NULL";
+
+            // indexes, for any fields that need to be searchable from selectors
+            $schema['keys']['primary'] = "PRIMARY KEY (`id`)";
+            $schema['keys']['pages_id_sort'] = "KEY `pages_id_sort` (`pages_id`, `sort`)";
+            $schema['keys']['status'] = "KEY `status` (`status`, `email`)";
+            $schema['keys']['pages_id'] = "KEY `pages_id` (`pages_id`,`status`,`created`)";
+            $schema['keys']['created'] = "KEY `created` (`created`, `status`)";
+            $schema['keys']['data'] = "FULLTEXT KEY `data` (`data`)";
+            $schema['keys']['code'] = "KEY `code` (`code`, `status`)";
+
+            return $schema;
+        }
+
+        /**
+         * Return the Inputfield used to collect input for a field of this type
+         *
+         * @param Page $page
+         * @param Field $field
+         * @return Module|null
+         * @throws WirePermissionException|WireException
+         */
+        public function getInputfield(Page $page, Field $field): Module|null
+        {
+            $inputfield = $this->wire()->modules->get('InputfieldFrontendComments');
+            if (!$inputfield) return null;
+            $inputfield->class = $this->className();
+            return $inputfield;
+        }
+
+        /**
+         * @throws WireException
+         * @throws WirePermissionException
+         */
+        public function ___getConfigInputfields(Field $field): InputfieldWrapper
+        {
+
+            $modules = $this->wire()->modules;
+            $this->userfields = $this->getUserFields();
+            $userimages = $this->getUserfieldsOfType('FieldtypeImage');
+
+            $inputfields = parent::___getConfigInputfields($field);
+
+            bd($this->input_fc_stars);
+
+            /** @var InputfieldRadios $f */
+            $moderate = $this->wire()->modules->get('InputfieldRadios');
+            $moderate->label = $this->_('Comment moderation');
+            $moderate->description = $this->_('This determines when a newly posted comment will appear on your site.');
+            $moderate->attr('name', 'input_fc_moderate');
+            $moderate->attr('value', (int)$field->input_fc_moderate);
+            $moderate->addOption(self::moderateNone, $this->_('None - Comments posted immediately'));
+            $moderate->addOption(self::moderateAll, $this->_('All - All comments must be approved by user with page edit access'));
+            $moderate->addOption(self::moderateNew, $this->_('Only New - Only comments from users without prior approved comments require approval'));
+            $inputfields->append($moderate);
+
+            /**
+             * Field configuration fieldset
+             */
+
+            /**  $confFieldset */
+            $confFieldset = $this->wire('modules')->get('InputfieldFieldset');
+            $confFieldset->label = $this->_('Form fields configuration');
+            $confFieldset->collapsed = true;
+            $confFieldset->columnWidth = 100;
+            $confFieldset->icon = 'fa-list';
+
+            $userimage =  $this->wire()->modules->get('InputfieldSelect');
+            $userimage->label = $this->_('Select the field for the user image');
+            $userimage->attr('name', 'input_fc_userimage');
+            //get all possible image fields from the user template
+            $userimage->addOptions($userimages);
+            $value = (is_null($field->input_fc_userimage)) ? $this->input_fc_userimage : $field->input_fc_userimage;
+            $userimage->attr('value', $value);
+            $userimage->required = 1;
+            $userimage->columnWidth = 50;
+            $userimage->description = $this->_('Select the field of the user template which contains the user image');
+            $userimage->notes = $this->_('Only user fields of the type "FieldtypeImage" and the configuration setting for a single image will be displayed (if present).');
+            $confFieldset->add($userimage, $inputfields);
+
+            $imagesize = $this->wire()->modules->get('InputfieldInteger');
+            $imagesize->label = $this->_('Set the size of the image');
+            $imagesize->attr('name', 'input_fc_imagesize');
+            $imagesize->columnWidth = 50;
+            $imagesize->required = 1;
+            $imagesize->description = $this->_('Enter a value in px. The image will be displayed squared.');
+            $value = (is_null($field->input_fc_imagesize)) ? $this->input_fc_imagesize : $field->input_fc_imagesize;
+            $imagesize->attr('value', $value);
+            $confFieldset->add($imagesize, $inputfields);
+
+            $inputfields->add($confFieldset);
+
+            /**  $emailFieldset */
+            $emailFieldset = $this->wire('modules')->get('InputfieldFieldset');
+            $emailFieldset->label = $this->_('Default email configuration');
+            $emailFieldset->collapsed = true;
+            $emailFieldset->columnWidth = 100;
+            $emailFieldset->icon = 'fa-envelope';
+
+            // choose whether to use an email template or not
+            if ($this->frontendForms->getEmailTemplates()) {
+                $emailTemplate = $this->wire()->modules->get('InputfieldSelect');
+                $emailTemplate->label = $this->_('Select an email template');
+                $emailTemplate->attr('name', 'input_fc_emailTemplate');
+                // create options
+                $templates = [
+                    'inherit' => $this->_('inherit from FrontendForms settings'),
+                    'none' => $this->_('no HTML template (plain text only)')
+                ];
+                foreach ($this->frontendForms->getEmailTemplates() as $template) {
+                    $templates[$template] = ucfirst($template);
+                }
+                $emailTemplate->addOptions($templates);
+                $value = (is_null($field->input_fc_emailTemplate)) ? $this->input_fc_emailTemplate : $field->input_fc_emailTemplate;
+                $emailTemplate->attr('value', $value);
+                $emailTemplate->required = 1;
+                $emailTemplate->description = $this->_('Select if you want to use a HTML template for the notification emails or not.');
+                $emailTemplate->notes = $this->_('Inherit from FrontendForms will take the setting from this module.');
+                $emailFieldset->add($emailTemplate);
+
+            }
+
+            // set email manually or use a PW field value
+            $emailtype = $this->wire()->modules->get('InputfieldSelect');
+            $emailtype->label = $this->_('Email address(es) for the notification email');
+            $emailtype->description = $this->_('Select, if you want to enter the receiver email address(es) for the notification mails manually or if you want to select users as recipients.');
+            $emailtype->attr('name', 'input_fc_emailtype');
+            $emailtype->addOptions([
+                'text' => $this->_('Enter email address(es) manually'),
+                'pwfield' => $this->_('Select users as recipients')
+            ]);
+            $emailtype->attr('value', $field->input_fc_emailtype);
+            $emailtype->columnWidth = 50;
+            $emailtype->required = 1;
+            $emailtype->notes = '';
+            $emailFieldset->add($emailtype);
+
+            // email address where the emails should be sent to (fe. noreply@mycompany.com)
+            $email = $this->wire()->modules->get('InputfieldEmail');
+            $email->label = $this->_('Default email address(es) as text');
+            $email->attr('name', 'input_fc_default_to');
+            $email->attr('value', $field->input_fc_default_to);
+            $email->columnWidth = 25;
+            $email->showIf = 'input_fc_emailtype=text';
+            $email->required = 1;
+            $email->requiredIf = 'input_fc_emailtype=text';
+            $email->description = $this->_('Enter one ore more email addresses separated by a comma.');
+            $email->notes = $this->_('Fe email1@mydomain.com,email2@mydomain.com.');
+            $emailFieldset->add($email);
+
+            // select one or more users as recipients
+            // this field overwrites the text field for the email address
+            $emailField = $this->wire()->modules->get('InputfieldAsmSelect');
+            $emailField->label = $this->_('Recipients for the notification email');
+            $emailField->attr('name', 'input_fc_defaultPWField_to');
+            $emailField->required = 1;
+            $emailField->requiredIf = 'input_fc_emailtype=pwfield';
+            // create options that contain users (excluding registered)
+            $users = $this->wire('users')->find('roles!=registered,id!=40,sort=roles');
+            $userFields = [];
+            foreach ($users as $user) {
+                $userFields[$user->email] = $user->name . ' [' . $user->email . ']';
+            }
+            $emailField->addOptions($userFields);
+            $emailField->attr('value', $field->input_fc_defaultPWField_to);
+            $emailField->description = $this->_('Select one or more users that should receive a notification about new comments.');
+            $emailField->notes = $this->_('Users with the role "registered" will not be displayed, because they are not allowed to get notification emails.');
+            $emailField->columnWidth = 25;
+            $emailField->showIf = 'input_fc_emailtype=pwfield';
+            $emailFieldset->add($emailField);
+
+            // enter the email address from where the emails should be sent (fe. no-reply@mycompany.com)
+            $email = $modules->get('InputfieldEmail');
+            $email->label = $this->_('From email address');
+            $email->attr('name', 'input_fc_email');
+            $email->attr('value', $field->input_fc_email);
+            $email->description = $this->_('This email address will be displayed as the sender of the emails sent by this module.');
+            $email->columnWidth = 50;
+            $email->useLanguages = true;
+            $email->notes = sprintf($this->_('If no email address will be entered, %s will be displayed instead as the sender address.'), '"'.$this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"].'"');
+            $emailFieldset->add($email);
+
+            // enter the sender of the emails (fe. My Company)
+            $sender = $modules->get('InputfieldText');
+            $sender->label = $this->_('From name');
+            $sender->attr('name', 'input_fc_sender');
+            $sender->attr('value', $field->input_fc_sender);
+            $sender->placeholder = $this->_('fe. My company');
+            $sender->description = $this->_('This name will be displayed as the sender of the emails sent by this module.');
+            $sender->notes = $this->_('If no sender name will be entered, than the sender email address will be used as the sender name.');
+            $sender->columnWidth = 50;
+            $sender->useLanguages = true;
+            $emailFieldset->add($sender);
+
+            // enter the subject of the emails (fe. Comment notification)
+            $subject = $modules->get('InputfieldText');
+            $subject->label = $this->_('Mail subject');
+            $subject->attr('name', 'input_fc_subject');
+            $subject->attr('value', $field->input_fc_subject);
+            $subject->description = $this->_('This text will be displayed as the subject for the email.');
+            $subject->notes = $this->_('If no subject will be entered, than "Comment notification" will be displayed as the default subject.');
+            $subject->columnWidth = 50;
+            $subject->useLanguages = true;
+            $emailFieldset->add($subject);
+
+            // enter the title of the emails (fe. Comment notification)
+            $title = $modules->get('InputfieldText');
+            $title->label = $this->_('Mail Title');
+            $title->attr('name', 'input_fc_title');
+            $title->attr('value', $field->input_fc_title);
+            $title->description = $this->_('This text will be displayed under the sender name.');
+            $title->notes = $this->_('If no title will be entered, than "New commment has been submitted" will be displayed as the default title.');
+            $title->columnWidth = 50;
+            $title->useLanguages = true;
+            $emailFieldset->add($title);
+
+            $inputfields->append($emailFieldset);
+
+            $fieldset = $modules->get('InputfieldFieldset');
+            $fieldset->label = $this->_('Output rendering');
+            $fieldset->collapsed = 1;// by default, this fieldset should be collapsed
+            $fieldset->description = $this->_('Change some parameters to get the preferred output.');
+
+            // field to enter the number of decimals (fe 2) -> will be appended after the inputfield
+            $f = $this->modules->get('InputfieldInteger');
+            $f->attr('name+id', 'input_fc_depth');
+            $f->attr('type', 'number');
+            $f->label = $this->_('Replay depth');
+            $value = (is_null($field->input_fc_depth)) ? $this->input_fc_depth : $field->input_fc_depth;
+            $f->attr('value', $value);
+            $f->attr('size', 10);
+            $f->attr('min', 0);
+            $f->attr('max', 10);
+            $f->required(true);
+            $f->description = $this->_('Choose the number of depth for threaded comments');
+            $f->notes = $this->_('Specify 0 for traditional flat chronological comments. For threaded comments (replies appear with comment being replied to) specify the maximum depth allowed for replies (0 to 3 recommended).');
+            $fieldset->append($f);
+
+            // field to enter the number of decimals (fe 2) -> will be appended after the inputfield
+            $f = $this->modules->get('InputfieldCheckbox');
+            $f->attr('name+id', 'input_fc_sort');
+            $f->label = $this->_('Sort order');
+            $f->attr('value', $field->input_fc_sort);
+            $f->attr('checked', $field->input_fc_sort ? 'checked' : '');
+            $f->label2 = $this->_('Sort newest to oldest');
+            $f->description = $this->_('Set the sort order for the comments');
+            $f->notes = $this->_('By default, comments will sort chronologically (oldest to newest). To reverse that behavior check this box.');
+            $fieldset->append($f);
+
+            // field to reverse the output order of form and comments
+            $f = $this->modules->get('InputfieldCheckbox');
+            $f->attr('name+id', 'input_fc_outputorder');
+            $f->label = $this->_('Output order');
+            $f->attr('value', $field->input_fc_outputorder);
+            $f->attr('checked', $field->input_fc_outputorder ? 'checked' : '');
+            $f->label2 = $this->_('Show form after comments');
+            $f->description = $this->_('Reverse the order of the output of form and comments');
+            $f->notes = $this->_('By default, the form will be displayed before the comments. To reverse that behavior check this box.');
+            $fieldset->append($f);
+
+            // field to show or hide the star rating
+            $f = $this->modules->get('InputfieldCheckbox');
+            $f->attr('name+id', 'input_fc_stars');
+            $f->label = $this->_('Use star rating');
+            $f->attr('value', $field->input_fc_stars);
+            $f->attr('checked', $field->input_fc_stars ? 'checked' : '');
+            $f->label2 = $this->_('Show star rating');
+            $f->description = $this->_('If you want to offer star rating, please check the box');
+            $fieldset->append($f);
+
+            // remove the CSS file
+            $f = $this->modules->get('InputfieldCheckbox');
+            $f->attr('name+id', 'input_fc_removeCSS');
+            $f->label = $this->_('Remove CSS file');
+            $f->attr('value', $field->input_fc_removeCSS);
+            $f->attr('checked', $field->input_fc_removeCSS ? 'checked' : '');
+            $f->label2 = $this->_('Remove the frontendcomments.css file from the template');
+            $f->notes = $this->_('A CSS file for the comments will be added to the template by default. You can remove the embedding of the CSS file by checking the box.');
+            $f->columnWidth = 50;
+            $fieldset->append($f);
+
+            // remove the JS file
+            $f = $this->modules->get('InputfieldCheckbox');
+            $f->attr('name+id', 'input_fc_removeJS');
+            $f->label = $this->_('Remove JavaScript file');
+            $f->attr('value', $field->input_fc_removeJS);
+            $f->attr('checked', $field->input_fc_removeJS ? 'checked' : '');
+            $f->label2 = $this->_('Remove the frontendcomments.js file from the template');
+            $f->notes = $this->_('A small JavaScript, which will be needed for some features of the comments, will added before the closing body tag on the frontend by default . You can remove the embedding of the script file by checking the box.');
+            $f->columnWidth = 50;
+            $fieldset->append($f);
+
+            $inputfields->append($fieldset);
+
+            /**  $spamFieldset */
+            $spamFieldset = $this->wire('modules')->get('InputfieldFieldset');
+            $spamFieldset->label = $this->_('Spam');
+            $spamFieldset->collapsed = true;
+            $spamFieldset->columnWidth = 100;
+            $spamFieldset->icon = 'fa-ban';
+
+            // field to enter the number of decimals (fe 2) -> will be appended after the inputfield
+            $f = $this->modules->get('InputfieldInteger');
+            $f->attr('name+id', 'input_fc_spam');
+            $f->attr('type', 'number');
+            $f->label = $this->_('Number of days after which to delete spam');
+            $value = (is_null($field->input_fc_spam)) ? $this->input_fc_spam : $field->input_fc_spam;
+            $f->attr('value', $value);
+            $f->attr('size', 10);
+            $f->attr('min', 0);
+            $f->required(true);
+            $f->description = $this->_('After the number of days indicated, spam will be automatically deleted.');
+            $spamFieldset->append($f);
+
+            // captcha
+            $captcha = $this->wire()->modules->get('InputfieldSelect');
+            $captcha->label = $this->_('CAPTCHA');
+            $captcha->description = $this->_('Select, if you want to use a CAPTCHA for the comment form.');
+            $captcha->notes = $this->_('If you receive a lot of spam comments, you can enable a CAPTCHA to prevent spam bots from filling out the form.');
+            $captcha->attr('name', 'input_fc_captcha');
+            // grab CAPTCHA types from FrontendForms module
+            $modulePath = $this->wire('config')->get('paths')->siteModules.'FrontendForms/';
+            $captchaTypes = $this->wire('files')->find($modulePath . 'Formelements/Captcha/variants/',
+                ['recursive' => 0]);
+            $captcha->addOption('inherit', $this->_('Inherit from FrontendForms'));
+            $captcha->addOption('none', $this->_('No CAPTCHA'));
+
+            foreach ($captchaTypes as $file) {
+                $className = pathinfo($file, PATHINFO_FILENAME);
+                $cname = 'FrontendForms\\' . $className;
+                $option = new $cname();
+                $captcha->addOption($className, $option->title);
+            }
+            $value = (is_null($field->input_fc_captcha)) ? $this->input_fc_captcha : $field->input_fc_captcha;
+            $captcha->attr('value', $value);
+            $captcha->required = 1;
+            $spamFieldset->add($captcha, $inputfields);
+
+            $inputfields->append($spamFieldset);
+
+            // output all input fields (parent and custom)
+            return $inputfields;
+        }
+
+    }

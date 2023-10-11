@@ -1,0 +1,42 @@
+<?php
+declare(strict_types=1);
+
+namespace FrontendComments;
+
+/*
+ * Various general methods for getting configuration values that can be used inside any class
+ *
+ * Created by Jürgen K.
+ * https://github.com/juergenweb 
+ * File name: configValues.php
+ * Created: 22.07.2023 
+ */
+
+
+trait configValues {
+
+    /**
+     * Get all configuration settings from the FrontendForms module as an assoc. array
+     * @return array
+     */
+    function getFrontendFormsConfigValues(): array {
+        $configValues = [];
+        foreach ($this->wire('modules')->getConfig('FrontendForms') as $key => $value) {
+            $configValues[$key] = $value;
+        }
+        return $configValues;
+    }
+
+    /**
+     * Get all configuration settings from the FrontendComments input field as an assoc. array
+     * @return array
+     */
+    function getFrontendCommentsInputfieldConfigValues(): array {
+        $configValues = [];
+        foreach ($this->wire('fields')->get($this->field->name) as $key => $value) {
+            $configValues[$key] = $value;
+        }
+        return $configValues;
+    }
+
+}
