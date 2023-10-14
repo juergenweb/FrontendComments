@@ -30,7 +30,6 @@
     use ProcessWire\WireException;
     use ProcessWire\WirePaginatable;
 
-
     class CommentArray extends PaginatedArray implements WirePaginatable
     {
 
@@ -152,8 +151,7 @@
         public function renderComments(): string
         {
             $comments = $this->getComments();
-            $form = $this->getCommentForm();
-            return $comments->___renderComments(0, $this->commentId, $form);
+            return $comments->___renderComments(0, $this->commentId);
         }
 
         /**
@@ -178,71 +176,14 @@
             // grab configuration values from the FrontendComments input field
             $frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
 
-            // create the form inside the invisible result div
-            if($this->wire('config')->ajax) {
-
-                if(isset($_POST)){
-                    bd('post');
-                } else {
-                    bd('get');
-                }
-                $out = '<div id="result">';
-
-                // get the form id via the querystring
-                // check if a code has been sent to the page via the email link to change the status
-                $queryString = $this->wire('input')->queryString();
-                parse_str($queryString, $queryParams);
-                if (array_key_exists('commentid', $queryParams)) {
-                    $id = $this->wire('sanitizer')->string($queryParams['formid']);
-                }
-                bd($queryString);
-
-                $parent_id = 0;
-                $queryId = null;
-                $form = new CommentForm($this, 'frontend_comments', 0);
-                /*
-                if($queryString){
-                    // reply form
-                    $form = new CommentForm($this->comments, 'reply-form-'.$id, (int)$id);
-                    $form->setAttribute('action', '/?formid=reply-form-'.$id.'#reply-comment-form-'.$this->comments->getField()->name.'-reply-'.$id);
-                } else {
-                    //  form
-                    $parent_id = 0;
-                    $queryId = null;
-                    $form = new CommentForm($this, $this->field->name, $parent_id);
-                    //$form->setAttribute('action', '/?formid=reply-form-'.$id.'#reply-comment-form-'.$this->comments->getField()->name.'-reply-'.$id);
-                }
-                */
-
-
-                // TODO: delete afterwards - only for dev purposes disabled
-                $form->setMaxAttempts(0);
-                $form->setMinTime(0);
-                $form->setMaxTime(0);
-
-                /*
-                $text = '<div class="alert-close-wrapper"><a href="#" class="fc-cancel-reply" data-field="'.$this->comments->getField()->name.'" data-id="'.$id.'">'.$this->_('Cancel').'</a></div>';
-                $text .= '<h3>'.$this->_('Write an answer to this comment').'</h3>';
-                $form->prepend($text);
-                */
-
-                // get the submit button object and change the name attribute
-                //$submitButton = $form->getSubmitButton();
-                //$submitButton->setAttribute('name', 'reply-form-'.$id.'-submit');
-
-                $out .= $form->render();
-                $out .= '</div>';
-                echo $out;
-            }
-
-
-
-            //$form = $this->___render();
             // show the form on top only if id=0 or id is different, but query string with code is present
             $form = '';
             if (($this->commentId === 0) || (($this->code))) {
-                $form = '<div id="'.$this->field->name.'-form-wrapper"></div>';
-
+                // get session after redirect of successful form submission
+                $validCommentStatus = $this->wire('session')->get('status');
+                // TODO: output an alert box
+                $this->wire('session')->remove('status');
+                $form = $this->___render();
             }
             $content = array_filter([$form, $this->renderComments()]);
             // reverse the order depending on the config settings
