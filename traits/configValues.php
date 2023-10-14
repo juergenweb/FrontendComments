@@ -18,6 +18,7 @@ trait configValues {
     /**
      * Get all configuration settings from the FrontendForms module as an assoc. array
      * @return array
+     * @throws \ProcessWire\WireException
      */
     function getFrontendFormsConfigValues(): array {
         $configValues = [];
@@ -30,6 +31,8 @@ trait configValues {
     /**
      * Get all configuration settings from the FrontendComments input field as an assoc. array
      * @return array
+     * @throws \ProcessWire\WireException
+     * @throws \ProcessWire\WirePermissionException
      */
     function getFrontendCommentsInputfieldConfigValues(): array {
         $configValues = [];
