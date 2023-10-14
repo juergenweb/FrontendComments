@@ -94,7 +94,7 @@
                 'permanent' => false,
                 'version' => '1.0.0',
                 'requires' => [
-                    'FrontendForms>=2.1.45',
+                    'FrontendForms>=2.1.47',
                     'PHP>=8.0',
                     'ProcessWire>=3'
                 ],
@@ -107,11 +107,16 @@
          */
         public function init(): void
         {
+            parent::init();
             // add CSS and JS to the frontend template
             $this->addHookAfter('Page::render', $this, 'addAssets');
             $this->addHookAfter('Page::render', $this, 'deleteSpam');
 
+
+
+
         }
+
 
         /**
          * Delete comments marked as SPAM after a given time as set in the input field configuration
@@ -136,13 +141,40 @@
 
         }
 
+
+
+        public function addAssets(HookEvent $event):void
+        {
+            $page = $event->object;
+
+            $assets = wire('config')->urls->siteModules . $this->className() . '/';
+            $js = '';
+            /*
+            // load only on frontend
+            if ($page->template->name !== 'admin') {
+                if (!$this->input_removeJS) {
+                    $js = '<script src="' . $assets . $this->className() . '.js"></script>' . PHP_EOL;
+                }
+                // TODO
+                $this->input_removeCSS = false;
+                if (!$this->input_removeCSS) {
+                    $css = '<link rel="stylesheet" type="text/css" href="' . $assets . $this->className().'.css"/>' . PHP_EOL;
+                    $event->return = str_replace('</head>', $css . PHP_EOL . '</head>', $event->return);
+                }
+            }
+
+            $event->return = str_replace('</body>', $js . PHP_EOL . '</body>', $event->return);
+            */
+        }
+
+
         /**
          * Add the module javascript and CSS file to the frontend
          * JS files will be added before the closing body tag
          * CSS files are added before the closing head tag
          * @param HookEvent $event
          */
-        protected function addAssets(HookEvent $event): void
+        protected function addAssetsOld(HookEvent $event): void
         {
             $page = $event->object;
             //if(!$event->return) bd(Debug::backtrace());
@@ -551,7 +583,6 @@
 
             $inputfields = parent::___getConfigInputfields($field);
 
-            bd($this->input_fc_stars);
 
             /** @var InputfieldRadios $f */
             $moderate = $this->wire()->modules->get('InputfieldRadios');
