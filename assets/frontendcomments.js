@@ -8,9 +8,9 @@ Created: 20.07.2023
 */
 
 /**
- * Function to check if the document is completely loaded
- * @param fn
- */
+* Function to check if the document is completely loaded
+* @param fn
+*/
 function docReady(fn) {
     // see if DOM is already available
     if (document.readyState === "complete" || document.readyState === "interactive") {
@@ -22,13 +22,65 @@ function docReady(fn) {
 }
 
 /**
+ * Load the reply form under the given comment via Ajax on demand
+ */
+function loadReplyForm() {
+    document.addEventListener('click', (e) => {
+        // check if a parent element is a link with class fc-comment-reply
+        let link = e.target.parentElement;
+        if (link.classList.contains('fc-comment-reply')) {
+
+            e.preventDefault();
+
+            // grab some values from the element
+            let commentId = link.dataset.id;
+
+            let fieldName = link.dataset.field;
+            let url = document.location.href.split('?')[0] + '?commentid=' + commentId;
+            let target = document.getElementById('reply-comment-form-' + fieldName + '-reply-' + commentId);
+
+            // make an Ajax call to load the form from the result div
+            let xhr = new XMLHttpRequest();
+
+            xhr.onload = function () {
+
+                let result = this.responseText;
+
+                const parser = new DOMParser();
+                let doc = parser.parseFromString(result, "text/html");
+
+                let content = doc.getElementById('reply-comment-form-' + fieldName + '-reply-' + commentId).innerHTML;
+
+                if (xhr.readyState === 4) {
+
+                    // load the form inside the target div
+                    target.innerHTML = content;
+
+                    // add Ajax event listener function once more
+                    subAjax('reply-form-' + commentId);
+
+                }
+
+            }
+
+            xhr.open("GET", url);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.send();
+
+        }
+    });
+
+}
+
+
+/**
  * Cancel the reply process and remove the form from the wrapper div under the comment by clicking
  * on the cancel link
  */
-function removeForm() {
+function cancelReply() {
     document.addEventListener('click', (e) => {
         // check if a parent element is a link with class fc-alert-close
-        if (e.target.classList.contains('fc-cancel-reply')) {
+        if (e.target.classList.contains('fc-cancel-link')) {
             e.preventDefault();
             document.getElementById('reply-comment-form-' + e.target.dataset.field + '-reply-' + e.target.dataset.id).innerHTML = '';
         }
@@ -36,130 +88,12 @@ function removeForm() {
 }
 
 
-function loadForm(formid = null, commentid = null)
-{
-    let target = null;
-    let url = '';
-
-    if(commentid === null){
-        // it is not a reply
-        target = document.getElementById('frontend_comments-form-wrapper');
-    } else {
-        // it is a reply
-        target = document.getElementsByClassName('reply-form-wrapper');
-    }
-    // make AJAX request to load the form inside the wrapper
-    if(formid){
-        url = document.location.href.split('?')[0] + '?formid='+ formid;
-    } else {
-        url = document.location.href.split('?')[0];
-    }
-
-
-
-        let xhr = new XMLHttpRequest();
-
-        xhr.onload = function () {
-            let result = this.responseText;
-
-            const parser = new DOMParser();
-            let doc = parser.parseFromString(result, "text/html");
-            let content = doc.getElementById('result').innerHTML;
-
-            if (xhr.readyState === 4) {
-                // load the form inside the target div
-                target.innerHTML = content;
-            }
-        }
-        xhr.open("GET", url);
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        xhr.send();
-
-}
-
-function validateForm()
-{
-    // check if fc-comment-button button was clicked
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('fc-comment-button')) {
-            e.preventDefault();
-            console.log('submitted');
-            // get the action attribute value
-            let form = document.getElementById(e.target.dataset.formid);
-            let url = form.getAttribute('action');
-            let target = document.getElementById('frontend_comments-form-wrapper');
-
-            // make a POST request
-            let xhr = new XMLHttpRequest();
-
-            xhr.onload = function () {
-                let result = this.responseText;
-                const parser = new DOMParser();
-                let doc = parser.parseFromString(result, "text/html");
-                let content = doc.getElementById('result').innerHTML;
-
-                if (xhr.readyState === 4) {
-                    // load the form inside the target div
-                    target.innerHTML = content;
-                }
-            }
-            xhr.open("POST", url);
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-            xhr.send();
-        }
-    });
-}
-
-/**
- * Function to load the reply form via Ajax into the form wrapper container after the comment
- * Close all other open instances of forms before
- */
-function addForm() {
-
-    document.addEventListener('click', (e) => {
-
-        if ((e.target.parentElement.classList.contains('fc-comment-reply')) || (e.target.classList.contains('fc-comment-button'))){
-            e.preventDefault();
-
-            let form_id = e.target.dataset.formid;
-
-            //let comment_id = replylink.dataset.id;
-            let comment_id = e.target.parentElement.dataset.id;
-            // close all open forms first
-            let formwrappers = document.getElementsByClassName('reply-form-wrapper');
-
-            for (let i = 0; i < formwrappers.length; ++i){
-                if(formwrappers[i].dataset.id !== comment_id){
-                    formwrappers[i].innerHTML = ''; // remove the content
-                }
-            }
-
-            let url = document.location.href.split('?')[0] + '?formid='+ formid + '&commentid=' + comment_id;
-            let xhr = new XMLHttpRequest();
-            xhr.onload = function () {
-                let result = this.responseText;
-                const parser = new DOMParser();
-                let doc = parser.parseFromString(result, "text/html");
-                let content = doc.getElementById('result').innerHTML;
-
-                if (xhr.readyState === 4) {
-                    // load the reply form inside the div
-                    document.getElementById('reply-comment-form-' + e.target.parentElement.dataset.field + '-reply-' + comment_id).innerHTML = content;
-                }
-            }
-            xhr.open("GET", url);
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-            xhr.send();
-        }
-    });
-}
-
 /**
  * Add the value of the stars to the hidden inputfield,
  * change the rating text and
  * set star icons to full or empty
  */
-function executeRating(){
+function executeRating() {
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('rating__star')) {
 
@@ -173,7 +107,7 @@ function executeRating(){
             let resetLink = document.getElementById('resetlink-' + formId);
             let i = 0;
 
-            if(hiddenStarInput.value === starValue){
+            if (hiddenStarInput.value === starValue) {
                 starContainer.classList.remove('vote');
                 starContainer.classList.remove('unvote');
                 // set value back to 0
@@ -184,7 +118,7 @@ function executeRating(){
                 ratingResult.innerText = ratingResult.dataset.unvoted
 
                 // set all stars back to empty
-                for(i; i < 5; i++){
+                for (i; i < 5; i++) {
                     allStars[i].classList.remove("fa-star");
                     allStars[i].classList.add("fa-star-o");
                 }
@@ -200,10 +134,10 @@ function executeRating(){
                 //change the icon of all stars until the current value
                 ratingResult.innerText = starValue + '/5';
                 // set stars to full until the value is reached
-                for(i; i < 5; i++){
-                    if(i <parseInt(starValue)){
-                    allStars[i].classList.remove("fa-star-o");
-                    allStars[i].classList.add("fa-star");
+                for (i; i < 5; i++) {
+                    if (i < parseInt(starValue)) {
+                        allStars[i].classList.remove("fa-star-o");
+                        allStars[i].classList.add("fa-star");
                     } else {
                         allStars[i].classList.remove("fa-star");
                         allStars[i].classList.add("fa-star-o");
@@ -218,9 +152,10 @@ function executeRating(){
 }
 
 /**
- * Reset the star rating to unvote by clicking the reset link
+ * Reset the star rating to unvote (n/a) by clicking the reset link
+ * This set the status unrated
  */
-function resetRating(){
+function resetRating() {
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('fc-resetlink')) {
             e.preventDefault();
@@ -252,26 +187,14 @@ function resetRating(){
     });
 }
 
-/**
- * Function to insert an element after a specific node
- * @param newNode
- * @param existingNode
- */
-function insertAfter(newNode, existingNode) {
-    existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
-}
 
 
 docReady(function () {
 
-    // load form on page load via Ajax
-    loadForm();
-    validateForm();
-
     // remove the reply form by clicking on the cancel link in the top right corner of the form
-    removeForm();
+    cancelReply();
     // load the reply form by clicking the reply link via Ajax into the form container
-    //addForm();
+    loadReplyForm();
 
     // rating stars
     let ratingStars = [...document.getElementsByClassName("rating__star")];
