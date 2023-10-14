@@ -26,6 +26,7 @@
      * @property protected InputHidden $parentid: the field object for the hidden parentid field
      * @property protected Alert $alert: The alert object
      * @property protected Link $cancel: the link object to cancel the reply comment
+     * @property protected string|int $parent_id: the id of the parent comment
      *
      * @method string renderButton(): Render buttons for the email template to publish a comment or mark it as SPAM
      * @method string render(): Output the form markup
@@ -65,6 +66,7 @@
         protected array $frontendFormsConfig = [];
         protected array $frontendCommentsConfig = [];
         protected string $redirectUrl = '';
+        protected string|int $parent_id = 0;
 
         /** class objects */
         protected Email $email; // the email field object
@@ -82,7 +84,6 @@
         protected Alert $alert; // The alert object of the form for further manipulations
         protected Link $cancel; // The cancel link object for replies
 
-
         /**
          * @param CommentArray $comments - needed for getting the field for storage of the values inside the database
          * @param string|null $id
@@ -93,28 +94,17 @@
         public function __construct(CommentArray $comments, string $id = null, int $parentId = 0)
         {
 
+            $this->parent_id = $parentId;
+
             // set default values
-            $this->comments = $comments;
-            $this->page = $comments->getPage(); // set the page object, where the comments are
-            $this->field = $comments->getField(); // set the field object for the comments
-            $this->database = $this->wire('database'); // set the database object
+            $this->comments = $comments; // the comment text object
+            $this->page = $comments->getPage(); // the current page object, which contains the comment field
+            $this->field = $comments->getField(); // Processwire comment field object
+            $this->database = $this->wire('database'); // the database object
 
             // set the comment field name as id of the form if id is not present
             if ($id === null) {
                 $id = $this->field->name;
-            }
-
-            // saving the whole comments table will often take more time and this will leads
-            // to the problem that the rendering of the new reply form is faster than the saving process has been
-            // finished. In this case the form get a wrong parent id number (0)
-            // To prevent this the last added comment id will be taken and increased by one.
-            if ($id == 'reply-form-0') {
-                $tableName = $this->database->escapeTable($this->field->table);
-                $sqlQuery = 'SELECT MAX(id) FROM '.$tableName; // grab the last id
-                $result = $this->database->query($sqlQuery);
-                $last_id = $result->fetch()[0];
-                $newCommentId = $last_id + 1; // take the last item and increment of 1
-                $id = 'reply-form-'.$newCommentId;
             }
 
             parent::__construct($id);
@@ -138,12 +128,15 @@
             // add internal anchor to the form action attribute to jump directly to the form after submission
             $this->setAttribute('action', $this->page->url . '?formid=' . $this->getID() . '#' . $this->getID() . '-form-wrapper');
 
+            // redirect to the same page after form passes validation
+            $this->setRedirectUrlAfterAjax($this->page->url);
+
             // TODO: delete afterwards - only for dev purposes
             $this->setMaxAttempts(0);
             $this->setMinTime(0);
             $this->setMaxTime(0);
 
-            // Create all form fields of the form
+            // Create all form fields
 
             // 1) email
             $this->email = new Email('email');
@@ -163,6 +156,8 @@
             $this->comment = new Textarea('text');
             $this->comment->setLabel($this->_('Comment'));
             $this->comment->setRule('required');
+            $this->comment->setRule('lengthMax', 1024);
+            $this->comment->setSanitizer('maxLength'); // limit the length of the comment
             $this->comment->setNotes($this->_('HTML is not allowed.'));
             $this->add($this->comment);
 
@@ -184,7 +179,7 @@
 
             // 6) submit button
             $this->button = new Button('submit');
-            $this->button->setAttribute('class','fc-comment-button');
+            $this->button->setAttribute('class', 'fc-comment-button');
 
             $this->button->setAttribute('data-formid', $id);
             $this->add($this->button);
@@ -197,7 +192,8 @@
             // cancel link
             $this->cancel = new Link($this->field->name . '-cancel');
             $this->cancel->setAttribute('class', 'fc-cancel-link');
-            $this->cancel->setAttribute('style', 'display:none;');
+            $this->cancel->setAttribute('data-field', $this->field->name);
+            $this->cancel->setAttribute('data-id', $this->parent_id);
             $this->cancel->setLinkText($this->_('Cancel'));
             $this->cancel->setAttribute('title', $this->_('Click to cancel the reply'));
             $this->cancel->wrap();
@@ -216,7 +212,6 @@
             }
 
         }
-
 
         /**
          * Get the submit button object for further manipulations if needed
@@ -268,7 +263,7 @@
         public static function ___renderStarRating(float|null $number = 0, bool $rating = false, string|null $id = null): string
         {
             // add classes depending on settings
-            if($rating){
+            if ($rating) {
                 $class = 'rating vote';
             } else {
                 $class = 'rating';
@@ -276,12 +271,12 @@
 
             // add id depending on settings
             $id_attr = $id_ratingtext = $id_ratingstar = '';
-            if(!is_null($id)){
-                $id_attr = ' id="'.$id.'-rating"';
-                $id_ratingtext = ' id="'.$id.'-ratingtext"';
-                $id_ratingstar = $id.'-ratingstar';
+            if (!is_null($id)) {
+                $id_attr = ' id="' . $id . '-rating"';
+                $id_ratingtext = ' id="' . $id . '-ratingtext"';
+                $id_ratingstar = $id . '-ratingstar';
             }
-            $out = '<div'.$id_attr.' class="'.$class.'">';
+            $out = '<div' . $id_attr . ' class="' . $class . '">';
 
             // round to int down
             if (!is_null(($number))) {
@@ -290,14 +285,14 @@
                 $number = 0;
             }
 
-            if($rating){
-                $out .= '<span'.$id_ratingtext.' class="rating__result" data-unvoted="'._('n/a').'">'._('n/a').'</span>';
+            if ($rating) {
+                $out .= '<span' . $id_ratingtext . ' class="rating__result" data-unvoted="' . _('n/a') . '">' . _('n/a') . '</span>';
             } else {
                 $votingText = _('n/a');
-                if($number > 0){
-                    $votingText = $number.'/5';
+                if ($number > 0) {
+                    $votingText = $number . '/5';
                 }
-                $out .= '<span'.$id_ratingtext.' class="rating__result">'.$votingText.'</span>';
+                $out .= '<span' . $id_ratingtext . ' class="rating__result">' . $votingText . '</span>';
             }
 
             // no stars
@@ -305,19 +300,19 @@
                 // 5 empty stars
                 for ($x = 1; $x <= 5; $x++) {
                     $ratingstarid = '';
-                    if($id_ratingstar){
-                        $ratingstarid = ' id='.$id_ratingstar.'-'.$x.'"';
+                    if ($id_ratingstar) {
+                        $ratingstarid = ' id=' . $id_ratingstar . '-' . $x . '"';
                     }
-                    $out .= '<i'.$ratingstarid.' class="rating__star fa fa-star-o" data-value="'.$x.'" data-form_id="'.$id.'"></i>';
+                    $out .= '<i' . $ratingstarid . ' class="rating__star fa fa-star-o" data-value="' . $x . '" data-form_id="' . $id . '"></i>';
                 }
             } else if ($number > 4.5) {
                 // 5 full stars
                 for ($x = 1; $x <= 5; $x++) {
                     $ratingstarid = '';
-                    if($id_ratingstar){
-                        $ratingstarid = ' id='.$id_ratingstar.'-'.$x.'"';
+                    if ($id_ratingstar) {
+                        $ratingstarid = ' id=' . $id_ratingstar . '-' . $x . '"';
                     }
-                    $out .= '<i'.$ratingstarid.' class="rating__star fa fa-star"></i>';
+                    $out .= '<i' . $ratingstarid . ' class="rating__star fa fa-star"></i>';
                 }
             } else {
                 // empty, half and full stars
@@ -326,37 +321,38 @@
 
                 for ($x = 1; $x <= $repeats; $x++) {
                     $ratingstarid = '';
-                    if($id_ratingstar){
-                        $ratingstarid = ' id='.$id_ratingstar.'-'.$x.'"';
+                    if ($id_ratingstar) {
+                        $ratingstarid = ' id=' . $id_ratingstar . '-' . $x . '"';
                     }
-                    $out .= '<i'.$ratingstarid.' class="rating__star fa fa-star" data-value="'.$x.'" data-form_id="'.$id.'"></i>';
+                    $out .= '<i' . $ratingstarid . ' class="rating__star fa fa-star" data-value="' . $x . '" data-form_id="' . $id . '"></i>';
                 }
                 // check if there is a half-step
                 if ($number - $repeats != 0) {
                     //there is a half star
                     $ratingstarid = '';
-                    if($id_ratingstar){
-                        $ratingstarid = ' id='.$id_ratingstar.'-'.$x.'"';
+                    if ($id_ratingstar) {
+                        $ratingstarid = ' id=' . $id_ratingstar . '-' . $x . '"';
                     }
-                    $out .= '<i'.$ratingstarid.' class="rating__star fa fa-star-half-o" data-value="'.$x.'" data-form_id="'.$id.'"></i>';
+                    $out .= '<i' . $ratingstarid . ' class="rating__star fa fa-star-half-o" data-value="' . $x . '" data-form_id="' . $id . '"></i>';
                     $add = 1;
                 }
                 // add last start until the number of 5 is reached
                 $sum = $repeats + $add;
                 if ($sum < 5) {
                     for ($x = 1; $x <= 5 - $sum; $x++) {
-                        $out .= '<i class="rating__star fa fa-star-o" data-value="'.$x.'" data-form_id="'.$id.'"></i>';
+                        $out .= '<i class="rating__star fa fa-star-o" data-value="' . $x . '" data-form_id="' . $id . '"></i>';
                     }
                 }
             }
             $out .= '</div>';
+
             //show reset link only if $rating is true
-            if($rating){
+            if ($rating) {
                 $resetlink_id = '';
-                if($id){
-                   $resetlink_id = ' id="resetlink-'.$id.'"';
+                if ($id) {
+                    $resetlink_id = ' id="resetlink-' . $id . '"';
                 }
-                $out .= '<div class="reset-rating"><a'.$resetlink_id.' href="#" class="fc-resetlink" data-form_id="'.$id.'" style="display:none">' . _('Reset rating') . '</a></div>';
+                $out .= '<div class="reset-rating"><a' . $resetlink_id . ' href="#" class="fc-resetlink" data-form_id="' . $id . '" style="display:none">' . _('Reset rating') . '</a></div>';
             }
             return $out;
         }
@@ -498,13 +494,12 @@
          */
         protected function changeStatusViaMail(): void
         {
+            $code = $newStatus = null; // set default values
+
             // check if a code has been sent to the page via the email link to change the status
             $queryString = $this->wire('input')->queryString();
-
             parse_str($queryString, $queryParams);
 
-
-            $code = $newStatus = null;
             if (array_key_exists('code', $queryParams)) {
                 $code = $this->wire('sanitizer')->string($queryParams['code']);
             }
@@ -614,6 +609,8 @@
                 $newComment->code = $random->alphanumeric(120);
                 $newComment->status = $this->setStatus($newComment);
 
+                $this->wire('session')->set('statis', $newComment->status);
+
                 // add the new comment to the existing Comment WireArray
                 if ($this->comments->add($newComment)) {
 
@@ -709,17 +706,17 @@
 
             }
 
-
             // output the form
             $out = '<div id="' . $this->getID() . '-form-wrapper">';
             $out .= parent::render();
-            // add the hidden cancel link after the form
-            $out .= $this->cancel->___render();
+            // add the cancel link only after a reply form
+            if ($this->parent_id != '0') {
+                $out .= $this->cancel->___render();
+            }
             $out .= '</div>';
 
             return $out;
         }
-
 
         /**
          * @return string
