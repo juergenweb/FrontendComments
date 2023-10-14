@@ -20,14 +20,12 @@
      * @method string renderComments(): Output all comments as an unordered list including sub-levels if set
      */
 
-
     namespace FrontendComments;
 
     use ProcessWire\InputfieldFrontendComments;
     use ProcessWire\Wire;
     use ProcessWire\Field;
     use ProcessWire\Page;
-
 
     class Comments extends Wire
     {
@@ -39,19 +37,17 @@
         protected Field $field;
         protected Page $page;
 
-
         public function __construct(CommentArray $comments)
         {
             parent::__construct();
 
-            $this->comments = $comments;
-            $this->field = $comments->getField();
-            $this->page = $comments->getPage();
+            $this->comments = $comments; // the CommentArray object
+            $this->field = $comments->getField(); // Processwire comment field object
+            $this->page = $comments->getPage(); // the current page object, which contains the comment field
 
-
-            // grab configuration values from the FrontendForms module
+            // get configuration values from the FrontendForms module
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
-            // grab configuration values from the FrontendComments input field
+            // get configuration values from the FrontendComments input field
             $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
 
         }
@@ -84,28 +80,20 @@
          * Render the list of comments (including different depths) as an unordered list
          * @param int|string|null $parent_id
          * @param int|null $queryId
-         * @param \FrontendComments\CommentForm $form
          * @param int $level
          * @return string
          * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
          */
-        public function ___renderComments(int|string|null $parent_id, int|null $queryId, CommentForm $form, int $level = 0): string
+        public function ___renderComments(int|string|null $parent_id, int|null $queryId, int $level = 0): string
         {
 
             $out = '';
-
-
-
-
-
-
 
             // convert $queryId to int (could be null too)
             $queryId = (int)$queryId;
 
             $levelStatus = true;
-            $cancel = $form->getCancelLink();
-            //$out = '';
 
             if ($parent_id !== 0) {
                 // check if the level is not higher than the max level, otherwise set the max level
@@ -127,21 +115,9 @@
                         $out .= '<li id="comment-' . $data->id . '" class="fc-listitem">' . $this->renderSingleComment($data,
                                 $levelStatus, $level);
 
-                        if ($data->id === $queryId) {
-                            // add query string for comment id to the action attribute of the form
-                            //$actionAttrValue = $this->page->url . '?commentid=' . $data->id . '#' . $this->comments->getField()->name . '-form-wrapper';
-                            //$form->setAttribute('action', $actionAttrValue);
-                            $out .= $form->___render();
-
-                            // make the cancel link visible by changing style attribute to display:block;
-                            $cancel->removeAttributeValue('style', 'display:none;');
-                            $out .= $cancel->___render();
-
-                        }
-
                         if ($this->numberOfChildren($data)) {
                             // comment has at least 1 child
-                            $out .= $this->___renderComments($data->id, $queryId, $form, $level + 1);
+                            $out .= $this->___renderComments($data->id, $queryId, $level + 1);
                         }
 
                         $out .= '</li>';
