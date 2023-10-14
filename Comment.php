@@ -16,7 +16,6 @@
      * @property protected string|int $created: the time of creation
      * @property protected string $email: the email
      * @property protected string $author: the name of the author
-     * @property protected int $created_user_id: the id of the user, who has created the comment
      * @property protected array $comment: contains all values of the comment
      * @property protected CommentArray $comments: contains all comments as a CommentArray
      * @property protected Page $page: the page object the comment field is part of
@@ -61,7 +60,6 @@
         protected string $email = '';
         protected string $author = '';
         protected string $text = '';
-        protected int $created_user_id = 40;
         protected array $comment = [];
         protected array $frontendFormsConfig = [];
         protected array $frontendCommentsConfig = [];
@@ -86,15 +84,13 @@
             // set defaults for the comment as fallback for non-provided values
             $this->created = time(); // current time of creation as default value
 
-            $this->comments = $comments;
-            $this->field = $comments->getField();
-            $this->page = $comments->getPage();
+            $this->comments = $comments; // the CommentArray object
+            $this->field = $comments->getField(); // Processwire comment field object
+            $this->page = $comments->getPage(); // the current page object, which contains the comment field
 
-
-
-            // grab configuration values from the FrontendForms module
+            // get configuration values from the FrontendForms module
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
-            // grab configuration values from the FrontendComments input field
+            // get configuration values from the FrontendComments input field
             $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
 
             // set all comment values provided via the constructor as property
@@ -135,21 +131,22 @@
             $this->replyLink->setAttribute('data-id', $this->id);
 
             // reply form
-/*
-            $this->form = new CommentForm($comments, 'reply-form-'.$this->getId(), $this->getId());
+            $this->form = new CommentForm($comments, 'reply-form-' . $this->getId(), $this->getId());
+            $this->form->setAttribute('action', '/?commentid=' . $this->getId() . '&formid=reply-form-' . $this->getId() . '#reply-comment-form-' . $this->field->name . '-reply-' . $this->getId());
+            $this->form->setSubmitWithAjax();
 
             // TODO: delete afterwards - only for dev purposes disabled
             $this->form->setMaxAttempts(0);
             $this->form->setMinTime(0);
             $this->form->setMaxTime(0);
 
-            $this->form->prepend('<h3>'.$this->_('Write an answer to this comment').'</h3>');
+            $this->form->prepend('<h3>' . $this->_('Write an answer to this comment') . '</h3>');
+
             // get the submit button object and change the name attribute
             $submitButton = $this->form->getSubmitButton();
-            $submitButton->setAttribute('name', 'reply-form-'.$this->getId().'-submit');
-*/
-        }
+            $submitButton->setAttribute('name', 'reply-form-' . $this->getId() . '-submit');
 
+        }
 
         /**
          * Get the email of the author of the comment
@@ -170,7 +167,7 @@
         }
 
         /**
-         * Get the the author of the comment
+         * Get the author of the comment
          * @return string
          */
         public function getAuthor(): string
@@ -245,7 +242,6 @@
             return $this->replyLink;
         }
 
-
         /**
          * Render the image tag for the avatar image
          * @return string - <img....> or nothing
@@ -273,29 +269,6 @@
         }
 
         /**
-         * Check if specific query string "formid" is equal to the form id
-         * @param string|null $querystring
-         * @param string $formid
-         * @param string $queryValue
-         * @return bool
-         */
-        protected function checkFormId(string|null $querystring, string $formid): bool
-        {
-
-            if($querystring){
-                $queryString = explode('=', $querystring);
-                $queryValue = $queryString[1];
-
-                if($queryValue === $formid){
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-            return false;
-        }
-
-        /**
          * Default render method for a single comment
          * @param \FrontendComments\Comment $comment
          * @param bool $levelStatus
@@ -307,20 +280,9 @@
         public function renderDefault(Comment $comment, bool $levelStatus, int $level): string
         {
 
-            // check if the query string for this form is present and add style attribute depending on the querystring
-            $formQueryString = $this->wire('input')->queryStringClean(['validNames' => ['formid']]);
-
-            /*
-            $style = true;
-            if($this->checkFormId($formQueryString, $this->form->getId())){
-                $style = false;
-            }*/
-
-
-
             $out = '';
             if ($level === 0) {
-                $out .= '<div id="comment-wrapper-'.$comment->id.'" class="comment-main-level">';
+                $out .= '<div id="comment-wrapper-' . $comment->id . '" class="comment-main-level">';
             }
             $out .= '<div class="comment-avatar">' . $this->___renderAvatar() . '</div>';
 
@@ -342,24 +304,31 @@
 
             // star rating
             if ((array_key_exists('input_fc_stars', $this->frontendCommentsConfig)) && $this->frontendCommentsConfig['input_fc_stars'] === 1) {
-                if(is_null($this->stars)){
+                if (is_null($this->stars)) {
                     $this->stars = 0;
                 }
 
                 $out .= '<div class="star-rating-comment">' . CommentForm::___renderStarRating((float)$this->stars) . '</div>';
             }
 
-
             $out .= '</div>';
-
             $out .= '<div id="' . $this->getReplyLink()->getAttribute('id') . '-comment" class="comment-content">' . $this->getCommentText()->___render() . '</div>';
+            $out .= '<div id="reply-comment-form-' . $this->getReplyLink()->getAttribute('id') . '" data-id="' . $this->id . '" class="reply-form-wrapper">';
 
+            if ($this->wire('config')->ajax) {
 
+                // check if the form with this id was requested and render it below the comment
+                $queryString = $this->wire('input')->queryString();
+                parse_str($queryString, $queryParams);
 
-            //$out .= '<div id="' . $this->form->getID() . '-form-wrapper" data-id="'.$this->id.'" class="reply-form-wrapper"></div>';
-            $out .= '<div id="reply-comment-form-'.$this->getReplyLink()->getAttribute('id').'" data-id="'.$this->id.'" class="reply-form-wrapper"></div>';
-
-
+                if (array_key_exists('commentid', $queryParams)) {
+                    $id = $this->wire('sanitizer')->string($queryParams['commentid']);
+                    if ($id == $this->id) {
+                        $out .= $this->form->___render();
+                    }
+                }
+            }
+            $out .= '</div>';
             $out .= '</div>';
 
             if ($level === 0) {
@@ -377,7 +346,7 @@
          */
         public function renderUikit3(Comment $comment, bool $levelStatus): string
         {
-            $out = '<article id="comment-wrapper-'.$comment->id.'" class="uk-comment" role="comment">';
+            $out = '<article id="comment-wrapper-' . $comment->id . '" class="uk-comment" role="comment">';
             $out .= '<header class="uk-comment-header">';
             $out .= '<div class="uk-grid-medium uk-flex-middle" data-uk-grid>';
             $out .= '<div class="uk-width-auto">';
@@ -414,12 +383,10 @@
         public function ___renderComment(Comment $comment, bool $levelStatus, int $level): string
         {
             $frameWork = ucfirst(pathinfo($this->frontendFormsConfig['input_framework'], PATHINFO_FILENAME));
-            $frameWork = ucfirst(pathinfo($this->frontendFormsConfig['input_framework'], PATHINFO_FILENAME));
             $methodName = 'render' . $frameWork;
             if (method_exists($this, $methodName))
                 return $this->$methodName($comment, $levelStatus, $level);
             return $this->renderDefault($comment, $levelStatus, $level);
         }
-
 
     }
