@@ -133,8 +133,8 @@
             $this->setAttribute('action', $this->page->url . '?formid=' . $this->getID() . '/#' . $this->getID() . '-form-wrapper');
 
             // redirect to the same page after form passes validation (including anchor)
-            //$this->setRedirectUrlAfterAjax($this->page->url.'#comments-form-wrapper');
-            $this->setRedirectUrlAfterAjax($this->page->url);
+            $this->setRedirectUrlAfterAjax($this->page->url.'#comments-form-wrapper');
+            //$this->setRedirectUrlAfterAjax($this->page->url);
 
             // TODO: delete afterwards - only for dev purposes
             $this->setMaxAttempts(0);
@@ -174,7 +174,9 @@
                 $this->stars->setAttribute('max', 5);
                 $this->stars->setAttribute('readonly'); // set read only by default, which means no vote
                 $this->stars->setAttribute('class', 'rating-value');
-                $this->stars->prepend(self:: ___renderStarRating(0, true, $this->getID()));
+                // add the post value of the star rating to the star rating render function after form submission
+                $number = ($_POST) ? $_POST[$this->field->name.'-stars'] : '0';
+                $this->stars->prepend(self:: ___renderStarRating((float)$number, true, $this->getID()));
                 $this->add($this->stars);
             }
 
@@ -290,15 +292,16 @@
                 $number = 0;
             }
 
+            $votingTextDefault = $votingText = _('n/a');
+            if ($number > 0) {
+                $votingText = $number . '/5';
+            }
             if ($rating) {
-                $out .= '<span' . $id_ratingtext . ' class="rating__result" data-unvoted="' . _('n/a') . '">' . _('n/a') . '</span>';
+                $out .= '<span' . $id_ratingtext . ' class="rating__result" data-unvoted="' . $votingTextDefault. '">' . $votingText . '</span>';
             } else {
-                $votingText = _('n/a');
-                if ($number > 0) {
-                    $votingText = $number . '/5';
-                }
                 $out .= '<span' . $id_ratingtext . ' class="rating__result">' . $votingText . '</span>';
             }
+            
 
             // no stars
             if ($number < 0.5) {
@@ -357,7 +360,13 @@
                 if ($id) {
                     $resetlink_id = ' id="resetlink-' . $id . '"';
                 }
-                $out .= '<div class="reset-rating"><a' . $resetlink_id . ' href="#" class="fc-resetlink" data-form_id="' . $id . '" style="display:none">' . _('Reset rating') . '</a></div>';
+                // style attribute
+                $style = ' style="display:none"';
+                // remove display none attribute if star rating value is present
+                if($number > 0){
+                    $style = '';
+                }
+                $out .= '<div class="reset-rating"><a' . $resetlink_id . ' href="#" class="fc-resetlink" data-form_id="' . $id . '"'.$style.'>' . _('Reset rating') . '</a></div>';
             }
             return $out;
         }
