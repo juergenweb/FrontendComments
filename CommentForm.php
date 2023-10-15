@@ -94,6 +94,10 @@
         public function __construct(CommentArray $comments, string $id = null, int $parentId = 0)
         {
 
+            if($this->wire('session')->get('comment') == 'saved'){
+                $this->wire('session')->set('comment', 'ready');
+            }
+
             $this->parent_id = $parentId;
 
             // set default values
@@ -126,9 +130,10 @@
             $this->redirectUrl = $this->wire('pages')->request()->getRedirectUrl();
 
             // add internal anchor to the form action attribute to jump directly to the form after submission
-            $this->setAttribute('action', $this->page->url . '?formid=' . $this->getID() . '#' . $this->getID() . '-form-wrapper');
+            $this->setAttribute('action', $this->page->url . '?formid=' . $this->getID() . '/#' . $this->getID() . '-form-wrapper');
 
-            // redirect to the same page after form passes validation
+            // redirect to the same page after form passes validation (including anchor)
+            //$this->setRedirectUrlAfterAjax($this->page->url.'#comments-form-wrapper');
             $this->setRedirectUrlAfterAjax($this->page->url);
 
             // TODO: delete afterwards - only for dev purposes
@@ -553,7 +558,7 @@
                     $this->alert->setText($this->_('The status of the comment has already been changed. For security reasons, however, this is only allowed once per link. If you want to change the status once more, you have to login to the backend.'));
                 }
 
-                // redirect to the same page without querystring but with internal anchor
+                // redirect to the same page
                 $this->wire('session')->redirect($this->wire('page')->url);
 
             }
@@ -613,12 +618,15 @@
                 // add the new comment to the existing Comment WireArray
                 if ($this->comments->add($newComment)) {
 
+
+
                     $fieldtypeMulti = $this->wire('fieldtypes')->get('FrontendComments');
 
                     // save the whole CommentArray (including the new comment) to the database
                     if ($fieldtypeMulti->savePageField($this->page, $this->field)) {
 
-                        // set success session
+                        $this->wire('session')->set('comment','saved');
+                        // set status session
                         $this->wire('session')->set('commentstatus', (string)$newComment->status);
 
                         // Send a notification email to the moderators
@@ -701,13 +709,20 @@
 
 
             // set success message after form has been submitted valid
-            if ((!is_null($this->wire('session')->get('commentstatus'))) && ($this->getID() == $this->field->name)) {
+            // TODO does not work
+
+            if (($this->wire('session')->get('comment') == 'ready') && ($this->getID() == $this->field->name)) {
+                $this->wire('session')->remove('comment');
+                bd('test');
                 $this->alert->setCSSClass('alert_successClass');
                 // output the success message if the comment has been submitted successfully depending on config settings
                 $status = $this->wire('session')->get('commentstatus');
                 if ($status == '1') {
-                    $jumpLink = '<a href="#comment-'.$this->comments->last()->id.'" title="'.$this->_('Directly to the comment').'">'.$this->_('To the comment').'</a>';
-                    $this->alert->setText(sprintf($this->_('Thank you! Your comment has been submitted successfully (%s)'), $jumpLink));
+                    $jumpLink = '';
+                    if(!is_null($this->comments->last())){
+                        $jumpLink = '(<a href="#comment-'.$this->comments->last()->id.'" title="'.$this->_('Directly to the comment').'">'.$this->_('To the comment').'</a>)';
+                    }
+                    $this->alert->setText(sprintf($this->_('Thank you! Your comment has been submitted successfully. %s'), $jumpLink));
                 } else {
                     $this->alert->setText($this->_('Thank you for your comment. Please be patient. Your comment has been submitted successfully and is waiting for approval.'));
                 }
