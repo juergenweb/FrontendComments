@@ -609,7 +609,6 @@
                 $newComment->code = $random->alphanumeric(120);
                 $newComment->status = $this->setStatus($newComment);
 
-                $this->wire('session')->set('statis', $newComment->status);
 
                 // add the new comment to the existing Comment WireArray
                 if ($this->comments->add($newComment)) {
@@ -619,14 +618,8 @@
                     // save the whole CommentArray (including the new comment) to the database
                     if ($fieldtypeMulti->savePageField($this->page, $this->field)) {
 
-                        // output the success message if the comment has been submitted successfully depending on config settings
-                        if (!is_null($newComment->status)) {
-                            if ($newComment->status == '1') {
-                                $this->alert->setText($this->_('Thank you! Your comment has been submitted successfully'));
-                            } else {
-                                $this->alert->setText($this->_('Thank you for your comment. Please be patient. Your comment has been submitted successfully and is waiting for approval.'));
-                            }
-                        }
+                        // set success session
+                        $this->wire('session')->set('commentstatus', (string)$newComment->status);
 
                         // Send a notification email to the moderators
                         $mail = new WireMail();
@@ -704,6 +697,21 @@
                     $this->alert->setText($this->_('Error saving new status of comment.'));
                 }
 
+            }
+
+
+            // set success message after form has been submitted valid
+            if ((!is_null($this->wire('session')->get('commentstatus'))) && ($this->getID() == $this->field->name)) {
+                $this->alert->setCSSClass('alert_successClass');
+                // output the success message if the comment has been submitted successfully depending on config settings
+                $status = $this->wire('session')->get('commentstatus');
+                if ($status == '1') {
+                    $jumpLink = '<a href="#comment-'.$this->comments->last()->id.'" title="'.$this->_('Directly to the comment').'">'.$this->_('To the comment').'</a>';
+                    $this->alert->setText(sprintf($this->_('Thank you! Your comment has been submitted successfully (%s)'), $jumpLink));
+                } else {
+                    $this->alert->setText($this->_('Thank you for your comment. Please be patient. Your comment has been submitted successfully and is waiting for approval.'));
+                }
+                $this->wire('session')->remove('commentstatus');
             }
 
             // output the form
