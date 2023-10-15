@@ -35,8 +35,19 @@ function loadReplyForm() {
             // grab some values from the element
             let commentId = link.dataset.id;
 
+
             let fieldName = link.dataset.field;
-            let url = document.location.href.split('?')[0] + '?commentid=' + commentId;
+
+            let url = document.location.href;
+
+            // check if hash tag is present and remove it, because a hash tag leads to blocking the form load
+            if(document.location.hash) {
+                const urlObj = new URL(url);
+                urlObj.hash = "";
+                url = urlObj.href
+            }
+            url = url.split('?')[0] + '?commentid=' + commentId;
+
             let target = document.getElementById('reply-comment-form-' + fieldName + '-reply-' + commentId);
 
             // make an Ajax call to load the form from the result div
