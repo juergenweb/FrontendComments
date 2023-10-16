@@ -34,10 +34,7 @@ function loadReplyForm() {
 
             // grab some values from the element
             let commentId = link.dataset.id;
-
-
             let fieldName = link.dataset.field;
-
             let url = document.location.href;
 
             // check if hash tag is present and remove it, because a hash tag leads to blocking the form load
@@ -83,7 +80,6 @@ function loadReplyForm() {
 
 }
 
-
 /**
  * Cancel the reply process and remove the form from the wrapper div under the comment by clicking
  * on the cancel link
@@ -97,7 +93,6 @@ function cancelReply() {
         }
     });
 }
-
 
 /**
  * Add the value of the stars to the hidden inputfield,
@@ -198,8 +193,7 @@ function resetRating() {
     });
 }
 
-
-
+// run after body has been loaded
 docReady(function () {
 
     // remove the reply form by clicking on the cancel link in the top right corner of the form
@@ -214,5 +208,7 @@ docReady(function () {
         executeRating();
         resetRating();
     }
+
+
 
 });
