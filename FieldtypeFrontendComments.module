@@ -56,6 +56,7 @@
         protected string|int $input_fc_userimage = 'none';
         protected string|int $input_fc_imagesize = 70;
         protected string|int $input_fc_stars = 0;
+        protected string|int $input_fc_counter = 0;
 
         // array of all fields inside the user template
         protected array $userfields = [];
@@ -94,7 +95,7 @@
                 'permanent' => false,
                 'version' => '1.0.0',
                 'requires' => [
-                    'FrontendForms>=2.1.47',
+                    'FrontendForms>=2.1.48',
                     'PHP>=8.0',
                     'ProcessWire>=3'
                 ],
@@ -807,6 +808,17 @@
             $f->attr('checked', $field->input_fc_stars ? 'checked' : '');
             $f->label2 = $this->_('Show star rating');
             $f->description = $this->_('If you want to offer star rating, please check the box');
+            $fieldset->append($f);
+
+
+            // field to show or hide the character counter under the comment text field
+            $f = $this->modules->get('InputfieldCheckbox');
+            $f->attr('name+id', 'input_fc_counter');
+            $f->label = $this->_('Show/hide character counter under the textarea field');
+            $f->attr('value', $field->input_fc_counter);
+            $f->attr('checked', $field->input_fc_counter ? 'checked' : '');
+            $f->label2 = $this->_('Hide character counter');
+            $f->description = $this->_('By default, a character counter will be displayed under the comment text field to inform the user, how many characters are left until the max. limit of 1024 characters is reached.');
             $fieldset->append($f);
 
             // remove the CSS file
