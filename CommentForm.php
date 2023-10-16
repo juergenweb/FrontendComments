@@ -162,7 +162,9 @@
             $this->comment->setLabel($this->_('Comment'));
             $this->comment->setRule('required');
             $this->comment->setRule('lengthMax', 1024);
-            $this->comment->useCharacterCounter();
+            if(!array_key_exists('input_fc_counter', $this->frontendCommentsConfig)){
+                $this->comment->useCharacterCounter();
+            }
             $this->comment->setSanitizer('maxLength'); // limit the length of the comment
             $this->comment->setNotes($this->_('HTML is not allowed.'));
             $this->add($this->comment);
@@ -172,7 +174,9 @@
                 $this->stars = new InputNumber('stars');
                 $this->stars->useInputWrapper(false);
                 $this->stars->useFieldWrapper(false);
+                $this->stars->setLabel($this->_('Rating'));
                 $this->stars->setAttribute('max', 5);
+                $this->stars->setAttribute('hidden');
                 $this->stars->setAttribute('readonly'); // set read only by default, which means no vote
                 $this->stars->setAttribute('class', 'rating-value');
                 // add the post value of the star rating to the star rating render function after form submission
