@@ -133,7 +133,7 @@
             $this->setAttribute('action', $this->page->url . '?formid=' . $this->getID() . '/#' . $this->getID() . '-form-wrapper');
 
             // redirect to the same page after form passes validation (including anchor)
-            $this->setRedirectUrlAfterAjax($this->page->url.'#fc-anchor='.$this->field->name.'-form-wrapper');
+            $this->setRedirectUrlAfterAjax($this->page->url.'#'.$this->field->name.'-form-wrapper');
 
 
             // TODO: delete afterwards - only for dev purposes
