@@ -133,8 +133,8 @@
             $this->setAttribute('action', $this->page->url . '?formid=' . $this->getID() . '/#' . $this->getID() . '-form-wrapper');
 
             // redirect to the same page after form passes validation (including anchor)
-            $this->setRedirectUrlAfterAjax($this->page->url.'#comments-form-wrapper');
-            //$this->setRedirectUrlAfterAjax($this->page->url);
+            $this->setRedirectUrlAfterAjax($this->page->url.'#fc-anchor='.$this->field->name.'-form-wrapper');
+
 
             // TODO: delete afterwards - only for dev purposes
             $this->setMaxAttempts(0);
@@ -162,6 +162,7 @@
             $this->comment->setLabel($this->_('Comment'));
             $this->comment->setRule('required');
             $this->comment->setRule('lengthMax', 1024);
+            $this->comment->useCharacterCounter();
             $this->comment->setSanitizer('maxLength'); // limit the length of the comment
             $this->comment->setNotes($this->_('HTML is not allowed.'));
             $this->add($this->comment);
@@ -301,7 +302,7 @@
             } else {
                 $out .= '<span' . $id_ratingtext . ' class="rating__result">' . $votingText . '</span>';
             }
-            
+
 
             // no stars
             if ($number < 0.5) {
