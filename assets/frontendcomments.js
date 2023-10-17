@@ -8,9 +8,9 @@ Created: 20.07.2023
 */
 
 /**
-* Function to check if the document is completely loaded
-* @param fn
-*/
+ * Function to check if the document is completely loaded
+ * @param fn
+ */
 function docReady(fn) {
     // see if DOM is already available
     if (document.readyState === "complete" || document.readyState === "interactive") {
@@ -37,8 +37,8 @@ function loadReplyForm() {
             let fieldName = link.dataset.field;
             let url = document.location.href;
 
-            // check if hash tag is present and remove it, because a hash tag leads to blocking the form load
-            if(document.location.hash) {
+            // check if a hashtag is present and remove it, because a hashtag leads to blocking the form load
+            if (document.location.hash) {
                 const urlObj = new URL(url);
                 urlObj.hash = "";
                 url = urlObj.href
@@ -193,7 +193,55 @@ function resetRating() {
     });
 }
 
-// run after body has been loaded
+function makeVote() {
+    document.addEventListener('click', (e) => {
+        if (e.target.parentElement.classList.contains('fc-vote-link')) {
+            e.preventDefault();
+
+            let url = e.target.parentElement.href;
+            let field = e.target.parentElement.dataset.field;
+            let commentid = e.target.parentElement.dataset.commentid;
+
+            // make an Ajax call to save the vote
+            let xhr = new XMLHttpRequest();
+
+            xhr.onload = function () {
+
+                let result = this.responseText;
+                let voteresult = '';
+                let votetype = '';
+                let elementName = '';
+
+                const parser = new DOMParser();
+                let doc = parser.parseFromString(result, "text/html");
+
+                let content = doc.getElementById('fc-ajax-vote-result');
+                if (content) {
+                    voteresult = content.innerText;
+                    votetype = content.dataset.votetype;
+                }
+
+                if (xhr.readyState === 4) {
+
+                    if (voteresult) {
+                        // update the number beside the upvotes or downvotes
+                        elementName = field + '-' + commentid + '-votebadge-' + votetype;
+                        let target = document.getElementById(elementName);
+                        // set the new vote value inside the span element
+                        target.innerHTML = voteresult;
+                    }
+                }
+
+            }
+
+            xhr.open("GET", url);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.send();
+        }
+    });
+}
+
+// run after the body has been loaded
 docReady(function () {
 
     // remove the reply form by clicking on the cancel link in the top right corner of the form
@@ -209,6 +257,7 @@ docReady(function () {
         resetRating();
     }
 
+    makeVote();
 
 
 });
