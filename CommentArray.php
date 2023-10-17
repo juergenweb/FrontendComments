@@ -13,6 +13,7 @@
      * @property protected Field $field: the field object for the comment field
      * @property protected int $commentId: the value (id) of the query string "commentid"
      * @property string $code: the code for updating the comment status via mail link
+     * @property array $userdata: array that hold various data about the user visiting the comments
      *
      * @method setPage(): set the page the comment field is part of
      * @method Page getPage(): set the page the comment field is part of
@@ -39,6 +40,7 @@
         protected Field|null $field = null;
         protected int $commentId = 0;
         protected string|null $code = null;
+        protected array $userdata = [];
 
         /**
          * @throws \ProcessWire\WireException
@@ -52,6 +54,17 @@
 
             // set the value of the query string 'commentid' as an integer
             $this->commentId = (int)$this->getQueryStringValue('commentid');
+
+            // put user data inside a session array for later usage by votes
+            $this->userdata = [
+                'user_id' => $this->wire('user')->id,
+                'ip' => $this->wire('session')->getIP(),
+                'user_agent' => $_SERVER['HTTP_USER_AGENT']
+            ];
+
+
+            $this->wire('session')->set('visitordata', $this->userdata);
+
 
         }
 
@@ -173,16 +186,85 @@
         public function render(): string
         {
 
+            if ($this->wire('config')->ajax) {
+                // check if the querystring votecommentid is present for adding a vote to a comment
+                $queryString = $this->wire('input')->queryString();
+                parse_str($queryString, $queryParams);
+
+                if (array_key_exists('votecommentid', $queryParams)) {
+                    if (array_key_exists('vote', $queryParams)) {
+
+                        $vote = $queryParams['vote'];
+                        $database = $this->wire('database');
+                        $fieldTableName = 'field_' . $this->field->name;
+                        $votesTableName = 'field_' . $this->field->name . '_votes';
+                        $comment = $this->find('id=' . $queryParams['votecommentid'])->first();
+
+                        //1) save data to the votes table first
+
+                        $statement = "INSERT INTO $votesTableName (comment_id, user_id, user_agent, ip, vote)" .
+                            " VALUES (:comment_id, :user_id, :user_agent, :ip, :vote)";
+
+                        $query = $database->prepare($statement);
+
+                        $query->bindValue(':comment_id', $queryParams['votecommentid'], \PDO::PARAM_INT);
+                        $query->bindValue(':ip', $this->userdata['ip'], \PDO::PARAM_STR);
+                        $query->bindValue(':user_id', $this->userdata['user_id'], \PDO::PARAM_INT);
+                        $query->bindValue(':user_agent', $this->userdata['user_agent'], \PDO::PARAM_STR);
+
+                        $value = ($vote === 'up') ? 1 : -1;
+
+                        $query->bindValue(':vote', $value, \PDO::PARAM_INT);
+
+                        try {
+                            $query->execute();
+                            $result = $query->rowCount();
+                            $query->closeCursor();
+                        } catch (\Exception $e) {
+                            $result = 0;
+                        }
+
+                        if ($result) {
+
+                            // 2) increase the upvotes or downvotes in field table
+                            $commentId = $queryParams['votecommentid'];
+                            $pageId = $this->wire('page')->id;
+
+                            // update the field table by incrementing up or downloads
+                            $updateCol = ($value === 1) ? 'upvotes' : 'downvotes';
+
+                            $statement = "UPDATE $fieldTableName 
+                                SET $updateCol = :$updateCol
+                                WHERE  pages_id=$pageId AND id=$commentId
+                                ";
+
+                            $query = $database->prepare($statement);
+
+                            $newValue = $comment->{$updateCol} + 1;
+                            $query->bindValue(':' . $updateCol, $newValue, \PDO::PARAM_INT);
+
+                            try {
+                                $query->execute();
+                                $result = $query->rowCount();
+                                $query->closeCursor();
+                            } catch (\Exception $e) {
+                                $result = 0;
+                            }
+
+                            // finally add the new value to the result div
+                            echo '<div id="fc-ajax-vote-result" data-votetype="' . $vote . '">' . $newValue . '</div>';
+                        }
+
+                    }
+                }
+            }
+
             // grab configuration values from the FrontendComments input field
             $frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
 
             // show the form on top only if id=0 or id is different, but query string with code is present
             $form = '';
             if (($this->commentId === 0) || (($this->code))) {
-                // get session after redirect of successful form submission
-                $validCommentStatus = $this->wire('session')->get('status');
-                // TODO: output an alert box
-                $this->wire('session')->remove('status');
                 $form = $this->___render();
             }
             $content = array_filter([$form, $this->renderComments()]);
