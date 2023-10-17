@@ -57,6 +57,8 @@
         protected string|int $input_fc_imagesize = 70;
         protected string|int $input_fc_stars = 0;
         protected string|int $input_fc_counter = 0;
+        protected string|int $input_fc_voting = 0;
+        protected string|int $input_fc_voting_lock = 7;
 
         // array of all fields inside the user template
         protected array $userfields = [];
@@ -112,6 +114,8 @@
             // add CSS and JS to the frontend template
             $this->addHookAfter('Page::render', $this, 'addAssets');
             $this->addHookAfter('Page::render', $this, 'deleteSpam');
+            // delete voting entries which are older then the selected time period
+            $this->addHookAfter('Page::render', $this, 'deleteOldVoteEntries');
         }
 
 
@@ -138,7 +142,30 @@
 
         }
 
-        public function addAssets(HookEvent $event):void
+
+        /**
+         * Delete votes, which are older than the time period set inside the configuration
+         * @return void
+         * @throws \ProcessWire\WireException
+         */
+        protected function deleteOldVoteEntries(): void
+        {
+            $timePeriod = $this->input_fc_voting_lock;
+            $currentDate = new \DateTime(); // this will return today
+            $comparingDate = $currentDate->sub(new \DateInterval('P' . $timePeriod . 'D')); // substract the time period
+
+            $commentsFields = $this->wire('fields')->find('type=FieldtypeFrontendComments');
+
+            foreach ($commentsFields as $field) {
+                $table = $this->database->escapeTable($field->table);
+                $query = $this->database->prepare("DELETE FROM `$table` WHERE created < :comparingDate");
+                $query->bindValue(":comparingDate", $comparingDate->getTimestamp());
+                $query->execute();
+            }
+
+        }
+
+        public function addAssets(HookEvent $event): void
         {
             $page = $event->object;
 
@@ -207,7 +234,7 @@
          * @throws WireException
          * @throws WirePermissionException
          */
-        protected function getUserFields():array
+        protected function getUserFields(): array
         {
             // get array of all editable user template fields
 
@@ -232,7 +259,7 @@
          * @throws WireException
          * @throws WirePermissionException
          */
-        protected function getUserfieldsOfType(string $classname):array
+        protected function getUserfieldsOfType(string $classname): array
         {
             $fields = [];
             foreach ($this->userfields as $id => $name) {
@@ -555,7 +582,7 @@
 
             // create table for storing the up- and down-votes user data (user id, browser, date/time,...)
             // This table is for checking, if a user has voted within a given time period
-            if(!$database->tableExists("{$table}_votes")) {
+            if (!$database->tableExists("{$table}_votes")) {
 
                 $sql = '
             CREATE TABLE ' . $table . '_votes (
@@ -580,7 +607,8 @@
         /**
          * Delete the given field, which implies: drop the table $field->table and the table_votes
          *
-         * This should only be called by the Fields class since fieldgroups_fields lookup entries must be deleted before this method is called.
+         * This should only be called by the Fields class since fieldgroups_fields lookup entries must be deleted
+         * before this method is called.
          *
          * @param Field $field Field object
          * @return bool True on success, false on DB delete failure.
@@ -592,13 +620,13 @@
             $table = $database->escapeTable($field->table);
             try {
                 $result = $database->exec("DROP TABLE `$table`"); // delete the table field
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 $result = false;
                 $this->error($e->getMessage());
             }
-            if($result !== false) try {
+            if ($result !== false) try {
                 $database->exec("DROP TABLE `{$table}_votes`"); // delete the votes table field too
-            } catch(\Exception $e) {
+            } catch (\Exception $e) {
                 // ok to ignore, as table may not exist
             }
             return (bool)$result;
@@ -656,7 +684,7 @@
             $confFieldset->columnWidth = 100;
             $confFieldset->icon = 'fa-list';
 
-            $userimage =  $this->wire()->modules->get('InputfieldSelect');
+            $userimage = $this->wire()->modules->get('InputfieldSelect');
             $userimage->label = $this->_('Select the field for the user image');
             $userimage->attr('name', 'input_fc_userimage');
             //get all possible image fields from the user template
@@ -768,7 +796,7 @@
             $email->description = $this->_('This email address will be displayed as the sender of the emails sent by this module.');
             $email->columnWidth = 50;
             $email->useLanguages = true;
-            $email->notes = sprintf($this->_('If no email address will be entered, %s will be displayed instead as the sender address.'), '"'.$this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"].'"');
+            $email->notes = sprintf($this->_('If no email address will be entered, %s will be displayed instead as the sender address.'), '"' . $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"] . '"');
             $emailFieldset->add($email);
 
             // enter the sender of the emails (fe. My Company)
@@ -870,6 +898,32 @@
             $f->description = $this->_('By default, a character counter will be displayed under the comment text field to inform the user, how many characters are left until the max. limit of 1024 characters is reached.');
             $fieldset->append($f);
 
+            // field to show or hide comment rating
+            $f = $this->modules->get('InputfieldCheckbox');
+            $f->attr('name+id', 'input_fc_voting');
+            $f->label = $this->_('Show/hide voting of comments');
+            $f->attr('value', $field->input_fc_voting);
+            $f->attr('checked', $field->input_fc_voting ? 'checked' : '');
+            $f->label2 = $this->_('Enable voting of comments');
+            $f->description = $this->_('By checking the box you offer visitors the possibility to rate comments (upvotes and downvotes).');
+            $f->columnWidth = 50;
+            $fieldset->append($f);
+
+            //input_fc_voting_lock
+            $f = $this->modules->get('InputfieldInteger');
+            $f->attr('name+id', 'input_fc_voting_lock');
+            $f->attr('type', 'number');
+            $f->label = $this->_('Lock in days before voting can be done again');
+            $value = (is_null($field->input_fc_voting_lock)) ? $this->input_fc_voting_lock : $field->input_fc_voting_lock;
+            $f->attr('value', $value);
+            $f->attr('size', 10);
+            $f->attr('min', 1);
+            $f->required(true);
+            $f->description = $this->_('To prevent multiple ratings from the same user, this module checks if the user have voted before. Please enter a time period in days during which further rating is not allowed.');
+            $f->notes = $this->_('The user will be identified by using data of his Internet fingerprint. This means that the IP address, the browser system and the user ID will be compared with entries in the database. If an entry with the same data will be found, then the rating is not allowed. Entries in the database which are older than the time period selected above will be deleted automatically and the user will be allowed to rate again.');
+            $f->columnWidth = 50;
+            $fieldset->append($f);
+
             // remove the CSS file
             $f = $this->modules->get('InputfieldCheckbox');
             $f->attr('name+id', 'input_fc_removeCSS');
@@ -921,7 +975,7 @@
             $captcha->notes = $this->_('If you receive a lot of spam comments, you can enable a CAPTCHA to prevent spam bots from filling out the form.');
             $captcha->attr('name', 'input_fc_captcha');
             // grab CAPTCHA types from FrontendForms module
-            $modulePath = $this->wire('config')->get('paths')->siteModules.'FrontendForms/';
+            $modulePath = $this->wire('config')->get('paths')->siteModules . 'FrontendForms/';
             $captchaTypes = $this->wire('files')->find($modulePath . 'Formelements/Captcha/variants/',
                 ['recursive' => 0]);
             $captcha->addOption('inherit', $this->_('Inherit from FrontendForms'));
