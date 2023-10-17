@@ -379,7 +379,9 @@
                     'user_agent' => $comment->user_agent,
                     'code' => $comment->code,
                     'remote_flag' => $comment->remote_flag,
-                    'stars' => $comment->stars
+                    'stars' => $comment->stars,
+                    'upvotes' => $comment->upvotes,
+                    'downvotes' => $comment->downvotes,
                 );
 
                 $sleepValue[] = $a;
@@ -539,6 +541,8 @@
             $schema['code'] = "varchar(128) NOT NULL default ''";
             $schema['remote_flag'] = "tinyint(3) NOT NULL default '0'";
             $schema['stars'] = "tinyint(3) unsigned default NULL";
+            $schema['upvotes'] = "int unsigned default 0";
+            $schema['downvotes'] = "int unsigned default 0";
 
             // indexes, for any fields that need to be searchable from selectors
             $schema['keys']['primary'] = "PRIMARY KEY (`id`)";
@@ -549,18 +553,20 @@
             $schema['keys']['data'] = "FULLTEXT KEY `data` (`data`)";
             $schema['keys']['code'] = "KEY `code` (`code`, `status`)";
 
-            // create table for storing the up- and downvotes user data (user id, browser, date/time,...)
+            // create table for storing the up- and down-votes user data (user id, browser, date/time,...)
             // This table is for checking, if a user has voted within a given time period
             if(!$database->tableExists("{$table}_votes")) {
 
                 $sql = '
             CREATE TABLE ' . $table . '_votes (
+                id int unsigned NOT NULL auto_increment,
                 comment_id int unsigned NOT NULL,
                 vote tinyint NOT NULL,
                 created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 ip varchar(15) NOT NULL default "",
                 user_id int unsigned NOT NULL default 0,
-                PRIMARY KEY (comment_id, ip, vote),
+                user_agent varchar(255) NOT NULL,
+                PRIMARY KEY (id),
                 INDEX created (created)
             )
             ';
