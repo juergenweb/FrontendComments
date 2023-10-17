@@ -112,10 +112,6 @@
             // add CSS and JS to the frontend template
             $this->addHookAfter('Page::render', $this, 'addAssets');
             $this->addHookAfter('Page::render', $this, 'deleteSpam');
-
-
-
-
         }
 
 
@@ -141,8 +137,6 @@
             }
 
         }
-
-
 
         public function addAssets(HookEvent $event):void
         {
@@ -385,7 +379,7 @@
                     'user_agent' => $comment->user_agent,
                     'code' => $comment->code,
                     'remote_flag' => $comment->remote_flag,
-                    'stars' => $comment->stars,
+                    'stars' => $comment->stars
                 );
 
                 $sleepValue[] = $a;
@@ -527,6 +521,9 @@
         {
 
             $schema = parent::getDatabaseSchema($field);
+            $table = $field->getTable();
+            $database = $this->database;
+
 
             $schema['id'] = "int unsigned NOT NULL auto_increment";
             $schema['status'] = "tinyint(3) NOT NULL default '0'";
@@ -552,7 +549,53 @@
             $schema['keys']['data'] = "FULLTEXT KEY `data` (`data`)";
             $schema['keys']['code'] = "KEY `code` (`code`, `status`)";
 
+            // create table for storing the up- and downvotes user data (user id, browser, date/time,...)
+            // This table is for checking, if a user has voted within a given time period
+            if(!$database->tableExists("{$table}_votes")) {
+
+                $sql = '
+            CREATE TABLE ' . $table . '_votes (
+                comment_id int unsigned NOT NULL,
+                vote tinyint NOT NULL,
+                created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                ip varchar(15) NOT NULL default "",
+                user_id int unsigned NOT NULL default 0,
+                PRIMARY KEY (comment_id, ip, vote),
+                INDEX created (created)
+            )
+            ';
+
+                $database->exec($sql);
+            }
+
             return $schema;
+        }
+
+        /**
+         * Delete the given field, which implies: drop the table $field->table and the table_votes
+         *
+         * This should only be called by the Fields class since fieldgroups_fields lookup entries must be deleted before this method is called.
+         *
+         * @param Field $field Field object
+         * @return bool True on success, false on DB delete failure.
+         *
+         */
+        public function ___deleteField(Field $field): bool
+        {
+            $database = $this->database;
+            $table = $database->escapeTable($field->table);
+            try {
+                $result = $database->exec("DROP TABLE `$table`"); // delete the table field
+            } catch(\Exception $e) {
+                $result = false;
+                $this->error($e->getMessage());
+            }
+            if($result !== false) try {
+                $database->exec("DROP TABLE `{$table}_votes`"); // delete the votes table field too
+            } catch(\Exception $e) {
+                // ok to ignore, as table may not exist
+            }
+            return (bool)$result;
         }
 
         /**
