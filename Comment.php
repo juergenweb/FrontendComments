@@ -22,6 +22,7 @@
      * @property protected Field $field: the field object for the comment field
      * @property protected array $frontendFormsConfig: the configuration values as set in FrontendForms
      * @property protected array $frontendCommentsconfig: the configuration values as set in by this module
+     * @property protected array $userdata: session value, that contains ip, user_agent and user id of the user visiting the page
      *
      * @method int getEmail(): Get the email of the commenter
      * @method int getAuthor(): Get the name of the commenter
@@ -61,6 +62,7 @@
         protected string $author = '';
         protected string $text = '';
         protected array $comment = [];
+        protected array $userdata = [];
         protected array $frontendFormsConfig = [];
         protected array $frontendCommentsConfig = [];
         protected CommentArray $comments; // the array containing all comments of this page
@@ -123,7 +125,7 @@
             // reply Link
             $this->replyLink = new Link('reply-' . $this->getId());
             $this->replyLink->setAttribute('class', 'fc-comment-reply');
-            $this->replyLink->setAttribute('title', $this->_('Click to reply to this comment'));
+            $this->replyLink->setAttribute('title', $this->_('Reply to this comment'));
             $this->replyLink->setLinkText($this->_('Reply'));
             $this->replyLink->setUrl('#');
             $this->replyLink->setAttribute('data-field', $this->field->name);
@@ -299,8 +301,10 @@
                 $out .= $this->getReplyLink()->___render();
 
             }
-            //$out .= '<i class="fa fa-reply"></i>';
-            $out .= '<i class="fa fa-heart"></i>';
+
+            // create the vote links with FontAwesome icons
+            $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->upvotes . '</span><a class="fc-vote-link" title="' . $this->_('Like the comment') . '" href="' . $this->page->url . '?vote=up&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-up"></i></a>';
+            $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="votebadge">' . $this->downvotes . '</span><a class="fc-vote-link" title="' . $this->_('Dislike the comment') . '" href="' . $this->page->url . '?vote=down&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-down"></i></a>';
 
             // star rating
             if ((array_key_exists('input_fc_stars', $this->frontendCommentsConfig)) && $this->frontendCommentsConfig['input_fc_stars'] === 1) {
