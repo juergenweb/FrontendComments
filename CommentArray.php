@@ -24,6 +24,7 @@
 
     namespace FrontendComments;
 
+    use FrontendForms\Alert;
     use ProcessWire\Field;
     use ProcessWire\Page;
     use ProcessWire\PaginatedArray;
@@ -42,12 +43,15 @@
         protected string|null $code = null;
         protected array $userdata = [];
 
+
         /**
          * @throws \ProcessWire\WireException
          */
         public function __construct()
         {
             parent::__construct();
+
+
 
             // set the value if query string 'code' is present or not (true/false)
             $this->code = $this->getQueryStringValue('code');
@@ -186,6 +190,10 @@
         public function render(): string
         {
 
+            // check if rating is enabled;
+            $field = $this->field;
+            if (!is_null($field->input_fc_voting)) {
+
             if ($this->wire('config')->ajax) {
                 // check if the querystring votecommentid is present for adding a vote to a comment
                 $queryString = $this->wire('input')->queryString();
@@ -200,48 +208,51 @@
                         $votesTableName = 'field_' . $this->field->name . '_votes';
                         $comment = $this->find('id=' . $queryParams['votecommentid'])->first();
 
-                        //1) save data to the votes table first
+                        // 1)check first if the user has not voted for this comment within a certain amount of days
 
-                        $statement = "INSERT INTO $votesTableName (comment_id, user_id, user_agent, ip, vote)" .
-                            " VALUES (:comment_id, :user_id, :user_agent, :ip, :vote)";
+
+                        // check the database if user has voted for this comment
+                        $statement = "SELECT id 
+		                        FROM $votesTableName
+                                WHERE comment_id = :comment_id
+                                AND user_id = :user_id
+                                AND user_agent = :user_agent
+                                AND ip = :ip";
 
                         $query = $database->prepare($statement);
 
                         $query->bindValue(':comment_id', $queryParams['votecommentid'], \PDO::PARAM_INT);
-                        $query->bindValue(':ip', $this->userdata['ip'], \PDO::PARAM_STR);
                         $query->bindValue(':user_id', $this->userdata['user_id'], \PDO::PARAM_INT);
                         $query->bindValue(':user_agent', $this->userdata['user_agent'], \PDO::PARAM_STR);
-
-                        $value = ($vote === 'up') ? 1 : -1;
-
-                        $query->bindValue(':vote', $value, \PDO::PARAM_INT);
+                        $query->bindValue(':ip', $this->userdata['ip'], \PDO::PARAM_STR);
 
                         try {
                             $query->execute();
-                            $result = $query->rowCount();
+                            $rowsnumber = $query->rowCount();
                             $query->closeCursor();
+                            $result = true;
                         } catch (\Exception $e) {
-                            $result = 0;
+
+                            $result = false;
                         }
 
-                        if ($result) {
+                        if ($result && ($rowsnumber === 0)) {
 
-                            // 2) increase the upvotes or downvotes in field table
-                            $commentId = $queryParams['votecommentid'];
-                            $pageId = $this->wire('page')->id;
 
-                            // update the field table by incrementing up or downloads
-                            $updateCol = ($value === 1) ? 'upvotes' : 'downvotes';
-
-                            $statement = "UPDATE $fieldTableName 
-                                SET $updateCol = :$updateCol
-                                WHERE  pages_id=$pageId AND id=$commentId
-                                ";
+                            //2) save data to the votes table first
+                            $statement = "INSERT INTO $votesTableName (comment_id, user_id, user_agent, ip, vote)" .
+                                " VALUES (:comment_id, :user_id, :user_agent, :ip, :vote)";
 
                             $query = $database->prepare($statement);
 
-                            $newValue = $comment->{$updateCol} + 1;
-                            $query->bindValue(':' . $updateCol, $newValue, \PDO::PARAM_INT);
+                            $query->bindValue(':comment_id', $queryParams['votecommentid'], \PDO::PARAM_INT);
+                            $query->bindValue(':ip', $this->userdata['ip'], \PDO::PARAM_STR);
+                            $query->bindValue(':user_id', $this->userdata['user_id'], \PDO::PARAM_INT);
+                            $query->bindValue(':user_agent', $this->userdata['user_agent'], \PDO::PARAM_STR);
+
+                            $value = ($vote === 'up') ? 1 : -1;
+
+                            $query->bindValue(':vote', $value, \PDO::PARAM_INT);
 
                             try {
                                 $query->execute();
@@ -251,13 +262,51 @@
                                 $result = 0;
                             }
 
-                            // finally add the new value to the result div
-                            echo '<div id="fc-ajax-vote-result" data-votetype="' . $vote . '">' . $newValue . '</div>';
-                        }
+                            if ($result) {
 
+                                // 3) increase the upvotes or downvotes in field table
+                                $commentId = $queryParams['votecommentid'];
+                                $pageId = $this->wire('page')->id;
+
+                                // update the field table by incrementing up or downloads
+                                $updateCol = ($value === 1) ? 'upvotes' : 'downvotes';
+
+                                $statement = "UPDATE $fieldTableName 
+                                SET $updateCol = :$updateCol
+                                WHERE  pages_id=$pageId AND id=$commentId
+                                ";
+
+                                $query = $database->prepare($statement);
+
+                                $newValue = $comment->{$updateCol} + 1;
+                                $query->bindValue(':' . $updateCol, $newValue, \PDO::PARAM_INT);
+
+                                try {
+                                    $query->execute();
+                                    $result = $query->rowCount();
+                                    $query->closeCursor();
+                                } catch (\Exception $e) {
+                                    $result = 0;
+                                }
+
+                                // finally add the new value to the result div
+                                echo '<div id="fc-ajax-vote-result" data-votetype="' . $vote . '">' . $newValue . '</div>';
+                            }
+                        } else {
+                            // not allowed to vote
+
+                            // create the alert box
+                            $alert = new Alert();
+                            $timePeriod = '3 days';
+                            $alert->setContent(sprintf($this->_('It seems that you have rated this comment within the last %s. In this case you are not allowed to vote again.'), $timePeriod));
+                            $alert->setCSSClass('alert_dangerClass');
+
+                            echo '<div id="fc-ajax-noVote">' . $alert->render() . '</div>';
+                        }
                     }
                 }
             }
+        }
 
             // grab configuration values from the FrontendComments input field
             $frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
