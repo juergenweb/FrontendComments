@@ -282,7 +282,7 @@
         public function renderDefault(Comment $comment, bool $levelStatus, int $level): string
         {
 
-            $out = '';
+            $out = '<div id="'.$this->field->name.'-'. $comment->id .'-novote"></div>'; // wrapper for no vote alert box
             if ($level === 0) {
                 $out .= '<div id="comment-wrapper-' . $comment->id . '" class="comment-main-level">';
             }
@@ -302,9 +302,11 @@
 
             }
 
-            // create the vote links with FontAwesome icons
-            $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->upvotes . '</span><a class="fc-vote-link" title="' . $this->_('Like the comment') . '" href="' . $this->page->url . '?vote=up&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-up"></i></a>';
-            $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="votebadge">' . $this->downvotes . '</span><a class="fc-vote-link" title="' . $this->_('Dislike the comment') . '" href="' . $this->page->url . '?vote=down&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-down"></i></a>';
+            // create the vote links with FontAwesome icons if enabled
+            if (array_key_exists('input_fc_voting', $this->frontendCommentsConfig)) {
+                $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->upvotes . '</span><a class="fc-vote-link" title="' . $this->_('Like the comment') . '" href="' . $this->page->url . '?vote=up&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-up"></i></a>';
+                $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="votebadge">' . $this->downvotes . '</span><a class="fc-vote-link" title="' . $this->_('Dislike the comment') . '" href="' . $this->page->url . '?vote=down&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-down"></i></a>';
+            }
 
             // star rating
             if ((array_key_exists('input_fc_stars', $this->frontendCommentsConfig)) && $this->frontendCommentsConfig['input_fc_stars'] === 1) {
