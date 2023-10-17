@@ -215,10 +215,12 @@ function makeVote() {
                 const parser = new DOMParser();
                 let doc = parser.parseFromString(result, "text/html");
 
-                let content = doc.getElementById('fc-ajax-vote-result');
-                if (content) {
-                    voteresult = content.innerText;
-                    votetype = content.dataset.votetype;
+                let voteElement = doc.getElementById('fc-ajax-vote-result');
+                let noVoteElement = doc.getElementById('fc-ajax-noVote');
+
+                if (voteElement) {
+                    voteresult = voteElement.innerText;
+                    votetype = voteElement.dataset.votetype;
                 }
 
                 if (xhr.readyState === 4) {
@@ -229,6 +231,14 @@ function makeVote() {
                         let target = document.getElementById(elementName);
                         // set the new vote value inside the span element
                         target.innerHTML = voteresult;
+                    }
+                    if(noVoteElement){
+                        elementName = field + '-' + commentid + '-novote';
+                        let target = document.getElementById(elementName);
+                        if(target){
+                            // add the alert box to the div element
+                            target.innerHTML = noVoteElement.innerHTML;
+                        }
                     }
                 }
 
