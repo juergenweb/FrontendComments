@@ -140,10 +140,8 @@
             $this->form->setAttribute('action', '/?commentid=' . $this->getId() . '&formid=reply-form-' . $this->getId() . '#reply-comment-form-' . $this->field->name . '-reply-' . $this->getId());
             $this->form->setSubmitWithAjax();
 
-            // TODO: delete afterwards - only for dev purposes disabled
-            $this->form->setMaxAttempts(0);
-            $this->form->setMinTime(0);
-            $this->form->setMaxTime(0);
+
+
 
             $this->form->prepend('<h3>' . $this->_('Write an answer to this comment') . '</h3>');
 
