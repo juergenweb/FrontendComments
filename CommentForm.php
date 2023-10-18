@@ -21,7 +21,7 @@
      * @property protected InputText $author: the field object for the author field
      * @property protected Textarea $comment: the field object for the comment field
      * @property protected InputNumber $stars: the field object for the star rating number field
-     * @property protected InputRadios $notify: the field object for email notification about new comments
+     * @property protected InputRadioMultiple $notify: the field object for email notification about new comments
      * @property protected Privacy $privacy: the field object for the privacy field
      * @property protected InputHidden $pageid: the field object for the hidden pageid field
      * @property protected InputHidden $parentid: the field object for the hidden parentid field
@@ -97,7 +97,7 @@
         public function __construct(CommentArray $comments, string $id = null, int $parentId = 0)
         {
 
-            if($this->wire('session')->get('comment') == 'saved'){
+            if ($this->wire('session')->get('comment') == 'saved') {
                 $this->wire('session')->set('comment', 'ready');
             }
 
@@ -136,10 +136,10 @@
             $this->setAttribute('action', $this->page->url . '?formid=' . $this->getID() . '/#' . $this->getID() . '-form-wrapper');
 
             // redirect to the same page after form passes validation (including anchor)
-            $this->setRedirectUrlAfterAjax($this->page->url.'#'.$this->field->name.'-form-wrapper');
+            $this->setRedirectUrlAfterAjax($this->page->url . '#' . $this->field->name . '-form-wrapper');
 
 
-            // TODO: delete afterwards - only for dev purposes
+            // TODO: delete or set new values afterwards - only for dev purposes set to 0
             $this->setMaxAttempts(0);
             $this->setMinTime(0);
             $this->setMaxTime(0);
@@ -165,7 +165,7 @@
             $this->comment->setLabel($this->_('Comment'));
             $this->comment->setRule('required');
             $this->comment->setRule('lengthMax', 1024);
-            if(!array_key_exists('input_fc_counter', $this->frontendCommentsConfig)){
+            if (!array_key_exists('input_fc_counter', $this->frontendCommentsConfig)) {
                 $this->comment->useCharacterCounter();
             }
             $this->comment->setSanitizer('maxLength'); // limit the length of the comment
@@ -183,30 +183,30 @@
                 $this->stars->setAttribute('readonly'); // set read only by default, which means no vote
                 $this->stars->setAttribute('class', 'rating-value');
                 // add the post value of the star rating to the star rating render function after form submission
-                $number = ($_POST) ? $_POST[$this->field->name.'-stars'] : '0';
+                $number = ($_POST) ? $_POST[$this->field->name . '-stars'] : '0';
                 $this->stars->prepend(self:: ___renderStarRating((float)$number, true, $this->getID()));
                 $this->add($this->stars);
             }
 
             // 5) email notification about new comments
-            if(array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig) && ($this->frontendCommentsConfig['input_fc_comment_notification'] !== 0)){
-                $this->notify = new InputRadioMultiple('commentnotification');
+            if (array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig) && ($this->frontendCommentsConfig['input_fc_comment_notification'] !== 0)) {
+                $this->notify = new InputRadioMultiple('notification');
                 $this->notify->setlabel($this->_('Notify me about new comments'));
                 $this->notify->setRule('required');
                 $this->notify->setRule('integer');
                 $allowedValues = ($this->frontendCommentsConfig['input_fc_comment_notification'] === 1) ? ['0', '1'] : ['0', '1', '2'];
                 $this->notify->setRule('in', $allowedValues);
                 $this->notify->setNotes($this->_('You can cancel the receiving of notification emails everytime by clicking the link inside the notification email.'));
-                $this->notify->addOption($this->_('No notification'),'0');
-                $this->notify->addOption($this->_('Notify me about replies to this comment only'),(string)Comment::flagNotifyReply);
-                if($this->frontendCommentsConfig['input_fc_comment_notification'] === 2){
+                $this->notify->setDefaultValue('0');
+                $this->notify->addOption($this->_('No notification'), '0');
+                $this->notify->addOption($this->_('Notify me about replies to this comment only'), (string)Comment::flagNotifyReply);
+                if ($this->frontendCommentsConfig['input_fc_comment_notification'] === 2) {
                     $this->notify->addOption($this->_('Notify me about replies to all comments'), (string)Comment::flagNotifyAll);
                 }
-                $this->notify->setDefaultValue('0');
+
                 $this->notify->alignVertical();
                 $this->add($this->notify);
             }
-
 
             // 6) privacy checkbox
             $this->privacy = new Privacy('privacy');
@@ -325,11 +325,10 @@
                 $votingText = $number . '/5';
             }
             if ($rating) {
-                $out .= '<span' . $id_ratingtext . ' class="rating__result" data-unvoted="' . $votingTextDefault. '">' . $votingText . '</span>';
+                $out .= '<span' . $id_ratingtext . ' class="rating__result" data-unvoted="' . $votingTextDefault . '">' . $votingText . '</span>';
             } else {
                 $out .= '<span' . $id_ratingtext . ' class="rating__result">' . $votingText . '</span>';
             }
-
 
             // no stars
             if ($number < 0.5) {
@@ -391,10 +390,10 @@
                 // style attribute
                 $style = ' style="display:none"';
                 // remove display none attribute if star rating value is present
-                if($number > 0){
+                if ($number > 0) {
                     $style = '';
                 }
-                $out .= '<div class="reset-rating"><a' . $resetlink_id . ' href="#" class="fc-resetlink" data-form_id="' . $id . '"'.$style.'>' . _('Reset rating') . '</a></div>';
+                $out .= '<div class="reset-rating"><a' . $resetlink_id . ' href="#" class="fc-resetlink" data-form_id="' . $id . '"' . $style . '>' . _('Reset rating') . '</a></div>';
             }
             return $out;
         }
@@ -530,6 +529,29 @@
         }
 
         /**
+         * Create the body text for the comment notification email
+         * This method creates the content markup of the email
+         * @param array $values
+         * @param Comment $newComment
+         * @return string
+         */
+        protected function renderCommentNotificationBody(array $values, Comment $newComment): string
+        {
+            // create the body for the email
+            $body = '<h1>' . $this->_('A new reply has been submitted') . '</h1>';
+            $body .= '<p>' . $this->_('You are receiving this email because, you have chosen to get informed if a new reply has been posted.') . '</p>';
+            $body .= '<h2>' . $this->_('New comment') . '</h2>';
+            $body .= '<table style="width:100%;background-color:#dddddd;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;"><p style="margin:12px;">[[TEXTVALUE]]</p></td></tr></table></td></tr></table>';
+            $body .= '<p>' . $this->_('Link to the page of the comment') . ': ' . $this->page->httpUrl . '</p>';
+            $body .= '<p>' . $this->_('If you do not want to receive further mails about new comments, please click the link below') . '</p>';
+            // create a link for canceling the receiving of further notifications
+            $url = $this->page->httpUrl . '?code=' . $newComment->notifycode . '&notification=0#' . $this->getID() . '-form-wrapper';
+            $body .= $this->renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
+                '#7BA428');
+            return $body;
+        }
+
+        /**
          * Save the new status of the comment to the database if querystring is used via email
          * @return void
          * @throws \ProcessWire\WireException
@@ -555,7 +577,7 @@
                 $comment = $this->comments->get('code=' . $code);
 
                 // check if comment exists and remote_flag is 0
-                if (($comment->id) && ($comment->remote_flag == InputfieldFrontendComments::pendingApproval)) {
+                if ((!is_null($comment)) && ($comment->id) && ($comment->remote_flag == InputfieldFrontendComments::pendingApproval)) {
 
                     // save the new comment status and the remote_flag
                     $database = $this->wire()->database;
@@ -590,13 +612,10 @@
                         $this->wire('session')->set('commentstatuschange', 3); // 3 stands for error
                     }
                 } else {
-                    // mail link was used
                     $this->alert->setCSSClass('alert_dangerClass');
                     $this->alert->setText($this->_('The status of the comment has already been changed. For security reasons, however, this is only allowed once per link. If you want to change the status once more, you have to login to the backend.'));
                 }
 
-                // redirect to the same page
-                $this->wire('session')->redirect($this->wire('page')->url);
 
             }
 
@@ -647,22 +666,25 @@
                 $newComment->user_agent = $_SERVER['HTTP_USER_AGENT']; // get the user agent header
                 $newComment->sort = count($this->comments) + 1; // increase the sort
                 $newComment->created = time(); // set the current timestamp
+                // create random codes for remote links inside emails
                 $random = new WireRandom();
                 $newComment->code = $random->alphanumeric(120);
                 $newComment->status = $this->setStatus($newComment);
 
+                // check if email notification on new comments is enabled
+                if (array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig)) {
+                    $newComment->notifycode = $random->alphanumeric(120);
+                }
 
                 // add the new comment to the existing Comment WireArray
                 if ($this->comments->add($newComment)) {
-
-
 
                     $fieldtypeMulti = $this->wire('fieldtypes')->get('FrontendComments');
 
                     // save the whole CommentArray (including the new comment) to the database
                     if ($fieldtypeMulti->savePageField($this->page, $this->field)) {
 
-                        $this->wire('session')->set('comment','saved');
+                        $this->wire('session')->set('comment', 'saved');
                         // set status session
                         $this->wire('session')->set('commentstatus', (string)$newComment->status);
 
@@ -718,6 +740,69 @@
                             $this->generateEmailSentErrorAlert();
                         }
 
+                        // check if notification email sending is enabled
+                        if ((array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig)) && ($this->frontendCommentsConfig['input_fc_comment_notification'] > 0)) {
+                            //check if this is a reply or a new comment
+                            $reply = !$this->parent_id == 0; // true or false
+
+                            $notificationEmails = [];
+
+
+                            if ($reply) {
+                                // find all other users which have chosen to get informed about all replies
+                                $commenters = $this->comments->find('notification=' . Comment::flagNotifyAll);
+                                // get all email addresses to this comments
+                                foreach ($commenters as $comments) {
+                                    $notificationEmails[] = $comments->email;
+                                }
+
+                                // get the commenter which is the parent of this comment and check if notification is enabled
+                                $parentcomment = $this->comments->find('id='.$this->parent_id)->first();
+                                $this->wire('session')->set('rec', $parentcomment->notification);
+                                if ($parentcomment->notification == Comment::flagNotifyReply) {
+                                    $notificationEmails[] = $parentcomment->email;
+
+                                }
+
+                            }
+
+                            // remove the email address of the current commenter
+                            $notificationEmails = array_diff($notificationEmails, [$newComment->email]);
+
+                            // remove double entries if present
+                            $notificationEmails = array_unique($notificationEmails);
+
+                            if (count($notificationEmails)) {
+                                // send notification mail to all of these users
+                                $mail = new WireMail();
+                                $mail->from($emailSender);
+                                // set from name if present
+                                if (array_key_exists('input_fc_sender', $this->frontendCommentsConfig)) {
+                                    $mail->fromName($this->frontendCommentsConfig['input_fc_sender']);
+                                }
+                                $mail->subject($this->_('New reply to a comment'));
+                                $mail->title($this->_('A new reply has been done'));
+                                $mail->mailTemplate($template);
+                                // render the body string for the notification mail
+                                $body = $this->renderCommentNotificationBody($values, $newComment);
+                                $mail->bodyHTML($body);
+                                // set all receivers
+
+                                foreach ($notificationEmails as $email) {
+
+                                    $mail->to($email);
+                                }
+
+
+                                if (!$mail->send()) {
+                                    // write a log file
+                                }
+                            }
+
+
+                        }
+
+
                     }
                 }
 
@@ -744,20 +829,16 @@
 
             }
 
-
-            // set success message after form has been submitted valid
-            // TODO does not work
-
             if (($this->wire('session')->get('comment') == 'ready') && ($this->getID() == $this->field->name)) {
                 $this->wire('session')->remove('comment');
-                bd('test');
+
                 $this->alert->setCSSClass('alert_successClass');
                 // output the success message if the comment has been submitted successfully depending on config settings
                 $status = $this->wire('session')->get('commentstatus');
                 if ($status == '1') {
                     $jumpLink = '';
-                    if(!is_null($this->comments->last())){
-                        $jumpLink = '(<a href="#comment-'.$this->comments->last()->id.'" title="'.$this->_('Directly to the comment').'">'.$this->_('To the comment').'</a>)';
+                    if (!is_null($this->comments->last())) {
+                        $jumpLink = '(<a href="#comment-' . $this->comments->last()->id . '" title="' . $this->_('Directly to the comment') . '">' . $this->_('To the comment') . '</a>)';
                     }
                     $this->alert->setText(sprintf($this->_('Thank you! Your comment has been submitted successfully. %s'), $jumpLink));
                 } else {
