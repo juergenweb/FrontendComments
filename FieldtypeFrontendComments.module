@@ -59,6 +59,7 @@
         protected string|int $input_fc_counter = 0;
         protected string|int $input_fc_voting = 0;
         protected string|int $input_fc_voting_lock = 7;
+        protected string|int $input_fc_comment_notification = 0;
 
         // array of all fields inside the user template
         protected array $userfields = [];
@@ -833,12 +834,25 @@
             $title->useLanguages = true;
             $emailFieldset->add($title);
 
+            // input_fc_comment_notification
+            $notification = $modules->get('InputfieldRadios');
+            $notification->attr('name', 'input_fc_comment_notification');
+            $notification->optionColumns = 1;
+            $notification->label = $this->_('Commenter email notification');
+            $notification->description = $this->_('Send commenters notification emails about new comments');
+            $notification->addOption(0, $this->_('Disabled'));
+            $notification->addOption(Comment::flagNotifyReply, $this->_('Users can receive email notifications of replies to their comment only'));
+            $notification->addOption(Comment::flagNotifyAll, $this->_('Users can receive email notifications for all new comments on the page'));
+            $notification->attr('value', (int) $field->get('input_fc_comment_notification'));
+            $emailFieldset->add($notification);
+
             $inputfields->append($emailFieldset);
 
             $fieldset = $modules->get('InputfieldFieldset');
             $fieldset->label = $this->_('Output rendering');
             $fieldset->collapsed = 1;// by default, this fieldset should be collapsed
             $fieldset->description = $this->_('Change some parameters to get the preferred output.');
+            $fieldset->icon = 'fa-cog';
 
             // field to enter the number of decimals (fe 2) -> will be appended after the inputfield
             $f = $this->modules->get('InputfieldInteger');
@@ -863,7 +877,7 @@
             $f->attr('checked', $field->input_fc_sort ? 'checked' : '');
             $f->label2 = $this->_('Sort newest to oldest');
             $f->description = $this->_('Set the sort order for the comments');
-            $f->notes = $this->_('By default, comments will sort chronologically (oldest to newest). To reverse that behavior check this box.');
+            $f->notes = $this->_('By default, comments will be sort chronologically (oldest to newest). To reverse that behavior check this box.');
             $fieldset->append($f);
 
             // field to reverse the output order of form and comments
