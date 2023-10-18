@@ -109,6 +109,7 @@
             }
             // get all comments with status approved (=1)
             if (!is_null($parent_id)) {
+
                 foreach ($this->comments->find('parent_id=' . $parent_id . ',status=' . InputfieldFrontendComments::approved) as $data) {
                     if ($data instanceof Comment) {
 
