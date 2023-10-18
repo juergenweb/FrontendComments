@@ -52,6 +52,9 @@
 
         use configValues;
 
+        const flagNotifyReply = 1; //Flag to indicate author of this comment wants to be notified of replies to their comment
+        const flagNotifyAll = 2; // Flag to indicate author of this comment wants to be notified of all comments on page
+
         // set default comment properties
         protected string|int $id = 0;
         protected string|int $parent_id = 0;
