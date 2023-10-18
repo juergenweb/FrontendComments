@@ -407,6 +407,8 @@
                     'user_agent' => $comment->user_agent,
                     'code' => $comment->code,
                     'remote_flag' => $comment->remote_flag,
+                    'notification' => $comment->notification,
+                    'notifycode' => $comment->notifycode,
                     'stars' => $comment->stars,
                     'upvotes' => $comment->upvotes,
                     'downvotes' => $comment->downvotes,
@@ -568,6 +570,8 @@
             $schema['parent_id'] = "int unsigned NOT NULL default 0";
             $schema['code'] = "varchar(128) NOT NULL default ''";
             $schema['remote_flag'] = "tinyint(3) NOT NULL default '0'";
+            $schema['notification'] = "tinyint(3) NOT NULL default '0'";
+            $schema['notifycode'] = "varchar(128) NOT NULL default ''";
             $schema['stars'] = "tinyint(3) unsigned default NULL";
             $schema['upvotes'] = "int unsigned default 0";
             $schema['downvotes'] = "int unsigned default 0";
