@@ -21,6 +21,7 @@
      * @property protected InputText $author: the field object for the author field
      * @property protected Textarea $comment: the field object for the comment field
      * @property protected InputNumber $stars: the field object for the star rating number field
+     * @property protected InputRadios $notify: the field object for email notification about new comments
      * @property protected Privacy $privacy: the field object for the privacy field
      * @property protected InputHidden $pageid: the field object for the hidden pageid field
      * @property protected InputHidden $parentid: the field object for the hidden parentid field
@@ -44,6 +45,7 @@
     use FrontendForms\InputNumber;
     use FrontendForms\InputText;
     use FrontendForms\Textarea;
+    use FrontendForms\InputRadioMultiple;
     use FrontendForms\Privacy;
     use FrontendForms\Button;
     use FrontendForms\Link;
@@ -73,6 +75,7 @@
         protected InputText $author; // the author field object
         protected Textarea $comment; // the comment text field object
         protected InputNumber $stars; // the number field for star rating
+        protected InputRadioMultiple $notify; // the notify me about new comments field object
         protected Privacy $privacy; // the accept privacy checkbox object
         protected Button $button; // the submit button object
         protected InputHidden $pageId; // the hidden page id input object
@@ -185,18 +188,38 @@
                 $this->add($this->stars);
             }
 
-            // 5) privacy checkbox
+            // 5) email notification about new comments
+            if(array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig) && ($this->frontendCommentsConfig['input_fc_comment_notification'] !== 0)){
+                $this->notify = new InputRadioMultiple('commentnotification');
+                $this->notify->setlabel($this->_('Notify me about new comments'));
+                $this->notify->setRule('required');
+                $this->notify->setRule('integer');
+                $allowedValues = ($this->frontendCommentsConfig['input_fc_comment_notification'] === 1) ? ['0', '1'] : ['0', '1', '2'];
+                $this->notify->setRule('in', $allowedValues);
+                $this->notify->setNotes($this->_('You can cancel the receiving of notification emails everytime by clicking the link inside the notification email.'));
+                $this->notify->addOption($this->_('No notification'),'0');
+                $this->notify->addOption($this->_('Notify me about replies to this comment only'),(string)Comment::flagNotifyReply);
+                if($this->frontendCommentsConfig['input_fc_comment_notification'] === 2){
+                    $this->notify->addOption($this->_('Notify me about replies to all comments'), (string)Comment::flagNotifyAll);
+                }
+                $this->notify->setDefaultValue('0');
+                $this->notify->alignVertical();
+                $this->add($this->notify);
+            }
+
+
+            // 6) privacy checkbox
             $this->privacy = new Privacy('privacy');
             $this->add($this->privacy);
 
-            // 6) submit button
+            // 7) submit button
             $this->button = new Button('submit');
             $this->button->setAttribute('class', 'fc-comment-button');
 
             $this->button->setAttribute('data-formid', $id);
             $this->add($this->button);
 
-            // 7) hidden field for parent id
+            // 8) hidden field for parent id
             $this->parentId = new InputHidden('parent_id');
             $this->parentId->setAttribute('value', $parentId); // set 0 as default
             $this->add($this->parentId);
