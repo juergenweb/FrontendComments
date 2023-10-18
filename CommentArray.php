@@ -51,8 +51,6 @@
         {
             parent::__construct();
 
-
-
             // set the value if query string 'code' is present or not (true/false)
             $this->code = $this->getQueryStringValue('code');
 
@@ -67,7 +65,7 @@
             ];
 
 
-            $this->wire('session')->set('visitordata', $this->userdata);
+            //$this->wire('session')->set('visitordata', $this->userdata);
 
 
         }
