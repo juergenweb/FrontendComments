@@ -100,7 +100,8 @@
                 'requires' => [
                     'FrontendForms>=2.1.48',
                     'PHP>=8.0',
-                    'ProcessWire>=3'
+                    'ProcessWire>=3',
+                    'LazyCron'
                 ],
                 'author' => 'Jürgen Kern'
             );
@@ -117,6 +118,8 @@
             $this->addHookAfter('Page::render', $this, 'deleteSpam');
             // delete voting entries which are older then the selected time period
             $this->addHookAfter('Page::render', $this, 'deleteOldVoteEntries');
+            // send queued emails as a batch to the users
+            $this->addHookAfter('LazyCron::every30Seconds', $this, 'sendQueuedEmails');
         }
 
 
@@ -163,6 +166,37 @@
                 $query->bindValue(":comparingDate", $comparingDate->getTimestamp());
                 $query->execute();
             }
+        }
+
+
+        /**
+         * Get all queued emails from the database and send the emails in batches
+         * @return void
+         */
+        protected function sendQueuedEmails():void
+        {
+            $batchSize = 3;
+
+            // get all FrontendComments fields
+            $fields = $this->wire('fields')->findByType('FieldtypeFrontendComments');
+            $numberOfFields = count($fields);
+
+            // get all tables that contain the queued email list
+            $select = [];
+            foreach($fields as $name => $value){
+
+                $select[] = 'SELECT * FROM field_'.$name.'_queues';
+            }
+            $query = implode(' UNION ', $select);
+            $statement = $query.' ORDER BY created, comment_id';
+            bd($statement);
+            $result = $this->wire('database')->prepare($statement);
+            $result->execute();
+
+
+            $row = $result->fetchAll();
+            bd($row);
+
 
         }
 
@@ -604,6 +638,25 @@
             ';
 
                 $database->exec($sql);
+            }
+
+
+            // create a table for queuing emails that will be sent to users
+            // the table contains the comment id and the email, where the mail should be sent to
+            if (!$database->tableExists("{$table}_queues")) {
+
+                $sql = '
+            CREATE TABLE ' . $table . '_queues (
+                id int unsigned NOT NULL auto_increment,
+                comment_id int unsigned NOT NULL,              
+                email varchar(255) NOT NULL,
+                created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (id),
+                INDEX created (comment_id)
+            )
+            ';
+
+            $database->exec($sql);
             }
 
             return $schema;
