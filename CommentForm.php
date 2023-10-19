@@ -138,7 +138,6 @@
             // redirect to the same page after form passes validation (including anchor)
             $this->setRedirectUrlAfterAjax($this->page->url . '#' . $this->field->name . '-form-wrapper');
 
-
             // TODO: delete or set new values afterwards - only for dev purposes set to 0
             $this->setMaxAttempts(0);
             $this->setMinTime(0);
@@ -636,6 +635,9 @@
 
             if ($this->___isValid()) {
 
+                // get the id of the last comment id
+                $last_comment_id = $this->comments->last()->id;
+
                 // get the name of the comment field
                 $fieldName = $this->field->name;
 
@@ -681,8 +683,9 @@
 
                     $fieldtypeMulti = $this->wire('fieldtypes')->get('FrontendComments');
 
+
                     // save the whole CommentArray (including the new comment) to the database
-                    if ($fieldtypeMulti->savePageField($this->page, $this->field)) {
+                    if ($fieldtypeMulti->___savePageField($this->page, $this->field)) {
 
                         $this->wire('session')->set('comment', 'saved');
                         // set status session
@@ -735,75 +738,107 @@
                         $mail->bodyHTML($body);
                         // set all receivers
                         $this->setMailTo($mail);
+
                         if (!$mail->send()) {
                             // output an error message if the mail could not be sent
                             $this->generateEmailSentErrorAlert();
                         }
 
-                        // check if notification email sending is enabled
-                        if ((array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig)) && ($this->frontendCommentsConfig['input_fc_comment_notification'] > 0)) {
-                            //check if this is a reply or a new comment
-                            $reply = !$this->parent_id == 0; // true or false
+                    } else {
+                        $last_comment_id = null;
+                    }
 
-                            $notificationEmails = [];
+                    /**
+                     * Queuing notification emails for users
+                     */
+                    // check if notification email sending is enabled
+                    if ((array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig)) && ($this->frontendCommentsConfig['input_fc_comment_notification'] > 0)) {
+                        //check if this is a reply or a new comment
+                        $reply = !$this->parent_id == 0; // true or false
 
+                        $notificationEmails = [];
 
-                            if ($reply) {
-                                // find all other users which have chosen to get informed about all replies
-                                $commenters = $this->comments->find('notification=' . Comment::flagNotifyAll);
-                                // get all email addresses to this comments
-                                foreach ($commenters as $comments) {
-                                    $notificationEmails[] = $comments->email;
-                                }
+                        if ($reply) {
+                            // find all other users which have chosen to get informed about all replies
+                            $commenters = $this->comments->find('notification=' . Comment::flagNotifyAll);
+                            // get all email addresses to this comments
+                            foreach ($commenters as $comments) {
+                                $notificationEmails[] = $comments->email;
+                            }
 
-                                // get the commenter which is the parent of this comment and check if notification is enabled
-                                $parentcomment = $this->comments->find('id='.$this->parent_id)->first();
-                                $this->wire('session')->set('rec', $parentcomment->notification);
-                                if ($parentcomment->notification == Comment::flagNotifyReply) {
-                                    $notificationEmails[] = $parentcomment->email;
-
-                                }
+                            // get the commenter which is the parent of this comment and check if notification is enabled
+                            $parentcomment = $this->comments->find('id='.$this->parent_id)->first();
+                            //$this->wire('session')->set('rec', $parentcomment->notification);
+                            if ($parentcomment->notification == Comment::flagNotifyReply) {
+                                $notificationEmails[] = $parentcomment->email;
 
                             }
 
-                            // remove the email address of the current commenter
-                            $notificationEmails = array_diff($notificationEmails, [$newComment->email]);
+                        }
 
-                            // remove double entries if present
-                            $notificationEmails = array_unique($notificationEmails);
+                        // remove the email address of the current commenter
+                        $notificationEmails = array_diff($notificationEmails, [$newComment->email]);
 
-                            if (count($notificationEmails)) {
-                                // send notification mail to all of these users
-                                $mail = new WireMail();
-                                $mail->from($emailSender);
-                                // set from name if present
-                                if (array_key_exists('input_fc_sender', $this->frontendCommentsConfig)) {
-                                    $mail->fromName($this->frontendCommentsConfig['input_fc_sender']);
-                                }
-                                $mail->subject($this->_('New reply to a comment'));
-                                $mail->title($this->_('A new reply has been done'));
-                                $mail->mailTemplate($template);
-                                // render the body string for the notification mail
-                                $body = $this->renderCommentNotificationBody($values, $newComment);
-                                $mail->bodyHTML($body);
-                                // set all receivers
+                        // remove double entries if present
+                        $notificationEmails = array_unique($notificationEmails);
 
-                                foreach ($notificationEmails as $email) {
+                        if ((count($notificationEmails)) && (!is_null(($last_comment_id)))) {
 
-                                    $mail->to($email);
-                                }
+                            // write all receivers into the queue table for later sending of emails
+                            $table = 'field_'.$this->field->name.'_queues'; // table name
+
+                            // create the id of the new comment by incrementing the last id
+                            $newID = (int)($last_comment_id) + 1;
+
+                            // create comment_id, email array
+                            $sendingData = [];
+                            foreach($notificationEmails as $email){
+                                $sendingData[] = '('.$newID.',\''.$email.'\')';
+                            }
+                            $valuesString = 'VALUES'.implode(',', $sendingData);
+
+                            // create the SQL statement
+                            $statement = "INSERT INTO $table (comment_id, email) $valuesString";
+
+                            $this->wire('database')->exec($statement);
 
 
-                                if (!$mail->send()) {
-                                    // write a log file
-                                }
+                            // send notification mail to all of these users -> should be done via Hook
+                            /*
+                            $mail = new WireMail();
+                            $mail->from($emailSender);
+                            // set from name if present
+                            if (array_key_exists('input_fc_sender', $this->frontendCommentsConfig)) {
+                                $mail->fromName($this->frontendCommentsConfig['input_fc_sender']);
+                            }
+                            $mail->subject($this->_('New reply to a comment'));
+                            $mail->title($this->_('A new reply has been done'));
+                            $mail->mailTemplate($template);
+                            // render the body string for the notification mail
+                            $body = $this->renderCommentNotificationBody($values, $newComment);
+                            $mail->bodyHTML($body);
+                            // set all receivers
+
+                            foreach ($notificationEmails as $email) {
+
+                                $mail->to($email);
                             }
 
 
+                            if (!$mail->send()) {
+                                // write a log file
+                            }
+                            */
                         }
 
 
                     }
+
+
+
+
+
+
                 }
 
             }
