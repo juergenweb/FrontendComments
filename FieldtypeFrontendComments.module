@@ -13,6 +13,8 @@
 
     namespace ProcessWire;
 
+    use DateInterval;
+    use DateTime;
     use Exception;
     use FrontendComments\CommentArray;
     use FrontendComments\Comment;
@@ -125,7 +127,7 @@
             // delete voting entries which are older then the selected time period
             $this->addHookAfter('Page::render', $this, 'deleteOldVoteEntries');
             // send queued emails as a batch to the users
-            $this->addHookAfter('LazyCron::everyMinute', $this, 'sendQueuedEmails');
+            $this->addHookAfter('LazyCron::every30Seconds', $this, 'sendQueuedEmails');
         }
 
 
@@ -161,8 +163,8 @@
         protected function deleteOldVoteEntries(): void
         {
             $timePeriod = $this->input_fc_voting_lock;
-            $currentDate = new \DateTime(); // this will return today
-            $comparingDate = $currentDate->sub(new \DateInterval('P' . $timePeriod . 'D')); // substract the time period
+            $currentDate = new DateTime(); // this will return today
+            $comparingDate = $currentDate->sub(new DateInterval('P' . $timePeriod . 'D')); // substract the time period
 
             $commentsFields = $this->wire('fields')->find('type=FieldtypeFrontendComments');
 
@@ -174,10 +176,11 @@
             }
         }
 
-
         /**
          * Get all queued emails from the database and send the emails in batches
          * @return void
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
          */
         protected function sendQueuedEmails(): void
         {
@@ -185,7 +188,6 @@
             bd('hook runs');
             // get all FrontendComments fields
             $fields = $this->wire('fields')->findByType('FieldtypeFrontendComments');
-            $numberOfFields = count($fields);
 
             // get all tables that contain the queued email list
             $select = [];
@@ -222,25 +224,21 @@
 
                         // create WireMail instance
                         $mail = new WireMail();
+
                         // set the sender email address
-                        if ($this->input_fc_email) {
-                            $emailSender = $this->input_fc_email;
-                        } else {
-                            $emailSender = $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
-                        }
+                        $emailSender = $this->input_fc_email ? $this->input_fc_email : $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
+                        $mail->from($emailSender);
+
                         // set from name if present
                         if ($this->input_fc_sender) {
                             $mail->fromName($this->input_fc_sender);
                         }
+
                         $mail->subject($this->_('New reply to a comment'));
                         $mail->title($this->_('A new reply has been done'));
 
                         // set email template depending on config settings
-                        if ($this->input_fc_emailTemplate === 'inherit') {
-                            $template = $this->frontendFormsConfig['input_emailTemplate'];
-                        } else {
-                            $template = $this->input_fc_emailTemplate;
-                        }
+                        $template = $this->input_fc_emailTemplate === 'inherit' ? $this->frontendFormsConfig['input_emailTemplate'] : $this->input_fc_emailTemplate;
                         $mail->mailTemplate($template);
 
                         // create the body for the email
@@ -653,6 +651,7 @@
          * Database schema for the FrontendComments Fieldtype
          * @param Field $field
          * @return array
+         * @throws \ProcessWire\WireException
          */
         public function getDatabaseSchema(Field $field): array
         {
@@ -752,18 +751,18 @@
 
             try {
                 $result = $database->exec("DROP TABLE `$table`"); // delete the table field
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $result = false;
                 $this->error($e->getMessage());
             }
             if ($result !== false) try {
                 $database->exec("DROP TABLE `{$table}_votes`"); // delete the votes table field too
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // ok to ignore, as table may not exist
             }
             if ($result !== false) try {
                 $database->exec("DROP TABLE `{$table}_queues`"); // delete the queues table field too
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 // ok to ignore, as table may not exist
             }
             return (bool)$result;
