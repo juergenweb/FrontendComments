@@ -19,6 +19,7 @@
     use FrontendComments\CommentArray;
     use FrontendComments\Comment;
     use FrontendComments\configValues;
+    use FrontendComments\CommentForm;
     use PDO;
 
     // include all necessary files
@@ -221,7 +222,7 @@
                 if ($comments) {
                     $comment = $comments->get($comment_id);
                     if ($comment) {
-
+                        bd('start sending');
                         // send the mail - $comment object contains all the data
                         $commentPage = $this->wire('pages')->get($comment->pages_id);
 
@@ -244,6 +245,8 @@
                         $template = $this->input_fc_emailTemplate === 'inherit' ? $this->frontendFormsConfig['input_emailTemplate'] : $this->input_fc_emailTemplate;
                         $mail->mailTemplate($template);
 
+                        bd('template');
+
                         // create the body for the email
                         $body = '<h1>' . $this->_('A new reply has been submitted') . '</h1>';
                         $body .= '<p>' . $this->_('You are receiving this email because, you have chosen to get informed if a new reply has been posted.') . '</p>';
@@ -251,10 +254,12 @@
                         $body .= '<table style="width:100%;background-color:#dddddd;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;"><p style="margin:12px;">'.$comment->text.'</p></td></tr></table></td></tr></table>';
                         $body .= '<p>' . $this->_('Link to the page of the comment') . ': ' . $commentPage->httpUrl . '</p>';
                         $body .= '<p>' . $this->_('If you do not want to receive further mails about new comments, please click the link below') . '</p>';
+
                         // create a link for canceling the receiving of further notifications
                         $url = $commentPage->httpUrl . '?code=' . $comment->notifycode . '&notification=0#' . $fieldName . '-form-wrapper';
-                        $body .= $this->renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
+                        $body .= CommentForm::renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
                             '#7BA428');
+
                         $mail->bodyHTML($body);
 
                         $mail->to($comment->email);
