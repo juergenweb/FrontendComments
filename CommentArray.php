@@ -57,16 +57,12 @@
             // set the value of the query string 'commentid' as an integer
             $this->commentId = (int)$this->getQueryStringValue('commentid');
 
-            // put user data inside a session array for later usage by votes
+            // put user data inside an array for later usage by votes
             $this->userdata = [
                 'user_id' => $this->wire('user')->id,
                 'ip' => $this->wire('session')->getIP(),
                 'user_agent' => $_SERVER['HTTP_USER_AGENT']
             ];
-
-
-            //$this->wire('session')->set('visitordata', $this->userdata);
-
 
         }
 
@@ -203,6 +199,7 @@
                         $vote = $queryParams['vote'];
                         $database = $this->wire('database');
                         $fieldTableName = 'field_' . $this->field->name;
+
                         $votesTableName = 'field_' . $this->field->name . '_votes';
                         $comment = $this->find('id=' . $queryParams['votecommentid'])->first();
 
