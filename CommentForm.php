@@ -462,7 +462,7 @@
          *
          * @return string
          */
-        protected function renderButton(
+        public static function renderButton(
             string $linktext,
             string $url,
             string $bgColor,
@@ -515,13 +515,13 @@
             // create a link for approving the comment if the status has been set to 0
             if ($newComment->status == InputfieldFrontendComments::pendingApproval) {
                 $url = $this->page->httpUrl . '?code=' . $newComment->code . '&status=1#' . $this->getID() . '-form-wrapper';
-                $body .= $this->renderButton($this->_('Publish the comment'), $url, '#7BA428', '#ffffff',
+                $body .= self::renderButton($this->_('Publish the comment'), $url, '#7BA428', '#ffffff',
                     '#7BA428');
             }
 
             // create button to mark comment as SPAM
             $spamUrl = $this->page->httpUrl . '?code=' . $newComment->code . '&status=2#' . $this->getID() . '-form-wrapper';
-            $body .= $this->renderButton($this->_('Mark this comment as SPAM'), $spamUrl, '#ED2939',
+            $body .= self::renderButton($this->_('Mark this comment as SPAM'), $spamUrl, '#ED2939',
                 '#ffffff', '#ED2939');
 
             return $body;
@@ -545,7 +545,7 @@
             $body .= '<p>' . $this->_('If you do not want to receive further mails about new comments, please click the link below') . '</p>';
             // create a link for canceling the receiving of further notifications
             $url = $this->page->httpUrl . '?code=' . $newComment->notifycode . '&notification=0#' . $this->getID() . '-form-wrapper';
-            $body .= $this->renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
+            $body .= self::renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
                 '#7BA428');
             return $body;
         }
