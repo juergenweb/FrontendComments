@@ -137,11 +137,8 @@
 
             // reply form
             $this->form = new CommentForm($comments, 'reply-form-' . $this->getId(), $this->getId());
-            $this->form->setAttribute('action', '/?commentid=' . $this->getId() . '&formid=reply-form-' . $this->getId() . '#reply-comment-form-' . $this->field->name . '-reply-' . $this->getId());
+            $this->form->setAttribute('action', $this->page->url . '?commentid=' . $this->getId() . '&formid=reply-form-' . $this->getId() . '#reply-comment-form-' . $this->field->name . '-reply-' . $this->getId());
             $this->form->setSubmitWithAjax();
-
-
-
 
             $this->form->prepend('<h3>' . $this->_('Write an answer to this comment') . '</h3>');
 
@@ -283,7 +280,7 @@
         public function renderDefault(Comment $comment, bool $levelStatus, int $level): string
         {
 
-            $out = '<div id="'.$this->field->name.'-'. $comment->id .'-novote"></div>'; // wrapper for no vote alert box
+            $out = '<div id="' . $this->field->name . '-' . $comment->id . '-novote"></div>'; // wrapper for no vote alert box
             if ($level === 0) {
                 $out .= '<div id="comment-wrapper-' . $comment->id . '" class="comment-main-level">';
             }
