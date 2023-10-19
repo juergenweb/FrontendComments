@@ -62,6 +62,7 @@
         protected string|int $input_fc_voting = 0;
         protected string|int $input_fc_voting_lock = 7;
         protected string|int $input_fc_comment_notification = 0;
+        protected string|int $input_fc_queue_batch = 20;
         protected array $frontendCommentsConfig = [];
 
         // array of all fields inside the user template
@@ -204,6 +205,8 @@
             // shorten the list by the batch size (fe the first 20 entries)
             $list = array_slice($list, 0, $batchSize);
 
+            bd($list);
+
             // send emails according to the list
             foreach ($list as $parameters) {
                 $email = $parameters['email'];
@@ -259,6 +262,7 @@
                         if ($mail->send()) {
                             // delete entry in table_queues
                             bd($comment->email);
+
                         } else {
                             // write a log file
                         }
@@ -980,6 +984,25 @@
             $notification->addOption(Comment::flagNotifyAll, $this->_('Users can receive email notifications for all new comments on the page'));
             $notification->attr('value', (int)$field->get('input_fc_comment_notification'));
             $emailFieldset->add($notification);
+
+            // input_fc_queue_batch
+            $batch = $modules->get('InputfieldInteger');
+            $batch->attr('name+id', 'input_fc_queue_batch');
+            $batch->attr('type', 'number');
+            $batch->label = $this->_('Email queuing');
+            $value = (is_null($field->input_fc_queue_batch)) ? $this->input_fc_queue_batch : $field->input_fc_queue_batch;
+            $batch->attr('value', $value);
+            $batch->attr('size', 10);
+            $batch->attr('min', 10);
+            $batch->step(10);
+            $batch->defaultValue(20);
+            $batch->required(true);
+            $batch->description = $this->_('Choose the number of mails, that should be sent in one batch.');
+            $notes = $this->_('This module offers user the possibility to get notified if a new comment has been posted.');
+            $notes .= ' '.$this->_('This means that an unknown amount of mails will be sent to users and this can lead to problems on the server and time outs.');
+            $notes .= ' '.$this->_('To prevent such problems all emails will be queued and sent in smaller groups. The size of the group can be set in the inputfield above.');
+            $batch->notes = $notes;
+            $emailFieldset->add($batch);
 
             $inputfields->append($emailFieldset);
 
