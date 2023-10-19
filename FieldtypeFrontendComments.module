@@ -189,13 +189,14 @@
             }
             $query = implode(' UNION ', $select);
             $statement = $query.' ORDER BY created, comment_id';
-            bd($statement);
             $result = $this->wire('database')->prepare($statement);
             $result->execute();
+            $list = $result->fetchAll();
 
+            // shorten the list by the batch size (fe the first 20 entries)
+            $list = array_slice($list, 0, $batchSize);
+            bd($list);
 
-            $row = $result->fetchAll();
-            bd($row);
 
 
         }
