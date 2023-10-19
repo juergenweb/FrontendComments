@@ -60,6 +60,7 @@
         protected string|int $input_fc_voting = 0;
         protected string|int $input_fc_voting_lock = 7;
         protected string|int $input_fc_comment_notification = 0;
+        protected array $frontendCommentsConfig = [];
 
         // array of all fields inside the user template
         protected array $userfields = [];
@@ -77,6 +78,10 @@
 
             // grab FrontendForms module to be able to use some methods of it
             $this->frontendForms = wire('modules')->get('FrontendForms');
+
+            // grab configuration values from the FrontendForms module
+            $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
+
 
             // set database object
             $this->database = $this->wire()->database;
@@ -174,7 +179,7 @@
          * Get all queued emails from the database and send the emails in batches
          * @return void
          */
-        protected function sendQueuedEmails():void
+        protected function sendQueuedEmails(): void
         {
             $batchSize = 3;
             bd('hook runs');
@@ -184,21 +189,21 @@
 
             // get all tables that contain the queued email list
             $select = [];
-            foreach($fields as $name => $value){
+            foreach ($fields as $name => $value) {
 
-                $select[] = 'SELECT * FROM field_'.$name.'_queues';
+                $select[] = 'SELECT * FROM field_' . $name . '_queues';
             }
             $query = implode(' UNION ', $select);
-            $statement = $query.' ORDER BY created, comment_id';
+            $statement = $query . ' ORDER BY created, comment_id';
             $result = $this->wire('database')->prepare($statement);
             $result->execute();
             $list = $result->fetchAll();
 
             // shorten the list by the batch size (fe the first 20 entries)
             $list = array_slice($list, 0, $batchSize);
-            bd($list);
+
             // send emails according to the list
-            foreach($list as $parameters){
+            foreach ($list as $parameters) {
                 $email = $parameters['email'];
                 $comment_id = $parameters['comment_id'];
                 $page_id = $parameters['page_id'];
@@ -208,11 +213,59 @@
                 $field = $this->wire('fields')->get($field_id);
                 $fieldName = $field->name;
                 $comments = $this->wire('pages')->get(1)->$fieldName;
-                if($comments){
+                if ($comments) {
                     $comment = $comments->get($comment_id);
-                    if($comment){
+                    if ($comment) {
+
                         // send the mail - $comment object contains all the data
-                        bd($comment->email);
+                        $commentPage = $this->wire('pages')->get($comment->pages_id);
+
+                        // create WireMail instance
+                        $mail = new WireMail();
+                        // set the sender email address
+                        if ($this->input_fc_email) {
+                            $emailSender = $this->input_fc_email;
+                        } else {
+                            $emailSender = $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
+                        }
+                        // set from name if present
+                        if ($this->input_fc_sender) {
+                            $mail->fromName($this->input_fc_sender);
+                        }
+                        $mail->subject($this->_('New reply to a comment'));
+                        $mail->title($this->_('A new reply has been done'));
+
+                        // set email template depending on config settings
+                        if ($this->input_fc_emailTemplate === 'inherit') {
+                            $template = $this->frontendFormsConfig['input_emailTemplate'];
+                        } else {
+                            $template = $this->input_fc_emailTemplate;
+                        }
+                        $mail->mailTemplate($template);
+
+                        // create the body for the email
+                        $body = '<h1>' . $this->_('A new reply has been submitted') . '</h1>';
+                        $body .= '<p>' . $this->_('You are receiving this email because, you have chosen to get informed if a new reply has been posted.') . '</p>';
+                        $body .= '<h2>' . $this->_('New comment') . '</h2>';
+                        $body .= '<table style="width:100%;background-color:#dddddd;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;"><p style="margin:12px;">'.$comment->text.'</p></td></tr></table></td></tr></table>';
+                        $body .= '<p>' . $this->_('Link to the page of the comment') . ': ' . $commentPage->httpUrl . '</p>';
+                        $body .= '<p>' . $this->_('If you do not want to receive further mails about new comments, please click the link below') . '</p>';
+                        // create a link for canceling the receiving of further notifications
+                        $url = $commentPage->httpUrl . '?code=' . $comment->notifycode . '&notification=0#' . $fieldName . '-form-wrapper';
+                        $body .= $this->renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
+                            '#7BA428');
+                        $mail->bodyHTML($body);
+
+                        $mail->to($comment->email);
+
+                        if ($mail->send()) {
+                            // delete entry in table_queues
+                            bd($comment->email);
+                        } else {
+                            // write a log file
+                        }
+
+
                     }
                 }
             }
@@ -676,7 +729,7 @@
             )
             ';
 
-            $database->exec($sql);
+                $database->exec($sql);
             }
 
             return $schema;
@@ -696,7 +749,7 @@
         {
             $database = $this->database;
             $table = $database->escapeTable($field->table);
-            bd($table);
+
             try {
                 $result = $database->exec("DROP TABLE `$table`"); // delete the table field
             } catch (\Exception $e) {
@@ -926,7 +979,7 @@
             $notification->addOption(0, $this->_('Disabled'));
             $notification->addOption(Comment::flagNotifyReply, $this->_('Users can receive email notifications of replies to their comment only'));
             $notification->addOption(Comment::flagNotifyAll, $this->_('Users can receive email notifications for all new comments on the page'));
-            $notification->attr('value', (int) $field->get('input_fc_comment_notification'));
+            $notification->attr('value', (int)$field->get('input_fc_comment_notification'));
             $emailFieldset->add($notification);
 
             $inputfields->append($emailFieldset);
