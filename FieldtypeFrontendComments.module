@@ -74,6 +74,7 @@
         {
             parent::__construct();
 
+
             // grab FrontendForms module to be able to use some methods of it
             $this->frontendForms = wire('modules')->get('FrontendForms');
 
@@ -119,7 +120,7 @@
             // delete voting entries which are older then the selected time period
             $this->addHookAfter('Page::render', $this, 'deleteOldVoteEntries');
             // send queued emails as a batch to the users
-            $this->addHookAfter('LazyCron::every30Seconds', $this, 'sendQueuedEmails');
+            $this->addHookAfter('LazyCron::everyMinute', $this, 'sendQueuedEmails');
         }
 
 
@@ -176,7 +177,7 @@
         protected function sendQueuedEmails():void
         {
             $batchSize = 3;
-
+            bd('hook runs');
             // get all FrontendComments fields
             $fields = $this->wire('fields')->findByType('FieldtypeFrontendComments');
             $numberOfFields = count($fields);
@@ -200,11 +201,20 @@
             foreach($list as $parameters){
                 $email = $parameters['email'];
                 $comment_id = $parameters['comment_id'];
-                $field_id = 131;
-                bd('gaga');
-                $comments = $this->wire('pages')->get(1)->comments_a->get($comment_id);
-                //$comments = $this->wire('pages')->get(1)->get('id=131')->get($comment_id);
-                bd($comments);
+                $page_id = $parameters['page_id'];
+                $field_id = $parameters['field_id'];
+
+                //$test = $this->wire('pages')->get(1)->comments_a->get(1);
+                $field = $this->wire('fields')->get($field_id);
+                $fieldName = $field->name;
+                $comments = $this->wire('pages')->get(1)->$fieldName;
+                if($comments){
+                    $comment = $comments->get($comment_id);
+                    if($comment){
+                        // send the mail - $comment object contains all the data
+                        bd($comment->email);
+                    }
+                }
             }
         }
 
