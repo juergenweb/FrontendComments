@@ -196,9 +196,16 @@
             // shorten the list by the batch size (fe the first 20 entries)
             $list = array_slice($list, 0, $batchSize);
             bd($list);
-
-
-
+            // send emails according to the list
+            foreach($list as $parameters){
+                $email = $parameters['email'];
+                $comment_id = $parameters['comment_id'];
+                $field_id = 131;
+                bd('gaga');
+                $comments = $this->wire('pages')->get(1)->comments_a->get($comment_id);
+                //$comments = $this->wire('pages')->get(1)->get('id=131')->get($comment_id);
+                bd($comments);
+            }
         }
 
         public function addAssets(HookEvent $event): void
@@ -651,6 +658,8 @@
                 id int unsigned NOT NULL auto_increment,
                 comment_id int unsigned NOT NULL,              
                 email varchar(255) NOT NULL,
+                page_id int unsigned NOT NULL,
+                field_id int unsigned NOT NULL,
                 created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (id),
                 INDEX created (comment_id)
@@ -664,7 +673,7 @@
         }
 
         /**
-         * Delete the given field, which implies: drop the table $field->table and the table_votes
+         * Delete the given field, which implies: drop the table $field->table, the table_votes and the table_queues
          *
          * This should only be called by the Fields class since fieldgroups_fields lookup entries must be deleted
          * before this method is called.
@@ -677,6 +686,7 @@
         {
             $database = $this->database;
             $table = $database->escapeTable($field->table);
+            bd($table);
             try {
                 $result = $database->exec("DROP TABLE `$table`"); // delete the table field
             } catch (\Exception $e) {
@@ -685,6 +695,11 @@
             }
             if ($result !== false) try {
                 $database->exec("DROP TABLE `{$table}_votes`"); // delete the votes table field too
+            } catch (\Exception $e) {
+                // ok to ignore, as table may not exist
+            }
+            if ($result !== false) try {
+                $database->exec("DROP TABLE `{$table}_queues`"); // delete the queues table field too
             } catch (\Exception $e) {
                 // ok to ignore, as table may not exist
             }
