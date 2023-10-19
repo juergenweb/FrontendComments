@@ -793,12 +793,12 @@
                             // create comment_id, email array
                             $sendingData = [];
                             foreach($notificationEmails as $email){
-                                $sendingData[] = '('.$newID.',\''.$email.'\')';
+                                $sendingData[] = '('.$newID.',\''.$email.'\', '.$this->field->id.', '.$this->page->id.')';
                             }
                             $valuesString = 'VALUES'.implode(',', $sendingData);
 
                             // create the SQL statement
-                            $statement = "INSERT INTO $table (comment_id, email) $valuesString";
+                            $statement = "INSERT INTO $table (comment_id, email, field_id, page_id) $valuesString";
 
                             $this->wire('database')->exec($statement);
 
