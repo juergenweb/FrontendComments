@@ -64,7 +64,10 @@
         protected string|int $input_fc_voting_lock = 7;
         protected string|int $input_fc_comment_notification = 0;
         protected string|int $input_fc_queue_batch = 20;
+        protected string|null $input_fc_croninterval = 'every5Minutes';
+        protected array $moduleConfig = []; // array that hold all module config values
         protected array $frontendCommentsConfig = [];
+        protected array $cronIntervals = [];
 
         // array of all fields inside the user template
         protected array $userfields = [];
@@ -79,7 +82,6 @@
         {
             parent::__construct();
 
-
             // grab FrontendForms module to be able to use some methods of it
             $this->frontendForms = wire('modules')->get('FrontendForms');
 
@@ -89,6 +91,31 @@
 
             // set database object
             $this->database = $this->wire()->database;
+
+            $this->cronIntervals = [
+                'every30Seconds' => $this->_('Every 30 seconds'),
+                'everyMinute' => $this->_('Every minute'),
+                'every2Minutes' => $this->_('Every 2 minutes'),
+                'every3Minutes' => $this->_('Every 3 minutes'),
+                'every4Minutes' => $this->_('Every 4 minutes'),
+                'every5Minutes' => $this->_('Every 5 minutes'),
+                'every10Minutes' => $this->_('Every 10 minutes'),
+                'every15Minutes' => $this->_('Every 15 minutes'),
+                'every30Minutes' => $this->_('Every 30 minutes'),
+                'every45Minutes' => $this->_('Every 45 minutes'),
+                'everyHour' => $this->_('Every hour'),
+                'every2Hours' => $this->_('Every 2 hours'),
+                'every4Hours' => $this->_('Every 4 hours'),
+                'every6Hours' => $this->_('Every 6 hours'),
+                'every12Hours' => $this->_('Every 12 hours'),
+                'everyDay' => $this->_('Every day'),
+                'every2Days' => $this->_('Every 2 days'),
+                'every4Days' => $this->_('Every 4 days'),
+                'everyWeek' => $this->_('Every week'),
+                'every2weeks' => $this->_('Every 2 Weeks'),
+                'every4weeks' => $this->_('Every 4 Weeks')
+            ];
+
 
         }
 
@@ -132,7 +159,6 @@
             $this->addHookAfter('LazyCron::every30Seconds', $this, 'sendQueuedEmails');
         }
 
-
         /**
          * Delete comments marked as SPAM after a given time as set in the input field configuration
          * @return void
@@ -164,6 +190,8 @@
          */
         protected function deleteOldVoteEntries(): void
         {
+
+
             $timePeriod = $this->input_fc_voting_lock;
             $currentDate = new DateTime(); // this will return today
             $comparingDate = $currentDate->sub(new DateInterval('P' . $timePeriod . 'D')); // substract the time period
@@ -186,7 +214,7 @@
          */
         protected function sendQueuedEmails(): void
         {
-            $batchSize = 3;
+
             bd('hook runs');
             // get all FrontendComments fields
             $fields = $this->wire('fields')->findByType('FieldtypeFrontendComments');
@@ -198,31 +226,41 @@
                 $select[] = 'SELECT * FROM field_' . $name . '_queues';
             }
             $query = implode(' UNION ', $select);
-            $statement = $query . ' ORDER BY created, comment_id';
+            $statement = $query . ' ORDER BY created, field_id';
             $result = $this->wire('database')->prepare($statement);
             $result->execute();
             $list = $result->fetchAll();
 
             // shorten the list by the batch size (fe the first 20 entries)
+            $batchSize = 20;
             $list = array_slice($list, 0, $batchSize);
 
             bd($list);
 
-            // send emails according to the list
+            // send mails to each row in the list
             foreach ($list as $parameters) {
                 $email = $parameters['email'];
                 $comment_id = $parameters['comment_id'];
                 $page_id = $parameters['page_id'];
                 $field_id = $parameters['field_id'];
 
-                //$test = $this->wire('pages')->get(1)->comments_a->get(1);
                 $field = $this->wire('fields')->get($field_id);
                 $fieldName = $field->name;
-                $comments = $this->wire('pages')->get(1)->$fieldName;
+
+                $comments = $this->wire('pages')->get($page_id)->$fieldName;
+bd($comments);
                 if ($comments) {
                     $comment = $comments->get($comment_id);
+                    bd($comment_id);
                     if ($comment) {
-                        bd('start sending');
+
+
+                        // set array with table name and comment id to delet this queue entry after sending of the mail
+                        $deleteField = $this->wire('fields')->get($field_id);
+                        $deleteFieldTable = $this->database->escapeTable($deleteField->table) . '_queues';
+                        $deleteRowID = $parameters['id'];
+
+
                         // send the mail - $comment object contains all the data
                         $commentPage = $this->wire('pages')->get($comment->pages_id);
 
@@ -245,13 +283,11 @@
                         $template = $this->input_fc_emailTemplate === 'inherit' ? $this->frontendFormsConfig['input_emailTemplate'] : $this->input_fc_emailTemplate;
                         $mail->mailTemplate($template);
 
-                        bd('template');
-
                         // create the body for the email
                         $body = '<h1>' . $this->_('A new reply has been submitted') . '</h1>';
                         $body .= '<p>' . $this->_('You are receiving this email because, you have chosen to get informed if a new reply has been posted.') . '</p>';
                         $body .= '<h2>' . $this->_('New comment') . '</h2>';
-                        $body .= '<table style="width:100%;background-color:#dddddd;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;"><p style="margin:12px;">'.$comment->text.'</p></td></tr></table></td></tr></table>';
+                        $body .= '<table style="width:100%;background-color:#dddddd;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;"><p style="margin:12px;">' . $comment->text . '</p></td></tr></table></td></tr></table>';
                         $body .= '<p>' . $this->_('Link to the page of the comment') . ': ' . $commentPage->httpUrl . '</p>';
                         $body .= '<p>' . $this->_('If you do not want to receive further mails about new comments, please click the link below') . '</p>';
 
@@ -265,8 +301,23 @@
                         $mail->to($comment->email);
 
                         if ($mail->send()) {
+                            bd('mail wird gesendet');
                             // delete entry in table_queues
-                            bd($comment->email);
+                            bd($deleteRowID);
+                            // get the appropriate queued list item and delete it from the table
+                            $statement = "DELETE FROM $deleteFieldTable WHERE id=:id ";
+                            try {
+                                $query = $this->database->prepare($statement);
+                                $query->bindValue(":id", $deleteRowID, PDO::PARAM_INT);
+                                $result = $query->execute();
+
+                            } catch (Exception $e) {
+                                $result = false;
+                                $error = $e->getMessage();
+
+                            }
+
+
 
                         } else {
                             // write a log file
@@ -280,6 +331,8 @@
 
         public function addAssets(HookEvent $event): void
         {
+
+
             $page = $event->object;
 
             $assets = wire('config')->urls->siteModules . $this->className() . '/';
@@ -818,6 +871,7 @@
             $moderate->addOption(self::moderateNew, $this->_('Only New - Only comments from users without prior approved comments require approval'));
             $inputfields->append($moderate);
 
+
             /**
              * Field configuration fieldset
              */
@@ -1003,11 +1057,26 @@
             $batch->defaultValue(20);
             $batch->required(true);
             $batch->description = $this->_('Choose the number of mails, that should be sent in one batch.');
-            $notes = $this->_('This module offers user the possibility to get notified if a new comment has been posted.');
-            $notes .= ' '.$this->_('This means that an unknown amount of mails will be sent to users and this can lead to problems on the server and time outs.');
-            $notes .= ' '.$this->_('To prevent such problems all emails will be queued and sent in smaller groups. The size of the group can be set in the inputfield above.');
+            $notes = $this->_('This module offers the possibility to get notified if a new comment has been posted.');
+            $notes .= ' ' . $this->_('This means that an unknown amount of mails will be sent to users and this can lead to problems on the server and time outs.');
+            $notes .= ' ' . $this->_('To prevent such problems all emails will be queued and sent in smaller groups. The size of the group can be set in the inputfield above.');
             $batch->notes = $notes;
+            $batch->columnWidth = 50;
             $emailFieldset->add($batch);
+
+            // set cronjob interval
+            $cron = $this->wire()->modules->get('InputfieldSelect');
+            $cron->label = $this->_('Select the Cronjob interval for sending queued emails');
+            $cron->attr('name', 'input_fc_croninterval');
+            //get all possible image fields from the user template
+            $cron->addOptions($this->cronIntervals);
+            $cron->defaultValue(300);
+            $value = (is_null($field->input_fc_croninterval)) ? $this->input_fc_croninterval : $field->input_fc_croninterval;
+            $cron->attr('value', $value);
+            $cron->required = 1;
+            $cron->columnWidth = 50;
+            $cron->description = $this->_('Set the minimum time period between sending of email batches.');
+            $emailFieldset->add($cron, $inputfields);
 
             $inputfields->append($emailFieldset);
 
