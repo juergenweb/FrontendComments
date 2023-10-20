@@ -235,25 +235,29 @@
             $batchSize = 20;
             $list = array_slice($list, 0, $batchSize);
 
-            bd($list);
+
 
             // send mails to each row in the list
             foreach ($list as $parameters) {
+
                 $email = $parameters['email'];
                 $comment_id = $parameters['comment_id'];
                 $page_id = $parameters['page_id'];
                 $field_id = $parameters['field_id'];
 
+                $page = $this->wire('pages')->get($page_id);
+
                 $field = $this->wire('fields')->get($field_id);
                 $fieldName = $field->name;
 
+                // get all comments of the given field on the given page
                 $comments = $this->wire('pages')->get($page_id)->$fieldName;
-bd($comments);
-                if ($comments) {
-                    $comment = $comments->get($comment_id);
-                    bd($comment_id);
-                    if ($comment) {
 
+                if ($comments) {
+                    $comment = $comments->findOne('id='.$comment_id);
+
+
+                    if ($comment) {
 
                         // set array with table name and comment id to delet this queue entry after sending of the mail
                         $deleteField = $this->wire('fields')->get($field_id);
@@ -283,33 +287,40 @@ bd($comments);
                         $template = $this->input_fc_emailTemplate === 'inherit' ? $this->frontendFormsConfig['input_emailTemplate'] : $this->input_fc_emailTemplate;
                         $mail->mailTemplate($template);
 
+
+
                         // create the body for the email
                         $body = '<h1>' . $this->_('A new reply has been submitted') . '</h1>';
                         $body .= '<p>' . $this->_('You are receiving this email because, you have chosen to get informed if a new reply has been posted.') . '</p>';
                         $body .= '<h2>' . $this->_('New comment') . '</h2>';
+                        if($comment->author){
+                            $body .= '<p>' . $this->_('Author') . ': '.$comment->author.'</p>';
+                        }
                         $body .= '<table style="width:100%;background-color:#dddddd;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;"><p style="margin:12px;">' . $comment->text . '</p></td></tr></table></td></tr></table>';
-                        $body .= '<p>' . $this->_('Link to the page of the comment') . ': ' . $commentPage->httpUrl . '</p>';
-                        $body .= '<p>' . $this->_('If you do not want to receive further mails about new comments, please click the link below') . '</p>';
+                        $body .= '<p>' . $this->_('Link to the page of the comment') . ': ' . $page->httpUrl . '</p>';
+                        $body .= '<p>' . $this->_('If you do not want to receive further mails about new replies, please click the link below') . '</p>';
 
                         // create a link for canceling the receiving of further notifications
-                        $url = $commentPage->httpUrl . '?code=' . $comment->notifycode . '&notification=0#' . $fieldName . '-form-wrapper';
+                        $url = $page->httpUrl . '?code=' . $comment->notifycode . '&notification=0#' . $fieldName . '-form-wrapper';
                         $body .= CommentForm::renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
                             '#7BA428');
 
                         $mail->bodyHTML($body);
 
-                        $mail->to($comment->email);
+                        $mail->to($email);
 
                         if ($mail->send()) {
+                            bd($email);
                             bd('mail wird gesendet');
                             // delete entry in table_queues
-                            bd($deleteRowID);
+
                             // get the appropriate queued list item and delete it from the table
                             $statement = "DELETE FROM $deleteFieldTable WHERE id=:id ";
                             try {
                                 $query = $this->database->prepare($statement);
                                 $query->bindValue(":id", $deleteRowID, PDO::PARAM_INT);
                                 $result = $query->execute();
+                                bd('gelöscht');
 
                             } catch (Exception $e) {
                                 $result = false;
