@@ -830,12 +830,6 @@
                         $error = $e->getMessage();
                     }
 
-
-
-
-
-
-
                     // find all other users which have chosen to get informed about all replies
                     $commenters = $this->comments->find('notification=' . Comment::flagNotifyAll);
                     // get all email addresses to this comments
@@ -875,6 +869,9 @@
                     $statement = "INSERT INTO $table (comment_id, email, field_id, page_id) $valuesString";
 
                     $this->wire('database')->exec($statement);
+
+                    // create a session to stop the simultaneous sending of notification via Lazy Cron during the saving process
+                    $this->wire('session')->set('stopqueue', '1');
 
 
                 }
