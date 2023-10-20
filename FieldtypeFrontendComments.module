@@ -310,8 +310,7 @@
                         $mail->to($email);
 
                         if ($mail->send()) {
-                            bd($email);
-                            bd('mail wird gesendet');
+
                             // delete entry in table_queues
 
                             // get the appropriate queued list item and delete it from the table
@@ -320,7 +319,7 @@
                                 $query = $this->database->prepare($statement);
                                 $query->bindValue(":id", $deleteRowID, PDO::PARAM_INT);
                                 $result = $query->execute();
-                                bd('gelöscht');
+
 
                             } catch (Exception $e) {
                                 $result = false;
