@@ -864,14 +864,10 @@
                     // write all receivers into the queue table for later sending of emails
                     $table = 'field_' . $this->field->name . '_queues'; // table name
 
-                    // create the id of the new comment by incrementing the last id
-                    // TODO
-                    $newID = (int)($last_comment_id) + 1;
-
                     // create comment_id, email array
                     $sendingData = [];
                     foreach ($notificationEmails as $email) {
-                        $sendingData[] = '(' . $newID . ',\'' . $email . '\', ' . $this->field->id . ', ' . $this->page->id . ')';
+                        $sendingData[] = '(' . $last_comment_id . ',\'' . $email . '\', ' . $this->field->id . ', ' . $this->page->id . ')';
                     }
                     $valuesString = 'VALUES' . implode(',', $sendingData);
 
