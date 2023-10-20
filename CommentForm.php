@@ -143,6 +143,9 @@
             $this->setMinTime(0);
             $this->setMaxTime(0);
 
+            // overwrite currenturllabel
+            $this->setMailPlaceholder('currenturllabel', $this->_('Comment page'));
+
             // Create all form fields
 
             // 1) email
@@ -635,8 +638,6 @@
 
             if ($this->___isValid()) {
 
-                // get the id of the last comment id
-                $last_comment_id = $this->comments->last()->id;
 
                 // get the name of the comment field
                 $fieldName = $this->field->name;
@@ -742,102 +743,13 @@
                         if (!$mail->send()) {
                             // output an error message if the mail could not be sent
                             $this->generateEmailSentErrorAlert();
+                        } else {
+
+
+                            $this->writeEntryInQueueTable($newComment);
                         }
-
-                    } else {
-                        $last_comment_id = null;
-                    }
-
-                    /**
-                     * Queuing notification emails for users
-                     */
-                    // check if notification email sending is enabled
-                    if ((array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig)) && ($this->frontendCommentsConfig['input_fc_comment_notification'] > 0)) {
-                        //check if this is a reply or a new comment
-                        $reply = !$this->parent_id == 0; // true or false
-
-                        $notificationEmails = [];
-
-                        if ($reply) {
-                            // find all other users which have chosen to get informed about all replies
-                            $commenters = $this->comments->find('notification=' . Comment::flagNotifyAll);
-                            // get all email addresses to this comments
-                            foreach ($commenters as $comments) {
-                                $notificationEmails[] = $comments->email;
-                            }
-
-                            // get the commenter which is the parent of this comment and check if notification is enabled
-                            $parentcomment = $this->comments->find('id='.$this->parent_id)->first();
-                            //$this->wire('session')->set('rec', $parentcomment->notification);
-                            if ($parentcomment->notification == Comment::flagNotifyReply) {
-                                $notificationEmails[] = $parentcomment->email;
-
-                            }
-
-                        }
-
-                        // remove the email address of the current commenter
-                        $notificationEmails = array_diff($notificationEmails, [$newComment->email]);
-
-                        // remove double entries if present
-                        $notificationEmails = array_unique($notificationEmails);
-
-                        if ((count($notificationEmails)) && (!is_null(($last_comment_id)))) {
-
-                            // write all receivers into the queue table for later sending of emails
-                            $table = 'field_'.$this->field->name.'_queues'; // table name
-
-                            // create the id of the new comment by incrementing the last id
-                            $newID = (int)($last_comment_id) + 1;
-
-                            // create comment_id, email array
-                            $sendingData = [];
-                            foreach($notificationEmails as $email){
-                                $sendingData[] = '('.$newID.',\''.$email.'\', '.$this->field->id.', '.$this->page->id.')';
-                            }
-                            $valuesString = 'VALUES'.implode(',', $sendingData);
-
-                            // create the SQL statement
-                            $statement = "INSERT INTO $table (comment_id, email, field_id, page_id) $valuesString";
-
-                            $this->wire('database')->exec($statement);
-
-
-                            // send notification mail to all of these users -> should be done via Hook
-                            /*
-                            $mail = new WireMail();
-                            $mail->from($emailSender);
-                            // set from name if present
-                            if (array_key_exists('input_fc_sender', $this->frontendCommentsConfig)) {
-                                $mail->fromName($this->frontendCommentsConfig['input_fc_sender']);
-                            }
-                            $mail->subject($this->_('New reply to a comment'));
-                            $mail->title($this->_('A new reply has been done'));
-                            $mail->mailTemplate($template);
-                            // render the body string for the notification mail
-                            $body = $this->renderCommentNotificationBody($values, $newComment);
-                            $mail->bodyHTML($body);
-                            // set all receivers
-
-                            foreach ($notificationEmails as $email) {
-
-                                $mail->to($email);
-                            }
-
-
-                            if (!$mail->send()) {
-                                // write a log file
-                            }
-                            */
-                        }
-
 
                     }
-
-
-
-
-
 
                 }
 
@@ -892,6 +804,87 @@
             $out .= '</div>';
 
             return $out;
+        }
+
+
+        protected function writeEntryInQueueTable(Comment $newComment)
+        {
+            if ((array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig)) && ($this->frontendCommentsConfig['input_fc_comment_notification'] > 0)) {
+                //check if this is a reply or a new comment
+                $reply = !$this->parent_id == 0; // true or false
+
+                $notificationEmails = [];
+
+                if ($reply) {
+
+                    // get the id of the current saved comment inside the comment field table
+                    $table = $this->database->escapeTable($this->field->table);
+                    $statement = "SELECT max(id) AS `lastid`FROM $table";
+
+                    try {
+                        $query = $this->database->prepare($statement);
+                        $query->execute();
+                        $row = $query->fetchAll();
+                        $last_comment_id = $row[0]['lastid'];
+                    } catch (Exception $e) {
+                        $error = $e->getMessage();
+                    }
+
+
+
+
+
+
+
+                    // find all other users which have chosen to get informed about all replies
+                    $commenters = $this->comments->find('notification=' . Comment::flagNotifyAll);
+                    // get all email addresses to this comments
+                    foreach ($commenters as $comments) {
+                        $notificationEmails[] = $comments->email;
+                    }
+
+                    // get the commenter which is the parent of this comment and check if notification is enabled
+                    $parentcomment = $this->comments->find('id=' . $this->parent_id)->first();
+                    //$this->wire('session')->set('rec', $parentcomment->notification);
+                    if ($parentcomment->notification == Comment::flagNotifyReply) {
+                        $notificationEmails[] = $parentcomment->email;
+
+                    }
+
+                }
+
+                // remove the email address of the current commenter
+                $notificationEmails = array_diff($notificationEmails, [$newComment->email]);
+
+                // remove double entries if present
+                $notificationEmails = array_unique($notificationEmails);
+
+                if ((count($notificationEmails)) && (!is_null(($last_comment_id)))) {
+
+                    // write all receivers into the queue table for later sending of emails
+                    $table = 'field_' . $this->field->name . '_queues'; // table name
+
+                    // create the id of the new comment by incrementing the last id
+                    // TODO
+                    $newID = (int)($last_comment_id) + 1;
+
+                    // create comment_id, email array
+                    $sendingData = [];
+                    foreach ($notificationEmails as $email) {
+                        $sendingData[] = '(' . $newID . ',\'' . $email . '\', ' . $this->field->id . ', ' . $this->page->id . ')';
+                    }
+                    $valuesString = 'VALUES' . implode(',', $sendingData);
+
+                    // create the SQL statement
+                    $statement = "INSERT INTO $table (comment_id, email, field_id, page_id) $valuesString";
+
+                    $this->wire('database')->exec($statement);
+
+
+                }
+
+
+            }
         }
 
         /**
