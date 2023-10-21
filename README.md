@@ -1,5 +1,5 @@
 # FrontendComments
-Processwire Fieldtype to add and manage comments on your site based on the FrontendForms module.
+Processwire Fieldtype/Inputfield to add and manage comments on your site based on the FrontendForms module.
 
 ## My intention for the re-creation of a Fieldtype that exists 
 I wanted to use all the advantages of my FrontendForms module on a comment component and I wanted that the forms of the comment component looks like the same as all other forms on my site, so that they integrates seamlessly into my site. This is why I decided to develop my own version of a comment module.
