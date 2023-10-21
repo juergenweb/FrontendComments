@@ -1,7 +1,7 @@
 # FrontendComments
 Processwire Fieldtype to add and manage comments on your site based on the FrontendForms module.
 
-## My intention for the creation of this Fieldtype
+## My intention for the re-creation of a Fieldtype that exists 
 I wanted to use all the advantages of my FrontendForms module on a comment component and I wanted that the forms of the comment component looks like the same as all other forms on a site. This is why I decided to develop a own version of a comment component.
 
 The other reason was to increase my knowledge on creating modules in ProcessWire by creating my first "FieldtypeMulti" module. 
