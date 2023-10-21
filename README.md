@@ -5,13 +5,14 @@ Processwire Fieldtype to add and manage comments on your site based on the Front
 I wanted to use all the advantages of my FrontendForms module on a comment component and I wanted that the forms of the comment component looks like the same as all other forms on a site. This is why I decided to develop a own version of a comment component.
 
 ## Is this a copy of the Comments Fieldtype by Ryan?
-No, it is not. I have studied the code of Ryans module to understand how this Fieldtype works and I have adapted the structure and some parts of the code and use it in this module, but it is far away from a line for line copy. There are a lot of codes and logic behind the scenes, that are completely different from Ryans version, but I 
+No, it is not. I have studied the code of Ryans module to understand how this Fieldtype works and I have adapted the structure and some parts of the code and use it in this module, but it is far away from a line for line copy. There are a lot of codes and logic behind the scenes, that are completely different from Ryans version.
+But to be honest, I have taken Ryans version to get an idea which features can be included in the component (star rating, comment rating,..).
 
 ## Highlights / Features
 * Only 1 line of code is necessary to render the comments + forms on the frontend
 * Enable/disable star rating on per comment field base
 * Enable/disable rating of comments (like/dislike) on per comment field base
-* Enable/disable sending notification emails if to users if a new reply has been posted
+* Offer commenters the sending of notification emails if a new reply has been posted
 * Queuing the sending of notification emails instead of sending all at once (prevent problems of sending to much emails)
 * Ajax driven form submission with server side validation
 * Reply forms will be loaded only on demand, if the user clicks the link to add a reply to a comment
