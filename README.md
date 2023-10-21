@@ -18,6 +18,7 @@ But to be honest, I have taken Ryans version to get an idea which features can b
 * Queuing the sending of notification emails instead of sending all at once (preventing of problems of sending to much emails at once)
 * Ajax driven form submission with server side validation
 * Reply forms will be loaded only on demand, if the user clicks the link to add a reply to a comment
+* Usage of HTML email templates (provided by FrontendForms)
 
 
 ## Include comments inside a template
