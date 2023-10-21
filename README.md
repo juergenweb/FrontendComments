@@ -2,7 +2,7 @@
 Processwire Fieldtype/Inputfield to add and manage comments on your site based on the FrontendForms module.
 
 ## My intention for the re-creation of a Fieldtype that exists 
-I wanted to use all the advantages of my FrontendForms module on a comment component and I wanted that the forms of the comment component looks like the same as all other forms on my site, so that they integrates seamlessly into my site. This is why I decided to develop my own version of a comment module.
+I wanted to use all the advantages of my FrontendForms module on a comment component and I wanted that the forms of the comment component looks like the same as all other forms on my site, so that they integrate seamlessly into my site. This is why I decided to develop my own version of a comment module.
 
 The other reason was to increase my knowledge on creating modules in ProcessWire by creating my first "FieldtypeMulti" module. 
 
@@ -15,7 +15,7 @@ But to be honest, I have taken Ryans version to get an idea which features can b
 * Enable/disable star rating on per comment field base
 * Enable/disable rating of comments (like/dislike) on per comment field base
 * Offer commenters the sending of notification emails if a new reply has been posted
-* Queuing the sending of notification emails instead of sending all at once (prevent problems of sending to much emails)
+* Queuing the sending of notification emails instead of sending all at once (preventing of problems of sending to much emails at once)
 * Ajax driven form submission with server side validation
 * Reply forms will be loaded only on demand, if the user clicks the link to add a reply to a comment
 
