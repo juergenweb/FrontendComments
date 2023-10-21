@@ -67,6 +67,7 @@
         protected string|null $input_fc_croninterval = 'every5Minutes';
         protected array $moduleConfig = []; // array that hold all module config values
         protected array $frontendCommentsConfig = [];
+        protected array $frontendFormsConfig = [];
         protected array $cronIntervals = [];
 
         // array of all fields inside the user template
@@ -150,6 +151,7 @@
         public function init(): void
         {
             parent::init();
+
             // add CSS and JS to the frontend template
             $this->addHookAfter('Page::render', $this, 'addAssets');
             $this->addHookAfter('Page::render', $this, 'deleteSpam');
@@ -225,111 +227,111 @@
             // get all FrontendComments fields
             $fields = $this->wire('fields')->findByType('FieldtypeFrontendComments');
 
-            // get all queuing tables of the comment fields
-            $select = [];
             foreach ($fields as $name => $value) {
-                $select[] = 'SELECT * FROM field_' . $name . '_queues';
-            }
 
-            // combine the rows of all tables into one
-            $query = implode(' UNION ', $select);
-            $statement = $query . ' ORDER BY created, field_id';
-            $result = $this->wire('database')->prepare($statement);
-            $result->execute();
-            $list = $result->fetchAll();
+                $field = $this->wire('fields')->get($name); // field object
+                $table = 'field_' . $name . '_queues'; // the queue table name
 
-            // shorten this list by the batch size (fe the first 20 entries)
-            $batchSize = 20;
-            $list = array_slice($list, 0, $batchSize);
+                $sql = "SELECT * FROM $table ORDER BY id";
+                $query = $this->database->prepare($sql);
+                $result = $query->execute();
+                $list = $query->fetchAll();
 
-            // send mails to each row in the list
-            foreach ($list as $parameters) {
+                // shorten this list by the batch size (fe the first 20 entries) as set in the config
+                $batchSize = (int)$field->input_fc_queue_batch;
+                $list = array_slice($list, 0, $batchSize);
 
-                $email = $parameters['email'];
-                $comment_id = $parameters['comment_id'];
-                $page_id = $parameters['page_id'];
-                $field_id = $parameters['field_id'];
+                // send mails to each row in the list
+                foreach ($list as $parameters) {
 
-                // get the page object
-                $page = $this->wire('pages')->get($page_id);
+                    $email = $parameters['email'];
+                    $comment_id = $parameters['comment_id'];
+                    $page_id = $parameters['page_id'];
+                    $field_id = $parameters['field_id'];
 
-                // get the field object
-                $field = $this->wire('fields')->get($field_id);
-                $fieldName = $field->name;
+                    // get the page object
+                    $page = $this->wire('pages')->get($page_id);
 
-                // get the comments array containing all comments of the given field on the given page
-                $comments = $this->wire('pages')->get($page_id)->$fieldName;
+                    // get the field object
+                    $field = $this->wire('fields')->get($field_id);
+                    $fieldName = $field->name;
 
-                if ($comments) {
-                    $comment = $comments->findOne('id=' . $comment_id);
+                    // get the comments array containing all comments of the given field on the given page
+                    $comments = $this->wire('pages')->get($page_id)->$fieldName;
 
-                    if ($comment) {
+                    if ($comments) {
+                        $comment = $comments->findOne('id=' . $comment_id);
 
-                        // set array with table name and comment id to delet this queue entry after sending of the mail
-                        $deleteField = $this->wire('fields')->get($field_id);
-                        $deleteFieldTable = $this->database->escapeTable($deleteField->table) . '_queues';
-                        $deleteRowID = $parameters['id'];
+                        if ($comment) {
 
-                        // create WireMail instance
-                        $mail = new WireMail();
+                            // set array with table name and comment id to delet this queue entry after sending of the mail
+                            $deleteField = $this->wire('fields')->get($field_id);
+                            $deleteFieldTable = $this->database->escapeTable($deleteField->table) . '_queues';
+                            $deleteRowID = $parameters['id'];
 
-                        // set the sender email address
-                        $emailSender = $this->input_fc_email ? $this->input_fc_email : $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
-                        $mail->from($emailSender);
+                            // create WireMail instance
+                            $mail = new WireMail();
 
-                        // set from name if present
-                        if ($this->input_fc_sender) {
-                            $mail->fromName($this->input_fc_sender);
-                        }
+                            // set the sender email address
+                            $emailSender = $this->input_fc_email ? $this->input_fc_email : $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
+                            $mail->from($emailSender);
 
-                        $mail->subject($this->_('New reply to a comment'));
-                        $mail->title($this->_('A new reply has been done'));
+                            // set from name if present
+                            if ($this->input_fc_sender) {
+                                $mail->fromName($this->input_fc_sender);
+                            }
 
-                        // set email template depending on config settings
-                        $template = $this->input_fc_emailTemplate === 'inherit' ? $this->frontendFormsConfig['input_emailTemplate'] : $this->input_fc_emailTemplate;
-                        $mail->mailTemplate($template);
+                            $mail->subject($this->_('New reply to a comment'));
+                            $mail->title($this->_('A new reply has been posted'));
 
-                        // create the body for the email
-                        $body = '<h1>' . $this->_('A new reply has been submitted') . '</h1>';
-                        $body .= '<p>' . $this->_('You are receiving this email because, you have chosen to get informed if a new reply has been posted.') . '</p>';
-                        $body .= '<h2>' . $this->_('New comment') . '</h2>';
-                        if ($comment->author) {
-                            $body .= '<p>' . $this->_('Author') . ': ' . $comment->author . '</p>';
-                        }
-                        $body .= '<table style="width:100%;background-color:#dddddd;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;"><p style="margin:12px;">' . $comment->text . '</p></td></tr></table></td></tr></table>';
-                        $body .= '<p>' . $this->_('Link to the page of the comment') . ': ' . $page->httpUrl . '</p>';
-                        $body .= '<p>' . $this->_('If you do not want to receive further mails about new replies, please click the link below') . '</p>';
+                            // set email template depending on config settings
+                            $template = $this->input_fc_emailTemplate === 'inherit' ? $this->frontendFormsConfig['input_emailTemplate'] : $this->input_fc_emailTemplate;
+                            $mail->mailTemplate($template);
 
-                        // create a link for canceling the receiving of further notifications
-                        $url = $page->httpUrl . '?code=' . $comment->code . '&notification=0#' . $fieldName . '-form-wrapper';
-                        $body .= CommentForm::renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
-                            '#7BA428');
-                        $mail->bodyHTML($body);
+                            // create the body for the email
+                            $body = '<h1>' . $this->_('A new reply has been submitted') . '</h1>';
+                            $body .= '<p>' . $this->_('You are receiving this email because you have agreed to be notified when a new reply has been posted.') . '</p>';
+                            $body .= '<h2>' . $this->_('New comment') . '</h2>';
+                            if ($comment->author) {
+                                $body .= '<p>' . $this->_('Author') . ': ' . $comment->author . '</p>';
+                            }
+                            $body .= '<table style="width:100%;background-color:#dddddd;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;"><p style="margin:12px;">' . $comment->text . '</p></td></tr></table></td></tr></table>';
+                            $body .= '<p>' . $this->_('Link to the page of the comment') . ': ' . $page->httpUrl . '</p>';
+                            $body .= '<p>' . $this->_('If you do not want to receive further mails about new replies, please click the link below') . '</p>';
 
-                        $mail->to($email);
+                            // create a link for canceling the receiving of further notifications
+                            $url = $page->httpUrl . '?code=' . $comment->code . '&notification=0#' . $fieldName . '-form-wrapper';
+                            $body .= CommentForm::renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
+                                '#7BA428');
+                            $mail->bodyHTML($body);
 
-                        if ($mail->send()) {
+                            $mail->to($email);
 
-                            // get the appropriate queued list item and delete it from the table
-                            $statement = "DELETE FROM $deleteFieldTable WHERE id=:id ";
-                            try {
-                                $query = $this->database->prepare($statement);
-                                $query->bindValue(":id", $deleteRowID, PDO::PARAM_INT);
-                                $query->execute();
-                            } catch (Exception $e) {
-                                $error = $e->getMessage();
+                            if ($mail->send()) {
+
+                                // get the appropriate queued list item and delete it from the table
+                                $statement = "DELETE FROM $deleteFieldTable WHERE id=:id ";
+                                try {
+                                    $query = $this->database->prepare($statement);
+                                    $query->bindValue(":id", $deleteRowID, PDO::PARAM_INT);
+                                    $query->execute();
+                                } catch (Exception $e) {
+                                    $error = $e->getMessage();
+                                }
                             }
                         }
                     }
                 }
             }
+
         }
 
         public function addAssets(HookEvent $event): void
         {
 
-
+            bd($event);
             $page = $event->object;
+
 
             $assets = wire('config')->urls->siteModules . $this->className() . '/';
             $js = '';
@@ -778,7 +780,6 @@
                 email varchar(255) NOT NULL,
                 page_id int unsigned NOT NULL,
                 field_id int unsigned NOT NULL,
-                created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (id),
                 INDEX created (comment_id)
             )
@@ -848,14 +849,12 @@
         {
 
             $modules = $this->wire()->modules;
+            $inputfields = parent::___getConfigInputfields($field);
             $this->userfields = $this->getUserFields();
             $userimages = $this->getUserfieldsOfType('FieldtypeImage');
 
-            $inputfields = parent::___getConfigInputfields($field);
-
-
             /** @var InputfieldRadios $f */
-            $moderate = $this->wire()->modules->get('InputfieldRadios');
+            $moderate = $modules->get('InputfieldRadios');
             $moderate->label = $this->_('Comment moderation');
             $moderate->description = $this->_('This determines when a newly posted comment will appear on your site.');
             $moderate->attr('name', 'input_fc_moderate');
@@ -865,19 +864,18 @@
             $moderate->addOption(self::moderateNew, $this->_('Only New - Only comments from users without prior approved comments require approval'));
             $inputfields->append($moderate);
 
-
             /**
              * Field configuration fieldset
              */
 
             /**  $confFieldset */
-            $confFieldset = $this->wire('modules')->get('InputfieldFieldset');
+            $confFieldset = $modules->get('InputfieldFieldset');
             $confFieldset->label = $this->_('Form fields configuration');
             $confFieldset->collapsed = true;
             $confFieldset->columnWidth = 100;
             $confFieldset->icon = 'fa-list';
 
-            $userimage = $this->wire()->modules->get('InputfieldSelect');
+            $userimage = $modules->get('InputfieldSelect');
             $userimage->label = $this->_('Select the field for the user image');
             $userimage->attr('name', 'input_fc_userimage');
             //get all possible image fields from the user template
@@ -890,7 +888,7 @@
             $userimage->notes = $this->_('Only user fields of the type "FieldtypeImage" and the configuration setting for a single image will be displayed (if present).');
             $confFieldset->add($userimage, $inputfields);
 
-            $imagesize = $this->wire()->modules->get('InputfieldInteger');
+            $imagesize = $modules->get('InputfieldInteger');
             $imagesize->label = $this->_('Set the size of the image');
             $imagesize->attr('name', 'input_fc_imagesize');
             $imagesize->columnWidth = 50;
@@ -903,7 +901,7 @@
             $inputfields->add($confFieldset);
 
             /**  $emailFieldset */
-            $emailFieldset = $this->wire('modules')->get('InputfieldFieldset');
+            $emailFieldset = $modules->get('InputfieldFieldset');
             $emailFieldset->label = $this->_('Default email configuration');
             $emailFieldset->collapsed = true;
             $emailFieldset->columnWidth = 100;
@@ -911,7 +909,7 @@
 
             // choose whether to use an email template or not
             if ($this->frontendForms->getEmailTemplates()) {
-                $emailTemplate = $this->wire()->modules->get('InputfieldSelect');
+                $emailTemplate = $modules->get('InputfieldSelect');
                 $emailTemplate->label = $this->_('Select an email template');
                 $emailTemplate->attr('name', 'input_fc_emailTemplate');
                 // create options
@@ -933,7 +931,7 @@
             }
 
             // set email manually or use a PW field value
-            $emailtype = $this->wire()->modules->get('InputfieldSelect');
+            $emailtype = $modules->get('InputfieldSelect');
             $emailtype->label = $this->_('Email address(es) for the notification email');
             $emailtype->description = $this->_('Select, if you want to enter the receiver email address(es) for the notification mails manually or if you want to select users as recipients.');
             $emailtype->attr('name', 'input_fc_emailtype');
@@ -948,7 +946,7 @@
             $emailFieldset->add($emailtype);
 
             // email address where the emails should be sent to (fe. noreply@mycompany.com)
-            $email = $this->wire()->modules->get('InputfieldEmail');
+            $email = $modules->get('InputfieldEmail');
             $email->label = $this->_('Default email address(es) as text');
             $email->attr('name', 'input_fc_default_to');
             $email->attr('value', $field->input_fc_default_to);
@@ -962,7 +960,7 @@
 
             // select one or more users as recipients
             // this field overwrites the text field for the email address
-            $emailField = $this->wire()->modules->get('InputfieldAsmSelect');
+            $emailField = $modules->get('InputfieldAsmSelect');
             $emailField->label = $this->_('Recipients for the notification email');
             $emailField->attr('name', 'input_fc_defaultPWField_to');
             $emailField->required = 1;
@@ -1055,22 +1053,7 @@
             $notes .= ' ' . $this->_('This means that an unknown amount of mails will be sent to users and this can lead to problems on the server and time outs.');
             $notes .= ' ' . $this->_('To prevent such problems all emails will be queued and sent in smaller groups. The size of the group can be set in the inputfield above.');
             $batch->notes = $notes;
-            $batch->columnWidth = 50;
             $emailFieldset->add($batch);
-
-            // set cronjob interval
-            $cron = $this->wire()->modules->get('InputfieldSelect');
-            $cron->label = $this->_('Select the Cronjob interval for sending queued emails');
-            $cron->attr('name', 'input_fc_croninterval');
-            //get all possible image fields from the user template
-            $cron->addOptions($this->cronIntervals);
-            $cron->defaultValue(300);
-            $value = (is_null($field->input_fc_croninterval)) ? $this->input_fc_croninterval : $field->input_fc_croninterval;
-            $cron->attr('value', $value);
-            $cron->required = 1;
-            $cron->columnWidth = 50;
-            $cron->description = $this->_('Set the minimum time period between sending of email batches.');
-            $emailFieldset->add($cron, $inputfields);
 
             $inputfields->append($emailFieldset);
 
@@ -1189,7 +1172,7 @@
             $inputfields->append($fieldset);
 
             /**  $spamFieldset */
-            $spamFieldset = $this->wire('modules')->get('InputfieldFieldset');
+            $spamFieldset = $modules->get('InputfieldFieldset');
             $spamFieldset->label = $this->_('Spam');
             $spamFieldset->collapsed = true;
             $spamFieldset->columnWidth = 100;
@@ -1209,7 +1192,7 @@
             $spamFieldset->append($f);
 
             // captcha
-            $captcha = $this->wire()->modules->get('InputfieldSelect');
+            $captcha = $modules->get('InputfieldSelect');
             $captcha->label = $this->_('CAPTCHA');
             $captcha->description = $this->_('Select, if you want to use a CAPTCHA for the comment form.');
             $captcha->notes = $this->_('If you receive a lot of spam comments, you can enable a CAPTCHA to prevent spam bots from filling out the form.');
