@@ -301,7 +301,7 @@
                         $body .= '<p>' . $this->_('If you do not want to receive further mails about new replies, please click the link below') . '</p>';
 
                         // create a link for canceling the receiving of further notifications
-                        $url = $page->httpUrl . '?code=' . $comment->notifycode . '&notification=0#' . $fieldName . '-form-wrapper';
+                        $url = $page->httpUrl . '?code=' . $comment->code . '&notification=0#' . $fieldName . '-form-wrapper';
                         $body .= CommentForm::renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
                             '#7BA428');
                         $mail->bodyHTML($body);
@@ -569,7 +569,6 @@
                     'code' => $comment->code,
                     'remote_flag' => $comment->remote_flag,
                     'notification' => $comment->notification,
-                    'notifycode' => $comment->notifycode,
                     'stars' => $comment->stars,
                     'upvotes' => $comment->upvotes,
                     'downvotes' => $comment->downvotes,
@@ -733,7 +732,6 @@
             $schema['code'] = "varchar(128) NOT NULL default ''";
             $schema['remote_flag'] = "tinyint(3) NOT NULL default '0'";
             $schema['notification'] = "tinyint(3) NOT NULL default '0'";
-            $schema['notifycode'] = "varchar(128) NOT NULL default ''";
             $schema['stars'] = "tinyint(3) unsigned default NULL";
             $schema['upvotes'] = "int unsigned default 0";
             $schema['downvotes'] = "int unsigned default 0";
