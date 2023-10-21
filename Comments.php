@@ -41,8 +41,6 @@
         {
             parent::__construct();
 
-
-
             $this->comments = $comments; // the CommentArray object
             $this->field = $comments->getField(); // Processwire comment field object
             $this->page = $comments->getPage(); // the current page object, which contains the comment field
