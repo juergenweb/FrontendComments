@@ -648,8 +648,6 @@
          */
         public function ___render(): string
         {
-
-
             // change the status of the comment depending on code inside querystring of the mail link
             // this could be approved(1) or spam(2) - depending on the settings
             $this->changeStatusViaMail();
@@ -758,10 +756,9 @@
                             // output an error message if the mail could not be sent
                             $this->generateEmailSentErrorAlert();
                         } else {
-
-
                             $this->writeEntryInQueueTable($newComment);
                         }
+
 
                     }
 
@@ -790,7 +787,6 @@
 
             }
 
-
             // output an info message if the notification email status has been changed via the mail link
             $notifyChange = $this->wire('session')->get('notifystatuschange');
 
@@ -798,7 +794,7 @@
 
                 // remove the session first
                 $this->wire('session')->remove('notifystatuschange');
-                bd('hurra');
+
                 if ($notifyChange == '0') {
                     // output success message that the notification status has been changed to 0 (no notification)
                     $this->alert->setCSSClass('alert_successClass');
@@ -806,11 +802,10 @@
                 } else {
                     // there was an error
                     $this->alert->setCSSClass('alert_dangerClass');
-                    $this->alert->setText($this->_('Error saving new status of comment.'));
+                    $this->alert->setText($this->_('Error saving new status of notification emails.'));
                 }
 
             }
-
 
             if (($this->wire('session')->get('comment') == 'ready') && ($this->getID() == $this->field->name)) {
                 $this->wire('session')->remove('comment');
@@ -838,11 +833,16 @@
                 $out .= $this->cancel->___render();
             }
             $out .= '</div>';
-
             return $out;
+
         }
 
-
+        /**
+         * If a new comment has been posted, write all notification emails in the database for queued sending
+         * @param \FrontendComments\Comment $newComment
+         * @return void
+         * @throws \ProcessWire\WireException
+         */
         protected function writeEntryInQueueTable(Comment $newComment)
         {
             if ((array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig)) && ($this->frontendCommentsConfig['input_fc_comment_notification'] > 0)) {
