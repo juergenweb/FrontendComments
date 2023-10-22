@@ -15,7 +15,7 @@ But to be honest, I have taken Ryan's version to get an idea which features can 
 * Enable/disable star rating on per comment field base
 * Enable/disable rating of comments (like/dislike) on per comment field base
 * Offer commenters the receiving of notification emails if a new reply has been posted
-* Queuing the sending of notification emails instead of sending all at once (preventing of problems of sending to many emails at once)
+* Queuing the sending of notification emails instead of sending all at once (preventing of performance issues by sending to many emails at once)
 * Ajax driven form submission with server side validation
 * Reply forms will be loaded only on demand, if the user clicks the link to add a reply to a comment
 * Usage of HTML email templates (provided by FrontendForms)
