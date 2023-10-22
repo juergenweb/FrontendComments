@@ -208,6 +208,7 @@
             }
         }
 
+
         /**
          * Get all queued emails from the database and send the emails in batches
          * @return void
@@ -237,17 +238,32 @@
                 $result = $query->execute();
                 $list = $query->fetchAll();
 
-                // shorten this list by the batch size (fe the first 20 entries) as set in the config
-                $batchSize = (int)$field->input_fc_queue_batch;
-                $list = array_slice($list, 0, $batchSize);
+                // shorten this list by the batch size
+                $list = array_slice($list, 0, $this->input_fc_queue_batch);
 
                 // send mails to each row in the list
                 foreach ($list as $parameters) {
-
+                    $parent_id = $parameters['parent_id'];
                     $email = $parameters['email'];
                     $comment_id = $parameters['comment_id'];
                     $page_id = $parameters['page_id'];
                     $field_id = $parameters['field_id'];
+
+                    // get the code from the database
+                    $commentTable = $this->database->escapeTable($field->table);
+                    $statement = "SELECT code, email FROM $commentTable WHERE id=:parent_id";
+                    try {
+                        $query = $this->database->prepare($statement);
+                        $query->bindValue(":parent_id", $parent_id, PDO::PARAM_INT);
+                        $query->execute();
+                        $result = $query->fetchAll();
+                        $code = $result[0]['code'];
+                        bd($result[0]['email']);
+                        bd($code);
+                    } catch (Exception $e) {
+                        $error = $e->getMessage();
+                    }
+
 
                     // get the page object
                     $page = $this->wire('pages')->get($page_id);
@@ -300,7 +316,7 @@
                             $body .= '<p>' . $this->_('If you do not want to receive further mails about new replies, please click the link below') . '</p>';
 
                             // create a link for canceling the receiving of further notifications
-                            $url = $page->httpUrl . '?code=' . $comment->code . '&notification=0#' . $fieldName . '-form-wrapper';
+                            $url = $page->httpUrl . '?code=' . $code . '&notification=0#' . $fieldName . '-form-wrapper';
                             $body .= CommentForm::renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
                                 '#7BA428');
                             $mail->bodyHTML($body);
@@ -329,7 +345,6 @@
         public function addAssets(HookEvent $event): void
         {
 
-            bd($event);
             $page = $event->object;
 
 
@@ -776,6 +791,7 @@
                 $sql = '
             CREATE TABLE ' . $table . '_queues (
                 id int unsigned NOT NULL auto_increment,
+                parent_id int unsigned NOT NULL,
                 comment_id int unsigned NOT NULL,              
                 email varchar(255) NOT NULL,
                 page_id int unsigned NOT NULL,
@@ -1035,25 +1051,6 @@
             $notification->addOption(Comment::flagNotifyAll, $this->_('Users can receive email notifications for all new comments on the page'));
             $notification->attr('value', (int)$field->get('input_fc_comment_notification'));
             $emailFieldset->add($notification);
-
-            // input_fc_queue_batch
-            $batch = $modules->get('InputfieldInteger');
-            $batch->attr('name+id', 'input_fc_queue_batch');
-            $batch->attr('type', 'number');
-            $batch->label = $this->_('Email queuing');
-            $value = (is_null($field->input_fc_queue_batch)) ? $this->input_fc_queue_batch : $field->input_fc_queue_batch;
-            $batch->attr('value', $value);
-            $batch->attr('size', 10);
-            $batch->attr('min', 10);
-            $batch->step(10);
-            $batch->defaultValue(20);
-            $batch->required(true);
-            $batch->description = $this->_('Choose the number of mails, that should be sent in one batch.');
-            $notes = $this->_('This module offers the possibility to get notified if a new comment has been posted.');
-            $notes .= ' ' . $this->_('This means that an unknown amount of mails will be sent to users and this can lead to problems on the server and time outs.');
-            $notes .= ' ' . $this->_('To prevent such problems all emails will be queued and sent in smaller groups. The size of the group can be set in the inputfield above.');
-            $batch->notes = $notes;
-            $emailFieldset->add($batch);
 
             $inputfields->append($emailFieldset);
 
