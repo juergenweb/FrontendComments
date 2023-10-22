@@ -45,3 +45,19 @@ $comments = $page->mycomments;
 $comments->setReplyDepth(0); // use another reply depth than in the global settings
 echo $comments;
 ```
+
+## Queuing notification emails
+This module offers commenters the possibility to get notified, if a new reply has been posted to their comment or to other comments. This could lead to a very large amount of notification emails each time a comment will be posted especially if your site has a high comment activity.
+
+Sending a lot of emails at once will have an impact on your site performance, because the sending of mails will be triggered via LazyCron on page load and this will have an impact on the loading process of the page during the Cron task runs.
+
+In other words, a user visits a page on your site and if LazyCron will be triggered in this moment, the module will send out fe 200 mails at once. This could take a lot of time until the last mail has been sent and this blocks the loading process of the page.
+
+To prevent such performance issues by sending a large amount of mails at once, all notification emails will be send in smaller groups of 20 mails per batch. The LazyCron interval is set to 2 minutes. 20 mails every 2 Minutes should be good ratio between batch size and time.
+
+Technically, this works by writing each notification email into a row inside a custom database table. Each time LazyCron will be triggered, 20 mails in this table will be send out and the rows will be deleted afterwards. On the next LazyCron run, the next 20 mails will be send and so on until there is no mail left in this database table.
+
+Only to mention: This only happens to notification emails for commenters, not for moderators. Moderators will get the notification email about a new comment immediately, so they can react just in time (fe approve the comment or mark the comment as Spam).
+
+
+
