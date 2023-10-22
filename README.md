@@ -17,7 +17,7 @@ But to be honest, I have taken Ryan's version to get an idea which features can 
 * Offer commenters the receiving of notification emails if a new reply has been posted
 * Queuing the sending of notification emails instead of sending all at once (preventing of performance issues by sending to many emails at once)
 * Ajax driven form submission with server side validation withoud page reload
-* Reply forms will be loaded only on demand, if the user clicks the link to add a reply to a comment
+* Reply forms will only be loaded on demand by clicking on a reply symbol
 * Usage of HTML email templates (provided by FrontendForms)
 
 
