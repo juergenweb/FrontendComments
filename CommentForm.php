@@ -550,91 +550,107 @@
                 // sanitize the code to be a string and has a length of 120 characters
                 $code = $this->wire('sanitizer')->string120($queryParams['code']);
 
-                // check if the code is not empty
-                if ($code != '') {
+                // get the comments table
+                $table = $this->database->escapeTable($this->field->table);
 
-                    // get the comment that contains the given code from the query string in the database
-                    $comment = $this->comments->get('code=' . $code);
+                // check if the code exists inside the table
+                $sql = "SELECT id, notification FROM $table WHERE code= :code";
+                $query = $this->database->prepare($sql);
+                $query->bindValue(":code", $code, PDO::PARAM_STR);
+                $query->execute();
+                $row = $query->fetchAll();
+                $id = $row[0]['id'];
+                $notification = $row[0]['notification']; // get the current notification status
 
-                    if (!is_null($comment)) {
+                if ($id) {
+                    // check if the code is not empty
+                    if ($code != '') {
 
-                        // get the comments table
-                        $table = $this->database->escapeTable($this->field->table);
+                        // get the comment that contains the given code from the query string in the database
+                        $comment = $this->comments->get('code=' . $code);
 
-                        // comment with this code was found inside the database
-                        // check for the query strings
-                        switch (true) {
-                            case (array_key_exists('status', $queryParams)):
+                        if (!is_null($comment)) {
 
-                                // 1) change status of the comment via email link to approved or spam
 
-                                // sanitize the value "status" to be a string first
-                                $newStatus = $this->wire('sanitizer')->string($queryParams['status']);
+                            // comment with this code was found inside the database
+                            // check for the query strings
+                            switch (true) {
+                                case (array_key_exists('status', $queryParams)):
 
-                                // check if the value is only '0' or '1'
-                                $newStatus = in_array($newStatus, ['0', '1']) ? $newStatus : null;
+                                    // 1) change status of the comment via email link to approved or spam
 
-                                if (!is_null($newStatus)) {
+                                    // sanitize the value "status" to be a string first
+                                    $newStatus = $this->wire('sanitizer')->string($queryParams['status']);
 
-                                    // sanitize $newStatus to be integer
-                                    $newStatus = $this->wire('sanitizer')->int($newStatus);
+                                    // check if the value is only '0' or '1'
+                                    $newStatus = in_array($newStatus, ['0', '1']) ? $newStatus : null;
 
-                                    // check if comment has remote_flag = 0, which means the status has not been changed before
-                                    if ($comment->remote_flag === InputfieldFrontendComments::pendingApproval) {
+                                    if (!is_null($newStatus)) {
 
-                                        $sql = "UPDATE $table SET status=:status, remote_flag=:remote_flag WHERE id=:id";
+                                        // sanitize $newStatus to be integer
+                                        $newStatus = $this->wire('sanitizer')->int($newStatus);
 
+                                        // check if comment has remote_flag = 0, which means the status has not been changed before
+                                        if ($comment->remote_flag === InputfieldFrontendComments::pendingApproval) {
+
+                                            $sql = "UPDATE $table SET status=:status, remote_flag=:remote_flag WHERE id=:id";
+
+                                            // save the data to the database
+                                            try {
+
+                                                $query = $this->database->prepare($sql);
+                                                $query->bindValue(":status", $newStatus, PDO::PARAM_INT);
+                                                $query->bindValue(":remote_flag", 1, PDO::PARAM_INT);
+                                                $query->bindValue(":id", $comment->id, PDO::PARAM_INT);
+
+                                                // execute the query to save the comment in the database
+                                                if ($query->execute()) {
+                                                    // set the status of the new comment to a session variable for later output of the success message
+                                                    $this->wire('session')->set('commentstatuschange', $newStatus);
+                                                }
+                                            } catch (Exception $e) {
+                                                $this->log($e->getMessage()); // log the error message
+                                                $this->wire('session')->set('commentstatuschange', 3); // 3 stands for error
+                                            }
+                                        } else {
+                                            $this->alert->setCSSClass('alert_dangerClass');
+                                            $this->alert->setText($this->_('The status of the comment has already been changed. For security reasons, however, this is only allowed once via mail link. If you want to change the status once more, you have to login to the backend.'));
+                                        }
+                                    }
+
+                                    break;
+
+                                case (array_key_exists('notification', $queryParams)):
+                                    if ($notification == 0) {
+                                        $this->wire('session')->set('notifystatuschange', '1');
+                                    } else {
+                                        // 2) change status of mail notification to 0, which means to not send notification mails in the future
+                                        $sql = "UPDATE $table SET notification=:notification WHERE code=:code";
                                         // save the data to the database
                                         try {
-
                                             $query = $this->database->prepare($sql);
-                                            $query->bindValue(":status", $newStatus, PDO::PARAM_INT);
-                                            $query->bindValue(":remote_flag", 1, PDO::PARAM_INT);
-                                            $query->bindValue(":id", $comment->id, PDO::PARAM_INT);
-
+                                            $query->bindValue(":notification", 0, PDO::PARAM_INT);
+                                            $query->bindValue(":code", $code, PDO::PARAM_STR);
                                             // execute the query to save the comment in the database
                                             if ($query->execute()) {
                                                 // set the status of the new comment to a session variable for later output of the success message
-                                                $this->wire('session')->set('commentstatuschange', $newStatus);
+                                                $this->wire('session')->set('notifystatuschange', '0');
+                                            } else {
+                                                $this->wire('session')->set('notifystatuschange', '3');
                                             }
                                         } catch (Exception $e) {
                                             $this->log($e->getMessage()); // log the error message
-                                            $this->wire('session')->set('commentstatuschange', 3); // 3 stands for error
+                                            $this->wire('session')->set('notifystatuschange', 3); // 3 stands for error
                                         }
-                                    } else {
-                                        $this->alert->setCSSClass('alert_dangerClass');
-                                        $this->alert->setText($this->_('The status of the comment has already been changed. For security reasons, however, this is only allowed once via mail link. If you want to change the status once more, you have to login to the backend.'));
                                     }
-                                }
+                                    break;
 
-                                break;
-
-                            case (array_key_exists('notification', $queryParams)):
-
-                                // 2) change status of mail notification to 0, which means to not send notification mails in the future
-                                $sql = "UPDATE $table SET notification=:notification WHERE id=:id";
-
-                                // save the data to the database
-                                try {
-                                    $query = $this->database->prepare($sql);
-                                    $query->bindValue(":notification", 0, PDO::PARAM_INT);
-                                    $query->bindValue(":id", (int)$comment->id, PDO::PARAM_INT);
-                                    // execute the query to save the comment in the database
-                                    if ($query->execute()) {
-                                        // set the status of the new comment to a session variable for later output of the success message
-                                        $this->wire('session')->set('notifystatuschange', '0');
-                                    } else {
-                                        $this->wire('session')->set('notifystatuschange', '3');
-                                    }
-                                } catch (Exception $e) {
-                                    $this->log($e->getMessage()); // log the error message
-                                    $this->wire('session')->set('notifystatuschange', 3); // 3 stands for error
-                                }
-
-                                break;
-
+                            }
                         }
                     }
+                } else {
+                    // code was not found
+                    $this->wire('session')->set('nocodefound', 1);
                 }
             }
         }
@@ -766,6 +782,16 @@
 
             }
 
+
+            // output an info message if the code for change was not found
+            $nocodefound = $this->wire('session')->get('nocodefound');
+            if ($nocodefound) {
+                // there was an error
+                $this->alert->setCSSClass('alert_dangerClass');
+                $this->alert->setText($this->_('We are sorry, but there was no comment with this code found in the database.'));
+                $this->wire('session')->remove('nocodefound');
+            }
+
             // output an info message if the comment status has been changed via the mail link
             $statusChange = $this->wire('session')->get('commentstatuschange');
 
@@ -789,13 +815,15 @@
 
             // output an info message if the notification email status has been changed via the mail link
             $notifyChange = $this->wire('session')->get('notifystatuschange');
-
+            bd($notifyChange);
             if ($notifyChange == '0') {
 
                 // remove the session first
                 $this->wire('session')->remove('notifystatuschange');
 
                 if ($notifyChange == '0') {
+
+                    // check if the
                     // output success message that the notification status has been changed to 0 (no notification)
                     $this->alert->setCSSClass('alert_successClass');
                     $this->alert->setText($this->_('You have successfully unsubscribed from email notifications and you will no longer receive notifications of new replies.'));
@@ -805,6 +833,10 @@
                     $this->alert->setText($this->_('Error saving new status of notification emails.'));
                 }
 
+            } else if ($notifyChange == '1') {
+                // the notification status is 0
+                $this->alert->setCSSClass('alert_warningClass');
+                $this->alert->setText($this->_('You have tried to unsubscribe from getting notifications, but your notification status is already disabled.'));
             }
 
             if (($this->wire('session')->get('comment') == 'ready') && ($this->getID() == $this->field->name)) {
@@ -850,6 +882,7 @@
                 $reply = !$this->parent_id == 0; // true or false
 
                 $notificationEmails = [];
+                $commenterObjects = [];
 
                 if ($reply) {
 
@@ -870,14 +903,14 @@
                     $commenters = $this->comments->find('notification=' . Comment::flagNotifyAll);
                     // get all email addresses to this comments
                     foreach ($commenters as $comments) {
-                        $notificationEmails[] = $comments->email;
+                        $notificationEmails[$comments->id] = $comments->email;
                     }
 
                     // get the commenter which is the parent of this comment and check if notification is enabled
                     $parentcomment = $this->comments->find('id=' . $this->parent_id)->first();
-                    //$this->wire('session')->set('rec', $parentcomment->notification);
+
                     if ($parentcomment->notification == Comment::flagNotifyReply) {
-                        $notificationEmails[] = $parentcomment->email;
+                        $notificationEmails[$parentcomment->id] = $parentcomment->email;
 
                     }
 
@@ -896,23 +929,20 @@
 
                     // create comment_id, email array
                     $sendingData = [];
-                    foreach ($notificationEmails as $email) {
-                        $sendingData[] = '(' . $last_comment_id . ',\'' . $email . '\', ' . $this->field->id . ', ' . $this->page->id . ')';
+                    foreach ($notificationEmails as $id => $email) {
+                        $sendingData[] = '(' . $id . ',' . $last_comment_id . ',\'' . $email . '\', ' . $this->field->id . ', ' . $this->page->id . ')';
                     }
                     $valuesString = 'VALUES' . implode(',', $sendingData);
 
                     // create the SQL statement
-                    $statement = "INSERT INTO $table (comment_id, email, field_id, page_id) $valuesString";
+                    $statement = "INSERT INTO $table (parent_id, comment_id, email, field_id, page_id) $valuesString";
 
                     $this->wire('database')->exec($statement);
 
                     // create a session to stop the simultaneous sending of notification via Lazy Cron during the saving process
                     $this->wire('session')->set('stopqueue', '1');
 
-
                 }
-
-
             }
         }
 
