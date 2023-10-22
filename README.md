@@ -51,9 +51,9 @@ This module offers commenters the possibility to get notified, if a new reply ha
 
 Sending a lot of emails at once will have an impact on your site performance, because the sending of mails will be triggered via LazyCron on page load and this will have an impact on the loading process of the page during the Cron task runs.
 
-In other words, a user visits a page on your site and if LazyCron will be triggered at this moment, the module will send out fe 200 mails at once. This could take a lot of time until the last mail has been sent, and this blocks the loading process of the page.
+In other words, a user visits a page on your site and if LazyCron will be triggered at this moment, the module will send out fe 200 mails at once. This could take a lot of time until the last mail has been sent, and this blocks the loading process of the page. BTW if you are sending a lot of mails at once, you probably get marked as a spammer ;-)
 
-To prevent such performance issues by sending a large amount of mails at once, all notification emails will be sent in smaller groups of 20 mails per batch. The LazyCron interval is set to 2 minutes. 20 mails every 2 Minutes should be a good ratio between batch size and time.
+To prevent such issues by sending a large amount of mails at once, all notification emails will be sent in smaller groups of 20 mails per batch. The LazyCron interval is set to 2 minutes. 20 mails every 2 Minutes should be a good ratio between batch size and time.
 
 Technically, this works by writing each notification email into a row inside a custom database table. Each time LazyCron will be triggered, 20 mails in this table will be sent out, and the rows will be deleted afterwards. On the next LazyCron run, the next 20 mails will be sent and so on until there is no mail left in this database table.
 
