@@ -28,6 +28,13 @@
      * @property protected Alert $alert: The alert object
      * @property protected Link $cancel: the link object to cancel the reply comment
      * @property protected string|int $parent_id: the id of the parent comment
+     * @property protected string|null $input_fc_email: the email address that should be displayed as the sender of the emails
+     * @property protected string|null $input_fc_sender: the name that should be displayed as the sender of the emails
+     * @property protected string|null $input_fc_subject: the subject of the mail
+     * @property protected string|null $input_fc_title: the title value of the mail
+     * @property protected int|null|bool $input_fc_stars: whether to show star rating or not
+     * @property protected int|null|bool $input_fc_stars: whether to a textarea counter or not
+     * @property protected string|null $input_fc_captcha: whether to use a CAPTCHA or not
      *
      * @method string renderButton(): Render buttons for the email template to publish a comment or mark it as SPAM
      * @method string render(): Output the form markup
@@ -70,6 +77,13 @@
         protected array $frontendCommentsConfig = [];
         protected string $redirectUrl = '';
         protected string|int $parent_id = 0;
+        protected string|null $input_fc_email = null;
+        protected string|null $input_fc_sender = null;
+        protected string|null $input_fc_subject = null;
+        protected string|null $input_fc_title = null;
+        protected int|bool|null $input_fc_stars = false;
+        protected int|bool|null $input_fc_counter = false;
+        protected string|null $input_fc_captcha = 'inherit';
 
         /** class objects */
         protected Email $email; // the email field object
@@ -130,6 +144,10 @@
             // grab configuration values from the FrontendComments input field
             $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
 
+            // create properties of FrontendComments configuration values
+            $properties =  ['input_fc_email','input_fc_sender','input_fc_title', 'input_fc_subject', 'input_fc_stars', 'input_fc_counter', 'input_fc_captcha'];
+            $this->createPropertiesOfArray($this->frontendCommentsConfig,$properties);
+
             // get the redirect url
             $this->redirectUrl = $this->wire('pages')->request()->getRedirectUrl();
 
@@ -168,7 +186,7 @@
             $this->comment->setLabel($this->_('Comment'));
             $this->comment->setRule('required');
             $this->comment->setRule('lengthMax', 1024);
-            if (!array_key_exists('input_fc_counter', $this->frontendCommentsConfig)) {
+            if ($this->input_fc_counter) {
                 $this->comment->useCharacterCounter();
             }
             $this->comment->setSanitizer('maxLength'); // limit the length of the comment
@@ -176,7 +194,7 @@
             $this->add($this->comment);
 
             // 4) star rating
-            if (array_key_exists('input_fc_stars', $this->frontendCommentsConfig) && $this->frontendCommentsConfig['input_fc_stars'] === 1) {
+            if ($this->input_fc_stars) {
                 $this->stars = new InputNumber('stars');
                 $this->stars->useInputWrapper(false);
                 $this->stars->useFieldWrapper(false);
@@ -242,12 +260,10 @@
 
             // CAPTCHA settings
             // add FrontendForms settings for the CAPTCHA if "inherit" has been chosen
-            if ($this->frontendCommentsConfig['input_fc_captcha'] === 'inherit') {
-                $this->setCaptchaType($this->frontendFormsConfig['input_captchaType']);
-            } else {
-                // add individual CAPTCHA settings from this module
-                $this->setCaptchaType($this->frontendCommentsConfig['input_fc_captcha']);
+            if ($this->input_fc_captcha === 'inherit') {
+                $this->input_fc_captcha = $this->frontendFormsConfig['input_captchaType'];
             }
+            $this->setCaptchaType($this->input_fc_captcha);
 
         }
 
@@ -664,12 +680,12 @@
          */
         public function ___render(): string
         {
+
             // change the status of the comment depending on code inside querystring of the mail link
             // this could be approved(1) or spam(2) - depending on the settings
             $this->changeStatusViaMail();
 
             if ($this->___isValid()) {
-
 
                 // get the name of the comment field
                 $fieldName = $this->field->name;
@@ -722,31 +738,23 @@
 
                         // Send a notification email to the moderators
                         $mail = new WireMail();
+
                         // set the sender email address
-                        if (array_key_exists('input_fc_email', $this->frontendCommentsConfig)) {
-                            $emailSender = $this->frontendCommentsConfig['input_fc_email'];
-                        } else {
-                            $emailSender = $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
-                        }
-                        $mail->from($emailSender);
+                        $senderEmail = $this->input_fc_email ?? $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
+                        $mail->from($senderEmail);
+
                         // set from name if present
-                        if (array_key_exists('input_fc_sender', $this->frontendCommentsConfig)) {
-                            $mail->fromName($this->frontendCommentsConfig['input_fc_sender']);
+                        if($this->input_fc_sender){
+                            $mail->fromName($this->input_fc_sender);
                         }
+
                         // set subject
-                        if (array_key_exists('input_fc_subject', $this->frontendCommentsConfig)) {
-                            $subject = $this->frontendCommentsConfig['input_fc_subject'];
-                        } else {
-                            $subject = $this->_('Comment notification');
-                        }
-                        $mail->subject($subject);
+                        $emailSubject = $this->input_fc_subject ??  $this->_('A new reply has been posted');
+                        $mail->subject($emailSubject);
+
                         // set title
-                        if (array_key_exists('input_fc_title', $this->frontendCommentsConfig)) {
-                            $title = $this->frontendCommentsConfig['input_fc_title'];
-                        } else {
-                            $title = $this->_('New comment has been submitted');
-                        }
-                        $mail->title($title);
+                        $emailTitle = $this->input_fc_title ?? $this->_('New comment has been submitted');
+                        $mail->title($emailTitle);
 
                         // grab all form values from $_POST array
                         $values = $this->getValues();
@@ -815,23 +823,17 @@
 
             // output an info message if the notification email status has been changed via the mail link
             $notifyChange = $this->wire('session')->get('notifystatuschange');
-            bd($notifyChange);
             if ($notifyChange == '0') {
 
                 // remove the session first
                 $this->wire('session')->remove('notifystatuschange');
 
-                if ($notifyChange == '0') {
 
-                    // check if the
-                    // output success message that the notification status has been changed to 0 (no notification)
-                    $this->alert->setCSSClass('alert_successClass');
-                    $this->alert->setText($this->_('You have successfully unsubscribed from email notifications and you will no longer receive notifications of new replies.'));
-                } else {
-                    // there was an error
-                    $this->alert->setCSSClass('alert_dangerClass');
-                    $this->alert->setText($this->_('Error saving new status of notification emails.'));
-                }
+                // check if the
+                // output success message that the notification status has been changed to 0 (no notification)
+                $this->alert->setCSSClass('alert_successClass');
+                $this->alert->setText($this->_('You have successfully unsubscribed from email notifications and you will no longer receive notifications of new replies.'));
+
 
             } else if ($notifyChange == '1') {
                 // the notification status is 0
@@ -882,7 +884,7 @@
                 $reply = !$this->parent_id == 0; // true or false
 
                 $notificationEmails = [];
-                $commenterObjects = [];
+
 
                 if ($reply) {
 
