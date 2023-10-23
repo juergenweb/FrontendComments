@@ -10,15 +10,6 @@ Processwire Fieldtype/Inputfield to add and manage comments on your site based o
 * GD-Library for CAPTCHA image creation
 * FrontendForms
 * LazyCron for sending mails
-  
-## My intention for the re-creation of a Fieldtype that exists 
-I wanted to use all the advantages of my FrontendForms module on a comment component and I wanted that the forms of the comment component looks like the same as all other forms on my site, so that they integrate seamlessly into my site. This is why I decided to develop my own version of a comment module.
-
-The other reason was to increase my knowledge on creating modules in ProcessWire by creating my first "FieldtypeMulti" module. 
-
-## Is this a copy of the Comments Fieldtype by Ryan?
-No, it is not. I have studied the code of Ryan's module to understand how this Fieldtype works and I have adapted the structure and some parts of the code and use it in this module, but it is far away from a line for line copy. There are a lot of codes and logic behind the scenes, that are completely different from Ryan's version.
-But to be honest, I have taken Ryan's version to get an idea which features can be included in the component (star rating, comment rating,…).
 
 ## Highlights / Features
 * Only 1 line of code is necessary to render the comments + forms on the frontend
@@ -29,6 +20,23 @@ But to be honest, I have taken Ryan's version to get an idea which features can 
 * Ajax driven form submission with server side validation withoud page reload
 * Reply forms will only be loaded on demand by clicking on a reply symbol
 * Usage of HTML email templates (provided by FrontendForms)
+
+## Table of contents
+* [Installation and Quick-start guide](#installation-and-quick-start-guide)
+* [Which input types are supported?](#which-input-types-are-supported)
+* [SPAM protection](#spam-protection-and-security-features)
+  
+
+## Is this a copy of the Comments Fieldtype by Ryan?
+No, it is not. I have studied the code of Ryan's module to understand how this Fieldtype works and I have adapted the structure and some parts of the code and use it in this module, but it is far away from a line for line copy. There are a lot of codes and logic behind the scenes, that are completely different from Ryan's version.
+But to be honest, I have taken Ryan's version to get an idea which features can be included in the component (star rating, comment rating,…).
+
+## My intention for the re-creation of a Fieldtype that exists 
+I wanted to use all the advantages of my FrontendForms module on a comment component and I wanted that the forms of the comment component looks like the same as all other forms on my site, so that they integrate seamlessly into my site. This is why I decided to develop my own version of a comment module.
+
+The other reason was to increase my knowledge on creating modules in ProcessWire by creating my first "FieldtypeMulti" module. 
+
+
 
 ## Include comments inside a template
 You only need to include the field inside a template to render the comments on the frontend. In this case you have several possibilities:
