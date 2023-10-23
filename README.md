@@ -104,7 +104,7 @@ echo $comments;
 ```
 
 ### setSortNewToOld() - change the sort order of the comments
-Comments can be displayed from newest to oldes or vice versa. With this method you set the sort order. Setting it to true means that all comments will be displayed from the newest to the oldest. False sorts the comments the other way.
+Comments can be displayed from newest to oldest or vice versa. With this method you can set the sort order. Setting it to true means that all comments will be displayed from the newest to the oldest. False sorts the comments the other way.
 
 ```php
 $comments = $page->mycomments;
@@ -113,7 +113,7 @@ echo $comments;
 ```
 
 ### showFormAfterComments() - whether to show the form before or after the comments
-With this method you set the rendering order of the form and the comments. Setting it to true means that the form will be displayed after the comment lis. False renders the form before the comment list.
+With this method you set the rendering order of the form and the comments. Setting it to true means that the form will be displayed after the comment list. False renders the form before the comment list.
 
 ```php
 $comments = $page->mycomments;
@@ -121,5 +121,21 @@ $comments->showFormAfterComments(true); //true or false
 echo $comments;
 ```
 
+### showStarRating() - whether to show the star rating or not
+With this method can enable/disable star rating on the comments. Setting it to true means that the star rating will be displayed. False disable/hides the star rating.
 
+```php
+$comments = $page->mycomments;
+$comments->showStarRating(true); //true or false
+echo $comments;
+```
+
+### showTextareaCounter() - whether to show a character counter under the textarea or not
+With this method can enable/disable the display of a character counter under the comment textarea field. Setting it to true means that the counter will be displayed. False disable/hides the counter.
+
+```php
+$comments = $page->mycomments;
+$comments->showTextareaCounter(true); //true or false
+echo $comments;
+```
 
