@@ -59,7 +59,7 @@ Technically, this works by writing each notification email into a row inside a c
 
 Only to mention: This only happens to notification emails for commenters, not for moderators. Moderators will get the notification email about a new comment immediately, so they can react just in time (fe approve the comment or mark the comment as Spam).
 
-## Public methods to change field parameters in templates
+## Public methods to change field parameters in directly in templates
 There are a lot of configuration parameters that can be set as global values inside the details tab of the input field. Just for the case you want to use a comment field on various templates (pages), but you do not want use the same parameters on each of them, you have 2 possibilities:
 
 1) Create a comment field for each of the templates and change the parameters in the backend configuration to your needs or
@@ -76,12 +76,30 @@ $comments->setReplyDepth(1); // value must be higher than 0
 echo $comments;
 ```
 
-### setModeration() - change the reply depth of the comments
-This method let you change the reply depth of the comment list. Possible values are 0 (no moderation), 1 (only comments of new commenters will be moderated and 2 (all comments must be approved by a moderator)
+### setModeration() - change the moderation status of comments
+This method let you change how new comments will be published and approved. Possible values are 0 (no moderation, each comment will be published immediately), 1 (only comments of new commenters need approvement by a moderator) and 2 (all comments must be approved by a moderator)
 
 ```php
 $comments = $page->mycomments;
 $comments->setModeration(1); // 0, 1 or 2 
+echo $comments;
+```
+
+### setMailTemplate() - change the mail template for the moderator notification mails
+This method let you change another mail template. Please take a look at (the email template folder)[https://github.com/juergenweb/FrontendForms/tree/main/email_templates] to get the template files can be used.
+
+```php
+$comments = $page->mycomments;
+$comments->setMailTemplate('template1.html); // enter a file name form the email templates folder inside the parenthesis 
+echo $comments;
+```
+
+### setModeratorEmails() - set the email addresses for the moderator notification mails
+This method let you set new moderator email addresses. The notification mails about new comments will be sent to these email addresses. You can add a single email address or multiple comma separated addresses as a string
+
+```php
+$comments = $page->mycomments;
+$comments->setMailTemplate('email1@example.com, email2@example.com'); //enter one or multiple comma separated email addresses 
 echo $comments;
 ```
 
