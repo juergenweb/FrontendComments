@@ -42,4 +42,25 @@ trait configValues {
         return $configValues;
     }
 
+    /**
+     * Create a property of each item in the properties array if value is not null
+     * @param array $configArray
+     * @param array $properties
+     * @return void
+     */
+    function createPropertiesOfArray(array $configArray, array $properties){
+        // extract all properties from configArray
+        $filteredArr = array_filter($configArray,
+            fn ($key) => in_array($key, $properties),
+            ARRAY_FILTER_USE_KEY
+        );
+
+        foreach($filteredArr as $propName => $value)
+        {
+            if(!is_null($value)){
+                $this->$propName = $value;
+            }
+        }
+    }
+
 }
