@@ -20,7 +20,6 @@ But to be honest, I have taken Ryan's version to get an idea which features can 
 * Reply forms will only be loaded on demand by clicking on a reply symbol
 * Usage of HTML email templates (provided by FrontendForms)
 
-
 ## Include comments inside a template
 You only need to include the field inside a template to render the comments on the frontend. In this case you have several possibilities:
 
@@ -45,7 +44,6 @@ $comments = $page->mycomments;
 $comments->setReplyDepth(0); // use another reply depth than in the global settings
 echo $comments;
 ```
-
 ## Queuing notification emails
 This module offers commenters the possibility to get notified, if a new reply has been posted to their comment or to other comments. This could lead to a very large amount of notification emails each time a comment will be posted, especially if your site has a high comment activity.
 
@@ -59,13 +57,43 @@ Technically, this works by writing each notification email into a row inside a c
 
 Only to mention: This only happens to notification emails for commenters, not for moderators. Moderators will get the notification email about a new comment immediately, so they can react just in time (fe approve the comment or mark the comment as Spam).
 
-## Public methods to change field parameters in directly in templates
-There are a lot of configuration parameters that can be set as global values inside the details tab of the input field. Just for the case you want to use a comment field on various templates (pages), but you do not want use the same parameters on each of them, you have 2 possibilities:
+## Public methods to change field parameters in templates
+There are a lot of configuration parameters that can be set as global values inside the details tab of the input field. 
+If you are using only on one template a comment field, the backend configuration is all you need. In this case the following public methods are not relevant.
+They are for the case if you want to use the same comment field on various templates, but with different settings.
+This could be fe the case if you want to use a comment field on a product page and there you want to enable star rating for the product.
+On another template, fe a blog page, you do not need the star rating. In this case you must overwrite the global setting for the star rating by using a public method (in this case the showStarRating() method.
+That is the reason, why the public methods are there.
 
-1) Create a comment field for each of the templates and change the parameters in the backend configuration to your needs or
-2) you only create 1 comment field and change some parameters by using some of these public methods (recommended)
+Of course, you can also create 2 comment fields (one for the product and one for the blog page) and make different settings on each field, but due to performance reasons, it would be better to create only one comment field and adapt the settings on each template to your needs.
 
-In the following methods, the comment field is named "mycomments". Please change this name to the name of your comment field.
+Here is an example on how you can use the public methods inside a template:
+
+```php
+$comments = $page->mycomments;
+    
+// make your changes by using the public methods
+$comment->setReplyDepth(1)
+->setModeration(2)
+->setMailTemplate('template_4.html')
+->setMailSubject('Custom subject')
+->setMailTitle('Custom Title')
+->setSenderEmail('custom@comments.com')
+->setSenderName('Custom Name')
+->setModeratorEmails('moderatormail@comments.com')
+->setSortNewToOld(true)
+->showFormAfterComments(true)
+->showStarRating(true)
+->showTextareaCounter(false)
+->showVoting(true)
+->useCaptcha('DefaultImageCaptcha');
+
+// output the comments
+echo $comments;
+```
+
+
+In the following method descriptions, the comment field is named "mycomments". Please change this name to the name of your comment field.
 
 ### setReplyDepth() - change the reply depth of the comments
 This method let you change the reply depth of the comment list. The value must be higher than 0. A value of 1 means a flat hierarchy with no children.
