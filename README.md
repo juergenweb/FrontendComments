@@ -70,7 +70,7 @@ Of course, you can also create 2 comment fields (one for the product and one for
 Here is an example on how you can use the public methods inside a template:
 
 ```php
-$comments = $page->mycomments;
+$comments = $page->mycomments; // get your comment field inside a template
     
 // make your changes by using the public methods
 $comment->setReplyDepth(1)
