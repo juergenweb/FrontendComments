@@ -99,7 +99,7 @@ This method let you set new moderator email addresses. The notification mails ab
 
 ```php
 $comments = $page->mycomments;
-$comments->setMailTemplate('email1@example.com, email2@example.com'); //enter one or multiple comma separated email addresses 
+$comments->setModeratorEmails('email1@example.com, email2@example.com'); //enter one or multiple comma separated email addresses 
 echo $comments;
 ```
 
