@@ -17,7 +17,7 @@ Processwire Fieldtype/Inputfield to add and manage comments on your site based o
 * Enable/disable rating of comments (like/dislike) on per comment field base
 * Offer commenters the receiving of notification emails if a new reply has been posted
 * Queuing the sending of notification emails instead of sending all at once (preventing performance issues by sending to many emails at once)
-* Ajax driven form submission with server side validation withoud page reload
+* Ajax driven form submission with server side validation without page reload
 * Reply forms will only be loaded on demand by clicking on a reply symbol
 * Usage of HTML email templates (provided by FrontendForms)
 
