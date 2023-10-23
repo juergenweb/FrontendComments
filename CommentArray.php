@@ -14,12 +14,29 @@
      * @property protected int $commentId: the value (id) of the query string "commentid"
      * @property string $code: the code for updating the comment status via mail link
      * @property array $userdata: array that hold various data about the user visiting the comments
+     * @property int|bool|null $input_fc_outputorder: form should be displayed after (tru) or before (false) the comment list
      *
      * @method setPage(): set the page the comment field is part of
      * @method Page getPage(): set the page the comment field is part of
      * @method setField(): set the field object for the comments field
      * @method Page getField(): get the field object for the comment field
      * @method CommentArray makeNew(): create a new CommentArray
+     *
+     * @method setReplyDepth(): change the reply depth on per field base
+     * @method setModeration(): change the comments moderation status on per field base
+     * @method setMailTemplate(): change the mail template on per field base
+     * @method setModeratorEmails(): change the mail addresses of the moderators
+     * @method setMailSubject(): change the mail subject of the notification mails for the moderators
+     * @method setMailTitle(): change the mail title of the notification mails for the moderators
+     * @method setSenderEmail(): change the sender email address of the notification mails for the moderators
+     * @method setSenderName(): change the name of the sender of the notification mails for the moderators
+     * @method setSortNewToOld(): set if the comments should be output from new to old or not
+     * @method showFormAfterComments(): set if the form should be rendered after the comment list or not
+     * @method showStarRating(): set if the star rating should be displayed or not
+     * @method showTextareaCounter(): set if a character counter should be displayed under the comment textarea or not
+     * @method showVoting(): set if a voting options for a comment should be displayed or not
+     * @method useCaptcha(): set if a CAPTCHA should be used or not
+     *
      */
 
     namespace FrontendComments;
@@ -42,6 +59,7 @@
         protected int $commentId = 0;
         protected string|null $code = null;
         protected array $userdata = [];
+        protected int|bool|null $input_fc_outputorder = false;
 
 
         /**
@@ -65,6 +83,164 @@
             ];
 
         }
+
+        /**
+         * Public function to change the reply depth
+         * @param int $depth - 1, 2, 3... must be higher than 0
+         * @return $this
+         */
+        public function setReplyDepth(int $depth): self
+        {
+            $depth = $depth > 0 ?? 1;
+            $this->field->input_fc_depth = $depth;
+            return $this;
+        }
+
+        /**
+         * Public function to change the reply depth
+         * @param int $moderate
+         * @return $this
+         */
+        public function setModeration(int $moderate): self
+        {
+            $this->field->input_fc_moderate = $moderate;
+            return $this;
+        }
+
+        /**
+         * Public function to change the mail template
+         * @param string $template
+         * @return $this
+         */
+        public function setMailTemplate(string $template): self
+        {
+            $this->field->input_fc_emailTemplate = $template;
+            return $this;
+        }
+
+        /**
+         * Public function to change the email addresses of the moderators, where the mails should sent to
+         * @param string $moderatoremail
+         * @return $this
+         */
+        public function setModeratorEmails(string $moderatoremail): self
+        {
+            $this->field->input_fc_default_to = $moderatoremail;
+            return $this;
+        }
+
+        /**
+         * Set a new custom mail subject
+         * @param string $subject
+         * @return $this
+         */
+        public function setMailSubject(string $subject): self
+        {
+            $this->field->input_fc_subject = $subject;
+            return $this;
+        }
+
+        /**
+         * Set a new custom mail title
+         * @param string $title
+         * @return $this
+         */
+        public function setMailTitle(string $title): self
+        {
+            $this->field->input_fc_title = $title;
+            return $this;
+        }
+
+        /**
+         * Set a new email address, which will be displayed as the sender mail address of the notification mails
+         * @param string $email
+         * @return $this
+         */
+        public function setSenderEmail(string $email): self
+        {
+            $this->field->input_fc_email = $email;
+            return $this;
+        }
+
+        /**
+         * Set a new name, which will be displayed as the sender name of the notification mails
+         * @param string $name
+         * @return $this
+         */
+        public function setSenderName(string $name): self
+        {
+            $this->field->input_fc_sender = $name;
+            return $this;
+        }
+
+        /**
+         * Set if the sort order should be from new to old or not
+         * @param bool $sort
+         * @return $this
+         */
+        public function setSortNewToOld(bool $sort): self
+        {
+            $this->field->input_fc_sort = $sort;
+            return $this;
+        }
+
+        /**
+         * Render the form after the comments
+         * @param bool $after
+         * @return $this
+         */
+        public function showFormAfterComments(bool $after): self
+        {
+            $this->field->input_fc_outputorder = $after;
+            return $this;
+        }
+
+        /**
+         * Show star rating or not
+         * @param bool $show
+         * @return $this
+         */
+        public function showStarRating(bool $show): self
+        {
+            $this->field->input_fc_stars = $show;
+            return $this;
+        }
+
+        /**
+         * Show the character counter under the textarea or not
+         * @param bool $show
+         * @return $this
+         */
+        public function showTextareaCounter(bool $show): self
+        {
+            $this->field->input_fc_counter = $show;
+            return $this;
+        }
+
+        /**
+         * Show voting options on comments or not
+         * @param bool $show
+         * @return $this
+         */
+        public function showVoting(bool $show): self
+        {
+            $this->field->input_fc_voting = $show;
+            return $this;
+        }
+
+        /**
+         * Set the usage of a CAPTCHA by entering the name of the CAPTCHA, inherit or none
+         * @param string $captcha
+         * @return $this
+         */
+        public function useCaptcha(string $captcha): self
+        {
+            $this->field->input_fc_captcha = $captcha;
+            return $this;
+        }
+        // input_fc_captcha
+
+
 
         /**
          * Create a new blank CommentArray and add a page and field to it
@@ -162,6 +338,7 @@
         public function renderComments(): string
         {
             $comments = $this->getComments();
+
             return $comments->___renderComments(0, $this->commentId);
         }
 
@@ -172,6 +349,7 @@
          */
         public function ___render(): string
         {
+
             $form = $this->getCommentForm();
             return $form->___render();
         }
@@ -183,98 +361,73 @@
          */
         public function render(): string
         {
+            if (array_key_exists('input_fc_outputorder', $this->getFrontendCommentsInputfieldConfigValues())){
+                $this->input_fc_outputorder = $this->getFrontendCommentsInputfieldConfigValues()['input_fc_outputorder'];
+            }
 
             // check if rating is enabled;
             $field = $this->field;
             if (!is_null($field->input_fc_voting)) {
 
-            if ($this->wire('config')->ajax) {
-                // check if the querystring votecommentid is present for adding a vote to a comment
-                $queryString = $this->wire('input')->queryString();
-                parse_str($queryString, $queryParams);
+                if ($this->wire('config')->ajax) {
+                    // check if the querystring votecommentid is present for adding a vote to a comment
+                    $queryString = $this->wire('input')->queryString();
+                    parse_str($queryString, $queryParams);
 
-                if (array_key_exists('votecommentid', $queryParams)) {
-                    if (array_key_exists('vote', $queryParams)) {
+                    if (array_key_exists('votecommentid', $queryParams)) {
+                        if (array_key_exists('vote', $queryParams)) {
 
-                        $vote = $queryParams['vote'];
-                        $database = $this->wire('database');
-                        $fieldTableName = 'field_' . $this->field->name;
+                            $vote = $queryParams['vote'];
+                            $database = $this->wire('database');
+                            $fieldTableName = 'field_' . $this->field->name;
 
-                        $votesTableName = 'field_' . $this->field->name . '_votes';
-                        $comment = $this->find('id=' . $queryParams['votecommentid'])->first();
+                            $votesTableName = 'field_' . $this->field->name . '_votes';
+                            $comment = $this->find('id=' . $queryParams['votecommentid'])->first();
 
-                        // 1)check first if the user has not voted for this comment within a certain amount of days
+                            // 1)check first if the user has not voted for this comment within a certain amount of days
 
-
-                        // check the database if user has voted for this comment
-                        $statement = "SELECT id 
+                            // check the database if user has voted for this comment
+                            $statement = "SELECT id 
 		                        FROM $votesTableName
                                 WHERE comment_id = :comment_id
                                 AND user_id = :user_id
                                 AND user_agent = :user_agent
                                 AND ip = :ip";
 
-                        $query = $database->prepare($statement);
-
-                        $query->bindValue(':comment_id', $queryParams['votecommentid'], \PDO::PARAM_INT);
-                        $query->bindValue(':user_id', $this->userdata['user_id'], \PDO::PARAM_INT);
-                        $query->bindValue(':user_agent', $this->userdata['user_agent'], \PDO::PARAM_STR);
-                        $query->bindValue(':ip', $this->userdata['ip'], \PDO::PARAM_STR);
-
-                        try {
-                            $query->execute();
-                            $rowsnumber = $query->rowCount();
-                            $query->closeCursor();
-                            $result = true;
-                        } catch (\Exception $e) {
-
-                            $result = false;
-                        }
-
-                        if ($result && ($rowsnumber === 0)) {
-
-
-                            //2) save data to the votes table first
-                            $statement = "INSERT INTO $votesTableName (comment_id, user_id, user_agent, ip, vote)" .
-                                " VALUES (:comment_id, :user_id, :user_agent, :ip, :vote)";
-
                             $query = $database->prepare($statement);
 
                             $query->bindValue(':comment_id', $queryParams['votecommentid'], \PDO::PARAM_INT);
-                            $query->bindValue(':ip', $this->userdata['ip'], \PDO::PARAM_STR);
                             $query->bindValue(':user_id', $this->userdata['user_id'], \PDO::PARAM_INT);
                             $query->bindValue(':user_agent', $this->userdata['user_agent'], \PDO::PARAM_STR);
-
-                            $value = ($vote === 'up') ? 1 : -1;
-
-                            $query->bindValue(':vote', $value, \PDO::PARAM_INT);
+                            $query->bindValue(':ip', $this->userdata['ip'], \PDO::PARAM_STR);
 
                             try {
                                 $query->execute();
-                                $result = $query->rowCount();
+                                $rowsnumber = $query->rowCount();
                                 $query->closeCursor();
+                                $result = true;
                             } catch (\Exception $e) {
-                                $result = 0;
+
+                                $result = false;
                             }
 
-                            if ($result) {
+                            if ($result && ($rowsnumber === 0)) {
 
-                                // 3) increase the upvotes or downvotes in field table
-                                $commentId = $queryParams['votecommentid'];
-                                $pageId = $this->wire('page')->id;
 
-                                // update the field table by incrementing up or downloads
-                                $updateCol = ($value === 1) ? 'upvotes' : 'downvotes';
-
-                                $statement = "UPDATE $fieldTableName 
-                                SET $updateCol = :$updateCol
-                                WHERE  pages_id=$pageId AND id=$commentId
-                                ";
+                                //2) save data to the votes table first
+                                $statement = "INSERT INTO $votesTableName (comment_id, user_id, user_agent, ip, vote)" .
+                                    " VALUES (:comment_id, :user_id, :user_agent, :ip, :vote)";
 
                                 $query = $database->prepare($statement);
 
-                                $newValue = $comment->{$updateCol} + 1;
-                                $query->bindValue(':' . $updateCol, $newValue, \PDO::PARAM_INT);
+                                $query->bindValue(':comment_id', $queryParams['votecommentid'], \PDO::PARAM_INT);
+                                $query->bindValue(':ip', $this->userdata['ip'], \PDO::PARAM_STR);
+                                $query->bindValue(':user_id', $this->userdata['user_id'], \PDO::PARAM_INT);
+                                $query->bindValue(':user_agent', $this->userdata['user_agent'], \PDO::PARAM_STR);
+
+                                $value = ($vote === 'up') ? 1 : -1;
+
+                                $query->bindValue(':vote', $value, \PDO::PARAM_INT);
 
                                 try {
                                     $query->execute();
@@ -284,36 +437,64 @@
                                     $result = 0;
                                 }
 
-                                // finally add the new value to the result div
-                                echo '<div id="fc-ajax-vote-result" data-votetype="' . $vote . '">' . $newValue . '</div>';
+                                if ($result) {
+
+                                    // 3) increase the upvotes or downvotes in field table
+                                    $commentId = $queryParams['votecommentid'];
+                                    $pageId = $this->wire('page')->id;
+
+                                    // update the field table by incrementing up or downloads
+                                    $updateCol = ($value === 1) ? 'upvotes' : 'downvotes';
+
+                                    $statement = "UPDATE $fieldTableName 
+                                SET $updateCol = :$updateCol
+                                WHERE  pages_id=$pageId AND id=$commentId
+                                ";
+
+                                    $query = $database->prepare($statement);
+
+                                    $newValue = $comment->{$updateCol} + 1;
+                                    $query->bindValue(':' . $updateCol, $newValue, \PDO::PARAM_INT);
+
+                                    try {
+                                        $query->execute();
+                                        $result = $query->rowCount();
+                                        $query->closeCursor();
+                                    } catch (\Exception $e) {
+                                        $result = 0;
+                                    }
+
+                                    // finally add the new value to the result div
+                                    echo '<div id="fc-ajax-vote-result" data-votetype="' . $vote . '">' . $newValue . '</div>';
+                                }
+                            } else {
+                                // not allowed to vote
+
+                                // create the alert box
+                                $alert = new Alert();
+                                $timePeriod = '3 days';
+                                $alert->setContent(sprintf($this->_('It seems that you have rated this comment within the last %s. In this case you are not allowed to vote again.'), $timePeriod));
+                                $alert->setCSSClass('alert_dangerClass');
+
+                                echo '<div id="fc-ajax-noVote">' . $alert->render() . '</div>';
                             }
-                        } else {
-                            // not allowed to vote
-
-                            // create the alert box
-                            $alert = new Alert();
-                            $timePeriod = '3 days';
-                            $alert->setContent(sprintf($this->_('It seems that you have rated this comment within the last %s. In this case you are not allowed to vote again.'), $timePeriod));
-                            $alert->setCSSClass('alert_dangerClass');
-
-                            echo '<div id="fc-ajax-noVote">' . $alert->render() . '</div>';
                         }
                     }
                 }
             }
-        }
 
-            // grab configuration values from the FrontendComments input field
-            $frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
+
 
             // show the form on top only if id=0 or id is different, but query string with code is present
             $form = '';
             if (($this->commentId === 0) || (($this->code))) {
                 $form = $this->___render();
             }
+
             $content = array_filter([$form, $this->renderComments()]);
-            // reverse the order depending on the config settings
-            if (array_key_exists('input_fc_outputorder', $frontendCommentsConfig)) {
+
+            // reverse the order of comments and form depending on the config settings
+            if ($this->input_fc_outputorder) {
                 $content = array_reverse($content);
             }
             return implode('', $content);
