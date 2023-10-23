@@ -102,6 +102,7 @@ $comment->setReplyDepth(1)
 echo $comments;
 ```
 
+
 | Method name  | Use case | 
 | ------------- | ------------- |
 | [setReplyDepth()](#setreplydepth---change-the-reply-depth-of-the-comments)  | change the reply depth of the comments  |
@@ -114,6 +115,7 @@ echo $comments;
 | [showTextareaCounter()](#showtextareacounter---whether-to-show-a-character-counter-under-the-textarea-or-not)  | whether to show a character counter under the textarea or not  |
 | [showVoting()](#showvoting---whether-to-show-voting-option-on-a-comment-or-not)  | whether to show voting option on a comment or not  |
 | [useCaptcha()](#usecaptcha---whether-to-use-a-certain-type-of-captcha-or-no-captcha)  | whether to use a certain type of CAPTCHA or no CAPTCHA  |
+
 
 
 In the following method descriptions, the comment field is named "mycomments". Please change this name to the name of your comment field.
