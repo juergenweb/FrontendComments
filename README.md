@@ -103,5 +103,23 @@ $comments->setModeratorEmails('email1@example.com, email2@example.com'); //enter
 echo $comments;
 ```
 
+### setSortNewToOld() - change the sort order of the comments
+Comments can be displayed from newest to oldes or vice versa. With this method you set the sort order. Setting it to true means that all comments will be displayed from the newest to the oldest. False sorts the comments the other way.
+
+```php
+$comments = $page->mycomments;
+$comments->setSortNewToOld(true); //true or false
+echo $comments;
+```
+
+### showFormAfterComments() - whether to show the form before or after the comments
+With this method you set the rendering order of the form and the comments. Setting it to true means that the form will be displayed after the comment lis. False renders the form before the comment list.
+
+```php
+$comments = $page->mycomments;
+$comments->showFormAfterComments(true); //true or false
+echo $comments;
+```
+
 
 
