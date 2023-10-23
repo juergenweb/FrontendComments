@@ -139,3 +139,24 @@ $comments->showTextareaCounter(true); //true or false
 echo $comments;
 ```
 
+### showVoting() - whether to show voting option on a comment or not
+With this method can enable/disable the display like/dislike buttons on a comment. Setting it to true means that the buttons will be displayed. False disable/hides them.
+
+```php
+$comments = $page->mycomments;
+$comments->showVoting(true); //true or false
+echo $comments;
+```
+
+### useCaptcha() - whether to use a certain type of CAPTCHA or no CAPTCHA
+With this method can enable/disable the display of a CAPTCHA in the form. As values you can set following:
+* none: no CAPTCHA will be used
+* inherit: the global value as set in the FrontendForms configuration will be used or
+* use one of the following CAPTCHA types: DefaultImageCaptcha, DefaultTextCaptcha, EvenCharacterTextCaptcha, ReverseTextCaptcha, SimpleMathTextCaptcha
+
+```php
+$comments = $page->mycomments;
+$comments->useCaptcha('DefaultImageCaptcha); // inherit, none or one of the CAPTCHA types 
+echo $comments;
+```
+
