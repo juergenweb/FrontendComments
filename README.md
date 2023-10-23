@@ -59,5 +59,31 @@ Technically, this works by writing each notification email into a row inside a c
 
 Only to mention: This only happens to notification emails for commenters, not for moderators. Moderators will get the notification email about a new comment immediately, so they can react just in time (fe approve the comment or mark the comment as Spam).
 
+## Public methods to change field parameters in templates
+There are a lot of configuration parameters that can be set as global values inside the details tab of the input field. Just for the case you want to use a comment field on various templates (pages), but you do not want use the same parameters on each of them, you have 2 possibilities:
+
+1) Create a comment field for each of the templates and change the parameters in the backend configuration to your needs or
+2) you only create 1 comment field and change some parameters by using some of these public methods (recommended)
+
+In the following methods, the comment field is named "mycomments". Please change this name to the name of your comment field.
+
+### setReplyDepth() - change the reply depth of the comments
+This method let you change the reply depth of the comment list. The value must be higher than 0. A value of 1 means a flat hierarchy with no children.
+
+```php
+$comments = $page->mycomments;
+$comments->setReplyDepth(1); // value must be higher than 0
+echo $comments;
+```
+
+### setModeration() - change the reply depth of the comments
+This method let you change the reply depth of the comment list. Possible values are 0 (no moderation), 1 (only comments of new commenters will be moderated and 2 (all comments must be approved by a moderator)
+
+```php
+$comments = $page->mycomments;
+$comments->setModeration(1); // 0, 1 or 2 
+echo $comments;
+```
+
 
 
