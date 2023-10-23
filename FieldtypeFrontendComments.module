@@ -64,7 +64,6 @@
         protected string|int $input_fc_voting_lock = 7;
         protected string|int $input_fc_comment_notification = 0;
         protected string|int $input_fc_queue_batch = 20;
-        protected string|null $input_fc_croninterval = 'every5Minutes';
         protected array $moduleConfig = []; // array that hold all module config values
         protected array $frontendCommentsConfig = [];
         protected array $frontendFormsConfig = [];
@@ -89,34 +88,8 @@
             // grab configuration values from the FrontendForms module
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
 
-
             // set database object
             $this->database = $this->wire()->database;
-
-            $this->cronIntervals = [
-                'every30Seconds' => $this->_('Every 30 seconds'),
-                'everyMinute' => $this->_('Every minute'),
-                'every2Minutes' => $this->_('Every 2 minutes'),
-                'every3Minutes' => $this->_('Every 3 minutes'),
-                'every4Minutes' => $this->_('Every 4 minutes'),
-                'every5Minutes' => $this->_('Every 5 minutes'),
-                'every10Minutes' => $this->_('Every 10 minutes'),
-                'every15Minutes' => $this->_('Every 15 minutes'),
-                'every30Minutes' => $this->_('Every 30 minutes'),
-                'every45Minutes' => $this->_('Every 45 minutes'),
-                'everyHour' => $this->_('Every hour'),
-                'every2Hours' => $this->_('Every 2 hours'),
-                'every4Hours' => $this->_('Every 4 hours'),
-                'every6Hours' => $this->_('Every 6 hours'),
-                'every12Hours' => $this->_('Every 12 hours'),
-                'everyDay' => $this->_('Every day'),
-                'every2Days' => $this->_('Every 2 days'),
-                'every4Days' => $this->_('Every 4 days'),
-                'everyWeek' => $this->_('Every week'),
-                'every2weeks' => $this->_('Every 2 Weeks'),
-                'every4weeks' => $this->_('Every 4 Weeks')
-            ];
-
 
         }
 
@@ -152,8 +125,6 @@
         {
             parent::init();
 
-            // add CSS and JS to the frontend template
-            $this->addHookAfter('Page::render', $this, 'addAssets');
             $this->addHookAfter('Page::render', $this, 'deleteSpam');
             // delete voting entries which are older then the selected time period
             $this->addHookAfter('Page::render', $this, 'deleteOldVoteEntries');
@@ -258,12 +229,9 @@
                         $query->execute();
                         $result = $query->fetchAll();
                         $code = $result[0]['code'];
-                        bd($result[0]['email']);
-                        bd($code);
                     } catch (Exception $e) {
                         $error = $e->getMessage();
                     }
-
 
                     // get the page object
                     $page = $this->wire('pages')->get($page_id);
@@ -289,11 +257,11 @@
                             $mail = new WireMail();
 
                             // set the sender email address
-                            $emailSender = $this->input_fc_email ? $this->input_fc_email : $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
+                            $emailSender = $field->input_fc_email ? $field->input_fc_email : $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
                             $mail->from($emailSender);
 
                             // set from name if present
-                            if ($this->input_fc_sender) {
+                            if ($field->input_fc_sender) {
                                 $mail->fromName($this->input_fc_sender);
                             }
 
@@ -301,7 +269,7 @@
                             $mail->title($this->_('A new reply has been posted'));
 
                             // set email template depending on config settings
-                            $template = $this->input_fc_emailTemplate === 'inherit' ? $this->frontendFormsConfig['input_emailTemplate'] : $this->input_fc_emailTemplate;
+                            $template = $field->input_fc_emailTemplate === 'inherit' ? $this->frontendFormsConfig['input_emailTemplate'] : $field->input_fc_emailTemplate;
                             $mail->mailTemplate($template);
 
                             // create the body for the email
@@ -338,71 +306,6 @@
                         }
                     }
                 }
-            }
-
-        }
-
-        public function addAssets(HookEvent $event): void
-        {
-
-            $page = $event->object;
-
-
-            $assets = wire('config')->urls->siteModules . $this->className() . '/';
-            $js = '';
-            /*
-            // load only on frontend
-            if ($page->template->name !== 'admin') {
-                if (!$this->input_removeJS) {
-                    $js = '<script src="' . $assets . $this->className() . '.js"></script>' . PHP_EOL;
-                }
-                // TODO
-                $this->input_removeCSS = false;
-                if (!$this->input_removeCSS) {
-                    $css = '<link rel="stylesheet" type="text/css" href="' . $assets . $this->className().'.css"/>' . PHP_EOL;
-                    $event->return = str_replace('</head>', $css . PHP_EOL . '</head>', $event->return);
-                }
-            }
-
-            $event->return = str_replace('</body>', $js . PHP_EOL . '</body>', $event->return);
-            */
-        }
-
-
-        /**
-         * Add the module javascript and CSS file to the frontend
-         * JS files will be added before the closing body tag
-         * CSS files are added before the closing head tag
-         * @param HookEvent $event
-         */
-        protected function addAssetsOld(HookEvent $event): void
-        {
-            $page = $event->object;
-            //if(!$event->return) bd(Debug::backtrace());
-            // don't add this to the admin pages
-            if ($page->template->name === 'admin') return;
-            $hasField = false;
-            foreach ($page->template->fields as $field) {
-                if ($field->type == 'FieldtypeFrontendComments') {
-                    $hasField = true;
-                    break;
-                }
-            }
-            // add CSS and Javascript tags only on pages with a FieldtypeFrontendComments field
-            if ($hasField) {
-
-                /*
-
-             if (!$this->input_fc_removeJS) {
-                 $version = $this->getModuleInfo()['version'] . '-' . time();
-                 $js = '<script src="' . $this->wire('config')->urls->$this . 'frontendcomments.js?v=' . $version . '"></script>' . PHP_EOL;
-                 $event->return = str_replace('</body>', $js . PHP_EOL . '</body>', $event->return);
-             }
-             if (!$this->input_fc_removeCSS) {
-                 $css = '<link rel="stylesheet" type="text/css" href="' . $this->wire('config')->urls->$this . 'frontendcomments.css' . '"/>' . PHP_EOL;
-                 $event->return = str_replace('</head>', $css . PHP_EOL . '</head>', $event->return);
-             }
-             */
             }
         }
 
@@ -1144,33 +1047,11 @@
             $f->columnWidth = 50;
             $fieldset->append($f);
 
-            // remove the CSS file
-            $f = $this->modules->get('InputfieldCheckbox');
-            $f->attr('name+id', 'input_fc_removeCSS');
-            $f->label = $this->_('Remove CSS file');
-            $f->attr('value', $field->input_fc_removeCSS);
-            $f->attr('checked', $field->input_fc_removeCSS ? 'checked' : '');
-            $f->label2 = $this->_('Remove the frontendcomments.css file from the template');
-            $f->notes = $this->_('A CSS file for the comments will be added to the template by default. You can remove the embedding of the CSS file by checking the box.');
-            $f->columnWidth = 50;
-            $fieldset->append($f);
-
-            // remove the JS file
-            $f = $this->modules->get('InputfieldCheckbox');
-            $f->attr('name+id', 'input_fc_removeJS');
-            $f->label = $this->_('Remove JavaScript file');
-            $f->attr('value', $field->input_fc_removeJS);
-            $f->attr('checked', $field->input_fc_removeJS ? 'checked' : '');
-            $f->label2 = $this->_('Remove the frontendcomments.js file from the template');
-            $f->notes = $this->_('A small JavaScript, which will be needed for some features of the comments, will added before the closing body tag on the frontend by default . You can remove the embedding of the script file by checking the box.');
-            $f->columnWidth = 50;
-            $fieldset->append($f);
-
             $inputfields->append($fieldset);
 
             /**  $spamFieldset */
             $spamFieldset = $modules->get('InputfieldFieldset');
-            $spamFieldset->label = $this->_('Spam');
+            $spamFieldset->label = $this->_('Spam protection');
             $spamFieldset->collapsed = true;
             $spamFieldset->columnWidth = 100;
             $spamFieldset->icon = 'fa-ban';
@@ -1214,7 +1095,36 @@
 
             $inputfields->append($spamFieldset);
 
+
+            /**  CSS + JS fieldset */
+            $cssjsFieldset = $modules->get('InputfieldFieldset');
+            $cssjsFieldset->label = $this->_('JS and CSS');
+            $cssjsFieldset->collapsed = true;
+            $cssjsFieldset->columnWidth = 100;
+            $cssjsFieldset->icon = 'fa-code';
+
+            /** @var InputfieldMarkup $f */
+            $f = $modules->get('InputfieldMarkup');
+            $f->label = $this->_('CSS for front-end comments output');
+            $ftUrl = $this->wire('config')->urls('FieldtypeComments');
+            $f->value =
+                "<p>If you do not use a CSS framework, please copy and paste the following into the document <code>&lt;head&gt;</code> of your site:</p>" .
+                "<pre style='border-left: 4px solid #ccc; padding-left: 1em;'>&lt;link rel='stylesheet' type='text/css' href='&lt;?=\$config-&gt;urls-&gt;FieldtypeFrontendComments?&gt;&#92assets&#92frontendcomments.css' /&gt;</pre>" .
+
+            $cssjsFieldset->add($f);
+
+            /** @var InputfieldMarkup $f */
+            $f = $modules->get('InputfieldMarkup');
+            $f->label = $this->_('JS for front-end comments output');
+            $f->value =
+                "<p>Please copy and paste the following into the document before the closing <code>&lt;/body&gt;</code> tag:</p>" .
+                "<p><pre style='border-left: 4px solid #ccc; padding-left: 1em;'>&lt;script type='text/javascript' src='&lt;?=\$config-&gt;urls-&gt;FieldtypeFrontendComments?&gt;&#92assets&#92frontendcomments.js'&gt;&lt;/script&gt;</pre></p>";
+            $cssjsFieldset->add($f);
+
+            $inputfields->append($cssjsFieldset);
+
             // output all input fields (parent and custom)
+            return $inputfields;
             return $inputfields;
         }
 
