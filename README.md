@@ -1,6 +1,16 @@
 # FrontendComments
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![ProcessWire 3](https://img.shields.io/badge/ProcessWire-3.x-orange.svg)](https://github.com/processwire/processwire)
+
 Processwire Fieldtype/Inputfield to add and manage comments on your site based on the FrontendForms module.
 
+## Requirements
+* PHP>=8.0.0
+* ProcessWire>=3.0.181
+* GD-Library for CAPTCHA image creation
+* FrontendForms
+* LazyCron for sending mails
+  
 ## My intention for the re-creation of a Fieldtype that exists 
 I wanted to use all the advantages of my FrontendForms module on a comment component and I wanted that the forms of the comment component looks like the same as all other forms on my site, so that they integrate seamlessly into my site. This is why I decided to develop my own version of a comment module.
 
@@ -91,6 +101,19 @@ $comment->setReplyDepth(1)
 // output the comments
 echo $comments;
 ```
+
+| Method name  | Use case | 
+| ------------- | ------------- |
+| [setReplyDepth()](#setreplydepth---change-the-reply-depth-of-the-comments)  | change the reply depth of the comments  |
+| [setModeration()](#setmoderation---change-the-moderation-status-of-comments)  | change the moderation status of comments  |
+| [setMailTemplate()](#setmailtemplate---change-the-mail-template-for-the-moderator-notification-mails)  | change the template of the mails  |
+| [setModeratorEmails())](#setmoderatoremails---set-the-email-addresses-for-the-moderator-notification-mails)  | set the email addresses for the moderator notification mails  |
+| [setSortNewToOld()](#setsortnewtoold---change-the-sort-order-of-the-comments)  | change the sort order of the comments depending on date created  |
+| [showFormAfterComments()](#showformaftercomments---whether-to-show-the-form-before-or-after-the-comments)  | whether to show the form before or after the comments  |
+| [showStarRating()](#showstarrating---whether-to-show-the-star-rating-or-not)  | whether to show the star rating or not  |
+| [showTextareaCounter()](#showtextareacounter---whether-to-show-a-character-counter-under-the-textarea-or-not)  | whether to show a character counter under the textarea or not  |
+| [showVoting()](#showvoting---whether-to-show-voting-option-on-a-comment-or-not)  | whether to show voting option on a comment or not  |
+| [useCaptcha()](#usecaptcha---whether-to-use-a-certain-type-of-captcha-or-no-captcha)  | whether to use a certain type of CAPTCHA or no CAPTCHA  |
 
 
 In the following method descriptions, the comment field is named "mycomments". Please change this name to the name of your comment field.
