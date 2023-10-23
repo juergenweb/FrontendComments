@@ -90,7 +90,7 @@ This method let you change another mail template. Please take a look at (the ema
 
 ```php
 $comments = $page->mycomments;
-$comments->setMailTemplate('template1.html); // enter a file name form the email templates folder inside the parenthesis 
+$comments->setMailTemplate('template_4.html); // enter a file name form the email templates folder inside the parenthesis 
 echo $comments;
 ```
 
