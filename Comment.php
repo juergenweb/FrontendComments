@@ -23,6 +23,8 @@
      * @property protected array $frontendFormsConfig: the configuration values as set in FrontendForms
      * @property protected array $frontendCommentsconfig: the configuration values as set in by this module
      * @property protected array $userdata: session value, that contains ip, user_agent and user id of the user visiting the page
+     * @property protected int|null|bool $input_fc_stars: show star rating or not
+     * @property protected int|null|bool $input_fc_voting: show voting options or not
      *
      * @method int getEmail(): Get the email of the commenter
      * @method int getAuthor(): Get the name of the commenter
@@ -68,6 +70,10 @@
         protected array $userdata = [];
         protected array $frontendFormsConfig = [];
         protected array $frontendCommentsConfig = [];
+        protected int|bool|null $input_fc_stars = false;
+        protected int|bool|null $input_fc_voting = false;
+
+
         protected CommentArray $comments; // the array containing all comments of this page
         protected Field $field;
         protected Page $page;
@@ -97,6 +103,10 @@
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
             // get configuration values from the FrontendComments input field
             $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
+
+            // create properties of FrontendComments configuration values
+            $properties =  ['input_fc_stars','input_fc_voting'];
+            $this->createPropertiesOfArray($this->frontendCommentsConfig,$properties);
 
             // set all comment values provided via the constructor as property
             foreach ($comment as $name => $value) {
@@ -300,18 +310,17 @@
 
             }
 
+
             // create the vote links with FontAwesome icons if enabled
-            if (array_key_exists('input_fc_voting', $this->frontendCommentsConfig)) {
+            $showVoting = $this->field->input_fc_voting ?? $this->input_fc_voting;
+            if ($showVoting) {
                 $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->upvotes . '</span><a class="fc-vote-link" title="' . $this->_('Like the comment') . '" href="' . $this->page->url . '?vote=up&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-up"></i></a>';
                 $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="votebadge">' . $this->downvotes . '</span><a class="fc-vote-link" title="' . $this->_('Dislike the comment') . '" href="' . $this->page->url . '?vote=down&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-down"></i></a>';
             }
 
             // star rating
-            if ((array_key_exists('input_fc_stars', $this->frontendCommentsConfig)) && $this->frontendCommentsConfig['input_fc_stars'] === 1) {
-                if (is_null($this->stars)) {
-                    $this->stars = 0;
-                }
-
+            $showStarRating = $this->field->input_fc_stars ?? $this->input_fc_stars;
+            if ($showStarRating ) {
                 $out .= '<div class="star-rating-comment">' . CommentForm::___renderStarRating((float)$this->stars) . '</div>';
             }
 
