@@ -22,9 +22,9 @@ Processwire Fieldtype/Inputfield to add and manage comments on your site based o
 * Usage of HTML email templates (provided by FrontendForms)
 
 ## Table of contents
+* [Is this a copy of the Comments Fieldtype by Ryan?](#is-this-a-copy-of-the-comments-fieldtype-by-ryan)
+* [My intention for the re-creation of a Fieldtype that exists](#my-intention-for-the-re-creation-of-a-fieldtype-that-exists)
 * [Installation and Quick-start guide](#installation-and-quick-start-guide)
-* [Which input types are supported?](#which-input-types-are-supported)
-* [SPAM protection](#spam-protection-and-security-features)
   
 
 ## Is this a copy of the Comments Fieldtype by Ryan?
@@ -36,10 +36,17 @@ I wanted to use all the advantages of my FrontendForms module on a comment compo
 
 The other reason was to increase my knowledge on creating modules in ProcessWire by creating my first "FieldtypeMulti" module. 
 
-
-
-## Include comments inside a template
-You only need to include the field inside a template to render the comments on the frontend. In this case you have several possibilities:
+## Installation and Quick-start guide
+1. First of all, you need to download and install the FrontendForms module from the [module directory](https://processwire.com/modules/frontend-forms/) if you have not installed it.
+2. Download and extract this module and put the folder inside site/modules. Be aware that the folder name must be
+   FrontendComments and not FrontendComments-main or FrontendComments-master. GitHub adds this appendix by default. So be aware to remove it before you put the folder inside the module folder.
+2. Login to your admin area and refresh all modules.
+3. Find this module and install it.
+4. Then you need to create comment field and name it fe "comments".
+5. After you have created this comment field you can change some configuration settings if needed. The only value which is required, is entering at least one email address for a moderator.
+6. Add this field to a template.
+7. Add JavaScript and CSS file to your frontend (fe inside the main.php)
+8. To output the comment form and the comment list on the frontend you have to add fe. "echo $page->comments" to the frontend template. Take a look on the following output methods below.
 
 ### Simple direct output with "echo"
 If you do not want to change a parameter on the frontend, you can simply output the comments using the "echo" method and the name of the comments field. In this case, the comments field name is "mycomments". Please replace it with your comment field name.
