@@ -32,6 +32,7 @@
         use configValues;
 
         protected array $frontendFormsConfig = [];
+        protected bool|int|null $input_fc_sort = false;
         protected array $frontendCommentsConfig = [];
         protected CommentArray $comments;
         protected Field $field;
@@ -49,6 +50,12 @@
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
             // get configuration values from the FrontendComments input field
             $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
+
+            // create properties of FrontendComments configuration values
+            $properties =  ['input_fc_sort'];
+            $this->createPropertiesOfArray($this->frontendCommentsConfig,$properties);
+
+
 
         }
 
@@ -107,10 +114,18 @@
                 $levelClass = ($level == 0) ? ' comments-list' : ' comments-list reply-list'; // add additional class for sublevels
                 $out .= '<ul id="' . $this->comments->getField()->name . '-list-' . $parent_id . '" class="fc-list level-' . $level . $levelClass . '">';
             }
+
+
+            // change the sort order if set
+            $comments = $this->comments;
+            if($this->input_fc_sort){
+                $comments = $this->comments->reverse();
+            }
+
             // get all comments with status approved (=1)
             if (!is_null($parent_id)) {
 
-                foreach ($this->comments->find('parent_id=' . $parent_id . ',status=' . InputfieldFrontendComments::approved) as $data) {
+                foreach ($comments->find('parent_id=' . $parent_id . ',status=' . InputfieldFrontendComments::approved) as $data) {
                     if ($data instanceof Comment) {
 
                         $out .= '<li id="comment-' . $data->id . '" class="fc-listitem">' . $this->renderSingleComment($data,
