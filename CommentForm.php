@@ -145,8 +145,8 @@
             $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
 
             // create properties of FrontendComments configuration values
-            $properties =  ['input_fc_email','input_fc_sender','input_fc_title', 'input_fc_subject', 'input_fc_stars', 'input_fc_counter', 'input_fc_captcha'];
-            $this->createPropertiesOfArray($this->frontendCommentsConfig,$properties);
+            $properties = ['input_fc_email', 'input_fc_sender', 'input_fc_title', 'input_fc_subject', 'input_fc_stars', 'input_fc_counter', 'input_fc_captcha'];
+            $this->createPropertiesOfArray($this->frontendCommentsConfig, $properties);
 
             // get the redirect url
             $this->redirectUrl = $this->wire('pages')->request()->getRedirectUrl();
@@ -623,6 +623,11 @@
                                                 if ($query->execute()) {
                                                     // set the status of the new comment to a session variable for later output of the success message
                                                     $this->wire('session')->set('commentstatuschange', $newStatus);
+                                                    // make a redirect if comment status has been changed to approved to show the new comment
+                                                    if ($newStatus === InputfieldFrontendComments::approved) {
+                                                        $this->wire('session')->set('approvedid', $comment->id);
+                                                        $this->wire('session')->redirect('.');
+                                                    }
                                                 }
                                             } catch (Exception $e) {
                                                 $this->log($e->getMessage()); // log the error message
@@ -744,12 +749,12 @@
                         $mail->from($senderEmail);
 
                         // set from name if present
-                        if($this->input_fc_sender){
+                        if ($this->input_fc_sender) {
                             $mail->fromName($this->input_fc_sender);
                         }
 
                         // set subject
-                        $emailSubject = $this->input_fc_subject ??  $this->_('A new reply has been posted');
+                        $emailSubject = $this->input_fc_subject ?? $this->_('A new reply has been posted');
                         $mail->subject($emailSubject);
 
                         // set title
@@ -801,18 +806,31 @@
             }
 
             // output an info message if the comment status has been changed via the mail link
-            $statusChange = $this->wire('session')->get('commentstatuschange');
+            $statusChange = (int)$this->wire('session')->get('commentstatuschange');
 
             if ($statusChange) {
 
                 // remove the session first
                 $this->wire('session')->remove('commentstatuschange');
-                $statusTypes = ['0', '1', '2'];
+
+                $statusTypes = [
+                    InputfieldFrontendComments::pendingApproval,
+                    InputfieldFrontendComments::approved,
+                    InputfieldFrontendComments::spam
+                ];
+
                 if (in_array($statusChange, $statusTypes)) {
+                    // status is approved
+                    $jumpLink = '';
+                    if ($statusChange == InputfieldFrontendComments::approved) {
+                        $jumpLink = ' (<a href="#comment-' . $this->wire('session')->get('approvedid') . '" title="' . $this->_('Directly to the comment') . '">' .
+                            $this->_('To the comment') . '</a>)';
+                        $this->wire('session')->remove('approvedid');
+                    }
                     // output success message that the status has been changed (either to approved or to SPAM)
                     $this->alert->setCSSClass('alert_successClass');
-                    $this->alert->setText(sprintf($this->_('Comment status has been changed to "%s".'),
-                        $this->statusTexts[$statusChange]));
+                    $this->alert->setText(sprintf($this->_('Comment status has been changed to "%s"%s.'),
+                        $this->statusTexts[$statusChange], $jumpLink));
                 } else {
                     // there was an error
                     $this->alert->setCSSClass('alert_dangerClass');
@@ -850,7 +868,8 @@
                 if ($status == '1') {
                     $jumpLink = '';
                     if (!is_null($this->comments->last())) {
-                        $jumpLink = '(<a href="#comment-' . $this->comments->last()->id . '" title="' . $this->_('Directly to the comment') . '">' . $this->_('To the comment') . '</a>)';
+                        $jumpLink = '(<a href="#comment-' . $this->comments->last()->id . '" title="' . $this->_('Directly to the comment') . '">' .
+                            $this->_('To the comment') . '</a>)';
                     }
                     $this->alert->setText(sprintf($this->_('Thank you! Your comment has been submitted successfully. %s'), $jumpLink));
                 } else {
