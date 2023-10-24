@@ -109,6 +109,7 @@
             require_once(__DIR__ . '/FieldtypeFrontendComments.module');
         }
 
+
         public function ___processInput(WireInputData $input): InputfieldFrontendComments
         {
 
