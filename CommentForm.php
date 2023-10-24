@@ -820,12 +820,13 @@
                 ];
 
                 if (in_array($statusChange, $statusTypes)) {
-                    // status is approved
+
+                    // status is approved -> create the "to the comment" jump link
                     $jumpLink = '';
                     if ($statusChange == InputfieldFrontendComments::approved) {
                         $jumpLink = ' (<a href="#comment-' . $this->wire('session')->get('approvedid') . '" title="' . $this->_('Directly to the comment') . '">' .
                             $this->_('To the comment') . '</a>)';
-                        $this->wire('session')->remove('approvedid');
+                        $this->wire('session')->remove('approvedid'); // remove session containing the approved comment id
                     }
                     // output success message that the status has been changed (either to approved or to SPAM)
                     $this->alert->setCSSClass('alert_successClass');
@@ -846,8 +847,6 @@
                 // remove the session first
                 $this->wire('session')->remove('notifystatuschange');
 
-
-                // check if the
                 // output success message that the notification status has been changed to 0 (no notification)
                 $this->alert->setCSSClass('alert_successClass');
                 $this->alert->setText($this->_('You have successfully unsubscribed from email notifications and you will no longer receive notifications of new replies.'));
@@ -866,6 +865,7 @@
                 // output the success message if the comment has been submitted successfully depending on config settings
                 $status = $this->wire('session')->get('commentstatus');
                 if ($status == '1') {
+                    // create the "to the comment" jump link
                     $jumpLink = '';
                     if (!is_null($this->comments->last())) {
                         $jumpLink = '(<a href="#comment-' . $this->comments->last()->id . '" title="' . $this->_('Directly to the comment') . '">' .
