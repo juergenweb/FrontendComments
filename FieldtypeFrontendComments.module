@@ -42,6 +42,13 @@
         protected FrontendForms $frontendForms;
 
         // configuration values
+        protected string $primaryBg = '#2196F3'; // primary color
+        protected string $secondaryBg = '#323a45'; // secondary color
+        protected string $successBg = '#64DD17'; // success color
+        protected string $infoBg = '#29B6F6'; // info color
+        protected string $warningBg = '#FFD600'; // warning color
+        protected string $dangerBg = '#ef1c1c'; // danger color
+
         protected string|int $input_fc_moderate = '0';
         protected string $input_fc_emailTemplate = 'inherit';
         protected string $input_fc_emailtype = 'text';
@@ -64,6 +71,7 @@
         protected string|int $input_fc_voting_lock = 7;
         protected string|int $input_fc_comment_notification = 0;
         protected string|int $input_fc_queue_batch = 20;
+        protected string|int $input_fc_quite_save = 0;
         protected array $moduleConfig = []; // array that hold all module config values
         protected array $frontendCommentsConfig = [];
         protected array $frontendFormsConfig = [];
@@ -130,6 +138,7 @@
             $this->addHookAfter('Page::render', $this, 'deleteOldVoteEntries');
             // send queued emails as a batch to the users
             $this->addHookAfter('LazyCron::every30Seconds', $this, 'sendQueuedEmails');
+            $this->addHookAfter('FieldtypeMulti::savePageField', $this, 'sendStatusChangeMail');
         }
 
         /**
@@ -179,6 +188,100 @@
             }
         }
 
+        /**
+         * Send an notification mail to a commenter, if the status of his comment has been changed
+         * fe from pending approval to approved
+         * @return void
+         */
+        protected function sendStatusChangeMail(HookEvent $event): void
+        {
+            $fieldtypeMulti = $event->object;
+
+            if($fieldtypeMulti->className() != 'FieldtypeFrontendComments')
+                return;
+            if(!$this->wire('session')->get('commentstatuschanges'))
+                return;
+
+            $changedIDs = $this->wire('session')->get('commentstatuschanges');
+
+            // get all comments with status change from the database
+            $page = $event->arguments(0);
+            $field = $event->arguments(1);
+            $fieldName = $field->name;
+            $commentEntries = $page->$fieldName;
+
+            $ids = implode('|', $changedIDs);
+            $result = $commentEntries->find('id='.$ids);
+
+            // create arrays, which includes the successfully sent and failed sent mails
+            $sendMailsSuccess = $sendMailsError = [];
+
+            foreach($result as $comment){
+
+                $newStatus = $comment->status;
+                $commentId = $comment->id;
+
+                // create WireMail instance
+                $mail = new WireMail();
+
+                // set the sender email address
+                $emailSender = $field->input_fc_email ? $field->input_fc_email : $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
+                $mail->from($emailSender);
+
+                // set from name if present
+                if ($field->input_fc_sender) {
+                    $mail->fromName($this->input_fc_sender);
+                }
+
+                $statusTexts = [
+                    $this->_('pending approval'),
+                    $this->_('approved'),
+                    $this->_('SPAM')
+                ];
+
+
+                $mail->subject($this->_('Comment status has been changed'));
+                $mail->title(sprintf($this->_('Your comment status has been changed to %s'), $statusTexts[$comment->status]));
+
+                // set email template depending on config settings
+                $template = $field->input_fc_emailTemplate === 'inherit' ? $this->frontendFormsConfig['input_emailTemplate'] : $field->input_fc_emailTemplate;
+
+                $mail->mailTemplate($template);
+
+                // get the comment page object, where the comment lives
+                $commentPage = $comment->page;
+
+                // create the body for the email
+                $body = '<h1>' . $this->_('The status of your comment has been changed by a moderator') . '</h1>';
+                $body .= '<p>' . $this->_('We want to inform you, that the following comment you have written, has now been reviewed by a moderator:') . '</p>';
+
+                $body .= '<table style="width:100%;background-color:#dddddd;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;text-align:center;"><p style="margin:12px;">' . $comment->text . '</p></td></tr></table></td></tr></table>';
+
+                $body .= '<p>'.$this->_('The status of the comment has been changed to:').'</p>';
+                if($comment->status === 1){
+                    $backgroundcolor = $this->successBg;
+                } else {
+                    $backgroundcolor = $this->dangerBg;
+                }
+                $body .= '<table style="width:100%;background-color:'.$backgroundcolor.';"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;text-align:center;"><p style="margin:12px;color:#FFFFFF;">' . $statusTexts[$comment->status] . '</p></td></tr></table></td></tr></table>';
+                $body .= '<p>' . $this->_('Link to the page of the comment') . ':  <a href="' . $commentPage->httpUrl . '#comment-'.$comment->id.'">'.$commentPage->title.'</a></p>';
+
+                $mail->bodyHTML($body);
+
+                $mail->to($comment->email);
+
+               if($mail->send()) {
+                   $sendMailsSuccess[] = $comment->email;
+               } else {
+                   $sendMailsError[] =$comment->email;
+               }
+            }
+
+
+
+            $this->wire('session')->remove('commentstatuschanges');
+
+        }
 
         /**
          * Get all queued emails from the database and send the emails in batches
@@ -308,6 +411,7 @@
                 }
             }
         }
+
 
         /**
          * Get all fields inside the user template which can be selected to map form fields.
@@ -529,16 +633,22 @@
 
             // create a blank new CommentArray for saving
             $items = $allItems->makeNew();
-
+            $changedItems = [];
             foreach ($allItems as $item) {
                 // check if an existing comment has been changed or a new comment was submitted
+                if($item->isChanged('status')){
+                    $changedItems[] = $item->id;
+                }
                 // if yes -> add this item to the newly created CommentArray for saving
                 if ($item->isChanged() || !$item->id) $items->add($item);
                 if ($item->sort > $maxSort) $maxSort = $item->sort;
             }
+            // set array for changed items containing id and status of each changed item
+            if($changedItems){
+                $this->wire('session')->set('commentstatuschanges', $changedItems);
+            }
 
             // no new comments or updated comments inside the new CommentsArray -> stop the saving process here
-            if (!count($items)) return true;
 
             // convert the values for storage in the database
             $values = $this->sleepValue($page, $field, $items);
@@ -548,6 +658,7 @@
             $keys = is_array($value) ? array_keys($value) : array('data'); // get all array keys
 
             // cycle through the values, executing an update or an insert query for each
+            $commentStatusBefore = [];
             foreach ($values as $value) {
 
                 $binds = array();
@@ -782,6 +893,17 @@
             $moderate->addOption(self::moderateAll, $this->_('All - All comments must be approved by user with page edit access'));
             $moderate->addOption(self::moderateNew, $this->_('Only New - Only comments from users without prior approved comments require approval'));
             $inputfields->append($moderate);
+
+
+            /** @var InputfieldCheckbox $f */
+            $quietsave = $modules->get('InputfieldCheckbox');
+            $quietsave->attr('name', 'input_fc_quiet_save');
+            $quietsave->attr('value', 1);
+            $quietsave->attr('checked', $field->input_fc_quiet_save ? 'checked' : '');
+            $quietsave->label = $this->_('Quiet save?');
+            $quietsave->description = $this->_('When checked, the page modification time and user will not be updated when a comment will be changed in the backend.');
+            $quietsave->notes = $this->_('Only to mention: The modification time and user will only be changed, if you save the page in the backend. Changing the comment status via mail link does not affect the modification time and user.');
+            $inputfields->append($quietsave);
 
             /**
              * Field configuration fieldset
