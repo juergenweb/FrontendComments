@@ -3,7 +3,7 @@
 
     /*
      * File for creating, saving and rendering the comment form
-     * and to change the status of a comment via link from the mail
+     * and to change the status of a comment via remote link from the mail
      *
      * Created by Jürgen K.
      * https://github.com/juergenweb
@@ -23,6 +23,7 @@
      * @property protected InputNumber $stars: the field object for the star rating number field
      * @property protected InputRadioMultiple $notify: the field object for email notification about new comments
      * @property protected Privacy $privacy: the field object for the privacy field
+     * @property protected PrivacyText $privacyText: the field object for the privacytext field
      * @property protected InputHidden $pageid: the field object for the hidden pageid field
      * @property protected InputHidden $parentid: the field object for the hidden parentid field
      * @property protected Alert $alert: The alert object
@@ -54,6 +55,7 @@
     use FrontendForms\Textarea;
     use FrontendForms\InputRadioMultiple;
     use FrontendForms\Privacy;
+    use FrontendForms\PrivacyText;
     use FrontendForms\Button;
     use FrontendForms\Link;
     use FrontendForms\Alert;
@@ -72,7 +74,6 @@
 
         use configValues;
 
-        protected array $statusTexts = [];
         protected array $frontendFormsConfig = [];
         protected array $frontendCommentsConfig = [];
         protected string $redirectUrl = '';
@@ -92,6 +93,7 @@
         protected InputNumber $stars; // the number field for star rating
         protected InputRadioMultiple $notify; // the notify me about new comments field object
         protected Privacy $privacy; // the accept privacy checkbox object
+        protected PrivacyText $privacyText; // the accept privacy text object
         protected Button $button; // the submit button object
         protected InputHidden $pageId; // the hidden page id input object
         protected InputHidden $parentId; // the hidden parent page id input object
@@ -101,6 +103,7 @@
         protected WireDatabasePDO $database; // the ProcessWire database object
         protected Alert $alert; // The alert object of the form for further manipulations
         protected Link $cancel; // The cancel link object for replies
+        protected Notifications $notifications;
 
         /**
          * @param CommentArray $comments - needed for getting the field for storage of the values inside the database
@@ -131,13 +134,6 @@
 
             parent::__construct($id);
 
-            // generate statusTexts array
-            $this->statusTexts = [
-                $this->_('pending approval'),
-                $this->_('approved'),
-                $this->_('SPAM')
-            ];
-
             // grab configuration values from the FrontendForms module
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
 
@@ -166,6 +162,12 @@
             $this->setMailPlaceholder('currenturllabel', $this->_('Comment page'));
 
             // Create all form fields
+
+            // create privacy objects and add them to the form object
+            $this->privacy = new Privacy('privacy');
+            $this->add($this->privacy);
+            $this->privacyText = new PrivacyText('privacy-text');
+            $this->add($this->privacyText);
 
             // 1) email
             $this->email = new Email('email');
@@ -224,14 +226,9 @@
                 if ($this->frontendCommentsConfig['input_fc_comment_notification'] === 2) {
                     $this->notify->addOption($this->_('Notify me about replies to all comments'), (string)Comment::flagNotifyAll);
                 }
-
                 $this->notify->alignVertical();
                 $this->add($this->notify);
             }
-
-            // 6) privacy checkbox
-            $this->privacy = new Privacy('privacy');
-            $this->add($this->privacy);
 
             // 7) submit button
             $this->button = new Button('submit');
@@ -264,6 +261,9 @@
                 $this->input_fc_captcha = $this->frontendFormsConfig['input_captchaType'];
             }
             $this->setCaptchaType($this->input_fc_captcha);
+
+            // instantiate the Notifications object for creating the mail body text
+            $this->notifications = new Notifications($this->comments);
 
         }
 
@@ -471,96 +471,18 @@
         }
 
         /**
-         * Render a button for the email template
-         * This button will be used as the "Mark as Spam" button inside the email
-         *
-         * @param string $linktext
-         * @param string $url
-         * @param string $bgColor
-         * @param string $linkColor
-         * @param string $borderColor
-         *
-         * @return string
-         */
-        public static function renderButton(
-            string $linktext,
-            string $url,
-            string $bgColor,
-            string $linkColor,
-            string $borderColor
-        ): string
-        {
-            $out = '<table style="padding-top:20px">';
-            $out .= '<tr><td><table><tr><td style="border-radius: 2px;background-color:' . $bgColor . ';">';
-            $out .= '<a href="' . $url . '" style="padding: 8px 12px; border: 1px solid ' . $borderColor . ';border-radius: 2px;sans-serif;font-size: 14px; color: ' . $linkColor . ';text-decoration: none;font-weight:bold;display: inline-block;">';
-            $out .= $linktext;
-            $out .= '</a></td></tr></table></td></tr></table>';
-            return $out;
-        }
-
-        /**
-         * Create the body text for the notification email
-         * This method creates the content markup of the email
-         * @param array $values
-         * @param Comment $newComment
-         * @return string
-         */
-        protected function renderNotificationBody(array $values, Comment $newComment): string
-        {
-            // create the body for the email
-            $body = '<h1>' . $this->_('A new comment has been submitted') . '</h1>';
-            $body .= '<table>';
-            foreach ($values as $fieldName => $value) {
-                $fieldName = str_replace($this->getID() . '-', '', $fieldName);
-                $body .= '<tr style="padding: 10px 0;border-bottom: 1px solid #000000;"><td style="font-weight:bold;">[[' . strtoupper($fieldName) . 'LABEL]]:&nbsp;</td><td>' . $value . '</td></tr>';
-                $body .= '<tr><td colspan="2"><hr style="margin:0;height:0;border-top: 1px solid #f6f6f6"/></td></tr><tr>';
-            }
-
-            if ($newComment->status == InputfieldFrontendComments::approved) {
-                $color = '#7BA428';
-            } else {
-                $color = '#FD953A';
-            }
-            $body .= '<tr style="padding: 10px 0;"><td style="font-weight:bold;white-space: nowrap">' . $this->_('Comment status') . ':&nbsp;</td><td><span style="padding:3px;display:inline-block;background:' . $color . ';color:#fff;">&nbsp;' . $this->statusTexts[$newComment->status] . '&nbsp;</span></td></tr>';
-            $body .= '<tr><td colspan="2"><hr style="margin:0;height:0;border-top: 1px solid #f6f6f6;"/></td></tr><tr>';
-            $body .= '<tr style="padding: 10px 0;"><td style="font-weight:bold;">[[CURRENTURLLABEL]]:&nbsp;</td><td>[[CURRENTURLVALUE]]</td></tr>';
-            $body .= '<tr><td colspan="2"><hr style="margin:0;height:0;border-top: 1px solid #f6f6f6"/></td></tr><tr>';
-            $body .= '<tr style="padding: 10px 0;"><td style="font-weight:bold;">[[CURRENTDATETIMELABEL]]:&nbsp;</td><td>[[CURRENTDATETIMEVALUE]]</td></tr>';
-            $body .= '<tr><td colspan="2"><hr style="margin:0;height:0;border-top: 1px solid #f6f6f6"/></td></tr><tr>';
-            $body .= '<tr style="padding: 10px 0;"><td style="font-weight:bold;">[[IPLABEL]]:&nbsp;</td><td>[[IPVALUE]]</td></tr>';
-            $body .= '<tr><td colspan="2"><hr style="margin:0;height:0;border-top: 1px solid #f6f6f6"/></td></tr><tr>';
-            $body .= '<tr style="padding: 10px 0;"><td style="font-weight:bold;">[[BROWSERLABEL]]:&nbsp;</td><td>[[BROWSERVALUE]]</td></tr>';
-            $body .= '</table>';
-
-            // create a link for approving the comment if the status has been set to 0
-            if ($newComment->status == InputfieldFrontendComments::pendingApproval) {
-                $url = $this->page->httpUrl . '?code=' . $newComment->code . '&status=1#' . $this->getID() . '-form-wrapper';
-                $body .= self::renderButton($this->_('Publish the comment'), $url, '#7BA428', '#ffffff',
-                    '#7BA428');
-            }
-
-            // create button to mark comment as SPAM
-            $spamUrl = $this->page->httpUrl . '?code=' . $newComment->code . '&status=2#' . $this->getID() . '-form-wrapper';
-            $body .= self::renderButton($this->_('Mark this comment as SPAM'), $spamUrl, '#ED2939',
-                '#ffffff', '#ED2939');
-
-            return $body;
-        }
-
-
-        /**
-         * Save new stati of the comment to the database if querystring withc code is used via email
+         * Save the new status of a comment to the database via a remote link of an email
          * @return void
          * @throws \ProcessWire\WireException
          */
-        protected function changeStatusViaMail(): void
+        protected function processRemoteLink(): void
         {
 
             // get the query string
             $queryString = $this->wire('input')->queryString();
             parse_str($queryString, $queryParams);
 
-            // check if a code has been sent to the page via the email link
+            // check if a code has been sent to the page via the remote email link
             if (array_key_exists('code', $queryParams)) {
 
                 // sanitize the code to be a string and has a length of 120 characters
@@ -570,112 +492,91 @@
                 $table = $this->database->escapeTable($this->field->table);
 
                 // check if the code exists inside the table
-                $sql = "SELECT id, notification FROM $table WHERE code= :code";
-                $query = $this->database->prepare($sql);
-                $query->bindValue(":code", $code, PDO::PARAM_STR);
-                $query->execute();
-                $row = $query->fetchAll();
-                $id = $row[0]['id'];
-                $notification = $row[0]['notification']; // get the current notification status
+                $comment = $this->comments->get('code=' . $code);
+                if ($comment) {
+                    $oldStatus = $comment->status;
+                    $notification = $comment->notification;
 
-                if ($id) {
-                    // check if the code is not empty
-                    if ($code != '') {
+                    switch (true) {
+                        // Status change via remote link of an email
+                        case (array_key_exists('status', $queryParams)):
 
-                        // get the comment that contains the given code from the query string in the database
-                        $comment = $this->comments->get('code=' . $code);
+                            // check if the value is only '1' (approved) or '2' (spam)
+                            $newStatus = in_array($queryParams['status'], ['1', '2']) ? $queryParams['status'] : null;
 
-                        if (!is_null($comment)) {
+                            if (!is_null($newStatus)) {
 
+                                // sanitize $newStatus to be integer
+                                $newStatus = (int)($newStatus);
 
-                            // comment with this code was found inside the database
-                            // check for the query strings
-                            switch (true) {
-                                case (array_key_exists('status', $queryParams)):
+                                // check if comment has remote_flag = 0, which means the status has not been changed before
+                                if ($comment->remote_flag === 0) {
 
-                                    // 1) change status of the comment via email link to approved or spam
+                                    $sql = "UPDATE $table SET status=:status, remote_flag=:remote_flag WHERE id=:id";
 
-                                    // sanitize the value "status" to be a string first
-                                    $newStatus = $this->wire('sanitizer')->string($queryParams['status']);
+                                    // try to save the data to the database
+                                    try {
 
-                                    // check if the value is only '0' or '1'
-                                    $newStatus = in_array($newStatus, ['0', '1']) ? $newStatus : null;
+                                        $query = $this->database->prepare($sql);
+                                        $query->bindValue(":status", $newStatus, PDO::PARAM_INT);
+                                        $query->bindValue(":remote_flag", 1, PDO::PARAM_INT);
+                                        $query->bindValue(":id", $comment->id, PDO::PARAM_INT);
 
-                                    if (!is_null($newStatus)) {
+                                        // execute the query to save the comment in the database
+                                        if ($query->execute()) {
 
-                                        // sanitize $newStatus to be integer
-                                        $newStatus = $this->wire('sanitizer')->int($newStatus);
+                                            // set the change values (status old, status new, comment id) to a session variable
+                                            $this->wire('session')->set('remote', ['success' => '1', 'newstatus' => (string)$newStatus, 'oldstatus' => (string)$oldStatus, 'commentid' => (string)$comment->id]);
 
-                                        // check if comment has remote_flag = 0, which means the status has not been changed before
-                                        if ($comment->remote_flag === InputfieldFrontendComments::pendingApproval) {
-
-                                            $sql = "UPDATE $table SET status=:status, remote_flag=:remote_flag WHERE id=:id";
-
-                                            // save the data to the database
-                                            try {
-
-                                                $query = $this->database->prepare($sql);
-                                                $query->bindValue(":status", $newStatus, PDO::PARAM_INT);
-                                                $query->bindValue(":remote_flag", 1, PDO::PARAM_INT);
-                                                $query->bindValue(":id", $comment->id, PDO::PARAM_INT);
-
-                                                // execute the query to save the comment in the database
-                                                if ($query->execute()) {
-                                                    // set the status of the new comment to a session variable for later output of the success message
-                                                    $this->wire('session')->set('commentstatuschange', $newStatus);
-                                                    // make a redirect if comment status has been changed to approved to show the new comment
-                                                    if ($newStatus === InputfieldFrontendComments::approved) {
-                                                        $this->wire('session')->set('approvedid', $comment->id);
-                                                        $this->wire('session')->redirect('.');
-                                                    }
-                                                }
-                                            } catch (Exception $e) {
-                                                $this->log($e->getMessage()); // log the error message
-                                                $this->wire('session')->set('commentstatuschange', 3); // 3 stands for error
-                                            }
-                                        } else {
-                                            $this->alert->setCSSClass('alert_dangerClass');
-                                            $this->alert->setText($this->_('The status of the comment has already been changed. For security reasons, however, this is only allowed once via mail link. If you want to change the status once more, you have to login to the backend.'));
+                                            // make a redirect to show or hide the comment after the status has been changed
+                                            $this->wire('session')->redirect('.');
                                         }
+                                    } catch (Exception $e) {
+                                        $this->log($e->getMessage()); // log the error message
+                                        $this->wire('session')->set('remote', ['success' => 0]);
                                     }
 
-                                    break;
-
-                                case (array_key_exists('notification', $queryParams)):
-                                    if ($notification == 0) {
-                                        $this->wire('session')->set('notifystatuschange', '1');
-                                    } else {
-                                        // 2) change status of mail notification to 0, which means to not send notification mails in the future
-                                        $sql = "UPDATE $table SET notification=:notification WHERE code=:code";
-                                        // save the data to the database
-                                        try {
-                                            $query = $this->database->prepare($sql);
-                                            $query->bindValue(":notification", 0, PDO::PARAM_INT);
-                                            $query->bindValue(":code", $code, PDO::PARAM_STR);
-                                            // execute the query to save the comment in the database
-                                            if ($query->execute()) {
-                                                // set the status of the new comment to a session variable for later output of the success message
-                                                $this->wire('session')->set('notifystatuschange', '0');
-                                            } else {
-                                                $this->wire('session')->set('notifystatuschange', '3');
-                                            }
-                                        } catch (Exception $e) {
-                                            $this->log($e->getMessage()); // log the error message
-                                            $this->wire('session')->set('notifystatuschange', 3); // 3 stands for error
-                                        }
-                                    }
-                                    break;
-
+                                } else {
+                                    $this->alert->setCSSClass('alert_dangerClass');
+                                    $this->alert->setText($this->_('The status of the comment has already been changed. For security reasons, however, this is only allowed once via mail link. If you want to change the status once more, you have to login to the backend.'));
+                                }
                             }
-                        }
+                            break;
+
+                        // User do not want to get further mails about replies
+                        case (array_key_exists('notification', $queryParams)):
+                            if ($notification == 0) {
+                                $this->wire('session')->set('notifystatuschange', '1');
+                            } else {
+                                // 2) change status of mail notification to 0, which means to not send notification mails in the future
+                                $sql = "UPDATE $table SET notification=:notification WHERE code=:code";
+                                // save the data to the database
+                                try {
+                                    $query = $this->database->prepare($sql);
+                                    $query->bindValue(":notification", 0, PDO::PARAM_INT);
+                                    $query->bindValue(":code", $code, PDO::PARAM_STR);
+                                    // execute the query to save the comment in the database
+                                    if ($query->execute()) {
+                                        // set the status of the new comment to a session variable for later output of the success message
+                                        $this->wire('session')->set('notifystatuschange', '0');
+                                    } else {
+                                        $this->wire('session')->set('notifystatuschange', '3');
+                                    }
+                                } catch (Exception $e) {
+                                    $this->log($e->getMessage()); // log the error message
+                                    $this->wire('session')->set('notifystatuschange', 3); // 3 stands for error
+                                }
+                            }
+                            break;
+
                     }
+
                 } else {
                     // code was not found
                     $this->wire('session')->set('nocodefound', 1);
                 }
             }
         }
-
 
         /**
          * Render the comment form on the frontend
@@ -686,9 +587,30 @@
         public function ___render(): string
         {
 
-            // change the status of the comment depending on code inside querystring of the mail link
-            // this could be approved(1) or spam(2) - depending on the settings
-            $this->changeStatusViaMail();
+            // change some values inside the database according to the query strings inside the remote mail links
+            $this->processRemoteLink();
+
+            // add privacy notice if set
+            $privacyType = 1;
+            if (array_key_exists('input_privacy_show', $this->frontendCommentsConfig)) {
+                $privacyType = (int)$this->frontendCommentsConfig['input_privacy_show'];
+            }
+
+            // create and add the privacy notice type
+            switch ($privacyType) {
+                case(1): // checkbox has been selected
+                    // remove PrivacyText element
+                    $this->remove($this->privacyText);
+                    break;
+                case(2): // text only has been selected
+                    // remove Privacy element
+                    $this->remove($this->privacy);
+                    break;
+                default: // show none of them has been selected
+                    // remove both
+                    $this->remove($this->privacyText);
+                    $this->remove($this->privacy);
+            }
 
             if ($this->___isValid()) {
 
@@ -727,12 +649,10 @@
                 $newComment->code = $random->alphanumeric(120);
                 $newComment->status = $this->setStatus($newComment);
 
-
                 // add the new comment to the existing Comment WireArray
                 if ($this->comments->add($newComment)) {
 
                     $fieldtypeMulti = $this->wire('fieldtypes')->get('FrontendComments');
-
 
                     // save the whole CommentArray (including the new comment) to the database
                     if ($fieldtypeMulti->___savePageField($this->page, $this->field)) {
@@ -741,53 +661,31 @@
                         // set status session
                         $this->wire('session')->set('commentstatus', (string)$newComment->status);
 
-                        // Send a notification email to the moderators
-                        $mail = new WireMail();
+                        // send the notification email to the moderators
 
-                        // set the sender email address
-                        $senderEmail = $this->input_fc_email ?? $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
-                        $mail->from($senderEmail);
-
-                        // set from name if present
-                        if ($this->input_fc_sender) {
-                            $mail->fromName($this->input_fc_sender);
-                        }
-
-                        // set subject
-                        $emailSubject = $this->input_fc_subject ?? $this->_('A new reply has been posted');
-                        $mail->subject($emailSubject);
-
-                        // set title
-                        $emailTitle = $this->input_fc_title ?? $this->_('New comment has been submitted');
-                        $mail->title($emailTitle);
-
-                        // grab all form values from $_POST array
                         $values = $this->getValues();
 
-                        // remove unnecessary values, which should not be sent via the notification mail
-                        unset($values[$this->getID() . '-privacy']);
-                        unset($values[$this->getID() . '-parent_id']);
-
-                        // render the body string for the notification mail
-                        $body = $this->renderNotificationBody($values, $newComment);
-
-                        // set email template depending on config settings
-                        $template = $this->frontendCommentsConfig['input_fc_emailTemplate'];
-                        if ($template === 'inherit') {
-                            $template = $this->frontendFormsConfig['input_emailTemplate'];
+                        // overwrite notification status if it is present inside the array
+                        if(array_key_exists($fieldName.'-notification', $values)){
+                            $notificationText = [
+                                $this->_('No'),
+                                $this->_('Yes')
+                            ];
+                            $notificationValue = $values[$fieldName.'-notification'];
+                            $values[$fieldName.'-notification'] = $notificationText[$notificationValue];
                         }
-                        $mail->mailTemplate($template);
-                        $mail->bodyHTML($body);
-                        // set all receivers
-                        $this->setMailTo($mail);
 
-                        if (!$mail->send()) {
-                            // output an error message if the mail could not be sent
-                            $this->generateEmailSentErrorAlert();
-                        } else {
+                        // overwrite stars status if it is present inside the array
+                        if(array_key_exists($fieldName.'-rating', $values)){
+                            $ratingValue = $values[$fieldName.'-notification'];
+                            $values[$fieldName.'-notification'] = $ratingValue-' '. $this->_n('Star', 'Stars', $ratingValue);
+                        }
+
+                        if ($this->notifications->sendNotificationAboutNewComment($values, $newComment, $this)) {
                             $this->writeEntryInQueueTable($newComment);
+                        } else {
+                            $this->generateEmailSentErrorAlert();
                         }
-
 
                     }
 
@@ -795,49 +693,50 @@
 
             }
 
-
             // output an info message if the code for change was not found
-            $nocodefound = $this->wire('session')->get('nocodefound');
-            if ($nocodefound) {
+            if ($this->wire('session')->get('nocodefound')) {
                 // there was an error
                 $this->alert->setCSSClass('alert_dangerClass');
                 $this->alert->setText($this->_('We are sorry, but there was no comment with this code found in the database.'));
                 $this->wire('session')->remove('nocodefound');
             }
 
-            // output an info message if the comment status has been changed via the mail link
-            $statusChange = (int)$this->wire('session')->get('commentstatuschange');
-
-            if ($statusChange) {
+            // output an info message depending on the session array values set
+            $remoteValues = $this->wire('session')->get('remote');
+            if ($remoteValues) {
 
                 // remove the session first
-                $this->wire('session')->remove('commentstatuschange');
+                $this->wire('session')->remove('remote');
 
-                $statusTypes = [
-                    InputfieldFrontendComments::pendingApproval,
-                    InputfieldFrontendComments::approved,
-                    InputfieldFrontendComments::spam
-                ];
+                $success = (array_key_exists('success', $remoteValues)) ? (int)$remoteValues['success'] : null;
+                $newStatus = (array_key_exists('newstatus', $remoteValues)) ? (int)$remoteValues['newstatus'] : null;
+                $oldStatus = (array_key_exists('oldstatus', $remoteValues)) ? (int)$remoteValues['oldstatus'] : null;
+                $commentId = (array_key_exists('commentid', $remoteValues)) ? (int)$remoteValues['commentid'] : null;
+                $comment = $this->comments->find('id=' . $commentId)->first(); // get the comment object
 
-                if (in_array($statusChange, $statusTypes)) {
+                if ($success) {
+
+                    // get the status names array
+                    $statusTypes = InputfieldFrontendComments::statusTexts();
+
+                    // send notification mail to the user, that the status has been changed
+                    $this->notifications->sendStatusChangeEmail($comment, $this->field, $this->frontendFormsConfig);
 
                     // status is approved -> create the "to the comment" jump link
                     $jumpLink = '';
-                    if ($statusChange == InputfieldFrontendComments::approved) {
-                        $jumpLink = ' (<a href="#comment-' . $this->wire('session')->get('approvedid') . '" title="' . $this->_('Directly to the comment') . '">' .
+                    if ($newStatus === InputfieldFrontendComments::approved) {
+                        $jumpLink = ' (<a href="#comment-' . $commentId . '" title="' . $this->_('Directly to the comment') . '">' .
                             $this->_('To the comment') . '</a>)';
-                        $this->wire('session')->remove('approvedid'); // remove session containing the approved comment id
                     }
                     // output success message that the status has been changed (either to approved or to SPAM)
                     $this->alert->setCSSClass('alert_successClass');
-                    $this->alert->setText(sprintf($this->_('Comment status has been changed to "%s"%s.'),
-                        $this->statusTexts[$statusChange], $jumpLink));
+                    $this->alert->setText(sprintf($this->_('Comment status has been changed from "%s" to "%s". %s'),
+                        $statusTypes[$oldStatus], $statusTypes[$newStatus], $jumpLink));
                 } else {
                     // there was an error
                     $this->alert->setCSSClass('alert_dangerClass');
-                    $this->alert->setText($this->_('Error saving new status of comment.'));
+                    $this->alert->setText($this->_('An error occured during the saving of the new comment status.'));
                 }
-
             }
 
             // output an info message if the notification email status has been changed via the mail link
@@ -851,13 +750,13 @@
                 $this->alert->setCSSClass('alert_successClass');
                 $this->alert->setText($this->_('You have successfully unsubscribed from email notifications and you will no longer receive notifications of new replies.'));
 
-
             } else if ($notifyChange == '1') {
                 // the notification status is 0
                 $this->alert->setCSSClass('alert_warningClass');
                 $this->alert->setText($this->_('You have tried to unsubscribe from getting notifications, but your notification status is already disabled.'));
             }
 
+            // Output a success message if a comment has been submitted successfully
             if (($this->wire('session')->get('comment') == 'ready') && ($this->getID() == $this->field->name)) {
                 $this->wire('session')->remove('comment');
 
@@ -903,7 +802,6 @@
                 $reply = !$this->parent_id == 0; // true or false
 
                 $notificationEmails = [];
-
 
                 if ($reply) {
 
