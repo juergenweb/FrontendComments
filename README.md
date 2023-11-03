@@ -31,6 +31,11 @@ Processwire Fieldtype/Inputfield to add and manage comments on your site based o
 * [Queuing notification emails](#queuing-notification-emails)
   
 
+## Configurations
+After you have installed the module, you have to set a default email address where the mails should be sent to. This email address can be entered manually or you can choose a ProcessWire field, which contains the email address. All other configuration options are optional.
+
+* **`Comment moderation`** Select if you want to moderate all comments or only new comments or no comments at all. Moderation means that comments must be reviewed by a moderator, before they will be published
+
 ## Is this a copy of the Comments Fieldtype by Ryan?
 No, it is not. I have studied the code of Ryan's module to understand how this Fieldtype works and I have adapted the structure and some parts of the code and use it in this module, but it is far away from a line for line copy. There are a lot of codes and logic behind the scenes, that are completely different from Ryan's version.
 But to be honest, I have taken Ryan's version to get an idea which features can be included in the component (star rating, comment rating,…).
