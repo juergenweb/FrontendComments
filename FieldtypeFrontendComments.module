@@ -19,7 +19,7 @@
     use FrontendComments\CommentArray;
     use FrontendComments\Comment;
     use FrontendComments\configValues;
-    use FrontendComments\CommentForm;
+    use FrontendComments\Notifications;
     use PDO;
 
     // include all necessary files
@@ -29,6 +29,7 @@
     require_once($dirname . "/CommentForm.php");
     require_once($dirname . "/Comments.php");
     require_once($dirname . "/Comment.php");
+    require_once($dirname . "/Notifications.php");
     require_once($dirname . "/InputfieldFrontendComments.php");
 
     class FieldtypeFrontendComments extends FieldtypeMulti
@@ -42,12 +43,12 @@
         protected FrontendForms $frontendForms;
 
         // configuration values
-        protected string $primaryBg = '#2196F3'; // primary color
-        protected string $secondaryBg = '#323a45'; // secondary color
-        protected string $successBg = '#64DD17'; // success color
-        protected string $infoBg = '#29B6F6'; // info color
-        protected string $warningBg = '#FFD600'; // warning color
-        protected string $dangerBg = '#ef1c1c'; // danger color
+        public static string $primaryBg = '#2196F3'; // primary color
+        public static string $secondaryBg = '#323a45'; // secondary color
+        public static string $successBg = '#64DD17'; // success color
+        public static string $infoBg = '#29B6F6'; // info color
+        public static string $warningBg = '#FFD600'; // warning color
+        public static string $dangerBg = '#ef1c1c'; // danger color
 
         protected string|int $input_fc_moderate = '0';
         protected string $input_fc_emailTemplate = 'inherit';
@@ -69,10 +70,11 @@
         protected string|int $input_fc_counter = 0;
         protected string|int $input_fc_voting = 0;
         protected string|int $input_fc_voting_lock = 7;
+        protected string|int $input_privacy_show = 2;
         protected string|int $input_fc_comment_notification = 0;
         protected string|int $input_fc_queue_batch = 20;
         protected string|int $input_fc_quite_save = 0;
-        protected array $moduleConfig = []; // array that hold all module config values
+        protected array $moduleConfig = []; // array that holds all module config values
         protected array $frontendCommentsConfig = [];
         protected array $frontendFormsConfig = [];
         protected array $cronIntervals = [];
@@ -81,6 +83,7 @@
         protected array $userfields = [];
         protected User $user;
         protected WireDatabasePDO $database;
+
 
         /**
          * @throws \ProcessWire\WireException
@@ -98,7 +101,6 @@
 
             // set database object
             $this->database = $this->wire()->database;
-
         }
 
         /**
@@ -117,7 +119,7 @@
                 'permanent' => false,
                 'version' => '1.0.0',
                 'requires' => [
-                    'FrontendForms>=2.1.48',
+                    'FrontendForms>=2.1.53',
                     'PHP>=8.0',
                     'ProcessWire>=3',
                     'LazyCron'
@@ -134,11 +136,12 @@
             parent::init();
 
             $this->addHookAfter('Page::render', $this, 'deleteSpam');
-            // delete voting entries which are older then the selected time period
+            // delete voting entries which are older than the selected time period
             $this->addHookAfter('Page::render', $this, 'deleteOldVoteEntries');
             // send queued emails as a batch to the users
             $this->addHookAfter('LazyCron::every30Seconds', $this, 'sendQueuedEmails');
             $this->addHookAfter('FieldtypeMulti::savePageField', $this, 'sendStatusChangeMail');
+
         }
 
         /**
@@ -173,7 +176,6 @@
         protected function deleteOldVoteEntries(): void
         {
 
-
             $timePeriod = $this->input_fc_voting_lock;
             $currentDate = new DateTime(); // this will return today
             $comparingDate = $currentDate->sub(new DateInterval('P' . $timePeriod . 'D')); // substract the time period
@@ -189,96 +191,52 @@
         }
 
         /**
-         * Send an notification mail to a commenter, if the status of his comment has been changed
-         * fe from pending approval to approved
+         * Send notification mail to a commenter if the status of his comment has been changed
+         * fe from pending approval to approve
+         * @param \ProcessWire\HookEvent $event
          * @return void
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
          */
         protected function sendStatusChangeMail(HookEvent $event): void
         {
-            $fieldtypeMulti = $event->object;
+            // run only if at least on email status notification is enabled
+            if (array_key_exists('input_fc_status_change_notification', $this->frontendCommentsConfig)) {
 
-            if($fieldtypeMulti->className() != 'FieldtypeFrontendComments')
-                return;
-            if(!$this->wire('session')->get('commentstatuschanges'))
-                return;
+                $fieldtypeMulti = $event->object;
 
-            $changedIDs = $this->wire('session')->get('commentstatuschanges');
+                if ($fieldtypeMulti->className() != 'FieldtypeFrontendComments')
+                    return;
+                if (!$this->wire('session')->get('commentstatuschanges'))
+                    return;
 
-            // get all comments with status change from the database
-            $page = $event->arguments(0);
-            $field = $event->arguments(1);
-            $fieldName = $field->name;
-            $commentEntries = $page->$fieldName;
+                $changedIDs = $this->wire('session')->get('commentstatuschanges');
 
-            $ids = implode('|', $changedIDs);
-            $result = $commentEntries->find('id='.$ids);
+                // get all comments with status change from the database
+                $page = $event->arguments(0);
+                $field = $event->arguments(1);
+                $fieldName = $field->name;
+                $commentEntries = $page->$fieldName;
 
-            // create arrays, which includes the successfully sent and failed sent mails
-            $sendMailsSuccess = $sendMailsError = [];
+                // create a notification object
+                $notifications = new Notifications($commentEntries);
 
-            foreach($result as $comment){
+                $ids = implode('|', $changedIDs);
+                $result = $commentEntries->find('id=' . $ids);
 
-                $newStatus = $comment->status;
-                $commentId = $comment->id;
+                foreach ($result as $comment) {
 
-                // create WireMail instance
-                $mail = new WireMail();
+                    // send mails only if status is approved or spam
+                    if (in_array((int)$comment->status, [InputfieldFrontendComments::approved, InputfieldFrontendComments::pendingApproval])) {
 
-                // set the sender email address
-                $emailSender = $field->input_fc_email ? $field->input_fc_email : $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
-                $mail->from($emailSender);
+                        // check if sending of emails for this status is enabled
+                        if(array_key_exists($comment->status, $this->frontendCommentsConfig)){
+                            $notifications->sendStatusChangeEmail($comment, $field, $this->frontendFormsConfig);
+                        }
 
-                // set from name if present
-                if ($field->input_fc_sender) {
-                    $mail->fromName($this->input_fc_sender);
+                    }
                 }
-
-                $statusTexts = [
-                    $this->_('pending approval'),
-                    $this->_('approved'),
-                    $this->_('SPAM')
-                ];
-
-
-                $mail->subject($this->_('Comment status has been changed'));
-                $mail->title(sprintf($this->_('Your comment status has been changed to %s'), $statusTexts[$comment->status]));
-
-                // set email template depending on config settings
-                $template = $field->input_fc_emailTemplate === 'inherit' ? $this->frontendFormsConfig['input_emailTemplate'] : $field->input_fc_emailTemplate;
-
-                $mail->mailTemplate($template);
-
-                // get the comment page object, where the comment lives
-                $commentPage = $comment->page;
-
-                // create the body for the email
-                $body = '<h1>' . $this->_('The status of your comment has been changed by a moderator') . '</h1>';
-                $body .= '<p>' . $this->_('We want to inform you, that the following comment you have written, has now been reviewed by a moderator:') . '</p>';
-
-                $body .= '<table style="width:100%;background-color:#dddddd;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;text-align:center;"><p style="margin:12px;">' . $comment->text . '</p></td></tr></table></td></tr></table>';
-
-                $body .= '<p>'.$this->_('The status of the comment has been changed to:').'</p>';
-                if($comment->status === 1){
-                    $backgroundcolor = $this->successBg;
-                } else {
-                    $backgroundcolor = $this->dangerBg;
-                }
-                $body .= '<table style="width:100%;background-color:'.$backgroundcolor.';"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;text-align:center;"><p style="margin:12px;color:#FFFFFF;">' . $statusTexts[$comment->status] . '</p></td></tr></table></td></tr></table>';
-                $body .= '<p>' . $this->_('Link to the page of the comment') . ':  <a href="' . $commentPage->httpUrl . '#comment-'.$comment->id.'">'.$commentPage->title.'</a></p>';
-
-                $mail->bodyHTML($body);
-
-                $mail->to($comment->email);
-
-               if($mail->send()) {
-                   $sendMailsSuccess[] = $comment->email;
-               } else {
-                   $sendMailsError[] =$comment->email;
-               }
             }
-
-
-
             $this->wire('session')->remove('commentstatuschanges');
 
         }
@@ -291,7 +249,6 @@
          */
         protected function sendQueuedEmails(): void
         {
-            bd('hook runs');
 
             // do not send notification mails if stopqueue session is present
             if ($this->wire('session')->get('stopqueue')) {
@@ -299,6 +256,7 @@
                 return;
             }
 
+            bd('queue hook runs');
             // get all FrontendComments fields
             $fields = $this->wire('fields')->findByType('FieldtypeFrontendComments');
 
@@ -309,7 +267,7 @@
 
                 $sql = "SELECT * FROM $table ORDER BY id";
                 $query = $this->database->prepare($sql);
-                $result = $query->execute();
+                $query->execute();
                 $list = $query->fetchAll();
 
                 // shorten this list by the batch size
@@ -343,7 +301,7 @@
                     $field = $this->wire('fields')->get($field_id);
                     $fieldName = $field->name;
 
-                    // get the comments array containing all comments of the given field on the given page
+                    // get the comments' array containing all comments of the given field on the given page
                     $comments = $this->wire('pages')->get($page_id)->$fieldName;
 
                     if ($comments) {
@@ -351,50 +309,14 @@
 
                         if ($comment) {
 
-                            // set array with table name and comment id to delet this queue entry after sending of the mail
+                            // set an array with table name and comment id to delete this queue entry after sending of the mail
                             $deleteField = $this->wire('fields')->get($field_id);
                             $deleteFieldTable = $this->database->escapeTable($deleteField->table) . '_queues';
                             $deleteRowID = $parameters['id'];
 
-                            // create WireMail instance
-                            $mail = new WireMail();
-
-                            // set the sender email address
-                            $emailSender = $field->input_fc_email ? $field->input_fc_email : $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
-                            $mail->from($emailSender);
-
-                            // set from name if present
-                            if ($field->input_fc_sender) {
-                                $mail->fromName($this->input_fc_sender);
-                            }
-
-                            $mail->subject($this->_('New reply to a comment'));
-                            $mail->title($this->_('A new reply has been posted'));
-
-                            // set email template depending on config settings
-                            $template = $field->input_fc_emailTemplate === 'inherit' ? $this->frontendFormsConfig['input_emailTemplate'] : $field->input_fc_emailTemplate;
-                            $mail->mailTemplate($template);
-
-                            // create the body for the email
-                            $body = '<h1>' . $this->_('A new reply has been submitted') . '</h1>';
-                            $body .= '<p>' . $this->_('You are receiving this email because you have agreed to be notified when a new reply has been posted.') . '</p>';
-                            $body .= '<h2>' . $this->_('New comment') . '</h2>';
-                            if ($comment->author) {
-                                $body .= '<p>' . $this->_('Author') . ': ' . $comment->author . '</p>';
-                            }
-                            $body .= '<table style="width:100%;background-color:#dddddd;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;"><p style="margin:12px;">' . $comment->text . '</p></td></tr></table></td></tr></table>';
-                            $body .= '<p>' . $this->_('Link to the page of the comment') . ': ' . $page->httpUrl . '</p>';
-                            $body .= '<p>' . $this->_('If you do not want to receive further mails about new replies, please click the link below') . '</p>';
-
-                            // create a link for canceling the receiving of further notifications
-                            $url = $page->httpUrl . '?code=' . $code . '&notification=0#' . $fieldName . '-form-wrapper';
-                            $body .= CommentForm::renderButton($this->_('Stop sending me further notification mails about new comments'), $url, '#ED2939', '#ffffff',
-                                '#7BA428');
-                            $mail->bodyHTML($body);
-
-                            $mail->to($email);
-
-                            if ($mail->send()) {
+                            // create a notification object
+                            $notifications = new Notifications($comments);
+                            if ($notifications->sendNotificationAboutNewReply($comment, $page, $field, $code, $email)) {
 
                                 // get the appropriate queued list item and delete it from the table
                                 $statement = "DELETE FROM $deleteFieldTable WHERE id=:id ";
@@ -412,11 +334,10 @@
             }
         }
 
-
         /**
          * Get all fields inside the user template which can be selected to map form fields.
-         * Please note: Only user fields which are editable by the user will be taken into account
-         * @return array - key: field id, value: field name
+         * Please note: Only user fields, which are editable by the user will be taken into account
+         * @return array - key: field ID, value: field name
          * @throws WireException
          * @throws WirePermissionException
          */
@@ -601,6 +522,7 @@
                 $sleepValue[] = $a;
 
             }
+
             return $sleepValue;
         }
 
@@ -636,7 +558,7 @@
             $changedItems = [];
             foreach ($allItems as $item) {
                 // check if an existing comment has been changed or a new comment was submitted
-                if($item->isChanged('status')){
+                if ($item->isChanged('status')) {
                     $changedItems[] = $item->id;
                 }
                 // if yes -> add this item to the newly created CommentArray for saving
@@ -644,7 +566,7 @@
                 if ($item->sort > $maxSort) $maxSort = $item->sort;
             }
             // set array for changed items containing id and status of each changed item
-            if($changedItems){
+            if ($changedItems) {
                 $this->wire('session')->set('commentstatuschanges', $changedItems);
             }
 
@@ -723,6 +645,96 @@
             return true;
         }
 
+
+        /**
+         * @throws \ProcessWire\WireException
+         */
+        public function ___updateStatus($comment = null, array $queryParams, $table, $notification, $code, $alert)
+        {
+            if (!is_null($comment)) {
+
+                // comment with this code was found inside the database
+                // check for the query strings
+                switch (true) {
+                    case (array_key_exists('status', $queryParams)):
+
+                        // 1) change the status of the comment via an email link to approved or spam
+
+                        // sanitize the value "status" to be a string first
+                        $newStatus = $this->wire('sanitizer')->string($queryParams['status']);
+
+                        // check if the value is only '0' or '1'
+                        $newStatus = in_array($newStatus, ['0', '1']) ? $newStatus : null;
+
+                        if (!is_null($newStatus)) {
+
+                            // sanitize $newStatus to be integer
+                            $newStatus = $this->wire('sanitizer')->int($newStatus);
+
+                            // check if comment has remote_flag = 0, which means the status has not been changed before
+                            if ($comment->remote_flag === InputfieldFrontendComments::pendingApproval) {
+
+                                $sql = "UPDATE $table SET status=:status, remote_flag=:remote_flag WHERE id=:id";
+
+                                // save the data to the database
+                                try {
+
+                                    $query = $this->database->prepare($sql);
+                                    $query->bindValue(":status", $newStatus, PDO::PARAM_INT);
+                                    $query->bindValue(":remote_flag", 1, PDO::PARAM_INT);
+                                    $query->bindValue(":id", $comment->id, PDO::PARAM_INT);
+
+                                    // execute the query to save the comment in the database
+                                    if ($query->execute()) {
+                                        // set the status of the new comment to a session variable for later output of the success message
+                                        $this->wire('session')->set('commentstatuschange', $newStatus);
+                                        // make a redirect if comment status has been changed to approved to show the new comment
+                                        if ($newStatus === InputfieldFrontendComments::approved) {
+                                            $this->wire('session')->set('approvedid', $comment->id);
+                                            $this->wire('session')->redirect('.');
+                                        }
+                                    }
+                                } catch (Exception $e) {
+                                    $this->log($e->getMessage()); // log the error message
+                                    $this->wire('session')->set('commentstatuschange', 3); // 3 stands for error
+                                }
+                            } else {
+                                $alert->setCSSClass('alert_dangerClass');
+                                $alert->setText($this->_('The status of the comment has already been changed. For security reasons, however, this is only allowed once via mail link. If you want to change the status once more, you have to login to the backend.'));
+                            }
+                        }
+
+                        break;
+
+                    case (array_key_exists('notification', $queryParams)):
+                        if ($notification == 0) {
+                            $this->wire('session')->set('notifystatuschange', '1');
+                        } else {
+                            // 2) change the status of mail notification to 0, which means to not send notification mails in the future
+                            $sql = "UPDATE $table SET notification=:notification WHERE code=:code";
+                            // save the data to the database
+                            try {
+                                $query = $this->database->prepare($sql);
+                                $query->bindValue(":notification", 0, PDO::PARAM_INT);
+                                $query->bindValue(":code", $code);
+                                // execute the query to save the comment in the database
+                                if ($query->execute()) {
+                                    // set the status of the new comment to a session variable for later output of the success message
+                                    $this->wire('session')->set('notifystatuschange', '0');
+                                } else {
+                                    $this->wire('session')->set('notifystatuschange', '3');
+                                }
+                            } catch (Exception $e) {
+                                $this->log($e->getMessage()); // log the error message
+                                $this->wire('session')->set('notifystatuschange', 3); // 3 stands for error
+                            }
+                        }
+                        break;
+
+                }
+            }
+        }
+
         /**
          * User is not allowed to change this fieldtype to another fieldtype
          *
@@ -747,7 +759,6 @@
             $schema = parent::getDatabaseSchema($field);
             $table = $field->getTable();
             $database = $this->database;
-
 
             $schema['id'] = "int unsigned NOT NULL auto_increment";
             $schema['status'] = "tinyint(3) NOT NULL default '0'";
@@ -796,7 +807,6 @@
 
                 $database->exec($sql);
             }
-
 
             // create a table for queuing emails that will be sent to users
             // the table contains the comment id and the email, where the mail should be sent to
@@ -848,7 +858,7 @@
                 // ok to ignore, as table may not exist
             }
             if ($result !== false) try {
-                $database->exec("DROP TABLE `{$table}_queues`"); // delete the queues table field too
+                $database->exec("DROP TABLE `{$table}_queues`"); // delete the queue table field too
             } catch (Exception $e) {
                 // ok to ignore, as table may not exist
             }
@@ -877,7 +887,7 @@
          */
         public function ___getConfigInputfields(Field $field): InputfieldWrapper
         {
-
+            $languages = $this->wire('languages');
             $modules = $this->wire()->modules;
             $inputfields = parent::___getConfigInputfields($field);
             $this->userfields = $this->getUserFields();
@@ -893,7 +903,6 @@
             $moderate->addOption(self::moderateAll, $this->_('All - All comments must be approved by user with page edit access'));
             $moderate->addOption(self::moderateNew, $this->_('Only New - Only comments from users without prior approved comments require approval'));
             $inputfields->append($moderate);
-
 
             /** @var InputfieldCheckbox $f */
             $quietsave = $modules->get('InputfieldCheckbox');
@@ -927,7 +936,7 @@
             $userimage->columnWidth = 50;
             $userimage->description = $this->_('Select the field of the user template which contains the user image');
             $userimage->notes = $this->_('Only user fields of the type "FieldtypeImage" and the configuration setting for a single image will be displayed (if present).');
-            $confFieldset->add($userimage, $inputfields);
+            $confFieldset->add($userimage);
 
             $imagesize = $modules->get('InputfieldInteger');
             $imagesize->label = $this->_('Set the size of the image');
@@ -1025,9 +1034,15 @@
             $email->label = $this->_('From email address');
             $email->attr('name', 'input_fc_email');
             $email->attr('value', $field->input_fc_email);
-            $email->description = $this->_('This email address will be displayed as the sender of the emails sent by this module.');
+            if ($languages) {
+                $email->useLanguages = true;
+                foreach ($languages as $language) {
+                    if ($language->isDefault()) continue;
+                    $email->attr("value$language", (string)$field->get("input_fc_email$language->id"));
+                }
+            }
+            $email->description = $this->_('This email address will be displayed as the sender email address of the emails sent by this module.');
             $email->columnWidth = 50;
-            $email->useLanguages = true;
             $email->notes = sprintf($this->_('If no email address will be entered, %s will be displayed instead as the sender address.'), '"' . $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"] . '"');
             $emailFieldset->add($email);
 
@@ -1036,34 +1051,18 @@
             $sender->label = $this->_('From name');
             $sender->attr('name', 'input_fc_sender');
             $sender->attr('value', $field->input_fc_sender);
+            if ($languages) {
+                $sender->useLanguages = true;
+                foreach ($languages as $language) {
+                    if ($language->isDefault()) continue;
+                    $sender->attr("value$language", (string)$field->get("input_fc_sender$language->id"));
+                }
+            }
             $sender->placeholder = $this->_('fe. My company');
-            $sender->description = $this->_('This name will be displayed as the sender of the emails sent by this module.');
+            $sender->description = $this->_('This name will be displayed as the sender name of the emails sent by this module.');
             $sender->notes = $this->_('If no sender name will be entered, than the sender email address will be used as the sender name.');
             $sender->columnWidth = 50;
-            $sender->useLanguages = true;
             $emailFieldset->add($sender);
-
-            // enter the subject of the emails (fe. Comment notification)
-            $subject = $modules->get('InputfieldText');
-            $subject->label = $this->_('Mail subject');
-            $subject->attr('name', 'input_fc_subject');
-            $subject->attr('value', $field->input_fc_subject);
-            $subject->description = $this->_('This text will be displayed as the subject for the email.');
-            $subject->notes = $this->_('If no subject will be entered, than "Comment notification" will be displayed as the default subject.');
-            $subject->columnWidth = 50;
-            $subject->useLanguages = true;
-            $emailFieldset->add($subject);
-
-            // enter the title of the emails (fe. Comment notification)
-            $title = $modules->get('InputfieldText');
-            $title->label = $this->_('Mail Title');
-            $title->attr('name', 'input_fc_title');
-            $title->attr('value', $field->input_fc_title);
-            $title->description = $this->_('This text will be displayed under the sender name.');
-            $title->notes = $this->_('If no title will be entered, than "New commment has been submitted" will be displayed as the default title.');
-            $title->columnWidth = 50;
-            $title->useLanguages = true;
-            $emailFieldset->add($title);
 
             // input_fc_comment_notification
             $notification = $modules->get('InputfieldRadios');
@@ -1076,6 +1075,17 @@
             $notification->addOption(Comment::flagNotifyAll, $this->_('Users can receive email notifications for all new comments on the page'));
             $notification->attr('value', (int)$field->get('input_fc_comment_notification'));
             $emailFieldset->add($notification);
+
+            // input_fc_status_change_notification
+            $statusnotification = $modules->get('InputfieldCheckboxes');
+            $statusnotification->attr('name', 'input_fc_status_change_notification');
+            $statusnotification->label = $this->_('Send notification email to commenter on status change');
+            $statusnotification->description = $this->_('If a moderator changes the status of a comment, select on which status change the commenter should be informed via email.');
+            $statusnotification->addOption(InputfieldFrontendComments::approved, sprintf($this->_('Send notification email if status has been changed to approved'), InputfieldFrontendComments::statusTexts()[InputfieldFrontendComments::approved]));
+            $statusnotification->addOption(InputfieldFrontendComments::spam, sprintf($this->_('Send notification email if status has been changed to SPAM'), InputfieldFrontendComments::statusTexts()[InputfieldFrontendComments::approved]));
+            $statusnotification->attr('value', (int)$field->get('input_fc_status_change_notification'));
+            $statusnotification->notes = $this->_('If a box is checked, the commenter will receive an email if the comment status will be changed by a moderator in the backend or via email link. You can prevent this behavior by unchecking a box.');
+            $emailFieldset->add($statusnotification);
 
             $inputfields->append($emailFieldset);
 
@@ -1132,7 +1142,6 @@
             $f->description = $this->_('If you want to offer star rating, please check the box');
             $fieldset->append($f);
 
-
             // field to show or hide the character counter under the comment text field
             $f = $this->modules->get('InputfieldCheckbox');
             $f->attr('name+id', 'input_fc_counter');
@@ -1150,7 +1159,7 @@
             $f->attr('value', $field->input_fc_voting);
             $f->attr('checked', $field->input_fc_voting ? 'checked' : '');
             $f->label2 = $this->_('Enable voting of comments');
-            $f->description = $this->_('By checking the box you offer visitors the possibility to rate comments (upvotes and downvotes).');
+            $f->description = $this->_('By checking the box you offer visitors the possibility to rate comments (up-votes and down-votes).');
             $f->columnWidth = 50;
             $fieldset->append($f);
 
@@ -1168,6 +1177,22 @@
             $f->notes = $this->_('The user will be identified by using data of his Internet fingerprint. This means that the IP address, the browser system and the user ID will be compared with entries in the database. If an entry with the same data will be found, then the rating is not allowed. Entries in the database which are older than the time period selected above will be deleted automatically and the user will be allowed to rate again.');
             $f->columnWidth = 50;
             $fieldset->append($f);
+
+            // Show or hide privacy checkbox or text on form
+            $privacy_show = $this->wire()->modules->get('InputfieldSelect');
+            $privacy_show->label = $this->_('Add privacy text or privacy checkbox to the form');
+            $privacy_show->description = $this->_('Select if you want to show a privacy text only or a privacy checkbox above the submit button');
+            $options = [
+                $this->_('Do not show anything'),
+                $this->_('Show checkbox'),
+                $this->_('Show text')
+            ];
+            $privacy_show->addOptions($options);
+            $privacy_show->defaultValue = '2';
+            $privacy_show->attr('value', $this->input_privacy_show);
+            $privacy_show->attr('name', 'input_privacy_show');
+            $privacy_show->notes = $this->_('You can disable the display of the privacy text/checkbox, but you should be aware that this may lead to legal consequences if a privacy notice is required in your country.');
+            $fieldset->append($privacy_show);
 
             $inputfields->append($fieldset);
 
@@ -1217,7 +1242,6 @@
 
             $inputfields->append($spamFieldset);
 
-
             /**  CSS + JS fieldset */
             $cssjsFieldset = $modules->get('InputfieldFieldset');
             $cssjsFieldset->label = $this->_('JS and CSS');
@@ -1228,12 +1252,11 @@
             /** @var InputfieldMarkup $f */
             $f = $modules->get('InputfieldMarkup');
             $f->label = $this->_('CSS for front-end comments output');
-            $ftUrl = $this->wire('config')->urls('FieldtypeComments');
             $f->value =
                 "<p>If you do not use a CSS framework, please copy and paste the following into the document <code>&lt;head&gt;</code> of your site:</p>" .
                 "<pre style='border-left: 4px solid #ccc; padding-left: 1em;'>&lt;link rel='stylesheet' type='text/css' href='&lt;?=\$config-&gt;urls-&gt;FieldtypeFrontendComments?&gt;&#92assets&#92frontendcomments.css' /&gt;</pre>" .
 
-            $cssjsFieldset->add($f);
+                $cssjsFieldset->add($f);
 
             /** @var InputfieldMarkup $f */
             $f = $modules->get('InputfieldMarkup');
@@ -1247,7 +1270,7 @@
 
             // output all input fields (parent and custom)
             return $inputfields;
-            return $inputfields;
+
         }
 
     }
