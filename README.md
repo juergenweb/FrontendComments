@@ -21,6 +21,7 @@ Processwire Fieldtype/Inputfield to add and manage comments on your site based o
 * Ajax driven form submission with server side validation without page reload
 * Reply forms will only be loaded on demand by clicking on the reply symbol
 * Usage of HTML email templates (provided by FrontendForms)
+* Enable/disable the sending of notification emails to a commenter if status of a comment has been changed to "approved" or "SPAM"
 
 ## Table of contents
 * [Is this a copy of the Comments Fieldtype by Ryan?](#is-this-a-copy-of-the-comments-fieldtype-by-ryan)
