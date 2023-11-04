@@ -328,7 +328,7 @@
                 $text = $this->getCommentText()->___render();
             } else {
                 // comment is SPAM, but has replies
-                $text = 'SPAM';
+                $text = $this->_('This comment was removed by a moderator because it does not comply with the comment guidelines.');
             }
 
             $out .= '<div id="' . $this->getReplyLink()->getAttribute('id') . '-comment" class="comment-content">' . $text . '</div>';
