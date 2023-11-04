@@ -71,7 +71,8 @@
             return [
                 __('pending Approval'),
                 __('approved'),
-                __('SPAM')
+                __('SPAM'),
+                __('SPAM, but has replies')
             ];
         }
 
@@ -84,6 +85,7 @@
             return [
                 'fa-warning',
                 'fa-check-circle',
+                'fa-times-circle',
                 'fa-times-circle'
             ];
         }
@@ -97,6 +99,7 @@
             return [
                 'warning',
                 'success',
+                'danger',
                 'danger'
             ];
         }
