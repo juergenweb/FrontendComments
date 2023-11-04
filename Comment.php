@@ -310,7 +310,6 @@
 
             }
 
-
             // create the vote links with FontAwesome icons if enabled
             $showVoting = $this->field->input_fc_voting ?? $this->input_fc_voting;
             if ($showVoting) {
@@ -325,7 +324,14 @@
             }
 
             $out .= '</div>';
-            $out .= '<div id="' . $this->getReplyLink()->getAttribute('id') . '-comment" class="comment-content">' . $this->getCommentText()->___render() . '</div>';
+            if($comment->status == '1'){
+                $text = $this->getCommentText()->___render();
+            } else {
+                // comment is SPAM, but has replies
+                $text = 'SPAM';
+            }
+
+            $out .= '<div id="' . $this->getReplyLink()->getAttribute('id') . '-comment" class="comment-content">' . $text . '</div>';
             $out .= '<div id="reply-comment-form-' . $this->getReplyLink()->getAttribute('id') . '" data-id="' . $this->id . '" class="reply-form-wrapper">';
 
             if ($this->wire('config')->ajax) {
