@@ -223,7 +223,6 @@
             $ids = implode('|', $changedIDs);
             $result = $commentEntries->find('id=' . $ids);
 
-            $statusReplies = [];
             foreach ($result as $comment) {
 
                 // send mails only if status is approved or spam
@@ -253,17 +252,12 @@
 
                     // execute the query to save the comment in the database
                     $query->execute();
-                    $statusReplies[] = $comment->id;
                 } catch (Exception $e) {
 
                 }
             }
 
             $this->wire('session')->remove('commentstatuschanges');
-            if ($statusReplies) {
-                // make a redirect to the same page to view the correct status of each comment
-                $this->wire('session')->redirect($_SERVER['REQUEST_URI']);
-            }
         }
 
         /**
