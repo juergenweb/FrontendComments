@@ -151,6 +151,7 @@
          */
         protected function deleteSpam(): void
         {
+
             // get all FrontendComments Inputfields
             $commentsFields = $this->wire('fields')->find('type=FieldtypeFrontendComments');
             foreach ($commentsFields as $field) {
@@ -200,45 +201,69 @@
          */
         protected function sendStatusChangeMail(HookEvent $event): void
         {
-            // run only if at least on email status notification is enabled
-            if (array_key_exists('input_fc_status_change_notification', $this->frontendCommentsConfig)) {
 
-                $fieldtypeMulti = $event->object;
+            $fieldtypeMulti = $event->object;
 
-                if ($fieldtypeMulti->className() != 'FieldtypeFrontendComments')
-                    return;
-                if (!$this->wire('session')->get('commentstatuschanges'))
-                    return;
+            if ($fieldtypeMulti->className() != 'FieldtypeFrontendComments')
+                return;
+            if (!$this->wire('session')->get('commentstatuschanges'))
+                return;
 
-                $changedIDs = $this->wire('session')->get('commentstatuschanges');
+            $changedIDs = $this->wire('session')->get('commentstatuschanges');
 
-                // get all comments with status change from the database
-                $page = $event->arguments(0);
-                $field = $event->arguments(1);
-                $fieldName = $field->name;
-                $commentEntries = $page->$fieldName;
+            // get all comments with status change from the database
+            $page = $event->arguments(0);
+            $field = $event->arguments(1);
+            $fieldName = $field->name;
+            $commentEntries = $page->$fieldName;
 
-                // create a notification object
-                $notifications = new Notifications($commentEntries);
+            // create a notification object
+            $notifications = new Notifications($commentEntries);
 
-                $ids = implode('|', $changedIDs);
-                $result = $commentEntries->find('id=' . $ids);
+            $ids = implode('|', $changedIDs);
+            $result = $commentEntries->find('id=' . $ids);
 
-                foreach ($result as $comment) {
+            $statusReplies = [];
+            foreach ($result as $comment) {
 
-                    // send mails only if status is approved or spam
-                    if (in_array((int)$comment->status, [InputfieldFrontendComments::approved, InputfieldFrontendComments::pendingApproval])) {
+                // send mails only if status is approved or spam
+                if (in_array((int)$comment->status, [InputfieldFrontendComments::approved, InputfieldFrontendComments::pendingApproval])) {
 
-                        // check if sending of emails for this status is enabled
-                        if(array_key_exists($comment->status, $this->frontendCommentsConfig)){
-                            $notifications->sendStatusChangeEmail($comment, $field, $this->frontendFormsConfig);
-                        }
-
+                    // check if sending of emails for this status is enabled
+                    if (array_key_exists($comment->status, $this->frontendCommentsConfig)) {
+                        $notifications->sendStatusChangeEmail($comment, $field, $this->frontendFormsConfig);
                     }
+
                 }
             }
-            $this->wire('session')->remove('commentstatuschanges');
 
+            // check if comment has replies and if so, change the status to 3
+            if (($comment->getReplies()->count) && ($comment->status == '2')) {
+
+                $database = $this->wire('database');
+                $table = $database->escapeTable($field->table);
+                // change comment status to 3 and save it to the database
+                $sql = "UPDATE $table SET status=:status WHERE id=:id";
+
+                // try to save the data to the database
+                try {
+                    $query = $this->database->prepare($sql);
+                    $query->bindValue(":status", '3', PDO::PARAM_INT);
+                    $query->bindValue(":id", $comment->id, PDO::PARAM_INT);
+
+                    // execute the query to save the comment in the database
+                    $query->execute();
+                    $statusReplies[] = $comment->id;
+                } catch (Exception $e) {
+
+                }
+            }
+
+            $this->wire('session')->remove('commentstatuschanges');
+            if ($statusReplies) {
+                // make a redirect to the same page to view the correct status of each comment
+                $this->wire('session')->redirect($_SERVER['REQUEST_URI']);
+            }
         }
 
         /**
@@ -1069,10 +1094,10 @@
             $notification->attr('name', 'input_fc_comment_notification');
             $notification->optionColumns = 1;
             $notification->label = $this->_('Commenter email notification');
-            $notification->description = $this->_('Send commenters notification emails about new comments');
+            $notification->description = $this->_('Send commenters notification emails about new replies');
             $notification->addOption(0, $this->_('Disabled'));
-            $notification->addOption(Comment::flagNotifyReply, $this->_('Users can receive email notifications of replies to their comment only'));
-            $notification->addOption(Comment::flagNotifyAll, $this->_('Users can receive email notifications for all new comments on the page'));
+            $notification->addOption(Comment::flagNotifyReply, $this->_('Commenters can receive email notifications of replies to their comment only'));
+            $notification->addOption(Comment::flagNotifyAll, $this->_('Commenters can receive email notifications for all new replies to a comment on the page'));
             $notification->attr('value', (int)$field->get('input_fc_comment_notification'));
             $emailFieldset->add($notification);
 
