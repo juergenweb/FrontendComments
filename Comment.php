@@ -279,6 +279,15 @@
         }
 
         /**
+         * Get the reply comments of the comment
+         * @return array
+         */
+        public function getReplies(): CommentArray
+        {
+            return $this->comments->find('parent_id='.$this->id);
+        }
+
+        /**
          * Default render method for a single comment
          * @param \FrontendComments\Comment $comment
          * @param bool $levelStatus
@@ -302,7 +311,7 @@
             $out .= '<h6 class="comment-name by-author">' . $this->getCommentAuthor()->getContent() . '</h6>';
             $out .= '<span>' . $this->getCommentDate()->getContent() . '</span>';
             // show the reply link only if max level is not reached
-            if ($levelStatus) {
+            if ($levelStatus && $this->status != '3') {
                 $this->getReplyLink()->setAttribute('data-field', $this->field->name);
                 $this->getReplyLink()->setAttribute('id', $this->field->name . '-' . $this->getReplyLink()->getAttribute('id'));
                 $this->getReplyLink()->setContent('<i class="fa fa-reply"></i>');
@@ -312,7 +321,7 @@
 
             // create the vote links with FontAwesome icons if enabled
             $showVoting = $this->field->input_fc_voting ?? $this->input_fc_voting;
-            if ($showVoting) {
+            if ($showVoting && $this->status != '3') {
                 $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->upvotes . '</span><a class="fc-vote-link" title="' . $this->_('Like the comment') . '" href="' . $this->page->url . '?vote=up&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-up"></i></a>';
                 $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="votebadge">' . $this->downvotes . '</span><a class="fc-vote-link" title="' . $this->_('Dislike the comment') . '" href="' . $this->page->url . '?vote=down&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-down"></i></a>';
             }
