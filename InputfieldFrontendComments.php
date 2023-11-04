@@ -183,7 +183,8 @@
                 $commentfieldset->entityEncodeText = false;
                 $commentfieldset->icon = self::statusIcons()[$comment->status];
                 $commentfieldset->themeColor = self::statusColors()[$comment->status];
-                $commentfieldset->label = strtoupper(self::statusTexts()[$comment->status]) . ': ' . $this->_('Comment') . ' #' . $i . ' ' . sprintf($this->_('Posted on: %s'), $this->wire('datetime')->date($this->frontendFormsConfig['input_dateformat'], $comment->created));
+                $commentfieldset->label = strtoupper(self::statusTexts()[$comment->status]) . ': ' . $this->_('Comment') . ' #' . $i . ' ' .
+                    sprintf($this->_('Posted on: %s'), $this->wire('datetime')->date($this->frontendFormsConfig['input_dateformat'], $comment->created));
                 $commentfieldset->collapsed = true;
 
                 // comment text
