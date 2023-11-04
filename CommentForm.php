@@ -206,7 +206,7 @@
                 $this->stars->setAttribute('readonly'); // set read only by default, which means no vote
                 $this->stars->setAttribute('class', 'rating-value');
                 // add the post value of the star rating to the star rating render function after form submission
-                $number = ($_POST) ? $_POST[$this->field->name . '-stars'] : '0';
+                $number = array_key_exists($this->field->name . '-stars', $_POST) ? $_POST[$this->field->name . '-stars'] : '0';
                 $this->stars->prepend(self:: ___renderStarRating((float)$number, true, $this->getID()));
                 $this->add($this->stars);
             }
@@ -214,7 +214,7 @@
             // 5) email notification about new comments
             if (array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig) && ($this->frontendCommentsConfig['input_fc_comment_notification'] !== 0)) {
                 $this->notify = new InputRadioMultiple('notification');
-                $this->notify->setlabel($this->_('Notify me about new comments'));
+                $this->notify->setlabel($this->_('Notify me about new replies'));
                 $this->notify->setRule('required');
                 $this->notify->setRule('integer');
                 $allowedValues = ($this->frontendCommentsConfig['input_fc_comment_notification'] === 1) ? ['0', '1'] : ['0', '1', '2'];
@@ -511,6 +511,12 @@
 
                                 // check if comment has remote_flag = 0, which means the status has not been changed before
                                 if ($comment->remote_flag === 0) {
+
+                                    // if status is 2 - check if comment has children (replies)
+                                    if(($newStatus === 2) && ($comment->getReplies()->count)){
+                                        // comment has replies -> set status to 3
+                                        $newStatus = 3;
+                                    }
 
                                     $sql = "UPDATE $table SET status=:status, remote_flag=:remote_flag WHERE id=:id";
 
