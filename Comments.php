@@ -125,7 +125,7 @@
             // get all comments with status approved (=1)
             if (!is_null($parent_id)) {
 
-                foreach ($comments->find('parent_id=' . $parent_id . ',status=' . InputfieldFrontendComments::approved) as $data) {
+                foreach ($comments->find('parent_id=' . $parent_id . ',status=' . InputfieldFrontendComments::approved.'|'.InputfieldFrontendComments::spamReplies) as $data) {
                     if ($data instanceof Comment) {
 
                         $out .= '<li id="comment-' . $data->id . '" class="fc-listitem">' . $this->renderSingleComment($data,
