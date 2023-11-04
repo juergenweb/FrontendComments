@@ -25,6 +25,7 @@
         const pendingApproval = 0; // status waiting for approvement
         const approved = 1; // status approved
         const spam = 2; // status SPAM
+        const spamReplies = 3; // status SPAM but comment has replies and therefore is not allowed to delete
 
         protected array $frontendFormsConfig = [];
 
@@ -216,6 +217,7 @@
                 $status->addOption(self::pendingApproval, $this->_('Pending approval'));
                 $status->addOption(self::approved, $this->_('Approved'));
                 $status->addOption(self::spam, $this->_('SPAM'));
+                $status->addOption(self::spamReplies, $this->_('SPAM, but comment has replies'));
                 $commentfieldset->add($status);
 
                 $fieldset->add($commentfieldset);
