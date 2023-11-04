@@ -413,7 +413,6 @@
 
                             if ($result && ($rowsnumber === 0)) {
 
-
                                 //2) save data to the votes table first
                                 $statement = "INSERT INTO $votesTableName (comment_id, user_id, user_agent, ip, vote)" .
                                     " VALUES (:comment_id, :user_id, :user_agent, :ip, :vote)";
@@ -472,8 +471,9 @@
 
                                 // create the alert box
                                 $alert = new Alert();
-                                $timePeriod = '3 days';
-                                $alert->setContent(sprintf($this->_('It seems that you have rated this comment within the last %s. In this case you are not allowed to vote again.'), $timePeriod));
+                                $dayslocked = $this->getFrontendCommentsInputfieldConfigValues()['input_fc_voting_lock'];
+                                $timePeriod = $dayslocked.' '.$this->_n('day', 'days', $dayslocked);
+                                $alert->setContent(sprintf($this->_('It seems that you have rated this comment within the last %s. In this case, you may not vote again.'), $timePeriod));
                                 $alert->setCSSClass('alert_dangerClass');
 
                                 echo '<div id="fc-ajax-noVote">' . $alert->render() . '</div>';
