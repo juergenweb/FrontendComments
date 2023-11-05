@@ -56,7 +56,6 @@ function loadReplyForm() {
 
                 const parser = new DOMParser();
                 let doc = parser.parseFromString(result, "text/html");
-
                 let content = doc.getElementById('reply-comment-form-' + fieldName + '-reply-' + commentId).innerHTML;
 
                 if (xhr.readyState === 4) {
@@ -88,7 +87,6 @@ function cancelReply() {
     document.addEventListener('click', (e) => {
         // check if a parent element is a link with class fc-alert-close
         if (e.target.classList.contains('fc-cancel-link')) {
-            e.preventDefault();
             document.getElementById('reply-comment-form-' + e.target.dataset.field + '-reply-' + e.target.dataset.id).innerHTML = '';
         }
     });
