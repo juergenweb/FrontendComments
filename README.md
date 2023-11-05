@@ -29,6 +29,7 @@ Processwire Fieldtype/Inputfield to add and manage comments on your site based o
 * [Installation and Quick-start guide](#installation-and-quick-start-guide)
 * [Public methods to change field parameters in templates](#public-methods-to-change-field-parameters-in-templates)
 * [Queuing notification emails](#queuing-notification-emails)
+* [What happens if a comment, which has replies, will be declared as SPAM](#what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam)
   
 
 ## Configurations
