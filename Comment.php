@@ -272,7 +272,7 @@
                     $thumb = $user->$imageFieldName->size((int)$this->frontendCommentsConfig['input_fc_imagesize'], (int)$this->frontendCommentsConfig['input_fc_imagesize']);
                     // set src attribute
                     $this->avatar->setAttribute('src', $thumb->url);
-                    $out = $this->avatar->___render();
+                    $out = '<div class="comment-avatar">' .  $this->avatar->___render() . '</div>';
                 }
             }
             return $out;
@@ -286,6 +286,7 @@
         {
             return $this->comments->find('parent_id='.$this->id);
         }
+
 
         /**
          * Default render method for a single comment
@@ -303,28 +304,31 @@
             if ($level === 0) {
                 $out .= '<div id="comment-wrapper-' . $comment->id . '" class="comment-main-level">';
             }
-            $out .= '<div class="comment-avatar">' . $this->___renderAvatar() . '</div>';
+
 
             $out .= '<div class="comment-box">';
 
             $out .= '<div class="comment-head">';
+            $out .= $this->___renderAvatar();
             $out .= '<h6 class="comment-name by-author">' . $this->getCommentAuthor()->getContent() . '</h6>';
-            $out .= '<span>' . $this->getCommentDate()->getContent() . '</span>';
+            $out .= '<span class="comment-date">' . $this->getCommentDate()->getContent() . '</span>';
             // show the reply link only if max level is not reached
+            $out .= '<div class="fc-icons">';
             if ($levelStatus && $this->status != '3') {
                 $this->getReplyLink()->setAttribute('data-field', $this->field->name);
                 $this->getReplyLink()->setAttribute('id', $this->field->name . '-' . $this->getReplyLink()->getAttribute('id'));
                 $this->getReplyLink()->setContent('<i class="fa fa-reply"></i>');
-                $out .= $this->getReplyLink()->___render();
+                $out .= '<span class="icon-box">'.$this->getReplyLink()->___render().'</span>';
 
             }
 
             // create the vote links with FontAwesome icons if enabled
             $showVoting = $this->field->input_fc_voting ?? $this->input_fc_voting;
             if ($showVoting && $this->status != '3') {
-                $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->upvotes . '</span><a class="fc-vote-link" title="' . $this->_('Like the comment') . '" href="' . $this->page->url . '?vote=up&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-up"></i></a>';
-                $out .= '<span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="votebadge">' . $this->downvotes . '</span><a class="fc-vote-link" title="' . $this->_('Dislike the comment') . '" href="' . $this->page->url . '?vote=down&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-down"></i></a>';
+                $out .= '<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->upvotes . '</span><a class="fc-vote-link" title="' . $this->_('Like the comment') . '" href="' . $this->page->url . '?vote=up&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-up"></i></a></span>';
+                $out .= '<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="votebadge">' . $this->downvotes . '</span><a class="fc-vote-link" title="' . $this->_('Dislike the comment') . '" href="' . $this->page->url . '?vote=down&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-down"></i></a></span>';
             }
+            $out .= '</div>';
 
             // star rating
             $showStarRating = $this->field->input_fc_stars ?? $this->input_fc_stars;
@@ -337,7 +341,7 @@
                 $text = $this->getCommentText()->___render();
             } else {
                 // comment is SPAM, but has replies
-                $text = '<div class="comment-removed">'.$this->_('This comment was removed by a moderator because it does not comply with our comment guidelines.').'</div>';
+                $text = '<div class="comment-removed">'.$this->_('This comment has been removed by a moderator because it does not comply with our comment guidelines.').'</div>';
             }
 
             $out .= '<div id="' . $this->getReplyLink()->getAttribute('id') . '-comment" class="comment-content">' . $text . '</div>';
