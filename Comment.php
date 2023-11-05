@@ -143,7 +143,7 @@
             $this->replyLink->setAttribute('class', 'fc-comment-reply');
             $this->replyLink->setAttribute('title', $this->_('Reply to this comment'));
             $this->replyLink->setLinkText($this->_('Reply'));
-            $this->replyLink->setUrl('#');
+            $this->replyLink->setUrl('#reply-comment-form-'.$this->field->name.'-reply-'.$this->getId());
             $this->replyLink->setAttribute('data-field', $this->field->name);
             $this->replyLink->setAttribute('data-parent_id', $this->parent_id);
             $this->replyLink->setAttribute('data-id', $this->id);
