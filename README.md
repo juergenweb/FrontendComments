@@ -248,4 +248,4 @@ In this case, the comment will not be deleted, like a normal SPAM comment and al
 
 You do not have to take care, if a comment has replies or not, if you declare a comment as "SPAM" - it will be checked before the saving process via a Hook. If replies are present, the status will be automatically changed to "SPAM with replies" by the Hook function.
 
-
+![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-banned.png?raw=true)
