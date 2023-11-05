@@ -239,7 +239,7 @@ Technically, this works by writing each notification email into a row inside a c
 Only to mention: This only happens to notification emails for commenters, not for moderators. Moderators will get the notification email about a new comment immediately, so they can react just in time (fe approve the comment or mark the comment as Spam).
 
 ## What happens if a comment, which has replies, will be declared as SPAM
-By default, all comments that are declared as SPAM are no longer visible on the frontend and are deleted after a certain number of days if this has been set. This is fine as long as the comment has no replies. 
+By default, all comments that are declared as SPAM are no longer visible on the frontend and will be deleted after a certain number of days if this has been set inside the moudule configuration. This is fine as long as the comment has no replies. 
 
 If a comment has replies and you declare it as SPAM, all children (replies) are also no longer visible. This is not really desirable as you are disabling many comments at once (even comments with content that does not violate the comment guidelines). This could lead to commenters being frustrated that their comment is no longer visible.
 
@@ -247,7 +247,7 @@ To prevent this behaviour, all comments with replies that are declared as "SPAM"
 
 In this case, the comment will not be deleted, like a normal SPAM comment, and all replies will still be visible in the frontend.
 
-You don't have to worry about whether a comment has replies or not if you declare a comment as "SPAM" - it will be checked via a hook before saving. If replies are available, the status is automatically changed to "SPAM with replies" by the hook function.
+You don't have to worry about whether a comment has replies or not if you declare a comment as "SPAM" - it will be checked via a hook before saving. If replies are available, the status will be automatically changed to "SPAM with replies" by the hook function.
 
 In addition, the reply link symbol and the "Like" or "Dislike" buttons will be removed from this comment.
 
