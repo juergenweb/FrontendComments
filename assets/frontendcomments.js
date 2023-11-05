@@ -12,7 +12,7 @@ Created: 20.07.2023
  * @param elementId
  */
 function scrollSmoothTo(elementId) {
-    var element = document.getElementById(elementId);
+    let element = document.getElementById(elementId);
     element.scrollIntoView({ block: 'start',  behavior: 'smooth' });
 }
 
@@ -97,14 +97,15 @@ function loadReplyForm() {
 function cancelReply() {
     document.addEventListener('click', (e) => {
 
-        e.preventDefault();
         // check if a parent element is a link with class fc-alert-close
         if (e.target.classList.contains('fc-cancel-link')) {
+            e.preventDefault();
             document.getElementById('reply-comment-form-' + e.target.dataset.field + '-reply-' + e.target.dataset.id).innerHTML = '';
             scrollSmoothTo('comment-' + e.target.dataset.id);
         }
     });
 }
+
 
 /**
  * Add the value of the stars to the hidden inputfield,
@@ -268,6 +269,7 @@ docReady(function () {
 
     // remove the reply form by clicking on the cancel link in the top right corner of the form
     cancelReply();
+
     // load the reply form by clicking the reply link via Ajax into the form container
     loadReplyForm();
 
@@ -278,8 +280,6 @@ docReady(function () {
         executeRating();
         resetRating();
     }
-
     makeVote();
-
 
 });
