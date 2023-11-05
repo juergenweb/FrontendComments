@@ -239,14 +239,17 @@ Technically, this works by writing each notification email into a row inside a c
 Only to mention: This only happens to notification emails for commenters, not for moderators. Moderators will get the notification email about a new comment immediately, so they can react just in time (fe approve the comment or mark the comment as Spam).
 
 ## What happens if a comment, which has replies, will be declared as SPAM
-By default, all comments, which will be declared as SPAM are no longer visible on the frontend and will be deleted after a certain amount of days if set. This is fine as long as the comment has no replies. 
+By default, all comments that are declared as SPAM are no longer visible on the frontend and are deleted after a certain number of days if this has been set. This is fine as long as the comment has no replies. 
 
-If a comment has replies and you declare it as SPAM, all the children (replies) are no longer visible too. This is not really wanted, because you disable many comments at once (even comments with content that do not conflict, with the comment guidelines). This could lead to that commenters are frustrated, that their comment is no longer visible.
+If a comment has replies and you declare it as SPAM, all children (replies) are also no longer visible. This is not really desirable as you are disabling many comments at once (even comments with content that does not violate the comment guidelines). This could lead to commenters being frustrated that their comment is no longer visible.
 
-To prevent this behavior, all comments with replies, which will be declared as "SPAM" will be declared as "SPAM with replies". This means, that the comment will be visible, but the comment text will be replaced by the following text: "This comment was removed by a moderator because it does not comply with our comment guidelines."
+To prevent this behaviour, all comments with replies that are declared as "SPAM" will be declared as "SPAM with replies". This means that the comment will be visible, but the comment text will be replaced with the following text: "This comment has been removed by a moderator because it does not comply with our comment guidelines."
 
-In this case, the comment will not be deleted, like a normal SPAM comment and all the replies are still visible on the frontend.
+In this case, the comment will not be deleted, like a normal SPAM comment, and all replies will still be visible in the frontend.
 
-You do not have to take care, if a comment has replies or not, if you declare a comment as "SPAM" - it will be checked before the saving process via a Hook. If replies are present, the status will be automatically changed to "SPAM with replies" by the Hook function.
+You don't have to worry about whether a comment has replies or not if you declare a comment as "SPAM" - it will be checked via a hook before saving. If replies are available, the status is automatically changed to "SPAM with replies" by the hook function.
+
+In addition, the reply link symbol and the "Like" or "Dislike" buttons will be removed from this comment.
+
 
 ![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-banned.png?raw=true)
