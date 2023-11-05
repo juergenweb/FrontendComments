@@ -236,3 +236,16 @@ To prevent such issues by sending a large amount of mails at once, all notificat
 Technically, this works by writing each notification email into a row inside a custom database table. Each time LazyCron will be triggered, 20 mails in this table will be sent out, and the rows will be deleted afterwards. On the next LazyCron run, the next 20 mails will be sent and so on until there is no mail left in this database table.
 
 Only to mention: This only happens to notification emails for commenters, not for moderators. Moderators will get the notification email about a new comment immediately, so they can react just in time (fe approve the comment or mark the comment as Spam).
+
+## What happens if a comment, which has replies, will be declared as SPAM
+By default, all comments, which will be declared as SPAM are no longer visible on the frontend and will be deleted after a certain amount of days if set. This is fine as long as the comment has no replies. 
+
+If a comment has replies and you declare it as SPAM, all the children (replies) are no longer visible too. This is not really wanted, because you disable many comments at once (even comments with content that do not conflict, with the comment guidelines). This could lead to that commenters are frustrated, that their comment is no longer visible.
+
+To prevent this behavior, all comments with replies, which will be declared as "SPAM" will be declared as "SPAM with replies". This means, that the comment will be visible, but the comment text will be replaced by the following text: "This comment was removed by a moderator because it does not comply with our comment guidelines."
+
+In this case, the comment will not be deleted, like a normal SPAM comment and all the replies are still visible on the frontend.
+
+You do not have to take care, if a comment has replies or not, if you declare a comment as "SPAM" - it will be checked before the saving process via a Hook. If replies are present, the status will be automatically changed to "SPAM with replies" by the Hook function.
+
+
