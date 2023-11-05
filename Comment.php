@@ -127,16 +127,19 @@
 
             // commentCreated
             $this->commentCreated = new TextElements();
+            $this->commentCreated->setTag('span');
             $this->commentCreated->setContent($this->getCreated());
-            $this->commentCreated->setAttribute('class', 'fc-comment-created');
+            $this->commentCreated->setAttribute('class', 'comment-date');
 
-            // commentCreated
+            // commentAuthor
             $this->commentAuthor = new TextElements();
+            $this->commentAuthor->setTag('h6');
             $this->commentAuthor->setContent($this->getAuthor());
-            $this->commentAuthor->setAttribute('class', 'fc-comment-author');
+            $this->commentAuthor->setAttribute('class', 'comment-name by-author');
 
             // reply Link
-            $this->replyLink = new Link('reply-' . $this->getId());
+            //$this->replyLink = new Link('reply-' . $this->getId());
+            $this->replyLink = new Link($this->field->name . '-reply-' . $this->getId());
             $this->replyLink->setAttribute('class', 'fc-comment-reply');
             $this->replyLink->setAttribute('title', $this->_('Reply to this comment'));
             $this->replyLink->setLinkText($this->_('Reply'));
@@ -144,6 +147,8 @@
             $this->replyLink->setAttribute('data-field', $this->field->name);
             $this->replyLink->setAttribute('data-parent_id', $this->parent_id);
             $this->replyLink->setAttribute('data-id', $this->id);
+            //$this->replyLink->setAttribute('id', $this->field->name . '-' . $this->replyLink->getAttribute('id'));
+            $this->replyLink->setContent('<i class="fa fa-reply"></i>');
 
             // reply form
             $this->form = new CommentForm($comments, 'reply-form-' . $this->getId(), $this->getId());
@@ -216,6 +221,11 @@
             return $this->user_id;
         }
 
+        public function getAuthorElement(): TextElements
+        {
+            return $this->commentAuthor;
+        }
+
         /**
          * Get the comment text object
          * @return TextElements
@@ -229,10 +239,17 @@
          * Get the comment creation text object
          * @return TextElements
          */
-        public function getCommentDate(): TextElements
+        public function getCommentDateElement(): TextElements
         {
             return $this->commentCreated;
         }
+
+        public function ___renderCreated(): string
+        {
+            return $this->getCommentDateElement()->render();
+        }
+
+
 
         /**
          * Get the comment author object
@@ -278,6 +295,11 @@
             return $out;
         }
 
+        public function ___renderAuthor(): string
+        {
+            return $this->getAuthorElement()->render();
+        }
+
         /**
          * Get the reply comments of the comment
          * @return array
@@ -310,16 +332,12 @@
 
             $out .= '<div class="comment-head">';
             $out .= $this->___renderAvatar();
-            $out .= '<h6 class="comment-name by-author">' . $this->getCommentAuthor()->getContent() . '</h6>';
-            $out .= '<span class="comment-date">' . $this->getCommentDate()->getContent() . '</span>';
+            $out .= $this->___renderAuthor();
+            $out .= $this->___renderCreated();
             // show the reply link only if max level is not reached
             $out .= '<div class="fc-icons">';
             if ($levelStatus && $this->status != '3') {
-                $this->getReplyLink()->setAttribute('data-field', $this->field->name);
-                $this->getReplyLink()->setAttribute('id', $this->field->name . '-' . $this->getReplyLink()->getAttribute('id'));
-                $this->getReplyLink()->setContent('<i class="fa fa-reply"></i>');
                 $out .= '<span class="icon-box">'.$this->getReplyLink()->___render().'</span>';
-
             }
 
             // create the vote links with FontAwesome icons if enabled
@@ -345,7 +363,7 @@
             }
 
             $out .= '<div id="' . $this->getReplyLink()->getAttribute('id') . '-comment" class="comment-content">' . $text . '</div>';
-            $out .= '<div id="reply-comment-form-' . $this->getReplyLink()->getAttribute('id') . '" data-id="' . $this->id . '" class="reply-form-wrapper">';
+            $out .= '<div id="reply-comment-form-' . $this->getReplyLink()->getAttribute('id') . '" class="reply-form-wrapper" data-id="' . $this->id . '" >';
 
             if ($this->wire('config')->ajax) {
 
