@@ -8,6 +8,15 @@ Created: 20.07.2023
 */
 
 /**
+ * Function to scroll to an element like an internal anchor, but without changing the url
+ * @param elementId
+ */
+function scrollSmoothTo(elementId) {
+    var element = document.getElementById(elementId);
+    element.scrollIntoView({ block: 'start',  behavior: 'smooth' });
+}
+
+/**
  * Function to check if the document is completely loaded
  * @param fn
  */
@@ -36,6 +45,8 @@ function loadReplyForm() {
             let commentId = link.dataset.id;
             let fieldName = link.dataset.field;
             let url = document.location.href;
+
+            scrollSmoothTo('reply-comment-form-' + fieldName + '-reply-' + commentId);
 
             // check if a hashtag is present and remove it, because a hashtag leads to blocking the form load
             if (document.location.hash) {
@@ -85,9 +96,12 @@ function loadReplyForm() {
  */
 function cancelReply() {
     document.addEventListener('click', (e) => {
+
+        e.preventDefault();
         // check if a parent element is a link with class fc-alert-close
         if (e.target.classList.contains('fc-cancel-link')) {
             document.getElementById('reply-comment-form-' + e.target.dataset.field + '-reply-' + e.target.dataset.id).innerHTML = '';
+            scrollSmoothTo('comment-' + e.target.dataset.id);
         }
     });
 }
