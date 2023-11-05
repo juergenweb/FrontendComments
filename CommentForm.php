@@ -250,7 +250,7 @@
             $this->cancel->setLinkText($this->_('Cancel'));
             $this->cancel->setAttribute('title', $this->_('Click to cancel the reply'));
             $this->cancel->wrap();
-            $this->cancel->setUrl('#'.$this->field->name.'-reply-'.$this->parent_id.'-comment');
+            $this->cancel->setUrl('#comment-'.$this->parent_id);
 
             // set the alert object for further manipulations later on
             $this->alert = $this->getAlert();
