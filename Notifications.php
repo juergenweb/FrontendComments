@@ -29,6 +29,7 @@
 
         protected array $statusTexts = [];
         protected array $frontendCommentsConfig = [];
+        protected array $frontendFormsConfig = [];
         protected CommentArray $comments;
         protected Page $page;
         protected Field $field;
@@ -48,6 +49,7 @@
 
             // grab configuration values from the FrontendComments input field
             $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
+            $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
         }
 
         /**
