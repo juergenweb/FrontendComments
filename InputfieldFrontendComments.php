@@ -30,6 +30,9 @@
         protected array $frontendFormsConfig = [];
 
 
+        /**
+         * @throws \ProcessWire\WireException
+         */
         public function __construct()
         {
             parent::__construct();
@@ -217,10 +220,11 @@
                 $status->label = $this->_('Status');
                 $status->attr('id|name', $this->name . '_status_' . $comment->id);
                 $status->attr('value', $comment->status);
-                $status->addOption(self::pendingApproval, $this->_('Pending approval'));
+                $status->addOption(self::pendingApproval, $this->_('Pending approval'), ['disabled' => 'disabled']);
                 $status->addOption(self::approved, $this->_('Approved'));
                 $status->addOption(self::spam, $this->_('SPAM'));
                 $status->addOption(self::spamReplies, $this->_('SPAM, but comment has replies'));
+                $status->notes = $this->_('Status "Pending approval" cannot be selected.');
                 $commentfieldset->add($status);
 
                 $fieldset->add($commentfieldset);
