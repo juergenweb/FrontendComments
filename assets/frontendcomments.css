@@ -232,17 +232,7 @@ Created: 20.07.2023
 }
 
 @media only screen and (min-width: 481px) {
-    .comments-container {
-        width: auto;
-    }
 
-    .comments-list .comment-box {
-        width: auto
-    }
-
-    .reply-list .comment-box {
-        width: 98%;
-    }
 
     .fc-icons {
         float: right;
