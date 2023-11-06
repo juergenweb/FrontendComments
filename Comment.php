@@ -83,7 +83,7 @@
         protected Link $replyLink; // same as the reply button, but as a link
         protected Link $upvote; // link to like the comment
         protected Link $downvote; // link to dislike the comment
-        protected TextElements $rating; // the star rating element.
+
         protected TextElements $commentText; // the comment text object
         protected TextElements $commentRemoved; // the text if comment has been removed by a moderator
 
@@ -162,18 +162,13 @@
 
             // Down-vote link
             $this->downvote = new Link();
-            $this->upvote->setUrl($this->page->url . '?vote=down&votecommentid=' . $this->id);
+            $this->downvote->setUrl($this->page->url . '?vote=down&votecommentid=' . $this->id);
             $this->downvote->setAttribute('class', 'fc-vote-link');
             $this->downvote->setAttribute('title', $this->_('Dislike the comment'));
             $this->downvote->setAttribute('data-field', $this->field->name);
             $this->downvote->setAttribute('data-commentid', $this->id);
             $this->downvote->setLinkText('<i class="fa fa-thumbs-down"></i>');
             $this->downvote->prepend('<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">'.$this->downvotes.'</span>')->append('</span>');
-
-            // Star rating
-            $this->rating = new TextElements();
-            $this->rating->setAttribute('class', 'star-rating-comment');
-            $this->rating->setContent(CommentForm::___renderStarRating((float)$this->stars));
 
             // Comment text
             $this->commentText = new TextElements();
@@ -304,10 +299,7 @@
             return $this->downvote;
         }
 
-        public function getRatingElement(): TextElements
-        {
-            return $this->rating;
-        }
+
 
         public function getCommentRemovedTextElement(): TextElements
         {
@@ -390,7 +382,7 @@
             $out = '';
             $showStarRating = $this->field->input_fc_stars ?? $this->input_fc_stars;
             if ($showStarRating) {
-                $out = $this->getRatingElement()->___render();
+                $out = CommentArray::___renderStarsOnly($this->stars, true);
             }
             return $out;
         }
