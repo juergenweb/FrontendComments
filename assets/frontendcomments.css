@@ -110,6 +110,15 @@ Created: 20.07.2023
     border-radius: 4px 4px 0 0;
 }
 
+.comment-box .comment-head .star-rating {
+    margin-left: 5px;
+    top: 0;
+}
+
+.comment-box .comment-head .star-rating > span {
+    color: #dabd18b2;
+}
+
 .comment-box .comment-head i {
     float: right;
     position: relative;
@@ -289,4 +298,35 @@ Created: 20.07.2023
     color: #dabd18b2;
     text-shadow: 0 0 5px #ddd;
 }
+
+
+/*
+* empty star f006
+* half star f123
+* full star f005
+ */
+
+.full-star, .half-star, .empty-star {
+    font-family: FontAwesome;
+    margin-right: 2px;
+    color: #dabd18b2;
+}
+
+.star-rating > span.full-star:before {
+    content: "\f005";
+
+}
+
+.star-rating > span.half-star:before {
+    content: "\f123";
+
+}
+
+.star-rating > span.empty-star:before {
+    content: "\f006";
+
+}
+
+
+
 
