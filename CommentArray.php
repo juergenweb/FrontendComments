@@ -85,6 +85,79 @@
         }
 
         /**
+         * Helper function to round to certain steps (half, quarter,..)
+         * @param $num
+         * @param $parts -> 2 = half steps, 4 = quarter steps,....
+         * @return float|int
+         */
+        protected function mRound($num, $parts): float
+        {
+            $res = $num * $parts;
+            $res = round($res);
+            return $res / $parts;
+        }
+
+        /**
+         * Calculate the average Rating of all comments
+         * @return string
+         */
+        public function getAverageStarRating()
+        {
+            // find all comments with rating (not null)
+            $values = [];
+            foreach ($this as $comment) {
+                if (!is_null($comment->stars)) {
+                    $values[] = $comment->stars;
+                }
+            }
+
+            if (count($values) > 0) {
+                $averageValue = array_sum($values) / count($values);
+                $rounded = round($averageValue, 1,);
+                $rounded = $this->mRound($rounded, 2);
+                return $rounded;
+            }
+            return null;
+        }
+
+        /**
+         * Render FontAwesome stars depending on half step number
+         * @param float $stars
+         * @return string
+         */
+        public static function ___renderStarsOnly(float|int|null $stars, bool $showNull = false): string
+        {
+            $out = '';
+            if($showNull && $stars == null){
+                $stars = 0;
+            }
+            if (!is_null($stars)) {
+                $out = '<span class="star-rating">';
+
+                $fullStars = round($stars, 0, PHP_ROUND_HALF_DOWN);
+
+                $halfStars = (($stars - $fullStars) === 0.0) ? 0 : 1;
+                $emptyStars = 5 - $fullStars - $halfStars;
+                // full stars
+                if($fullStars){
+                    for ($x = 1; $x <= $fullStars; $x++) {
+                        $out .= '<span class="full-star"></span>';
+                    }
+                }
+                if($halfStars){
+                    $out .= '<span class="half-star"></span>';
+                }
+                if($emptyStars){
+                    for ($x = 1; $x <= $emptyStars; $x++) {
+                        $out .= '<span class="empty-star"></span>';
+                    }
+                }
+                $out .= '</span>';
+            }
+            return $out;
+        }
+
+        /**
          * Public function to change the reply depth
          * @param int $depth - 1, 2, 3... must be higher than 0
          * @return $this
@@ -241,7 +314,6 @@
         // input_fc_captcha
 
 
-
         /**
          * Create a new blank CommentArray and add a page and field to it
          * @return \ProcessWire\WireArray
@@ -361,7 +433,7 @@
          */
         public function render(): string
         {
-            if (array_key_exists('input_fc_outputorder', $this->getFrontendCommentsInputfieldConfigValues())){
+            if (array_key_exists('input_fc_outputorder', $this->getFrontendCommentsInputfieldConfigValues())) {
                 $this->input_fc_outputorder = $this->getFrontendCommentsInputfieldConfigValues()['input_fc_outputorder'];
             }
 
@@ -472,7 +544,7 @@
                                 // create the alert box
                                 $alert = new Alert();
                                 $dayslocked = $this->getFrontendCommentsInputfieldConfigValues()['input_fc_voting_lock'];
-                                $timePeriod = $dayslocked.' '.$this->_n('day', 'days', $dayslocked);
+                                $timePeriod = $dayslocked . ' ' . $this->_n('day', 'days', $dayslocked);
                                 $alert->setContent(sprintf($this->_('It seems that you have rated this comment within the last %s. In this case, you may not vote again.'), $timePeriod));
                                 $alert->setCSSClass('alert_dangerClass');
 
@@ -482,7 +554,6 @@
                     }
                 }
             }
-
 
 
             // show the form on top only if id=0 or id is different, but query string with code is present
