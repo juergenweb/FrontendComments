@@ -31,6 +31,8 @@
     require_once($dirname . "/Comment.php");
     require_once($dirname . "/Notifications.php");
     require_once($dirname . "/InputfieldFrontendComments.php");
+    require_once($dirname . "/Uikit3Comment.php");
+    require_once($dirname . "/Bootstrap5Comment.php");
 
     class FieldtypeFrontendComments extends FieldtypeMulti
     {
