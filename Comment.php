@@ -2,7 +2,7 @@
     declare(strict_types=1);
 
     /*
-     * This file contains all methods to render and manipulate a single comment
+     * This file contains all methods to render and manipulate a single comment including the reply form
      *
      * Created by Jürgen K.
      * https://github.com/juergenweb
@@ -22,7 +22,6 @@
      * @property protected Field $field: the field object for the comment field
      * @property protected array $frontendFormsConfig: the configuration values as set in FrontendForms
      * @property protected array $frontendCommentsconfig: the configuration values as set in by this module
-     * @property protected array $userdata: session value, that contains ip, user_agent and user id of the user visiting the page
      * @property protected int|null|bool $input_fc_stars: show star rating or not
      * @property protected int|null|bool $input_fc_voting: show voting options or not
      *
@@ -41,21 +40,23 @@
 
     namespace FrontendComments;
 
-    use FrontendForms\Link;
+    use FrontendForms\Link as Link;
     use ProcessWire\Field;
     use ProcessWire\Page;
     use ProcessWire\WireData;
     use FrontendForms\TextElements;
     use FrontendForms\Image;
     use ProcessWire\WireException;
+    use FrontendComments\Bootstrap5Comment;
+
 
     class Comment extends WireData
     {
 
         use configValues;
 
-        const flagNotifyReply = 1; //Flag to indicate author of this comment wants to be notified of replies to their comment
-        const flagNotifyAll = 2; // Flag to indicate author of this comment wants to be notified of all comments on page
+        const flagNotifyReply = 1; //Flag to indicate the author of this comment wants to be notified of replies to their comment
+        const flagNotifyAll = 2; // Flag to indicate the author of this comment wants to be notified of all comments on the page
 
         // set default comment properties
         protected string|int $id = 0;
@@ -67,12 +68,10 @@
         protected string $author = '';
         protected string $text = '';
         protected array $comment = [];
-        protected array $userdata = [];
         protected array $frontendFormsConfig = [];
         protected array $frontendCommentsConfig = [];
         protected int|bool|null $input_fc_stars = false;
         protected int|bool|null $input_fc_voting = false;
-
 
         protected CommentArray $comments; // the array containing all comments of this page
         protected Field $field;
@@ -83,11 +82,8 @@
         protected Link $replyLink; // same as the reply button, but as a link
         protected Link $upvote; // link to like the comment
         protected Link $downvote; // link to dislike the comment
-
         protected TextElements $commentText; // the comment text object
         protected TextElements $commentRemoved; // the text if comment has been removed by a moderator
-
-
         protected CommentForm $form; // the form object for replies
 
         /**
@@ -99,7 +95,7 @@
 
             // set defaults for the comment as fallback for non-provided values
             $this->created = time(); // current time of creation as default value
-
+            $this->comment = $comment;
             $this->comments = $comments; // the CommentArray object
             $this->field = $comments->getField(); // Processwire comment field object
             $this->page = $comments->getPage(); // the current page object, which contains the comment field
@@ -120,27 +116,27 @@
                 $this->$name = $value;
             }
 
-            // Instantiate all the elements for the comment
+            // Instantiate all the elements for the comment and set the properties
 
-            // avatar
+            // Image
             $this->avatar = new Image();
             $this->avatar->setAttribute('class', 'avatar');
             $this->avatar->prepend('<div class="comment-avatar">')->append('</div>');
 
-            // commentAuthor
+            // Author name
             $this->commentAuthor = new TextElements();
             $this->commentAuthor->setTag('h6');
             $this->commentAuthor->setContent($this->getAuthor());
             $this->commentAuthor->setAttribute('class', 'comment-name by-author');
 
-            // commentCreated
+            // Creation date
             $this->commentCreated = new TextElements();
             $this->commentCreated->setTag('span');
             $this->commentCreated->setContent($this->getCreated());
             $this->commentCreated->setAttribute('class', 'comment-date');
 
             // Reply Link
-            $this->replyLink = new Link($this->field->name.'-reply-'.$this->getId());
+            $this->replyLink = new Link($this->field->name . '-reply-' . $this->getId());
             $this->replyLink->setUrl('#reply-comment-form-' . $this->field->name . '-reply-' . $this->getId());
             $this->replyLink->setAttribute('class', 'fc-comment-reply');
             $this->replyLink->setAttribute('title', $this->_('Reply to this comment'));
@@ -158,7 +154,7 @@
             $this->upvote->setAttribute('data-field', $this->field->name);
             $this->upvote->setAttribute('data-commentid', $this->id);
             $this->upvote->setLinkText('<i class="fa fa-thumbs-up"></i>');
-            $this->upvote->prepend('<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">'.$this->upvotes.'</span>')->append('</span>');
+            $this->upvote->prepend('<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->upvotes . '</span>')->append('</span>');
 
             // Down-vote link
             $this->downvote = new Link();
@@ -168,7 +164,7 @@
             $this->downvote->setAttribute('data-field', $this->field->name);
             $this->downvote->setAttribute('data-commentid', $this->id);
             $this->downvote->setLinkText('<i class="fa fa-thumbs-down"></i>');
-            $this->downvote->prepend('<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">'.$this->downvotes.'</span>')->append('</span>');
+            $this->downvote->prepend('<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->downvotes . '</span>')->append('</span>');
 
             // Comment text
             $this->commentText = new TextElements();
@@ -251,7 +247,6 @@
             return $this->user_id;
         }
 
-
         /**
          * Get the comment text object
          * @return TextElements
@@ -298,8 +293,6 @@
         {
             return $this->downvote;
         }
-
-
 
         public function getCommentRemovedTextElement(): TextElements
         {
@@ -354,7 +347,6 @@
             return $this->getCreatedElement()->___render();
         }
 
-
         public function ___renderReply(bool $levelStatus): string
         {
             $out = '';
@@ -398,16 +390,19 @@
             return $out;
         }
 
-
         /**
          * Get the reply comments of the comment
-         * @return array
+         * @return \FrontendComments\CommentArray
          */
         public function getReplies(): CommentArray
         {
             return $this->comments->find('parent_id=' . $this->id);
         }
 
+        /**
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
+         */
         public function ___renderCommentMarkup(bool $levelStatus): string
         {
             $out = '<div class="comment-box">';
@@ -431,7 +426,6 @@
             return $out;
         }
 
-
         /**
          * Default render method for a single comment
          * @param \FrontendComments\Comment $comment
@@ -441,7 +435,7 @@
          * @throws \ProcessWire\WireException
          * @throws \ProcessWire\WirePermissionException
          */
-        public function renderDefault(Comment $comment, bool $levelStatus, int $level): string
+        public function ___renderComment(Comment $comment, bool $levelStatus, int $level): string
         {
 
             $out = '<div id="' . $this->field->name . '-' . $comment->id . '-novote"></div>'; // wrapper for no vote alert box
@@ -449,8 +443,16 @@
                 $out .= '<div id="comment-wrapper-' . $comment->id . '" class="comment-main-level">';
             }
 
-            $out .= $this->___renderCommentMarkup($levelStatus);
+            // render the comment markup depending on CSS framework set in the configuration
+            $frameWork = ucfirst(pathinfo($this->frontendFormsConfig['input_framework'], PATHINFO_FILENAME));
+            $className = 'FrontendComments\\'.$frameWork.'Comment';
+            if (class_exists($className)){
+                $class = new $className($this->comment, $this->comments);
+            } else {
+                $class = $this;
+            }
 
+            $out .= $class->___renderCommentMarkup($levelStatus);
 
             $out .= '<div id="reply-comment-form-' . $this->getReplyElement()->getAttribute('id') . '" class="reply-form-wrapper" data-id="' . $this->id . '" >';
 
@@ -474,82 +476,6 @@
                 $out .= '</div>';
             }
             return $out;
-        }
-
-        /**
-         * Render method for creating Uikit3 output
-         * @param \FrontendComments\Comment $comment
-         * @param bool $levelStatus
-         * @return string
-         * @throws \ProcessWire\WireException
-         */
-        public function renderUikit3(Comment $comment, bool $levelStatus): string
-        {
-
-            $out = '<article id="comment-wrapper-' . $comment->id . '" class="uk-comment" role="comment">';
-            $out .= '<header class="uk-comment-header">';
-            $out .= '<div class="uk-grid-medium uk-flex-middle" data-uk-grid>';
-
-            // Avatar image
-            $this->avatar->setAttribute('class', 'uk-comment-avatar');
-            $this->avatar->setAttribute('width', '80');
-            $this->avatar->setAttribute('height', '80');
-            $this->frontendCommentsConfig['input_fc_imagesize'] = 80;
-            $this->avatar->prepend('<div class="uk-width-auto">')->append('</div>');
-            $out .= $this->___renderAvatar();
-
-
-            $out .= '<div class="uk-width-expand">';
-
-            // Author name
-            $this->commentAuthor->setTag('h4');
-            $this->commentAuthor->removeAttribute('class');
-            $this->commentAuthor->setAttribute('class', 'uk-comment-title uk-margin-remove');
-
-            $authorLink = new Link();
-            $authorLink->setAttribute('class', 'uk-link-reset');
-            $authorLink->setLinkText($this->getAuthor());
-            $authorLink->setUrl('#');
-            //$this->commentAuthor->setContent($authorLink->___render());
-            $this->commentAuthor->setContent($this->getAuthor());
-            $out .= $this->___renderAuthor();
-
-
-            $out .= '<ul class="uk-comment-meta uk-subnav uk-subnav-divider uk-margin-remove-top">';
-
-
-            $out .= '<li><a href="#">' . $this->___renderCreated() . '</a></li>';
-            // show the reply link only if max level is not reached
-            if ($levelStatus) {
-                $out .= '<li>' . $this->getReplyLink()->___render() . '</li>';
-            }
-            $out .= '</ul>';
-            $out .= '</div>';
-            $out .= '</div>';
-            $out .= '</header>';
-            $out .= '<div class="uk-comment-body">';
-            $out .= '<p>' . $this->getCommentText()->___render() . '</p>';
-            $out .= '</div>';
-            $out .= '</article>';
-            return $out;
-        }
-
-        /**
-         * Render the markup of a comment
-         * @param \FrontendComments\Comment $comment
-         * @param bool $levelStatus
-         * @param int $level
-         * @return string
-         * @throws \ProcessWire\WireException
-         * @throws \ProcessWire\WirePermissionException
-         */
-        public function ___renderComment(Comment $comment, bool $levelStatus, int $level): string
-        {
-            $frameWork = ucfirst(pathinfo($this->frontendFormsConfig['input_framework'], PATHINFO_FILENAME));
-            $methodName = 'render' . $frameWork;
-            if (method_exists($this, $methodName))
-                return $this->$methodName($comment, $levelStatus, $level);
-            return $this->renderDefault($comment, $levelStatus, $level);
         }
 
     }
