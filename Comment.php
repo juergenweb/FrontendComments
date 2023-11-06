@@ -77,11 +77,16 @@
         protected CommentArray $comments; // the array containing all comments of this page
         protected Field $field;
         protected Page $page;
-        protected TextElements $commentText; // the comment text object
-        protected TextElements $commentCreated; // the date object of the comment
-        protected TextElements $commentAuthor; // the comment author object
-        protected Link $replyLink; // same as the reply button, but as a link
         protected Image $avatar; // image object for the user avatar image
+        protected TextElements $commentAuthor; // the comment author object
+        protected TextElements $commentCreated; // the date object of the comment
+        protected Link $replyLink; // same as the reply button, but as a link
+        protected Link $upvote; // link to like the comment
+        protected Link $downvote; // link to dislike the comment
+        protected TextElements $rating; // the star rating element.
+        protected TextElements $commentText; // the comment text object
+        protected TextElements $commentRemoved; // the text if comment has been removed by a moderator
+
 
         protected CommentForm $form; // the form object for replies
 
@@ -105,8 +110,8 @@
             $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
 
             // create properties of FrontendComments configuration values
-            $properties =  ['input_fc_stars','input_fc_voting'];
-            $this->createPropertiesOfArray($this->frontendCommentsConfig,$properties);
+            $properties = ['input_fc_stars', 'input_fc_voting'];
+            $this->createPropertiesOfArray($this->frontendCommentsConfig, $properties);
 
             // set all comment values provided via the constructor as property
             foreach ($comment as $name => $value) {
@@ -115,21 +120,12 @@
                 $this->$name = $value;
             }
 
-            // Instantiate all text objects for the comment
+            // Instantiate all the elements for the comment
 
             // avatar
             $this->avatar = new Image();
-
-            // commentText
-            $this->commentText = new TextElements();
-            $this->commentText->setContent($this->getText());
-            $this->commentText->setAttribute('class', 'fc-comment-text');
-
-            // commentCreated
-            $this->commentCreated = new TextElements();
-            $this->commentCreated->setTag('span');
-            $this->commentCreated->setContent($this->getCreated());
-            $this->commentCreated->setAttribute('class', 'comment-date');
+            $this->avatar->setAttribute('class', 'avatar');
+            $this->avatar->prepend('<div class="comment-avatar">')->append('</div>');
 
             // commentAuthor
             $this->commentAuthor = new TextElements();
@@ -137,20 +133,59 @@
             $this->commentAuthor->setContent($this->getAuthor());
             $this->commentAuthor->setAttribute('class', 'comment-name by-author');
 
-            // reply Link
-            //$this->replyLink = new Link('reply-' . $this->getId());
-            $this->replyLink = new Link($this->field->name . '-reply-' . $this->getId());
+            // commentCreated
+            $this->commentCreated = new TextElements();
+            $this->commentCreated->setTag('span');
+            $this->commentCreated->setContent($this->getCreated());
+            $this->commentCreated->setAttribute('class', 'comment-date');
+
+            // Reply Link
+            $this->replyLink = new Link($this->field->name.'-reply-'.$this->getId());
+            $this->replyLink->setUrl('#reply-comment-form-' . $this->field->name . '-reply-' . $this->getId());
             $this->replyLink->setAttribute('class', 'fc-comment-reply');
             $this->replyLink->setAttribute('title', $this->_('Reply to this comment'));
-            $this->replyLink->setLinkText($this->_('Reply'));
-            $this->replyLink->setUrl('#reply-comment-form-'.$this->field->name.'-reply-'.$this->getId());
             $this->replyLink->setAttribute('data-field', $this->field->name);
             $this->replyLink->setAttribute('data-parent_id', $this->parent_id);
             $this->replyLink->setAttribute('data-id', $this->id);
-            //$this->replyLink->setAttribute('id', $this->field->name . '-' . $this->replyLink->getAttribute('id'));
-            $this->replyLink->setContent('<i class="fa fa-reply"></i>');
+            $this->replyLink->setLinkText('<i class="fa fa-reply"></i>');
+            $this->replyLink->prepend('<span class="icon-box">')->append('</span>');
 
-            // reply form
+            // Up-vote link
+            $this->upvote = new Link();
+            $this->upvote->setUrl($this->page->url . '?vote=up&votecommentid=' . $this->id);
+            $this->upvote->setAttribute('class', 'fc-vote-link');
+            $this->upvote->setAttribute('title', $this->_('Like the comment'));
+            $this->upvote->setAttribute('data-field', $this->field->name);
+            $this->upvote->setAttribute('data-commentid', $this->id);
+            $this->upvote->setLinkText('<i class="fa fa-thumbs-up"></i>');
+            $this->upvote->prepend('<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">'.$this->upvotes.'</span>')->append('</span>');
+
+            // Down-vote link
+            $this->downvote = new Link();
+            $this->upvote->setUrl($this->page->url . '?vote=down&votecommentid=' . $this->id);
+            $this->downvote->setAttribute('class', 'fc-vote-link');
+            $this->downvote->setAttribute('title', $this->_('Dislike the comment'));
+            $this->downvote->setAttribute('data-field', $this->field->name);
+            $this->downvote->setAttribute('data-commentid', $this->id);
+            $this->downvote->setLinkText('<i class="fa fa-thumbs-down"></i>');
+            $this->downvote->prepend('<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">'.$this->downvotes.'</span>')->append('</span>');
+
+            // Star rating
+            $this->rating = new TextElements();
+            $this->rating->setAttribute('class', 'star-rating-comment');
+            $this->rating->setContent(CommentForm::___renderStarRating((float)$this->stars));
+
+            // Comment text
+            $this->commentText = new TextElements();
+            $this->commentText->setContent($this->getText());
+            $this->commentText->setAttribute('class', 'fc-comment-text');
+
+            // Comment removed
+            $this->commentRemoved = new TextElements();
+            $this->commentRemoved->setContent($this->_('This comment has been removed by a moderator because it does not comply with our comment guidelines.'));
+            $this->commentRemoved->setAttribute('class', 'comment-removed');
+
+            // Reply form
             $this->form = new CommentForm($comments, 'reply-form-' . $this->getId(), $this->getId());
             $this->form->setAttribute('action', $this->page->url . '?commentid=' . $this->getId() . '&formid=reply-form-' . $this->getId() . '#reply-comment-form-' . $this->field->name . '-reply-' . $this->getId());
             $this->form->setSubmitWithAjax();
@@ -221,10 +256,6 @@
             return $this->user_id;
         }
 
-        public function getAuthorElement(): TextElements
-        {
-            return $this->commentAuthor;
-        }
 
         /**
          * Get the comment text object
@@ -236,38 +267,56 @@
         }
 
         /**
-         * Get the comment creation text object
-         * @return TextElements
+         * Get the image (avatar) object for further manipulations
+         * @return \FrontendForms\Image
          */
-        public function getCommentDateElement(): TextElements
+        public function getImageElement(): Image
         {
-            return $this->commentCreated;
+            return $this->avatar;
         }
 
-        public function ___renderCreated(): string
-        {
-            return $this->getCommentDateElement()->render();
-        }
-
-
-
-        /**
-         * Get the comment author object
-         * @return TextElements
-         */
-        public function getCommentAuthor(): TextElements
+        public function getAuthorElement(): TextElements
         {
             return $this->commentAuthor;
         }
 
         /**
-         * Get the reply link object
-         * @return Link
+         * Get the comment creation text object
+         * @return TextElements
          */
-        public function getReplyLink(): Link
+        public function getCreatedElement(): TextElements
+        {
+            return $this->commentCreated;
+        }
+
+        public function getReplyElement(): Link
         {
             return $this->replyLink;
         }
+
+        public function getUpVoteElement(): TextElements
+        {
+            return $this->upvote;
+        }
+
+        public function getDownVoteElement(): TextElements
+        {
+            return $this->downvote;
+        }
+
+        public function getRatingElement(): TextElements
+        {
+            return $this->rating;
+        }
+
+        public function getCommentRemovedTextElement(): TextElements
+        {
+            return $this->commentRemoved;
+        }
+
+        /**
+         * Render methods
+         */
 
         /**
          * Render the image tag for the avatar image
@@ -275,7 +324,7 @@
          * @throws \ProcessWire\WireException
          * @throws \ProcessWire\WirePermissionException
          */
-        public function ___renderAvatar(): string
+        public function ___renderImage(): string
         {
             $out = '';
             $userimageField = $this->frontendCommentsConfig['input_fc_userimage'];
@@ -289,16 +338,74 @@
                     $thumb = $user->$imageFieldName->size((int)$this->frontendCommentsConfig['input_fc_imagesize'], (int)$this->frontendCommentsConfig['input_fc_imagesize']);
                     // set src attribute
                     $this->avatar->setAttribute('src', $thumb->url);
-                    $out = '<div class="comment-avatar">' .  $this->avatar->___render() . '</div>';
+                    $out = $this->avatar->___render();
                 }
             }
             return $out;
         }
 
+        /**
+         * Render the author string if present
+         * @return string
+         */
         public function ___renderAuthor(): string
         {
-            return $this->getAuthorElement()->render();
+            $out = '';
+            if ($this->getAuthor()) {
+                $out = $this->getAuthorElement()->___render();
+            }
+            return $out;
         }
+
+        public function ___renderCreated(): string
+        {
+            return $this->getCreatedElement()->___render();
+        }
+
+
+        public function ___renderReply(bool $levelStatus): string
+        {
+            $out = '';
+            if ($levelStatus && $this->status != '3') {
+                $out = $this->getReplyElement()->___render();
+            }
+            return $out;
+        }
+
+        public function ___renderVotes(): string
+        {
+            $out = '';
+            // create the vote links with FontAwesome icons if enabled
+            $showVoting = $this->field->input_fc_voting ?? $this->input_fc_voting;
+
+            if ($showVoting && $this->status != '3') {
+                $out .= $this->getUpVoteElement()->___render();
+                $out .= $this->getDownVoteElement()->___render();
+            }
+            return $out;
+        }
+
+        public function ___renderRating(): string
+        {
+            $out = '';
+            $showStarRating = $this->field->input_fc_stars ?? $this->input_fc_stars;
+            if ($showStarRating) {
+                $out = $this->getRatingElement()->___render();
+            }
+            return $out;
+        }
+
+        public function ___renderText(): string
+        {
+            if ($this->status == '1') {
+                $out = $this->getCommentText()->___render();
+            } else {
+                // comment is SPAM, but has replies
+                $out = $this->getCommentRemovedTextElement()->___render();
+            }
+            return $out;
+        }
+
 
         /**
          * Get the reply comments of the comment
@@ -306,7 +413,30 @@
          */
         public function getReplies(): CommentArray
         {
-            return $this->comments->find('parent_id='.$this->id);
+            return $this->comments->find('parent_id=' . $this->id);
+        }
+
+        public function ___renderCommentMarkup(bool $levelStatus): string
+        {
+            $out = '<div class="comment-box">';
+            $out .= '<div class="comment-head">';
+            $out .= $this->___renderImage();
+            $out .= $this->___renderAuthor();
+            $out .= $this->___renderCreated();
+
+            $out .= '<div class="fc-icons">';
+            $out .= $this->___renderReply($levelStatus);
+            $out .= $this->___renderVotes();
+            $out .= '</div>';
+
+            // star rating
+            $out .= $this->___renderRating();
+            $out .= '</div>';
+
+            $out .= '<div id="' . $this->getReplyElement()->getAttribute('id') . '-comment" class="comment-content">';
+            $out .= $this->___renderText();
+            $out .= '</div>';
+            return $out;
         }
 
 
@@ -327,43 +457,10 @@
                 $out .= '<div id="comment-wrapper-' . $comment->id . '" class="comment-main-level">';
             }
 
+            $out .= $this->___renderCommentMarkup($levelStatus);
 
-            $out .= '<div class="comment-box">';
 
-            $out .= '<div class="comment-head">';
-            $out .= $this->___renderAvatar();
-            $out .= $this->___renderAuthor();
-            $out .= $this->___renderCreated();
-            // show the reply link only if max level is not reached
-            $out .= '<div class="fc-icons">';
-            if ($levelStatus && $this->status != '3') {
-                $out .= '<span class="icon-box">'.$this->getReplyLink()->___render().'</span>';
-            }
-
-            // create the vote links with FontAwesome icons if enabled
-            $showVoting = $this->field->input_fc_voting ?? $this->input_fc_voting;
-            if ($showVoting && $this->status != '3') {
-                $out .= '<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->upvotes . '</span><a class="fc-vote-link" title="' . $this->_('Like the comment') . '" href="' . $this->page->url . '?vote=up&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-up"></i></a></span>';
-                $out .= '<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="votebadge">' . $this->downvotes . '</span><a class="fc-vote-link" title="' . $this->_('Dislike the comment') . '" href="' . $this->page->url . '?vote=down&votecommentid=' . $this->id . '" data-field="' . $this->field->name . '"  data-commentid="' . $this->id . '"><i class="fa fa-thumbs-down"></i></a></span>';
-            }
-            $out .= '</div>';
-
-            // star rating
-            $showStarRating = $this->field->input_fc_stars ?? $this->input_fc_stars;
-            if ($showStarRating ) {
-                $out .= '<div class="star-rating-comment">' . CommentForm::___renderStarRating((float)$this->stars) . '</div>';
-            }
-
-            $out .= '</div>';
-            if($comment->status == '1'){
-                $text = $this->getCommentText()->___render();
-            } else {
-                // comment is SPAM, but has replies
-                $text = '<div class="comment-removed">'.$this->_('This comment has been removed by a moderator because it does not comply with our comment guidelines.').'</div>';
-            }
-
-            $out .= '<div id="' . $this->getReplyLink()->getAttribute('id') . '-comment" class="comment-content">' . $text . '</div>';
-            $out .= '<div id="reply-comment-form-' . $this->getReplyLink()->getAttribute('id') . '" class="reply-form-wrapper" data-id="' . $this->id . '" >';
+            $out .= '<div id="reply-comment-form-' . $this->getReplyElement()->getAttribute('id') . '" class="reply-form-wrapper" data-id="' . $this->id . '" >';
 
             if ($this->wire('config')->ajax) {
 
@@ -396,16 +493,40 @@
          */
         public function renderUikit3(Comment $comment, bool $levelStatus): string
         {
+
             $out = '<article id="comment-wrapper-' . $comment->id . '" class="uk-comment" role="comment">';
             $out .= '<header class="uk-comment-header">';
             $out .= '<div class="uk-grid-medium uk-flex-middle" data-uk-grid>';
-            $out .= '<div class="uk-width-auto">';
-            $out .= '<img class="uk-comment-avatar" src="images/avatar.jpg" width="80" height="80" alt="">';
-            $out .= '</div>';
+
+            // Avatar image
+            $this->avatar->setAttribute('class', 'uk-comment-avatar');
+            $this->avatar->setAttribute('width', '80');
+            $this->avatar->setAttribute('height', '80');
+            $this->frontendCommentsConfig['input_fc_imagesize'] = 80;
+            $this->avatar->prepend('<div class="uk-width-auto">')->append('</div>');
+            $out .= $this->___renderAvatar();
+
+
             $out .= '<div class="uk-width-expand">';
-            $out .= '<h4 class="uk-comment-title uk-margin-remove"><a class="uk-link-reset" href="#">Author</a></h4>';
+
+            // Author name
+            $this->commentAuthor->setTag('h4');
+            $this->commentAuthor->removeAttribute('class');
+            $this->commentAuthor->setAttribute('class', 'uk-comment-title uk-margin-remove');
+
+            $authorLink = new Link();
+            $authorLink->setAttribute('class', 'uk-link-reset');
+            $authorLink->setLinkText($this->getAuthor());
+            $authorLink->setUrl('#');
+            //$this->commentAuthor->setContent($authorLink->___render());
+            $this->commentAuthor->setContent($this->getAuthor());
+            $out .= $this->___renderAuthor();
+
+
             $out .= '<ul class="uk-comment-meta uk-subnav uk-subnav-divider uk-margin-remove-top">';
-            $out .= '<li><a href="#">' . $this->getCreated() . '</a></li>';
+
+
+            $out .= '<li><a href="#">' . $this->___renderCreated() . '</a></li>';
             // show the reply link only if max level is not reached
             if ($levelStatus) {
                 $out .= '<li>' . $this->getReplyLink()->___render() . '</li>';
