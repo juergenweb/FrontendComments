@@ -31,7 +31,18 @@
             $this->replyLink->setLinkText($this->_('Reply'));
             $this->replyLink->prepend('<li>')->append('</li>');
 
-            // Up and down votes
+            // Up-votes
+            $this->upvote->removePrepend();
+            $this->upvote->removeAppend();
+            $this->upvote->prepend('<li><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="uk-badge uk-margin-small-right">' . $this->upvotes . '</span>')->append('</li>');
+
+            // Down-votes
+            $this->downvote->removePrepend();
+            $this->downvote->removeAppend();
+            $this->downvote->prepend('<li><span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="uk-badge uk-margin-small-right">' . $this->upvotes . '</span>')->append('</li>');
+
+
+            // Star rating
         }
 
         public function ___renderCommentMarkup(bool $levelStatus): string
@@ -43,8 +54,10 @@
                             '<div class="uk-width-expand">'
                                 .$this->___renderAuthor().
                                 '<ul class="uk-comment-meta uk-subnav uk-subnav-divider uk-margin-remove-top">'
-                                    .$this->___renderCreated().
-                                    '<li><a href="#">Reply</a></li>
+                                    .$this->___renderCreated()
+                                    .$this->___renderReply($levelStatus)
+                                    .$this->___renderVotes().
+                                    '<li>'.$this->___renderRating().'</li>
                                 </ul>
                             </div>
                         </div>
