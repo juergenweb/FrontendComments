@@ -1,0 +1,32 @@
+/*
+* empty star f006
+* half star f123
+* full star f005
+ */
+
+.full-star, .half-star, .empty-star {
+    font-family: FontAwesome;
+    margin-right: 2px;
+    color: #dabd18b2;
+}
+
+.star-rating > span.full-star:before {
+    content: "\f005";
+
+}
+
+.star-rating > span.half-star:before {
+    content: "\f123";
+
+}
+
+.star-rating > span.empty-star:before {
+    content: "\f006";
+
+}
+
+/* Badges */
+
+.uk-comment-meta.uk-subnav .uk-badge {
+    color: #fff;
+}
