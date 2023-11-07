@@ -249,7 +249,7 @@ In this case, the comment will not be deleted, like a normal SPAM comment, and a
 
 You don't have to worry about whether a comment has replies or not if you declare a comment as "SPAM" - it will be checked via a hook before saving. If replies are available, the status will be automatically changed to "SPAM with replies" by the hook function.
 
-In addition, the reply link symbol and the "Like" or "Dislike" buttons will be removed from this comment.
+In addition, the reply link symbol and the "Like" or "Dislike" buttons will be removed from this comment (Default output -> no CSS framework).
 
 
 ![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-banned.png?raw=true)
