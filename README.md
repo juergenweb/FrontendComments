@@ -254,9 +254,13 @@ In addition, the reply link symbol and the "Like" or "Dislike" buttons will be r
 
 ![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-banned.png?raw=true)
 
-## Locking vistiors to vote (up-vote or down-vote) for a comment
-This module offers the possibility to enable up- and downvotes for comments. Inside the inputfield configuration, you can set the time range after which a user is allowed to vote again. The identification of a user is done by checking his IP and his browser fingerpring. It is not really a 100% safe method to identify a user, but it is ok for this case.
+## Locking visitors to vote (up-vote or down-vote) for a comment
+This module offers the possibility to enable up- and downvotes for comments. Inside the inputfield configuration, you can set the time range after which a user is allowed to vote again. 
+
+The identification of a user is done by checking his IP and his browser fingerpring. It is not really a 100% safe method to identify a user, but it is ok for this case.
+
 If a user tries to vote again within this interval, he will get a notice, that he is not allowed to vote again. 
+
 The following image shows this scenario: Time range is set to 7 days and UIKit3 markup is selected for the output.
 
 
