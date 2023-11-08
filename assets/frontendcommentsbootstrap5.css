@@ -1,10 +1,27 @@
+form.reply-form {
+    padding: 20px 0;
+}
+
+.reply-form-headline {
+    margin-top: 20px;
+}
+
+.fc-cancel-link-wrapper {
+    padding-bottom: 20px;
+}
+
+.reply-form-wrapper
+.rating__result {
+    padding-right: 5px;
+}
+
 /*
 * empty star f006
 * half star f123
 * full star f005
  */
 
-.full-star, .half-star, .empty-star {
+.full-star, .half-star, .empty-star, .rating__star {
     font-family: FontAwesome;
     margin-right: 2px;
     color: #dabd18b2;
@@ -24,3 +41,4 @@
     content: "\f006";
 
 }
+
