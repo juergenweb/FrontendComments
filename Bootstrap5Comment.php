@@ -1,6 +1,11 @@
 <?php
+    declare(strict_types=1);
 
     namespace FrontendComments;
+
+    /**
+     * Class to render the comment with Bootstrap 5 markup
+     */
 
     class Bootstrap5Comment extends Comment
     {
@@ -13,8 +18,7 @@
             $this->avatar->removeAttribute('class');
             $this->avatar->setAttribute('class', 'rounded-circle me-2');
             $this->avatar->setAttribute('width', '60');
-            $this->avatar->removePrepend();
-            $this->avatar->removeAppend();
+            $this->avatar->removeWrap();
 
             // Author
             $this->commentAuthor->setTag('span');
@@ -39,11 +43,8 @@
             $this->downvote->append('<span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="badge bg-danger mx-2">' . $this->upvotes . '</span>');
 
             // Reply
-            $this->replyLink->removePrepend();
-            $this->replyLink->removeAppend();
-            $this->replyLink->setLinkText('<i class="fa fa-reply me-1"></i>'.$this->_('Reply'));
-
-
+            $this->replyLink->removeWrap();
+            $this->replyLink->setLinkText('<i class="fa fa-reply me-1"></i><span>'.$this->_('Reply').'</span>');
 
             // Comment text
             $this->commentText->setTag('p');
@@ -53,9 +54,7 @@
 
         public function ___renderCommentMarkup(bool $levelStatus): string
         {
-
-            return  '<div class="container card">
-                        <div class="d-flex justify-content-center row">
+            return  '<div class="d-flex justify-content-center row">
                             <div class="col-md-12">
                                 <div class="d-flex flex-column comment-section">
                                     <div class="bg-white p-2">
@@ -68,7 +67,7 @@
                                                 <div class="p-2 float-start">'.$this->___renderRating().'</div>
                                                 <div class="p-2">'.$this->___renderCreated().'</div>                                                                                                         
                                              </div> 
-                                             <div flex-shrink-0>
+                                             <div class="flex-shrink-0">
                                                 <div class="p-2 flex-grow float-end">'.$this->___renderReply($levelStatus).'</div>
                                              </div>
                                                  
@@ -86,8 +85,7 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>';
+                        </div>';
         }
 
 
