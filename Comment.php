@@ -121,7 +121,7 @@
             // Image
             $this->avatar = new Image();
             $this->avatar->setAttribute('class', 'avatar');
-            $this->avatar->prepend('<div class="comment-avatar">')->append('</div>');
+            $this->avatar->wrap()->setAttribute('class', 'comment-avatar');
 
             // Author name
             $this->commentAuthor = new TextElements();
@@ -143,8 +143,9 @@
             $this->replyLink->setAttribute('data-field', $this->field->name);
             $this->replyLink->setAttribute('data-parent_id', $this->parent_id);
             $this->replyLink->setAttribute('data-id', $this->id);
-            $this->replyLink->setLinkText('<i class="fa fa-reply"></i>');
-            $this->replyLink->prepend('<span class="icon-box">')->append('</span>');
+            $this->replyLink->setLinkText('<i class="fa fa-reply head-fc-icon"></i><span>'. $this->_('Reply').'</span>');
+            $this->replyLink->wrap('span')->setAttribute('class', 'icon-box');
+
 
             // Up-vote link
             $this->upvote = new Link();
@@ -153,7 +154,7 @@
             $this->upvote->setAttribute('title', $this->_('Like the comment'));
             $this->upvote->setAttribute('data-field', $this->field->name);
             $this->upvote->setAttribute('data-commentid', $this->id);
-            $this->upvote->setLinkText('<i class="fa fa-thumbs-up"></i>');
+            $this->upvote->setLinkText('<i class="fa fa-thumbs-up head-fc-icon"></i>');
             $this->upvote->prepend('<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->upvotes . '</span>')->append('</span>');
 
             // Down-vote link
@@ -163,7 +164,7 @@
             $this->downvote->setAttribute('title', $this->_('Dislike the comment'));
             $this->downvote->setAttribute('data-field', $this->field->name);
             $this->downvote->setAttribute('data-commentid', $this->id);
-            $this->downvote->setLinkText('<i class="fa fa-thumbs-down"></i>');
+            $this->downvote->setLinkText('<i class="fa fa-thumbs-down head-fc-icon"></i>');
             $this->downvote->prepend('<span class="icon-box"><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="votebadge">' . $this->downvotes . '</span>')->append('</span>');
 
             // Comment text
@@ -178,10 +179,11 @@
 
             // Reply form
             $this->form = new CommentForm($comments, 'reply-form-' . $this->getId(), $this->getId());
+            $this->form->setAttribute('class', 'reply-form');
             $this->form->setAttribute('action', $this->page->url . '?commentid=' . $this->getId() . '&formid=reply-form-' . $this->getId() . '#reply-comment-form-' . $this->field->name . '-reply-' . $this->getId());
             $this->form->setSubmitWithAjax();
 
-            $this->form->prepend('<h3>' . $this->_('Write an answer to this comment') . '</h3>');
+            $this->form->prepend('<h3 class="reply-form-headline">' . $this->_('Write an answer to this comment') . '</h3>');
 
             // get the submit button object and change the name attribute
             $submitButton = $this->form->getSubmitButton();
@@ -405,8 +407,7 @@
          */
         public function ___renderCommentMarkup(bool $levelStatus): string
         {
-            $out = '<div class="comment-box">';
-            $out .= '<div class="comment-head">';
+            $out = '<div class="comment-head">';
             $out .= $this->___renderImage();
             $out .= $this->___renderAuthor();
             $out .= $this->___renderCreated();
@@ -439,6 +440,7 @@
         {
 
             $out = '<div id="' . $this->field->name . '-' . $comment->id . '-novote"></div>'; // wrapper for no vote alert box
+
             if ($level === 0) {
                 $out .= '<div id="comment-wrapper-' . $comment->id . '" class="comment-main-level">';
             }
@@ -452,10 +454,22 @@
                 $class = $this;
             }
 
+            // create outer wrapper container depending on framework
+            switch($this->frontendFormsConfig['input_framework']){
+                case('uikit3.json'):
+                    $out .= '<article class="uk-comment uk-comment-primary" role="comment">';
+                break;
+                case('bootstrap5.json'):
+                    $out .= '<div class="container card">';
+                    break;
+                default:
+                    $out .= '<div class="comment-box">';
+            }
+
             $out .= $class->___renderCommentMarkup($levelStatus);
 
+            // Reply form
             $out .= '<div id="reply-comment-form-' . $this->getReplyElement()->getAttribute('id') . '" class="reply-form-wrapper" data-id="' . $this->id . '" >';
-
             if ($this->wire('config')->ajax) {
 
                 // check if the form with this id was requested and render it below the comment
@@ -470,7 +484,21 @@
                 }
             }
             $out .= '</div>';
-            $out .= '</div>';
+
+            // outer wrapper container end
+            switch($this->frontendFormsConfig['input_framework']){
+                case('uikit3.json'):
+                    $out .= '</article>';
+                    break;
+                case('bootstrap5.json'):
+                    $out .= '</div>';
+                    break;
+                default:
+                    $out .= '</div>';
+            }
+
+
+            //$out .= '</div>';
 
             if ($level === 0) {
                 $out .= '</div>';
