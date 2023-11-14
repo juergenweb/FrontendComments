@@ -1,10 +1,30 @@
+.head-fc-icon{
+    padding-right: 5px;
+}
+
+form.reply-form {
+    padding: 20px 0;
+}
+
+.rating__result {
+    padding-right: 5px;
+}
+
+.reply-form-headline {
+    margin-top: 20px;
+}
+
+.rating__star:hover {
+    cursor: pointer;
+}
+
 /*
 * empty star f006
 * half star f123
 * full star f005
  */
 
-.full-star, .half-star, .empty-star {
+.full-star, .half-star, .empty-star, .rating__star {
     font-family: FontAwesome;
     margin-right: 2px;
     color: #dabd18b2;
