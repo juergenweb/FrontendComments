@@ -1,0 +1,40 @@
+/*
+This CSS file contains all general styles for all types of markups (frameworks and no frame work)
+ */
+
+
+/*
+Star rating
+Based on: https://github.com/pryley/star-rating.js
+*/
+
+.star-rating-result{
+    margin-left: 10px;
+}
+
+.star-rating-result > span {
+    display:inline-block;
+    margin: 0 2px;
+}
+
+.full-star, .half-star, .empty-star {
+    display: inline-block;
+    width: 15px;
+    height: 13px;
+    line-height: 13px;
+    background-size: cover;
+    position:relative;
+    top: 1px;
+}
+
+.full-star {
+    background-image: url('../img/star-full.svg');
+}
+
+.empty-star:before {
+    background-image: url('../img/star-empty.svg');
+}
+
+.half-star:before {
+    background-image: url('../img/star-half.svg');
+}
