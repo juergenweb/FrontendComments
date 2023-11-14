@@ -10,11 +10,13 @@ form.reply-form {
     padding-bottom: 20px;
 }
 
-.reply-form-wrapper
 .rating__result {
     padding-right: 5px;
 }
 
+.rating__star:hover {
+    cursor: pointer;
+}
 /*
 * empty star f006
 * half star f123
