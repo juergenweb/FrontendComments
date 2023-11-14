@@ -30,6 +30,17 @@ function docReady(fn) {
     }
 }
 
+
+function configRating(){
+    var starRatingControl = new StarRating( '.star-rating' ,{
+        maxStars: 5,
+        clearable: true,
+
+    });
+    starRatingControl.rebuild();
+}
+
+
 /**
  * Load the reply form under the given comment via Ajax on demand
  */
@@ -38,7 +49,6 @@ function loadReplyForm() {
         // check if a parent element is a link with class fc-comment-reply
         let link = e.target.parentElement;
         if (link.classList.contains('fc-comment-reply')) {
-
             e.preventDefault();
 
             // grab some values from the element
@@ -77,7 +87,14 @@ function loadReplyForm() {
                     // add Ajax event listener function once more
                     subAjax('reply-form-' + commentId);
 
+                    let ratingStars = [...document.getElementsByClassName("rating__star")];
+                    if (ratingStars) {
+                        configRating();
+                    }
+
                 }
+
+
 
             }
 
@@ -86,6 +103,8 @@ function loadReplyForm() {
             xhr.send();
 
         }
+
+
     });
 
 }
@@ -107,104 +126,6 @@ function cancelReply() {
 }
 
 
-/**
- * Add the value of the stars to the hidden inputfield,
- * change the rating text and
- * set star icons to full or empty
- */
-function executeRating() {
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('rating__star')) {
-
-            let starValue = e.target.dataset.value;
-            let formId = e.target.dataset.form_id;
-            // check if the clicked value is inside the hidden input field
-            let hiddenStarInput = document.getElementById(formId + '-stars');
-            let ratingResult = document.getElementById(formId + '-ratingtext');
-            let starContainer = document.getElementById(formId + '-rating');
-            let allStars = starContainer.getElementsByTagName('i');
-            let resetLink = document.getElementById('resetlink-' + formId);
-            let i = 0;
-
-            if (hiddenStarInput.value === starValue) {
-                starContainer.classList.remove('vote');
-                starContainer.classList.remove('unvote');
-                // set value back to 0
-                hiddenStarInput.value = 0;
-                // add readonly attribute
-                hiddenStarInput.setAttribute('readonly', 'readonly');
-                // change the rating result value to unvoted;
-                ratingResult.innerText = ratingResult.dataset.unvoted
-
-                // set all stars back to empty
-                for (i; i < 5; i++) {
-                    allStars[i].classList.remove("fa-star");
-                    allStars[i].classList.add("fa-star-o");
-                }
-                // finally, hide the reset link
-                resetLink.setAttribute('style', 'display:none');
-            } else {
-                starContainer.classList.remove('unvote');
-                starContainer.classList.remove('vote');
-                // remove readonly attribute
-                hiddenStarInput.removeAttribute('readonly');
-                // set value
-                hiddenStarInput.value = starValue;
-                //change the icon of all stars until the current value
-                ratingResult.innerText = starValue + '/5';
-                // set stars to full until the value is reached
-                for (i; i < 5; i++) {
-                    if (i < parseInt(starValue)) {
-                        allStars[i].classList.remove("fa-star-o");
-                        allStars[i].classList.add("fa-star");
-                    } else {
-                        allStars[i].classList.remove("fa-star");
-                        allStars[i].classList.add("fa-star-o");
-                    }
-                }
-                // finally, show the reset link
-                resetLink.removeAttribute('style');
-            }
-
-        }
-    });
-}
-
-/**
- * Reset the star rating to unvote (n/a) by clicking the reset link
- * This set the status unrated
- */
-function resetRating() {
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('fc-resetlink')) {
-            e.preventDefault();
-            let starContainer = document.getElementById(e.target.dataset.form_id + '-rating');
-            let allStars = starContainer.getElementsByTagName('i');
-            let hiddenStarInput = document.getElementById(e.target.dataset.form_id + '-stars');
-            let ratingResult = document.getElementById(e.target.dataset.form_id + '-ratingtext');
-            // change the rating result value to unvoted;
-            ratingResult.innerText = ratingResult.dataset.unvoted
-            let i = 0;
-
-            // change class from vote to unvote
-            starContainer.classList.remove('vote');
-            starContainer.classList.remove('unvote');
-            // set value back to 0
-            hiddenStarInput.value = 0;
-            // add readonly attribute
-            hiddenStarInput.setAttribute('readonly', 'readonly');
-            // change the rating result value to unvoted;
-            ratingResult.innerText = ratingResult.dataset.unvoted
-            // set all stars back to empty
-            for (i; i < 5; i++) {
-                allStars[i].classList.remove("fa-star");
-                allStars[i].classList.add("fa-star-o");
-            }
-            // finally, hide the reset link
-            e.target.setAttribute('style', 'display:none');
-        }
-    });
-}
 
 function makeVote() {
     document.addEventListener('click', (e) => {
@@ -277,9 +198,10 @@ docReady(function () {
     let ratingStars = [...document.getElementsByClassName("rating__star")];
 
     if (ratingStars) {
-        executeRating();
-        resetRating();
+        configRating();
     }
     makeVote();
+
+
 
 });
