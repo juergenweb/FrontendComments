@@ -1,9 +1,11 @@
 <?php
+    declare(strict_types=1);
 
     namespace FrontendComments;
 
-    use FrontendComments\Comment;
-
+    /**
+     * Class to render the comment with UiKit 3 markup
+     */
     class Uikit3Comment extends Comment
     {
 
@@ -17,7 +19,7 @@
             $this->avatar->setAttribute('width', '80');
             $this->avatar->setAttribute('height', '80');
             $this->frontendCommentsConfig['input_fc_imagesize'] = 80;
-            $this->avatar->prepend('<div class="uk-width-auto">')->append('</div>');
+            $this->avatar->wrap()->setAttribute('class','uk-width-auto');
 
             // Author name
             $this->commentAuthor->setTag('h4');
@@ -25,30 +27,33 @@
             $this->commentAuthor->setAttribute('class', 'uk-comment-title uk-margin-remove');
 
             // Comment created
-            $this->commentCreated->prepend('<li>')->append('</li>');
+            $this->commentCreated->wrap()->setTag('li');
 
             // Reply Link
-            $this->replyLink->setLinkText($this->_('Reply'));
-            $this->replyLink->prepend('<li>')->append('</li>');
+            $this->replyLink->wrap()->setTag('li');
 
             // Up-votes
             $this->upvote->removePrepend();
             $this->upvote->removeAppend();
-            $this->upvote->prepend('<li><span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="uk-badge uk-margin-small-right">' . $this->upvotes . '</span>')->append('</li>');
+            $this->upvote->prepend('<li>')->append('<span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="uk-badge uk-margin-small-right">' . $this->upvotes . '</span></li>');
 
             // Down-votes
             $this->downvote->removePrepend();
             $this->downvote->removeAppend();
-            $this->downvote->prepend('<li><span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="uk-badge uk-margin-small-right">' . $this->upvotes . '</span>')->append('</li>');
+            $this->downvote->prepend('<li>')->append('<span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="uk-badge uk-margin-small-right">' . $this->downvotes . '</span></li>');
 
-
-            // Star rating
         }
 
+        /**
+         * Render method for the comment - outputs Uikit 3 comment markup
+         * @param bool $levelStatus
+         * @return string
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
+         */
         public function ___renderCommentMarkup(bool $levelStatus): string
         {
-            $out = '<article class="uk-comment uk-comment-primary" role="comment">
-                    <header class="uk-comment-header">
+            return '<header class="uk-comment-header">
                         <div class="uk-grid-medium uk-flex-middle" data-uk-grid>'
                             .$this->___renderImage().
                             '<div class="uk-width-expand">'
@@ -64,10 +69,7 @@
                     </header>
                     <div class="uk-comment-body">'
                         .$this->___renderText().
-                    '</div>
-                </article>';
-            return $out;
+                    '</div>';
         }
-
 
     }
