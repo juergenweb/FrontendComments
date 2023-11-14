@@ -20,7 +20,7 @@
      * @property protected Email $email: the field object for the email field
      * @property protected InputText $author: the field object for the author field
      * @property protected Textarea $comment: the field object for the comment field
-     * @property protected InputNumber $stars: the field object for the star rating number field
+     * @property protected InputSelect $stars: the field object for the star rating number field
      * @property protected InputRadioMultiple $notify: the field object for email notification about new comments
      * @property protected Privacy $privacy: the field object for the privacy field
      * @property protected PrivacyText $privacyText: the field object for the privacytext field
@@ -50,8 +50,8 @@
     use FrontendForms\Email;
     use FrontendForms\Form;
     use FrontendForms\InputHidden;
-    use FrontendForms\InputNumber;
     use FrontendForms\InputText;
+    use FrontendForms\Select;
     use FrontendForms\Textarea;
     use FrontendForms\InputRadioMultiple;
     use FrontendForms\Privacy;
@@ -90,7 +90,7 @@
         protected Email $email; // the email field object
         protected InputText $author; // the author field object
         protected Textarea $comment; // the comment text field object
-        protected InputNumber $stars; // the number field for star rating
+        protected Select $stars; // the number field for star rating
         protected InputRadioMultiple $notify; // the notify me about new comments field object
         protected Privacy $privacy; // the accept privacy checkbox object
         protected PrivacyText $privacyText; // the accept privacy text object
@@ -197,17 +197,19 @@
 
             // 4) star rating
             if ($this->input_fc_stars) {
-                $this->stars = new InputNumber('stars');
+                $this->stars = new Select('stars');
                 $this->stars->useInputWrapper(false);
                 $this->stars->useFieldWrapper(false);
                 $this->stars->setLabel($this->_('Rating'));
-                $this->stars->setAttribute('max', 5);
-                $this->stars->setAttribute('hidden');
-                $this->stars->setAttribute('readonly'); // set read only by default, which means no vote
-                $this->stars->setAttribute('class', 'rating-value');
+                $this->stars->addOption($this->_('Select a rating'), '');
+                $this->stars->addOption($this->_('Excellent'), '5');
+                $this->stars->addOption($this->_('Very Good'), '4');
+                $this->stars->addOption($this->_('Average'), '3');
+                $this->stars->addOption($this->_('Poor'), '2');
+                $this->stars->addOption($this->_('Terrible'), '1');
+                $this->stars->setAttribute('class', 'star-rating');
                 // add the post value of the star rating to the star rating render function after form submission
                 $number = array_key_exists($this->field->name . '-stars', $_POST) ? $_POST[$this->field->name . '-stars'] : '0';
-                $this->stars->prepend(self:: ___renderStarRating((float)$number, true, $this->getID()));
                 $this->add($this->stars);
             }
 
@@ -249,8 +251,8 @@
             $this->cancel->setAttribute('data-id', $this->parent_id);
             $this->cancel->setLinkText($this->_('Cancel'));
             $this->cancel->setAttribute('title', $this->_('Click to cancel the reply'));
-            $this->cancel->wrap();
-            $this->cancel->setUrl('#comment-'.$this->parent_id);
+            $this->cancel->wrap()->setAttribute('class', 'fc-cancel-link-wrapper');
+            $this->cancel->setUrl('#comment-' . $this->parent_id);
 
             // set the alert object for further manipulations later on
             $this->alert = $this->getAlert();
@@ -304,117 +306,6 @@
                 $secondPart = 1;
             }
             return $whole + $secondPart;
-        }
-
-        /**
-         * Render the star rating
-         * Outputs a line of 5 stars including empty, half or full colored stars - depending on the value entered
-         * @param float|null $number - the number of colored stars
-         * @param string|null $id - add unique id depending on the comment or the form
-         * @param bool $rating - if true, an additional class will be added which can be fetched via JavaScript
-         * @return string
-         */
-        public static function ___renderStarRating(float|null $number = 0, bool $rating = false, string|null $id = null): string
-        {
-            // add classes depending on settings
-            if ($rating) {
-                $class = 'rating vote';
-            } else {
-                $class = 'rating';
-            }
-
-            // add id depending on settings
-            $id_attr = $id_ratingtext = $id_ratingstar = '';
-            if (!is_null($id)) {
-                $id_attr = ' id="' . $id . '-rating"';
-                $id_ratingtext = ' id="' . $id . '-ratingtext"';
-                $id_ratingstar = $id . '-ratingstar';
-            }
-            $out = '<div' . $id_attr . ' class="' . $class . '">';
-
-            // round to int down
-            if (!is_null(($number))) {
-                $number = self::roundToHalfStepNumber($number);
-            } else {
-                $number = 0;
-            }
-
-            $votingTextDefault = $votingText = _('n/a');
-            if ($number > 0) {
-                $votingText = $number . '/5';
-            }
-            if ($rating) {
-                $out .= '<span' . $id_ratingtext . ' class="rating__result" data-unvoted="' . $votingTextDefault . '">' . $votingText . '</span>';
-            } else {
-                $out .= '<span' . $id_ratingtext . ' class="rating__result">' . $votingText . '</span>';
-            }
-
-            // no stars
-            if ($number < 0.5) {
-                // 5 empty stars
-                for ($x = 1; $x <= 5; $x++) {
-                    $ratingstarid = '';
-                    if ($id_ratingstar) {
-                        $ratingstarid = ' id=' . $id_ratingstar . '-' . $x . '"';
-                    }
-                    $out .= '<i' . $ratingstarid . ' class="rating__star fa fa-star-o" data-value="' . $x . '" data-form_id="' . $id . '"></i>';
-                }
-            } else if ($number > 4.5) {
-                // 5 full stars
-                for ($x = 1; $x <= 5; $x++) {
-                    $ratingstarid = '';
-                    if ($id_ratingstar) {
-                        $ratingstarid = ' id=' . $id_ratingstar . '-' . $x . '"';
-                    }
-                    $out .= '<i' . $ratingstarid . ' class="rating__star fa fa-star"></i>';
-                }
-            } else {
-                // empty, half and full stars
-                $add = 0;
-                $repeats = round($number, 0, PHP_ROUND_HALF_DOWN);
-
-                for ($x = 1; $x <= $repeats; $x++) {
-                    $ratingstarid = '';
-                    if ($id_ratingstar) {
-                        $ratingstarid = ' id=' . $id_ratingstar . '-' . $x . '"';
-                    }
-                    $out .= '<i' . $ratingstarid . ' class="rating__star fa fa-star" data-value="' . $x . '" data-form_id="' . $id . '"></i>';
-                }
-                // check if there is a half-step
-                if ($number - $repeats != 0) {
-                    //there is a half star
-                    $ratingstarid = '';
-                    if ($id_ratingstar) {
-                        $ratingstarid = ' id=' . $id_ratingstar . '-' . $x . '"';
-                    }
-                    $out .= '<i' . $ratingstarid . ' class="rating__star fa fa-star-half-o" data-value="' . $x . '" data-form_id="' . $id . '"></i>';
-                    $add = 1;
-                }
-                // add last start until the number of 5 is reached
-                $sum = $repeats + $add;
-                if ($sum < 5) {
-                    for ($x = 1; $x <= 5 - $sum; $x++) {
-                        $out .= '<i class="rating__star fa fa-star-o" data-value="' . $x . '" data-form_id="' . $id . '"></i>';
-                    }
-                }
-            }
-            $out .= '</div>';
-
-            //show reset link only if $rating is true
-            if ($rating) {
-                $resetlink_id = '';
-                if ($id) {
-                    $resetlink_id = ' id="resetlink-' . $id . '"';
-                }
-                // style attribute
-                $style = ' style="display:none"';
-                // remove display none attribute if star rating value is present
-                if ($number > 0) {
-                    $style = '';
-                }
-                $out .= '<div class="reset-rating"><a' . $resetlink_id . ' href="#" class="fc-resetlink" data-form_id="' . $id . '"' . $style . '>' . _('Reset rating') . '</a></div>';
-            }
-            return $out;
         }
 
         /**
@@ -513,7 +404,7 @@
                                 if ($comment->remote_flag === 0) {
 
                                     // if status is 2 - check if comment has children (replies)
-                                    if(($newStatus === 2) && ($comment->getReplies()->count)){
+                                    if (($newStatus === 2) && ($comment->getReplies()->count)) {
                                         // comment has replies -> set status to 3
                                         $newStatus = 3;
                                     }
@@ -672,19 +563,19 @@
                         $values = $this->getValues();
 
                         // overwrite notification status if it is present inside the array
-                        if(array_key_exists($fieldName.'-notification', $values)){
+                        if (array_key_exists($fieldName . '-notification', $values)) {
                             $notificationText = [
                                 $this->_('No'),
                                 $this->_('Yes')
                             ];
-                            $notificationValue = $values[$fieldName.'-notification'];
-                            $values[$fieldName.'-notification'] = $notificationText[$notificationValue];
+                            $notificationValue = $values[$fieldName . '-notification'];
+                            $values[$fieldName . '-notification'] = $notificationText[$notificationValue];
                         }
 
                         // overwrite stars status if it is present inside the array
-                        if(array_key_exists($fieldName.'-rating', $values)){
-                            $ratingValue = $values[$fieldName.'-notification'];
-                            $values[$fieldName.'-notification'] = $ratingValue-' '. $this->_n('Star', 'Stars', $ratingValue);
+                        if (array_key_exists($fieldName . '-rating', $values)) {
+                            $ratingValue = $values[$fieldName . '-notification'];
+                            $values[$fieldName . '-notification'] = $ratingValue - ' ' . $this->_n('Star', 'Stars', $ratingValue);
                         }
 
                         if ($this->notifications->sendNotificationAboutNewComment($values, $newComment, $this)) {
