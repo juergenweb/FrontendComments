@@ -111,7 +111,8 @@
             }
 
             if ($levelStatus) {
-                $levelClass = ($level == 0) ? ' comments-list' : ' comments-list reply-list'; // add additional class for sublevels
+
+                $levelClass = ($level == 0) ? ' comments-list uk-comment-list' : ' comments-list reply-list'; // add additional class for sublevels
                 $out .= '<ul id="' . $this->comments->getField()->name . '-list-' . $parent_id . '" class="fc-list level-' . $level . $levelClass . '">';
             }
 
@@ -133,6 +134,7 @@
 
                         if ($this->numberOfChildren($data)) {
                             // comment has at least 1 child
+
                             $out .= $this->___renderComments($data->id, $queryId, $level + 1);
                         }
 
@@ -140,7 +142,9 @@
                     }
                 }
             }
+
             if ($levelStatus) {
+
                 $out .= '</ul>';
             }
 
