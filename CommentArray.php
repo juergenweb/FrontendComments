@@ -132,7 +132,7 @@
                 $stars = 0;
             }
             if (!is_null($stars)) {
-                $out = '<span class="star-rating">';
+                $out = '<span class="star-rating-result">';
 
                 $fullStars = round($stars, 0, PHP_ROUND_HALF_DOWN);
 
@@ -546,7 +546,7 @@
                                 $dayslocked = $this->getFrontendCommentsInputfieldConfigValues()['input_fc_voting_lock'];
                                 $timePeriod = $dayslocked . ' ' . $this->_n('day', 'days', $dayslocked);
                                 $alert->setContent(sprintf($this->_('It seems that you have rated this comment within the last %s. In this case, you may not vote again.'), $timePeriod));
-                                $alert->setCSSClass('alert_dangerClass');
+                                $alert->setCSSClass('alert_warningClass');
 
                                 echo '<div id="fc-ajax-noVote">' . $alert->render() . '</div>';
                             }
