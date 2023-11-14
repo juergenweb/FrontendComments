@@ -137,6 +137,7 @@
         {
             parent::init();
 
+
             $this->addHookAfter('Page::render', $this, 'deleteSpam');
             // delete voting entries which are older than the selected time period
             $this->addHookAfter('Page::render', $this, 'deleteOldVoteEntries');
@@ -145,6 +146,27 @@
             $this->addHookAfter('FieldtypeMulti::savePageField', $this, 'sendStatusChangeMail');
 
         }
+
+        public function ready()
+        {
+            bd('ready');
+            $this->addAssets();
+        }
+
+        public function addFiles()
+        {
+            // hook after page render to add script
+            // this will also replace alfred tags
+            $this->addHookAfter(
+                "Page::render",
+                function (HookEvent $event) {
+                    $html = $event->return;
+                    bd($html);
+                }
+            );
+        }
+
+
 
         /**
          * Delete comments marked as SPAM after a given time as set in the input field configuration
