@@ -13,7 +13,7 @@ Created: 20.07.2023
  */
 function scrollSmoothTo(elementId) {
     let element = document.getElementById(elementId);
-    element.scrollIntoView({ block: 'start',  behavior: 'smooth' });
+    element.scrollIntoView({block: 'start', behavior: 'smooth'});
 }
 
 /**
@@ -30,16 +30,13 @@ function docReady(fn) {
     }
 }
 
-
-function configRating(){
-    var starRatingControl = new StarRating( '.star-rating' ,{
+function configRating() {
+    let starRatingControl = new StarRating('.star-rating', {
         maxStars: 5,
         clearable: true,
-
     });
     starRatingControl.rebuild();
 }
-
 
 /**
  * Load the reply form under the given comment via Ajax on demand
@@ -47,7 +44,7 @@ function configRating(){
 function loadReplyForm() {
     document.addEventListener('click', (e) => {
         // check if a parent element is a link with class fc-comment-reply
-        let link = e.target.parentElement;
+        let link = e.target;
         if (link.classList.contains('fc-comment-reply')) {
             e.preventDefault();
 
@@ -87,14 +84,12 @@ function loadReplyForm() {
                     // add Ajax event listener function once more
                     subAjax('reply-form-' + commentId);
 
-                    let ratingStars = [...document.getElementsByClassName("rating__star")];
-                    if (ratingStars) {
+                    let ratingStars = [...document.getElementsByClassName("star-rating")];
+                    if (ratingStars.length > 0) {
                         configRating();
                     }
 
                 }
-
-
 
             }
 
@@ -103,7 +98,6 @@ function loadReplyForm() {
             xhr.send();
 
         }
-
 
     });
 
@@ -125,16 +119,14 @@ function cancelReply() {
     });
 }
 
-
-
 function makeVote() {
     document.addEventListener('click', (e) => {
-        if (e.target.parentElement.classList.contains('fc-vote-link')) {
+        if (e.target.classList.contains('fc-vote-link')) {
             e.preventDefault();
 
-            let url = e.target.parentElement.href;
-            let field = e.target.parentElement.dataset.field;
-            let commentid = e.target.parentElement.dataset.commentid;
+            let url = e.target.href;
+            let field = e.target.dataset.field;
+            let commentid = e.target.dataset.commentid;
 
             // make an Ajax call to save the vote
             let xhr = new XMLHttpRequest();
@@ -166,10 +158,10 @@ function makeVote() {
                         // set the new vote value inside the span element
                         target.innerHTML = voteresult;
                     }
-                    if(noVoteElement){
+                    if (noVoteElement) {
                         elementName = field + '-' + commentid + '-novote';
                         let target = document.getElementById(elementName);
-                        if(target){
+                        if (target) {
                             // add the alert box to the div element
                             target.innerHTML = noVoteElement.innerHTML;
                         }
@@ -201,7 +193,5 @@ docReady(function () {
         configRating();
     }
     makeVote();
-
-
 
 });
