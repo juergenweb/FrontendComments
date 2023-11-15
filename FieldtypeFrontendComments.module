@@ -73,6 +73,7 @@
         protected string|int $input_fc_voting = 0;
         protected string|int $input_fc_voting_lock = 7;
         protected string|int $input_privacy_show = 2;
+        protected string|int $input_dateformatcomment = 0;
         protected string|int $input_fc_comment_notification = 0;
         protected string|int $input_fc_queue_batch = 20;
         protected string|int $input_fc_quite_save = 0;
@@ -1236,6 +1237,25 @@
             $privacy_show->attr('name', 'input_privacy_show');
             $privacy_show->notes = $this->_('You can disable the display of the privacy text/checkbox, but you should be aware that this may lead to legal consequences if a privacy notice is required in your country.');
             $fieldset->append($privacy_show);
+
+            // Set the type of date format
+            $dateformat = $this->wire()->modules->get('InputfieldSelect');
+            $dateformat->label = $this->_('Date/time format for comments');
+            $dateformat->description = $this->_('Select if you want to show the date of a comment as a full date string or a relative date.');
+            $options = [
+                $this->_('full date'),
+                $this->_('relative')
+            ];
+            $dateformat->addOptions($options);
+            $dateformat->defaultValue = '1';
+            $dateformat->attr('value', $this->input_dateformatcomment);
+            $dateformat->attr('name', 'input_dateformatcomment');
+            $dateformat->notes = $this->_('The format of a full date string can be defined in the configuration of the FrontendForms module.');
+            $fieldset->append($dateformat);
+
+
+
+
 
             $inputfields->append($fieldset);
 
