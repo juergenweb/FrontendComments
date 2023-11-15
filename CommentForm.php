@@ -208,6 +208,9 @@
                 $this->stars->addOption($this->_('Poor'), '2');
                 $this->stars->addOption($this->_('Terrible'), '1');
                 $this->stars->setAttribute('class', 'star-rating');
+                if($this->frontendCommentsConfig['input_fc_stars'] == 2){
+                    $this->stars->setRule('required');
+                }
                 // add the post value of the star rating to the star rating render function after form submission
                 $number = array_key_exists($this->field->name . '-stars', $_POST) ? $_POST[$this->field->name . '-stars'] : '0';
                 $this->add($this->stars);
