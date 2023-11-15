@@ -132,7 +132,7 @@
                 $stars = 0;
             }
             if (!is_null($stars)) {
-                $out = '<span class="star-rating-result">';
+                $out = '<div class="star-rating-result">';
 
                 $fullStars = round($stars, 0, PHP_ROUND_HALF_DOWN);
 
@@ -152,7 +152,7 @@
                         $out .= '<span class="empty-star"></span>';
                     }
                 }
-                $out .= '</span>';
+                $out .= '</div>';
             }
             return $out;
         }
