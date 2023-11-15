@@ -1155,13 +1155,17 @@
             $fieldset->append($f);
 
             // field to show or hide the star rating
-            $f = $this->modules->get('InputfieldCheckbox');
+            $f = $this->modules->get('InputfieldSelect');
             $f->attr('name+id', 'input_fc_stars');
             $f->label = $this->_('Use star rating');
             $f->attr('value', $field->input_fc_stars);
-            $f->attr('checked', $field->input_fc_stars ? 'checked' : '');
-            $f->label2 = $this->_('Show star rating');
-            $f->description = $this->_('If you want to offer star rating, please check the box');
+            $options = [
+                $this->_('Disabled'),
+                $this->_('Yes (star rating optional)'),
+                $this->_('Yes (star rating required)')
+            ];
+            $f->addOptions($options);
+            $f->description = $this->_('Please select, if you want to offer a star rating.');
             $fieldset->append($f);
 
             // field to show or hide the character counter under the comment text field
@@ -1219,7 +1223,7 @@
             // Set the type of date format
             $dateformat = $this->wire()->modules->get('InputfieldSelect');
             $dateformat->label = $this->_('Date/time format for comments');
-            $dateformat->description = $this->_('Select if you want to show the date of a comment as a full date string or a relative date.');
+            $dateformat->description = $this->_('Select if you want to show the date/time of a comment as a full or a relative date string.');
             $options = [
                 $this->_('full date'),
                 $this->_('relative')
