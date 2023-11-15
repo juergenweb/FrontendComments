@@ -2,26 +2,32 @@
 This CSS file contains all general styles for all types of markups (frameworks and no frame work)
  */
 
-
-/*
-Star rating
-Based on: https://github.com/pryley/star-rating.js
-*/
-
-.star-rating-result{
-    margin-left: 10px;
+.fc-comments-wrapper {
+    margin: 20px 0;
 }
 
-.star-rating-result > span {
-    display:inline-block;
-    margin: 0 2px;
+ul.fc-comments-list {
+    list-style-type: none;
+    margin-top: 20px;
+}
+
+.fc-listitem {
+    margin-top: 20px;
+}
+
+.fc-upvote:after {
+    content: '\2191';
+}
+
+.fc-downvote:after {
+    content: '\2193';
 }
 
 .full-star, .half-star, .empty-star {
     display: inline-block;
     width: 15px;
-    height: 13px;
-    line-height: 13px;
+    height: 15px;
+    line-height: 15px;
     background-size: cover;
     position:relative;
     top: 1px;
@@ -31,10 +37,18 @@ Based on: https://github.com/pryley/star-rating.js
     background-image: url('../img/star-full.svg');
 }
 
-.empty-star:before {
+.empty-star {
     background-image: url('../img/star-empty.svg');
 }
 
-.half-star:before {
+.half-star {
     background-image: url('../img/star-half.svg');
+}
+
+.fc-cancel-link-wrapper {
+    padding-bottom: 20px;
+}
+
+form.reply-form {
+    padding: 20px 0;
 }
