@@ -3,29 +3,28 @@ CSS file for default styling of the frontend comments
 
 Created by Jürgen K.
 https://github.com/juergenweb
-File name: frontendcomments.css
+File name: frontendcommentsnone.css
 Created: 20.07.2023
  */
 
 .privacy-text {
-    text-align:left;
+    text-align: left;
     padding: 10px 0;
 }
 
-.comments-list {
+.fc-comments-list {
     margin: 30px 0 30px 0;
     position: relative;
-    list-style-type: none;
     padding-left: 15px;
 }
 
-.comments-list li {
+.fc-comments-list li {
     margin-bottom: 15px;
     display: block;
     position: relative;
 }
 
-.comments-list li:after {
+.fc-comments-list li:after {
     content: '';
     display: block;
     clear: both;
@@ -33,7 +32,7 @@ Created: 20.07.2023
     width: 0;
 }
 
-.reply-list {
+.fc-reply-list {
     margin-left: 10px;
     padding-left: 20px;
     clear: both;
@@ -41,15 +40,10 @@ Created: 20.07.2023
     position: relative;
 }
 
-.comment-date {
-    display: block;
-    clear: both;
-}
-
 /**
  * Avatar
  ---------------------------*/
-.comments-list .comment-avatar {
+.fc-comment-avatar {
     position: relative;
     z-index: 99;
     float: left;
@@ -57,7 +51,7 @@ Created: 20.07.2023
     padding-right: 10px;
 }
 
-.comments-list .comment-avatar img {
+.fc-comment-avatar img {
     width: 100%;
     height: 100%;
     -webkit-border-radius: 4px;
@@ -65,7 +59,14 @@ Created: 20.07.2023
     border-radius: 4px;
 }
 
-.comment-main-level:after {
+/* Rating */
+.star-rating-result {
+    clear: both;
+}
+
+/* Comments styling */
+
+.fc-comment-main-level:after {
     content: '';
     width: 0;
     height: 0;
@@ -73,7 +74,7 @@ Created: 20.07.2023
     clear: both;
 }
 
-.comments-list .comment-box {
+.fc-comment-box {
     width: 100%;
     margin-top: 15px;
     float: right;
@@ -83,7 +84,7 @@ Created: 20.07.2023
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
 }
 
-.comments-list .comment-box:before, .comments-list .comment-box:after {
+.fc-comment-box:before, .fc-comment-box:after {
     content: '';
     height: 0;
     width: 0;
@@ -96,15 +97,15 @@ Created: 20.07.2023
     left: -11px;
 }
 
-.comments-list .comment-box:before {
+.fc-comment-box:before {
     border-width: 11px 13px 11px 0;
     border-color: transparent rgba(0, 0, 0, 0.05);
     left: -12px;
 }
 
-.comment-box .comment-head {
+.fc-comment-head {
     background: #FCFCFC;
-    padding: 10px 12px;
+    padding: 10px 20px;
     border-bottom: 1px solid #E5E5E5;
     overflow: hidden;
     -webkit-border-radius: 4px 4px 0 0;
@@ -112,31 +113,8 @@ Created: 20.07.2023
     border-radius: 4px 4px 0 0;
 }
 
-.comment-box .comment-head .star-rating {
-    margin-left: 5px;
-    top: 0;
-}
-
-.comment-box .comment-head .star-rating > span {
-    color: #dabd18b2;
-}
-
-.comment-box .comment-head i {
-    float: right;
-    position: relative;
-    top: 2px;
-    color: #A6A6A6;
-    cursor: pointer;
-    -webkit-transition: color 0.3s ease;
-    -o-transition: color 0.3s ease;
-    transition: color 0.3s ease;
-}
-
-.comment-box .comment-head i:hover {
-    color: #03658c;
-}
-
-.comment-removed {
+/* comment removed by moderator styling */
+.fc-comment-removed {
     background: #eee;
     padding: 5px;
     -webkit-border-radius: 4px;
@@ -144,45 +122,17 @@ Created: 20.07.2023
     border-radius: 4px;
 }
 
-.comment-box .comment-name {
-    color: #283035;
-    font-size: 14px;
-    font-weight: 700;
-    margin: 0 10px 0 0;
-}
-
-.comment-box .comment-name a {
-    color: #283035;
-}
-
-.comment-box .comment-head span {
-    color: #999;
-    font-size: 13px;
-    position: relative;
-    top: 1px;
-}
-
-.comment-box .comment-head span.votebadge {
-    float: right;
-    margin-left: 5px;
-}
-
-.comment-box .comment-content {
+/* Text styling */
+.fc-comment-content {
     background: #FFF;
     padding: 12px 20px;
     font-size: 15px;
-    color: #595959;
     -webkit-border-radius: 0 0 4px 4px;
     -moz-border-radius: 0 0 4px 4px;
     border-radius: 0 0 4px 4px;
 }
 
-.comment-box .comment-name.by-author, .comment-box .comment-name.by-author a {
-    color: #03658c;
-}
-
-
-.reply-form-headline {
+.fc-reply-form-headline {
     margin-top: 20px;
 }
 
@@ -190,7 +140,7 @@ Created: 20.07.2023
     padding-bottom: 20px;
 }
 
-.reply-form-wrapper{
+.fc-reply-form-wrapper {
     padding: 0 20px;
     border-top: 1px solid #E5E5E5;
 }
@@ -199,20 +149,58 @@ Created: 20.07.2023
     text-align: right;
 }
 
-.comment-date {
-    display: inline;
+.fc-comments-meta {
+    background: blue;
+    line-height: 18px;
+    font-size: 14px;
+}
+
+.fc-comments-meta-left {
+    float: left;
+}
+
+.fc-comments-meta-right {
+    float: right;
     clear: right;
 }
 
 .icon-box {
     display: inline-block;
-    padding: 5px;
-    margin-right: 5px;
-    height: 40px;
+    margin-left: 5px;
 }
 
-.icon-box span {
-    line-height: 40px;
+/* Styling author */
+.fc-comment-name {
+    color: #283035;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.fc-comment-date {
+    color: #595959;
+    margin-bottom: .5rem;
+
+}
+
+/* vote badge */
+.fc-votebadge {
+    margin: 0 5px;
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    text-align: center;
+    line-height: 18px;
+    border-radius: 50%;
+    background: #1779ba;
+    color: #fff;
+}
+
+.upvote {
+    background: #64DD17;
+}
+
+.downvote {
+    background: #ef1c1c;
 }
 
 /** =====================
@@ -220,48 +208,10 @@ Created: 20.07.2023
  ========================*/
 @media only screen and (min-width: 481px) {
 
-    .reply-list {
+    .fc-reply-list {
         margin-left: 20px;
     }
 
-    .comment-box .comment-name {
-        float: left;
-    }
-
-    .comment-date {
-        display: inline;
-        clear: none;
-    }
-
-    .comment-box .comment-head span {
-        float: left;
-    }
-
-    .comment-box .comment-head .fc-icons {
-        clear: none;
-    }
-
-    .comment-box .comment-head i {
-        line-height: 1.8em;
-        margin-left: 14px;
-
-    }
-
-    .icon-box {
-        margin-right: 0;
-    }
-
 }
 
-@media only screen and (min-width: 481px) {
-
-
-    .fc-icons {
-        float: right;
-    }
-
-    .icon-box {
-        padding: 0;
-    }
-}
 
