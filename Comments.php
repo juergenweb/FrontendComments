@@ -15,6 +15,7 @@
      * @property protected Page $page: the page object the comment field is part of
      * @property protected Field $field: the field object for the comment field
      * @property protected Link $cancel: the link object to cancel the reply comment
+     * @property protected Textelements $commentsHeadline: the headline object above the comment list
      *
      * @method int numberOfChildren(): Get the number of children of a comment with a certain id
      * @method string renderComments(): Output all comments as an unordered list including sub-levels if set
@@ -22,6 +23,7 @@
 
     namespace FrontendComments;
 
+    use FrontendForms\TextElements;
     use ProcessWire\InputfieldFrontendComments;
     use ProcessWire\Wire;
     use ProcessWire\Field;
@@ -33,6 +35,7 @@
 
         protected array $frontendFormsConfig = [];
         protected bool|int|null $input_fc_sort = false;
+        protected TextElements $commentsHeadline;
         protected array $frontendCommentsConfig = [];
         protected CommentArray $comments;
         protected Field $field;
@@ -41,6 +44,11 @@
         public function __construct(CommentArray $comments)
         {
             parent::__construct();
+
+            $this->commentsHeadline = new TextElements();
+            $this->commentsHeadline->setTag('h3');
+            $this->commentsHeadline->setAttribute('class', 'fc-comments-headline');
+            $this->commentsHeadline->setText($this->_('Comments'));
 
             $this->comments = $comments; // the CommentArray object
             $this->field = $comments->getField(); // Processwire comment field object
@@ -55,8 +63,16 @@
             $properties =  ['input_fc_sort'];
             $this->createPropertiesOfArray($this->frontendCommentsConfig,$properties);
 
+        }
 
 
+        /**
+         * Get the comments headline object for further manipulations
+         * @return \FrontendForms\TextElements
+         */
+        public function getCommentsHeadline(): TextElements
+        {
+            return $this->commentsHeadline;
         }
 
         /**
@@ -97,12 +113,15 @@
 
             $out = '';
 
+
+
             // convert $queryId to int (could be null too)
             $queryId = (int)$queryId;
 
             $levelStatus = true;
 
             if ($parent_id !== 0) {
+
                 // check if the level is not higher than the max level, otherwise set the max level
                 if ($level >= (int)$this->frontendCommentsConfig['input_fc_depth']) {
                     $level = (int)$this->frontendCommentsConfig['input_fc_depth'];
@@ -112,7 +131,14 @@
 
             if ($levelStatus) {
 
-                $levelClass = ($level == 0) ? ' comments-list uk-comment-list' : ' comments-list reply-list'; // add additional class for sublevels
+                if($level == 0)
+                {
+                    $out .= '<div class="fc-comments-wrapper">';
+                    // render the comments headline if present
+                    $out .= $this->commentsHeadline->___render();
+                }
+
+                $levelClass = ($level == 0) ? ' fc-comments-list uk-comment-list' : ' fc-comments-list fc-reply-list'; // add additional class for sublevels
                 $out .= '<ul id="' . $this->comments->getField()->name . '-list-' . $parent_id . '" class="fc-list level-' . $level . $levelClass . '">';
             }
 
@@ -146,6 +172,10 @@
             if ($levelStatus) {
 
                 $out .= '</ul>';
+                if($level == 0)
+                {
+                    $out .= '</div>';
+                }
             }
 
             return $out;
