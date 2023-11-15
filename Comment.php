@@ -126,7 +126,7 @@
 
             // Image
             $this->userImage = $this->getUserImage();
-            if(!is_null($this->userImage)){
+            if (!is_null($this->userImage)) {
                 $this->avatar = new Image();
                 $this->avatar->setAttribute('class', 'avatar');
                 $this->avatar->wrap()->setAttribute('class', 'fc-comment-avatar');
@@ -198,7 +198,6 @@
             $this->form->setSubmitWithAjax();
 
 
-
             // get the submit button object and change the name attribute
             $submitButton = $this->form->getSubmitButton();
             $submitButton->setAttribute('name', 'reply-form-' . $this->getId() . '-submit');
@@ -249,9 +248,16 @@
          */
         public function getCreated(): string
         {
-            $date = $this->wire('datetime')->date($this->frontendFormsConfig['input_dateformat'], $this->created);
-            $time = $this->wire('datetime')->date($this->frontendFormsConfig['input_timeformat'], $this->created);
-            return $date . ' ' . $time;
+            $ts = $this->created;
+
+            if ((is_null($this->frontendCommentsConfig['input_dateformatcomment'])) || ($this->frontendCommentsConfig['input_dateformatcomment'] == 0)) {
+                $dateString = $this->wire('datetime')->date($this->frontendFormsConfig['input_dateformat'], $ts);
+                $timeString = $this->wire('datetime')->date($this->frontendFormsConfig['input_timeformat'], $ts);
+                $date = $dateString . ' ' . $timeString;
+            } else {
+                $date = $this->wire('datetime')->relativeTimeStr($ts);
+            }
+            return $date;
         }
 
         /**
@@ -463,8 +469,6 @@
             $out .= '</div>';
 
 
-
-
             $out .= '</div>';
 
             $out .= '<div id="' . $this->getReplyElement()->getAttribute('id') . '-comment" class="fc-comment-content">';
@@ -495,18 +499,18 @@
 
             // render the comment markup depending on CSS framework set in the configuration
             $frameWork = ucfirst(pathinfo($this->frontendFormsConfig['input_framework'], PATHINFO_FILENAME));
-            $className = 'FrontendComments\\'.$frameWork.'Comment';
-            if (class_exists($className)){
+            $className = 'FrontendComments\\' . $frameWork . 'Comment';
+            if (class_exists($className)) {
                 $class = new $className($this->comment, $this->comments);
             } else {
                 $class = $this;
             }
 
             // create outer wrapper container depending on the framework
-            switch($this->frontendFormsConfig['input_framework']){
+            switch ($this->frontendFormsConfig['input_framework']) {
                 case('uikit3.json'):
                     $out .= '<article class="uk-comment uk-comment-primary" role="comment">';
-                break;
+                    break;
                 case('bootstrap5.json'):
                     $out .= '<div class="container card">';
                     break;
@@ -535,7 +539,7 @@
             $out .= '</div>';
 
             // outer wrapper container end
-            switch($this->frontendFormsConfig['input_framework']){
+            switch ($this->frontendFormsConfig['input_framework']) {
                 case('uikit3.json'):
                     $out .= '</article>';
                     break;
