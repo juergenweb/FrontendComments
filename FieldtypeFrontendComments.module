@@ -104,6 +104,7 @@
 
             // set database object
             $this->database = $this->wire()->database;
+
         }
 
         /**
@@ -138,7 +139,6 @@
         {
             parent::init();
 
-
             $this->addHookAfter('Page::render', $this, 'deleteSpam');
             // delete voting entries which are older than the selected time period
             $this->addHookAfter('Page::render', $this, 'deleteOldVoteEntries');
@@ -147,27 +147,6 @@
             $this->addHookAfter('FieldtypeMulti::savePageField', $this, 'sendStatusChangeMail');
 
         }
-
-        public function ready()
-        {
-            bd('ready');
-            $this->addAssets();
-        }
-
-        public function addFiles()
-        {
-            // hook after page render to add script
-            // this will also replace alfred tags
-            $this->addHookAfter(
-                "Page::render",
-                function (HookEvent $event) {
-                    $html = $event->return;
-                    bd($html);
-                }
-            );
-        }
-
-
 
         /**
          * Delete comments marked as SPAM after a given time as set in the input field configuration
@@ -192,7 +171,6 @@
             }
 
         }
-
 
         /**
          * Delete votes, which are older than the time period set inside the configuration
@@ -1233,7 +1211,7 @@
             ];
             $privacy_show->addOptions($options);
             $privacy_show->defaultValue = '2';
-            $privacy_show->attr('value', $this->input_privacy_show);
+            $privacy_show->attr('value', $field->input_privacy_show);
             $privacy_show->attr('name', 'input_privacy_show');
             $privacy_show->notes = $this->_('You can disable the display of the privacy text/checkbox, but you should be aware that this may lead to legal consequences if a privacy notice is required in your country.');
             $fieldset->append($privacy_show);
@@ -1247,15 +1225,11 @@
                 $this->_('relative')
             ];
             $dateformat->addOptions($options);
-            $dateformat->defaultValue = '1';
-            $dateformat->attr('value', $this->input_dateformatcomment);
+            $dateformat->defaultValue = '0';
+            $dateformat->attr('value', $field->input_dateformatcomment);
             $dateformat->attr('name', 'input_dateformatcomment');
             $dateformat->notes = $this->_('The format of a full date string can be defined in the configuration of the FrontendForms module.');
             $fieldset->append($dateformat);
-
-
-
-
 
             $inputfields->append($fieldset);
 
