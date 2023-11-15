@@ -15,10 +15,12 @@
             parent::__construct($comment, $comments);
 
             // Image
-            $this->avatar->removeAttribute('class');
-            $this->avatar->setAttribute('class', 'rounded-circle me-2');
-            $this->avatar->setAttribute('width', '60');
-            $this->avatar->removeWrap();
+            if(!is_null($this->userImage)) {
+                $this->avatar->removeAttribute('class');
+                $this->avatar->setAttribute('class', 'rounded-circle me-2');
+                $this->avatar->setAttribute('width', '60');
+                $this->avatar->removeWrap();
+            }
 
             // Author
             $this->commentAuthor->setTag('span');
@@ -33,23 +35,22 @@
             // Up-votes
             $this->upvote->removePrepend();
             $this->upvote->removeAppend();
-            $this->upvote->setLinkText($this->_('Like').'<i class="fa fa-thumbs-up ps-1"></i>');
             $this->upvote->append('<span id="' . $this->field->name . '-' . $this->id . '-votebadge-up" class="badge bg-success mx-2">' . $this->upvotes . '</span>');
 
             // Down-votes
             $this->downvote->removePrepend();
             $this->downvote->removeAppend();
-            $this->downvote->setLinkText($this->_('Dislike').'<i class="fa fa-thumbs-up ps-1"></i>');
             $this->downvote->append('<span id="' . $this->field->name . '-' . $this->id . '-votebadge-down" class="badge bg-danger mx-2">' . $this->upvotes . '</span>');
 
             // Reply
             $this->replyLink->removeWrap();
-            $this->replyLink->setLinkText('<i class="fa fa-reply me-1"></i><span>'.$this->_('Reply').'</span>');
 
             // Comment text
             $this->commentText->setTag('p');
             $this->commentText->removeAttribute('class');
             $this->commentText->setAttribute('class', 'comment-text');
+
+            $this->replayFormHeadline->setAttribute('class', 'mt-3');
         }
 
         public function ___renderCommentMarkup(bool $levelStatus): string
@@ -58,21 +59,26 @@
                             <div class="col-md-12">
                                 <div class="d-flex flex-column comment-section">
                                     <div class="bg-white p-2">
-                                        <div class="d-flex align-items-center">
+                                        <div class="d-flex align-items-center pt-2">
                                             <div class="flex-shrink-0">'
                                             .$this->___renderImage().
                                             '</div>
-                                            <div class="flex-grow-1">   
-                                                <div class="p-2 float-start">'.$this->___renderAuthor().'</div>
-                                                <div class="p-2 float-start">'.$this->___renderRating().'</div>
-                                                <div class="p-2">'.$this->___renderCreated().'</div>                                                                                                         
+                                            
+                                            <div class="flex-grow-1">              
+                                                
+                                              <div class="px-2 float-start">  
+                                                <div class="px-2 float-start">'.$this->___renderAuthor().'</div>
+                                                <div class="px-2 float-start">'.$this->___renderCreated().'</div> 
+                                                 <div class="px-2 clearfix">'.$this->___renderRating().'</div>
                                              </div> 
-                                             <div class="flex-shrink-0">
-                                                <div class="p-2 flex-grow float-end">'.$this->___renderReply($levelStatus).'</div>
+                                             
+                                             <div class="float-end">
+                                                <div class="px-2 flex-grow float-end">'.$this->___renderReply($levelStatus).'</div>
                                              </div>
-                                                 
+
+                                             </div>                                             
                                         </div>
-                                   
+                                         
                                         <div class="card-body mt-2">'
                                             .$this->___renderText().
                                         '</div>
