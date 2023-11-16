@@ -7,7 +7,7 @@ Processwire Fieldtype/Inputfield to add and manage comments on your site based o
 ## Requirements
 * PHP>=8.0.0
 * ProcessWire>=3.0.181
-* GD-Library for CAPTCHA image creation
+* GD-Library installed for CAPTCHA image creation
 * FrontendForms>=2.1.54
 * LazyCron enabled for sending mails
 
