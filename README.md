@@ -20,8 +20,10 @@ Processwire Fieldtype/Inputfield to add and manage comments on your site based o
 * Queuing the sending of notification emails instead of sending all at once (preventing performance issues by sending to many emails at once)
 * Ajax driven form submission with server side validation without page reload
 * Reply forms will only be loaded on demand by clicking on the reply symbol
-* Usage of HTML email templates (provided by FrontendForms)
+* Option to send HTML email templates (provided by FrontendForms)
 * Enable/disable the sending of notification emails to a commenter if status of a comment has been changed to "approved" or "SPAM"
+* No dependencies
+* Support for UiKit3 and Boostrap5 out of the box
 
 ## Table of contents
 * [Is this a copy of the Comments Fieldtype by Ryan?](#is-this-a-copy-of-the-comments-fieldtype-by-ryan)
