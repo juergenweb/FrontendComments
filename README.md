@@ -46,8 +46,6 @@ But to be honest, I have taken Ryan's version to get an idea which features can 
 ## My intention for the re-creation of a Fieldtype that exists 
 I wanted to use all the advantages of my FrontendForms module on a comment component and I wanted that the forms of the comment component looks like the same as all other forms on my site, so that they integrate seamlessly into my site. This is why I decided to develop my own version of a comment module.
 
-The other reason was to increase my knowledge on creating modules in ProcessWire by creating my first "FieldtypeMulti" module. 
-
 ## Installation and Quick-start guide
 1. First of all, you need to download and install the FrontendForms module from the [module directory](https://processwire.com/modules/frontend-forms/) if you have not installed it.
 2. After that, download and extract this module and put the folder inside site/modules. Be aware that the folder name must be FrontendComments and not FrontendComments-main or FrontendComments-master. GitHub adds this appendix by default. So be aware to remove it before you put the folder inside the module folder.
