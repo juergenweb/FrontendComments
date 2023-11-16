@@ -75,7 +75,7 @@ echo $comments;
 ### Indirect output, including the change of some parameter
 This kind of output is necessary, if you want to change some global settings before the output. 
 
-By the way: The only scenario for changing paramters on the frontend will be the case, if you use the same comment field on different templates and you need to change some parameters on each template. In this case you need to change them inside the template.
+By the way: The only scenario for changing paramters on the frontend will be the case, if you use the same comment field on different templates and you need to change some parameters on each template. In this case you need to change them inside the template and not in the backend configuration.
 
 If you use an new comment field for every template, you can change all of the parameters inside the "Details tab" of the field in the backend configuration.
 
