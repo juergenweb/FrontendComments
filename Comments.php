@@ -45,11 +45,6 @@
         {
             parent::__construct();
 
-            $this->commentsHeadline = new TextElements();
-            $this->commentsHeadline->setTag('h3');
-            $this->commentsHeadline->setAttribute('class', 'fc-comments-headline');
-            $this->commentsHeadline->setText($this->_('Comments'));
-
             $this->comments = $comments; // the CommentArray object
             $this->field = $comments->getField(); // Processwire comment field object
             $this->page = $comments->getPage(); // the current page object, which contains the comment field
@@ -58,6 +53,20 @@
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
             // get configuration values from the FrontendComments input field
             $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
+
+            $this->commentsHeadline = new TextElements();
+            $this->commentsHeadline->setTag('h3');
+            $this->commentsHeadline->setAttribute('class', 'fc-comments-headline');
+            $headline = $this->_('Comments');
+
+            if(isset($this->frontendCommentsConfig['input_fc_commentsheadline']) && ($this->frontendCommentsConfig['input_fc_commentsheadline'] != '')){
+                $headline = $this->frontendCommentsConfig['input_fc_commentsheadline'];
+            }
+            $this->commentsHeadline->setText($headline);
+
+
+
+
 
             // create properties of FrontendComments configuration values
             $properties =  ['input_fc_sort'];
