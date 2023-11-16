@@ -23,7 +23,7 @@ Processwire Fieldtype/Inputfield to add and manage comments on your site based o
 * Option to send HTML email templates (provided by FrontendForms)
 * Enable/disable the sending of notification emails to a commenter if status of a comment has been changed to "approved" or "SPAM"
 * No dependencies
-* Support for UiKit 3 and Boostrap 5 framework out of the box
+* Support for UiKit 3 and Bootstrap 5 framework out of the box
 
 ## Table of contents
 * [Is this a copy of the Comments Fieldtype by Ryan?](#is-this-a-copy-of-the-comments-fieldtype-by-ryan)
