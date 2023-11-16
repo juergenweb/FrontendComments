@@ -8,11 +8,11 @@ Processwire Fieldtype/Inputfield to add and manage comments on your site based o
 * PHP>=8.0.0
 * ProcessWire>=3.0.181
 * GD-Library for CAPTCHA image creation
-* FrontendForms
-* LazyCron for sending mails
+* FrontendForms>=2.1.54
+* LazyCron enabled for sending mails
 
 ## Highlights / Features
-* Only 1 line of code is necessary to render the comments + forms on the frontend
+* Easy integration: Only 1 line of code inside a template is necessary to render the comments + forms on the frontend
 * Possibility to use one comment field with different parameters in multiple templates
 * Enable/disable star rating on per comment field base
 * Enable/disable rating of comments (like/dislike) on per comment field base
