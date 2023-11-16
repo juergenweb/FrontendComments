@@ -32,8 +32,7 @@ function docReady(fn) {
 
 function configRating() {
     let starRatingControl = new StarRating('.star-rating', {
-        maxStars: 5,
-        clearable: true,
+        maxStars: 5
     });
     starRatingControl.rebuild();
 }
