@@ -53,8 +53,8 @@ I wanted to use all the advantages of my FrontendForms module on a comment compo
 3. Find this module and install it.
 4. Then you need to create your first comment field and name it fe "comments".
 5. After you have created this comment field you can change some configuration settings inside the details tab of the field if needed. The only value which is required to enter, is at least one email address for a moderator.This is mandatory.
-6. Now add this field to a template in the backend.
-7. Add JavaScript and CSS file to the frontend (fe inside the main.php). Please copy the code for embedding the stylesheet and the JS file from the bottom of the details tab.
+6. Now add this field to a template.
+7. JavaScript and CSS file for the frontend will be added automatically - no need to take care of it.
 8. To output the comment form and the comment list on the frontend you have to add fe. "echo $page->comments" to the frontend template. Take a look on the following output methods below.
 
 ### Simple direct output with "echo"
@@ -68,14 +68,20 @@ If you do not want to output the comments directly via "echo" method, you can pu
 
 ```php
 $comments = $page->mycomments;
+...
+...
 echo $comments;
 ```
 ### Indirect output, including the change of some parameter
-This kind of output is necessary, if you want to change some global settings before the output.
+This kind of output is necessary, if you want to change some global settings before the output. 
+
+By the way: The only scenario for changing paramters on the frontend will be the case, if you use the same comment field on different templates and you need to change some parameters on each template. In this case you need to change them inside the template.
+
+If you use an new comment field for every template, you can change all of the parameters inside the "Details tab" of the field in the backend configuration.
 
 ```php
 $comments = $page->mycomments;
-$comments->setReplyDepth(0); // use another reply depth than in the global settings
+$comments->setReplyDepth(0); // use another reply depth than in the field settings
 echo $comments;
 ```
 
