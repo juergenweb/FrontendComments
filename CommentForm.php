@@ -208,6 +208,22 @@
                 $this->stars->addOption($this->_('Poor'), '2');
                 $this->stars->addOption($this->_('Terrible'), '1');
                 $this->stars->setAttribute('class', 'star-rating');
+
+                // create data-options string
+                $options = [];
+                if(isset($this->frontendCommentsConfig['input_fc_showtooltip'])){
+                    // disable tooltip
+                    $options[] = '&quot;tooltip&quot;:false';
+                }
+                // set clear-able to true
+                $options[]= '&quot;clearable&quot;:true';
+
+                if($options){
+                    // create the data-options attribute
+                    $optionString = implode(',', $options);
+                    $this->stars->setAttribute('data-options', '{'.$optionString.'}');
+                }
+
                 if($this->frontendCommentsConfig['input_fc_stars'] == 2){
                     $this->stars->setRule('required');
                 }
