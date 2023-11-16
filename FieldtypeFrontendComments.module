@@ -56,6 +56,8 @@
         protected string $input_fc_emailTemplate = 'inherit';
         protected string $input_fc_emailtype = 'text';
         protected string $input_fc_email = '';
+
+        protected string $input_fc_commentsheadline = '';
         protected string $input_fc_sender = '';
         protected string $input_fc_subject = '';
         protected string $input_fc_title = '';
@@ -1117,31 +1119,13 @@
             $fieldset->description = $this->_('Change some parameters to get the preferred output.');
             $fieldset->icon = 'fa-cog';
 
-            // field to enter the number of decimals (fe 2) -> will be appended after the inputfield
-            $f = $this->modules->get('InputfieldInteger');
-            $f->attr('name+id', 'input_fc_depth');
-            $f->attr('type', 'number');
-            $f->label = $this->_('Replay depth');
-            $value = (is_null($field->input_fc_depth)) ? $this->input_fc_depth : $field->input_fc_depth;
-            $f->attr('value', $value);
-            $f->attr('size', 10);
-            $f->attr('min', 0);
-            $f->attr('max', 10);
-            $f->required(true);
-            $f->description = $this->_('Choose the number of depth for threaded comments');
-            $f->notes = $this->_('Specify 0 for traditional flat chronological comments. For threaded comments (replies appear with comment being replied to) specify the maximum depth allowed for replies (0 to 3 recommended).');
-            $fieldset->append($f);
 
-            // field to enter the number of decimals (fe 2) -> will be appended after the inputfield
-            $f = $this->modules->get('InputfieldCheckbox');
-            $f->attr('name+id', 'input_fc_sort');
-            $f->label = $this->_('Sort order');
-            $f->attr('value', $field->input_fc_sort);
-            $f->attr('checked', $field->input_fc_sort ? 'checked' : '');
-            $f->label2 = $this->_('Sort newest to oldest');
-            $f->description = $this->_('Set the sort order for the comments');
-            $f->notes = $this->_('By default, comments will be sort chronologically (oldest to newest). To reverse that behavior check this box.');
-            $fieldset->append($f);
+            /**  $generalFieldset */
+            $generalFieldset = $modules->get('InputfieldFieldset');
+            $generalFieldset->label = $this->_('General output settings');
+            $generalFieldset->collapsed = true;
+            $generalFieldset->columnWidth = 100;
+            $generalFieldset->icon = 'fa-cog';
 
             // field to reverse the output order of form and comments
             $f = $this->modules->get('InputfieldCheckbox');
@@ -1152,7 +1136,20 @@
             $f->label2 = $this->_('Show form after comments');
             $f->description = $this->_('Reverse the order of the output of form and comments');
             $f->notes = $this->_('By default, the form will be displayed before the comments. To reverse that behavior check this box.');
-            $fieldset->append($f);
+            $generalFieldset->append($f);
+
+
+            $fieldset->append($generalFieldset);
+
+
+
+            /**  $commentformFieldset */
+            $formFieldset = $modules->get('InputfieldFieldset');
+            $formFieldset->label = $this->_('Comment form settings');
+            $formFieldset->collapsed = true;
+            $formFieldset->columnWidth = 100;
+            $formFieldset->icon = 'fa-pencil';
+
 
             // field to show or hide the star rating
             $f = $this->modules->get('InputfieldSelect');
@@ -1166,7 +1163,19 @@
             ];
             $f->addOptions($options);
             $f->description = $this->_('Please select, if you want to offer a star rating.');
-            $fieldset->append($f);
+            $formFieldset->append($f);
+
+
+            // field to hide the tooltip next to the star rating
+            $f = $this->modules->get('InputfieldCheckbox');
+            $f->attr('name+id', 'input_fc_showtooltip');
+            $f->label = $this->_('Disable tooltip next to the star rating');
+            $f->attr('value', $field->input_fc_showtooltip);
+            $f->attr('checked', $field->input_fc_showtooltip ? 'checked' : '');
+            $f->label2 = $this->_('Disable the display of the tooltip beside the star rating');
+            $f->description = $this->_('By default, a tooltip showing the current rating on hover, will be displayed next to the star rating. Check the checkbox to hide the tooltip.');
+            $f->showIf = 'input_fc_stars=1|2';
+            $formFieldset->append($f);
 
             // field to show or hide the character counter under the comment text field
             $f = $this->modules->get('InputfieldCheckbox');
@@ -1176,33 +1185,8 @@
             $f->attr('checked', $field->input_fc_counter ? 'checked' : '');
             $f->label2 = $this->_('Hide character counter');
             $f->description = $this->_('By default, a character counter will be displayed under the comment text field to inform the user, how many characters are left until the max. limit of 1024 characters is reached.');
-            $fieldset->append($f);
+            $formFieldset->append($f);
 
-            // field to show or hide comment rating
-            $f = $this->modules->get('InputfieldCheckbox');
-            $f->attr('name+id', 'input_fc_voting');
-            $f->label = $this->_('Show/hide voting of comments');
-            $f->attr('value', $field->input_fc_voting);
-            $f->attr('checked', $field->input_fc_voting ? 'checked' : '');
-            $f->label2 = $this->_('Enable voting of comments');
-            $f->description = $this->_('By checking the box you offer visitors the possibility to rate comments (up-votes and down-votes).');
-            $f->columnWidth = 50;
-            $fieldset->append($f);
-
-            //input_fc_voting_lock
-            $f = $this->modules->get('InputfieldInteger');
-            $f->attr('name+id', 'input_fc_voting_lock');
-            $f->attr('type', 'number');
-            $f->label = $this->_('Lock in days before voting can be done again');
-            $value = (is_null($field->input_fc_voting_lock)) ? $this->input_fc_voting_lock : $field->input_fc_voting_lock;
-            $f->attr('value', $value);
-            $f->attr('size', 10);
-            $f->attr('min', 1);
-            $f->required(true);
-            $f->description = $this->_('To prevent multiple ratings from the same user, this module checks if the user have voted before. Please enter a time period in days during which further rating is not allowed.');
-            $f->notes = $this->_('The user will be identified by using data of his Internet fingerprint. This means that the IP address, the browser system and the user ID will be compared with entries in the database. If an entry with the same data will be found, then the rating is not allowed. Entries in the database which are older than the time period selected above will be deleted automatically and the user will be allowed to rate again.');
-            $f->columnWidth = 50;
-            $fieldset->append($f);
 
             // Show or hide privacy checkbox or text on form
             $privacy_show = $this->wire()->modules->get('InputfieldSelect');
@@ -1218,7 +1202,90 @@
             $privacy_show->attr('value', $field->input_privacy_show);
             $privacy_show->attr('name', 'input_privacy_show');
             $privacy_show->notes = $this->_('You can disable the display of the privacy text/checkbox, but you should be aware that this may lead to legal consequences if a privacy notice is required in your country.');
-            $fieldset->append($privacy_show);
+            $formFieldset->append($privacy_show);
+
+
+            $fieldset->append($formFieldset);
+
+
+
+            /**  $commentlistFieldset */
+            $commentFieldset = $modules->get('InputfieldFieldset');
+            $commentFieldset->label = $this->_('Comment list settings');
+            $commentFieldset->collapsed = true;
+            $commentFieldset->columnWidth = 100;
+            $commentFieldset->icon = 'fa-list';
+
+            // enter the headline of the comment list
+            $commentHead = $modules->get('InputfieldText');
+            $commentHead->label = $this->_('Comment list headline');
+            $commentHead->attr('name', 'input_fc_commentsheadline');
+            $commentHead->attr('value', $field->input_fc_commentsheadline);
+            if ($languages) {
+                $commentHead->useLanguages = true;
+                foreach ($languages as $language) {
+                    if ($language->isDefault()) continue;
+                    $commentHead->attr("value$language", (string)$field->get("input_fc_commentsheadline$language->id"));
+                }
+            }
+            $commentHead->description = $this->_('This heading appears at the top of the comment list.');
+            $commentHead->columnWidth = 100;
+            $commentHead->notes = $this->_('If no heading is entered, "Comments" will appear as the default heading.');
+            $commentFieldset->add($commentHead);
+
+            // field to enter the number of decimals (fe 2) -> will be appended after the inputfield
+            $f = $this->modules->get('InputfieldInteger');
+            $f->attr('name+id', 'input_fc_depth');
+            $f->attr('type', 'number');
+            $f->label = $this->_('Replay depth');
+            $value = (is_null($field->input_fc_depth)) ? $this->input_fc_depth : $field->input_fc_depth;
+            $f->attr('value', $value);
+            $f->attr('size', 10);
+            $f->attr('min', 0);
+            $f->attr('max', 10);
+            $f->required(true);
+            $f->description = $this->_('Choose the number of depth for threaded comments');
+            $f->columnWidth = 50;
+            $f->notes = $this->_('Specify 0 for traditional flat chronological comments. For threaded comments (replies appear with comment being replied to) specify the maximum depth allowed for replies (0 to 3 recommended).');
+            $commentFieldset->append($f);
+
+            // field to enter the number of decimals (fe 2) -> will be appended after the inputfield
+            $f = $this->modules->get('InputfieldCheckbox');
+            $f->attr('name+id', 'input_fc_sort');
+            $f->label = $this->_('Sort order');
+            $f->attr('value', $field->input_fc_sort);
+            $f->attr('checked', $field->input_fc_sort ? 'checked' : '');
+            $f->label2 = $this->_('Sort newest to oldest');
+            $f->description = $this->_('Set the sort order for the comments');
+            $f->columnWidth = 50;
+            $f->notes = $this->_('By default, comments will be sort chronologically (oldest to newest). To reverse that behavior check this box.');
+            $commentFieldset->append($f);
+
+            // field to show or hide comment rating
+            $f = $this->modules->get('InputfieldCheckbox');
+            $f->attr('name+id', 'input_fc_voting');
+            $f->label = $this->_('Show/hide voting of comments');
+            $f->attr('value', $field->input_fc_voting);
+            $f->attr('checked', $field->input_fc_voting ? 'checked' : '');
+            $f->label2 = $this->_('Enable voting of comments');
+            $f->description = $this->_('By checking the box you offer visitors the possibility to rate comments (up-votes and down-votes).');
+            $f->columnWidth = 50;
+            $commentFieldset->append($f);
+
+            //input_fc_voting_lock
+            $f = $this->modules->get('InputfieldInteger');
+            $f->attr('name+id', 'input_fc_voting_lock');
+            $f->attr('type', 'number');
+            $f->label = $this->_('Lock in days before voting can be done again');
+            $value = (is_null($field->input_fc_voting_lock)) ? $this->input_fc_voting_lock : $field->input_fc_voting_lock;
+            $f->attr('value', $value);
+            $f->attr('size', 10);
+            $f->attr('min', 1);
+            $f->required(true);
+            $f->description = $this->_('To prevent multiple ratings from the same user, this module checks if the user have voted before. Please enter a time period in days during which further rating is not allowed.');
+            $f->notes = $this->_('The user will be identified by using data of his Internet fingerprint. This means that the IP address, the browser system and the user ID will be compared with entries in the database. If an entry with the same data will be found, then the rating is not allowed. Entries in the database which are older than the time period selected above will be deleted automatically and the user will be allowed to rate again.');
+            $f->columnWidth = 50;
+            $commentFieldset->append($f);
 
             // Set the type of date format
             $dateformat = $this->wire()->modules->get('InputfieldSelect');
@@ -1233,7 +1300,10 @@
             $dateformat->attr('value', $field->input_dateformatcomment);
             $dateformat->attr('name', 'input_dateformatcomment');
             $dateformat->notes = $this->_('The format of a full date string can be defined in the configuration of the FrontendForms module.');
-            $fieldset->append($dateformat);
+            $commentFieldset->append($dateformat);
+
+
+            $fieldset->append($commentFieldset);
 
             $inputfields->append($fieldset);
 
@@ -1282,32 +1352,6 @@
             $spamFieldset->add($captcha, $inputfields);
 
             $inputfields->append($spamFieldset);
-
-            /**  CSS + JS fieldset */
-            $cssjsFieldset = $modules->get('InputfieldFieldset');
-            $cssjsFieldset->label = $this->_('JS and CSS');
-            $cssjsFieldset->collapsed = true;
-            $cssjsFieldset->columnWidth = 100;
-            $cssjsFieldset->icon = 'fa-code';
-
-            /** @var InputfieldMarkup $f */
-            $f = $modules->get('InputfieldMarkup');
-            $f->label = $this->_('CSS for front-end comments output');
-            $f->value =
-                "<p>If you do not use a CSS framework, please copy and paste the following into the document <code>&lt;head&gt;</code> of your site:</p>" .
-                "<pre style='border-left: 4px solid #ccc; padding-left: 1em;'>&lt;link rel='stylesheet' type='text/css' href='&lt;?=\$config-&gt;urls-&gt;FieldtypeFrontendComments?&gt;&#92assets&#92frontendcomments.css' /&gt;</pre>" .
-
-                $cssjsFieldset->add($f);
-
-            /** @var InputfieldMarkup $f */
-            $f = $modules->get('InputfieldMarkup');
-            $f->label = $this->_('JS for front-end comments output');
-            $f->value =
-                "<p>Please copy and paste the following into the document before the closing <code>&lt;/body&gt;</code> tag:</p>" .
-                "<p><pre style='border-left: 4px solid #ccc; padding-left: 1em;'>&lt;script type='text/javascript' src='&lt;?=\$config-&gt;urls-&gt;FieldtypeFrontendComments?&gt;&#92assets&#92frontendcomments.js'&gt;&lt;/script&gt;</pre></p>";
-            $cssjsFieldset->add($f);
-
-            $inputfields->append($cssjsFieldset);
 
             // output all input fields (parent and custom)
             return $inputfields;
