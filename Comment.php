@@ -205,6 +205,22 @@
         }
 
         /**
+         * Get the page object, where the comment belongs to
+         * @return \ProcessWire\Page
+         */
+        public function getPage() {
+            return $this->page;
+        }
+
+        /**
+         * Get the field object, where the comment belongs to
+         * @return \ProcessWire\Field
+         */
+        public function getField() {
+            return $this->field;
+        }
+
+        /**
          * Get the email of the author of the comment
          * @return string
          */
