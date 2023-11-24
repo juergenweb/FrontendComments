@@ -1,0 +1,606 @@
+<?php
+    declare(strict_types=1);
+
+    namespace ProcessWire;
+
+    /*
+     * Class to create a simple comments manager to manage all comments in one place
+     * A new custom admin page will be created
+     * This page includes a statistic area about all comment fields installed and
+     * a filterable table containing all comments of a certain FrontendComments field
+     *
+     */
+
+    use Exception;
+    use FrontendComments\CommentArray;
+    use FrontendComments\Comment;
+    use FrontendComments\configValues;
+    use FrontendComments\Notifications;
+
+    class FrontendCommentsAdmin extends Process
+    {
+
+        use configValues;
+
+        protected Field $field; // A single FrontendComments field;
+        protected int $defaultNumber = 20; // The default number of comments to display in the table
+        protected WireArray $commentFields; // Wire array containing all FrontendComments field objects
+        protected array $frontendFormsConfig = [];
+
+        /**
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
+         */
+        public function __construct()
+        {
+
+            // get all FrontendComments fields site wide as a WireArray
+            $this->commentFields = $this->getCommentFields();
+
+            // Output an error message if no FrontendComments fields have been found
+            if (!$this->commentFields->count) {
+                wire()->error('There are no FrontendComments fields installed.');
+            } else {
+
+                // As the default comment field on page load, take the first one inside the WireArray
+                $this->field = $this->commentFields->first();
+
+                // Get all FrontendForms configuration values
+                $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
+
+            }
+
+        }
+
+        /**
+         * Array containing the module info data
+         * @return array
+         */
+        public static function getModuleinfo(): array
+        {
+            return [
+                'title' => __('Comments manager', __FILE__),
+                'summary' => __('A custom page for the FrontendComments module to manage all comments in one place', __FILE__),
+                'author' => 'Jürgen Kern',
+                'version' => '1.0.0',
+                'page' => [
+                    'name' => 'comments-manager',
+                    'title' => __('Comments manager', __FILE__),
+                ],
+            ];
+        }
+
+        /**
+         * @throws \ProcessWire\WireException
+         */
+        public function init(): void
+        {
+            parent::init();
+
+            // add CSS and JS to the backend
+            $version = $this->getModuleInfo()['version'] . '-' . time();
+            $this->wire('config')->styles->add($this->wire('config')->urls->{$this->className} . 'backend-assets/frontendcommentsadmin.css?v=' . $version . '&time=' . time());
+            $this->wire('config')->scripts->add($this->wire('config')->urls->{$this->className} . 'backend-assets/frontendcommentsadmin.js?v=' . $version . '&time=' . time());
+
+        }
+
+        /**
+         * Create the Select input field for changing the status of a comment inside the table
+         * @param \FrontendComments\Comment $comment
+         * @return string
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
+         */
+        protected function ___createStatusSelect(Comment $comment): string
+        {
+            $select = wire('modules')->get('InputfieldSelect');
+            $selectName = 'status_' . $comment->id;
+            $select->attr('id+name', $selectName);
+            $statusOptions = [
+                FieldtypeFrontendComments::pendingApproval => $this->_('Waiting for approval'),
+                FieldtypeFrontendComments::approved => $this->_('Approved'),
+                FieldtypeFrontendComments::spam => $this->_('SPAM'),
+            ];
+            $select->addOptions($statusOptions);
+            $value = (wire('input')->post->$selectName) ?? $comment->status;
+            $select->attr('value', $value);
+            return $select->render();
+        }
+
+        /**
+         * Create and render the AdminTable containing the comments of a certain FrontendForms field
+         * @param \ProcessWire\WireArray $comments
+         * @param \ProcessWire\InputfieldForm $form
+         * @return string
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
+         */
+        public function ___executeTable(WireArray $comments, InputfieldForm $form): string
+        {
+
+            // get the list of date formats to choose one for the creation date
+            $dateFormats = wire('datetime')->getDateFormats();
+
+            // create the table
+            $table = $this->modules->get('MarkupAdminDataTable');
+            $table->setEncodeEntities(false);
+            $table->setColNotSortable(0);
+            $table->setColNotSortable(5);
+            $table->id = 'comment-manager-table';
+
+            // table head
+            $table->headerRow([
+                '#',
+                $this->_('Created'),
+                $this->_('Page'),
+                $this->_('Author'),
+                $this->_('Email'),
+                $this->_('Text'),
+                $this->_('Status')
+            ]);
+
+            foreach ($comments as $commentArray) {
+
+                // table body
+                foreach ($commentArray as $key => $comment) {
+
+                    // Create hidden field containing the ID of the comment
+                    $commentId = wire('modules')->get('InputfieldHidden');
+                    $commentIdName = 'id_' . $comment->id;
+                    $commentId->attr('commentid+name', $commentIdName);
+                    $commentId->value = $comment->id;
+
+                    $table->row([
+                        $key + 1,
+                        wire('datetime')->date($dateFormats[4], $comment['created']),
+                        '<a href="' . $comment->getPage()->url . '" target="_blank">' . $comment->getPage()->title . '</a>',
+                        $comment->author,
+                        $comment->email,
+                        $comment->text,
+                        $this->___createStatusSelect($comment),
+                        $commentId->render()
+                    ]);
+                }
+            }
+            return $table->render();
+        }
+
+        /** Helper function to group comments by field and page
+         * @param $arr
+         * @param $criteria
+         * @return array
+         */
+        protected function groupBy($arr, $criteria): array
+        {
+            return array_reduce($arr, function ($accumulator, $item) use ($criteria) {
+                $key = (is_callable($criteria)) ? $criteria($item) : $item[$criteria];
+                if (!array_key_exists($key, $accumulator)) {
+                    $accumulator[$key] = [];
+                }
+                array_push($accumulator[$key], $item);
+                return $accumulator;
+            }, []);
+        }
+
+        /**
+         * WireArray to get all CommentArrays and their comments according to selectors and limits
+         * @param \ProcessWire\Field $field
+         * @param array|null $selectors
+         * @param int $limit
+         * @return \ProcessWire\WireArray
+         * @throws \ProcessWire\WireException
+         */
+        protected function findComments(Field $field, array|null $selectors = [], int $limit = 0): WireArray
+        {
+
+            $allComments = new WireArray();
+
+            // If no FrontendCommentFields are installed, return an empty WireArray
+            if (!$this->commentFields->count)
+                return $allComments;
+
+            // Get all values of the given FrontendComments field table
+            $table = $field->getTable();
+            $query = ["SELECT * FROM $table"];
+
+            // add selectors if present
+            if ($selectors) {
+                $query[] = 'WHERE ' . implode(' AND ', $selectors);
+            }
+
+            // sort all results by creation date ascending
+            $query[] = "ORDER BY created";
+
+            // set the limit of comment saccording to the filter settings
+            if ($limit != 0) {
+                $query[] = "LIMIT $limit";
+            }
+
+            $queryString = implode(' ', $query);
+
+            // try to query the database
+            try {
+
+                $sql = wire('database')->prepare($queryString);
+                $sql->execute();
+                $commentsFound = $sql->fetchAll();
+
+                // comments have been found
+                if ($commentsFound) {
+                    $groupedComments = $this->groupBy($commentsFound, 'pages_id');
+                    foreach ($groupedComments as $pageId => $data) {
+                        $pageComments = new CommentArray();
+                        $pageComments->setPage(wire('pages')->get($pageId));
+                        $pageComments->setField($field);
+                        foreach ($data as $c) {
+                            $pageComment = new Comment($c, $pageComments);
+                            // Add the comment to the CommentArray
+                            $pageComments->add($pageComment);
+                        }
+                        // add the CommentArray to the WireArray
+                        $allComments->add($pageComments);
+                    }
+                }
+            } catch (Exception $e) {
+
+            }
+            return $allComments; // return the WireArray containing all CommentArrays
+        }
+
+        /**
+         * Output the new table according to the filters set
+         * @param \FrontendComments\CommentArray $totalComments
+         * @return void
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
+         */
+        public function ___executeComments(WireArray $totalComments): void
+        {
+            if ($this->input->post('submit')) {
+
+                // ID of the selected FieldtypeComments field from the filter
+                $fieldID = (int)$this->input->post('fc-commentsfield');
+
+                // Set new $field property according to the select POST value
+                $this->field = $this->commentFields->findOne($fieldID);
+
+                // array that should hold all updated commentIDs for later usage
+                $updates = [];
+
+                // get all comment IDs from the POST array
+                $commentids = $this->input->post->find('id_*');
+                foreach ($commentids as $id) {
+
+                    // get the comment with this id
+                    $comment = $totalComments->findOne($id);
+
+                    // create new CommentArray -> needed for sending notification email
+                    $commentArray = new CommentArray();
+                    $commentArray->setField($this->field);
+                    $commentArray->setPage(wire('pages')->get($comment->pages_id));
+                    $commentArray->add($comment);
+
+                    // Compare old and new status if something has been changed
+                    $oldStatus = $comment->status;
+                    $newStatus = (int)$this->input->post('status_' . $id);
+
+                    if ($oldStatus != $newStatus) {
+
+                        // status has been changed
+                        $table = $this->field->getTable();
+                        $sql = "UPDATE $table SET status=$newStatus WHERE id=$id";
+                        $query = wire('database')->prepare($sql);
+
+                        if ($query->execute()) {
+                            $updates[] = $id;
+
+                            // Send mail to user if it is enabled inside the field configuration
+                            $notification = new Notifications($commentArray);
+                            $notification->sendStatusChangeEmail($comment, $this->field, $this->frontendFormsConfig);
+
+                        }
+                    }
+
+                }
+
+                // output a message
+                if ($updates) {
+                    $number = count($updates);
+                    $text = _n($this->_('The status of 1 comment has been updated'),
+                        $this->_('The status of %s comments has been updated'), $number);
+                    $this->wire->message(sprintf($text, $number));
+                } else {
+                    // no updates
+                    $this->wire->message($this->_('No comments have been updated'));
+                }
+
+            }
+        }
+
+        /**
+         * Get the WireArray containing all FrontendComments fields as objects
+         * @return \ProcessWire\WireArray
+         * @throws \ProcessWire\WireException
+         */
+        public function getCommentFields(): WireArray
+        {
+            $commentFields = new WireArray();
+            foreach (wire('fields')->findByType('FieldtypeFrontendComments') as $field) {
+                $commentFields->add($field);
+            }
+            return $commentFields;
+        }
+
+        /**
+         * Get the total number of comments limited by one or more selectors for a given FrontendComments field
+         * @param \ProcessWire\Field $field
+         * @param array $selector
+         * @return int
+         * @throws \ProcessWire\WireException
+         */
+        public function getNumberOfCommentsBySelector(Field $field, array $selector = []): int
+        {
+            $number = 0;
+            foreach ($this->findComments($field, $selector) as $comment) {
+                $number += $comment->count;
+            }
+            return $number;
+        }
+
+        /**
+         * Get the total number of comments for a given FrontendComments field
+         * @param \ProcessWire\Field $field
+         * @return int
+         * @throws \ProcessWire\WireException
+         */
+        public function getTotal(Field $field): int
+        {
+            return $this->getNumberOfCommentsBySelector($field);
+        }
+
+        /**
+         * Get number of comments with status approved for a certain FrontendComments field
+         * @param \ProcessWire\Field $field
+         * @return int
+         * @throws \ProcessWire\WireException
+         */
+        public function getApproved(Field $field): int
+        {
+            return $this->getNumberOfCommentsBySelector($field, ['status=' . FieldtypeFrontendComments::approved]);
+        }
+
+        /**
+         * Get number of comments with status waiting for approval for a certain FrontendComments field
+         * @param \ProcessWire\Field $field
+         * @return int
+         * @throws \ProcessWire\WireException
+         */
+        public function getWaitingApproval(Field $field): int
+        {
+            return $this->getNumberOfCommentsBySelector($field, ['status=' . FieldtypeFrontendComments::pendingApproval]);
+        }
+
+        /**
+         * Get number of comments with status waiting for approval for a certain FrontendComments field
+         * @param \ProcessWire\Field $field
+         * @return int
+         * @throws \ProcessWire\WireException
+         */
+        public function getSpam(Field $field): int
+        {
+            return $this->getNumberOfCommentsBySelector($field, ['status=' . FieldtypeFrontendComments::spam]);
+        }
+
+        /**
+         * Create and output the filter form including the table for the comments
+         * @return string
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
+         */
+        public function ___execute(): string
+        {
+
+            // No FrontendComments field exists
+            if (!$this->commentFields->count)
+                return '';
+
+            // get all comments of this field
+            $totalComments = $this->findComments($this->field); // all comments - no limit
+            $comments = $this->findComments($this->field, null, $this->defaultNumber); // default number of comments
+
+            $selectors = [];
+
+            $out = '<div id="frontendcomments-manager">';
+
+            $form = wire('modules')->get('InputfieldForm');
+
+            // create statistic fieldset
+            $statisticFieldset = wire('modules')->get('InputfieldFieldset');
+            $statisticFieldset->label = $this->_('Comment statistics');
+            $statisticFieldset->columnWidth = 100;
+            $statisticFieldset->icon = 'fa-bar-chart';
+            $statisticFieldset->collapsed = Inputfield::collapsedYes;
+
+            $commentfieldsdata = $this->modules->get('InputfieldMarkup');
+
+            // Data table for all FieldtypeComments fields
+            $datatable = wire('modules')->get('MarkupAdminDataTable');
+            $datatable->setEncodeEntities(false);
+            $datatable->id = 'fields-data-table';
+
+            $datatable->headerRow([
+                '#',
+                $this->_('Field name'),
+                $this->_('Total number of comments'),
+                $this->_('Number of approved comments'),
+                $this->_('Number of comments waiting for approval'),
+                $this->_('Number of comments declared as SPAM'),
+            ]);
+
+            foreach ($this->commentFields as $key => $commentField) {
+
+                $datatable->row([
+                    $key + 1,
+                    $commentField->name,
+                    $this->getTotal($commentField),
+                    $this->getApproved($commentField),
+                    $this->getWaitingApproval($commentField),
+                    $this->getSpam($commentField)
+                ]);
+            }
+            $commentfieldsdata->value = $datatable->render();
+            $statisticFieldset->add($commentfieldsdata);
+            $form->add($statisticFieldset);
+
+            // create comment managing fieldset
+            // create filter fieldset
+            $managingFieldset = wire('modules')->get('InputfieldFieldset');
+            $managingFieldset->label = $this->_('Manage the comments');
+            $managingFieldset->columnWidth = 100;
+            $managingFieldset->icon = 'fa-cog';
+
+            // create filter fieldset
+            $filterFieldset = wire('modules')->get('InputfieldFieldset');
+            $filterFieldset->label = $this->_('Filter the comments');
+            $filterFieldset->columnWidth = 100;
+            $filterFieldset->icon = 'fa-filter';
+
+            // Filter select for the FrontendCommentsField
+            $commentsField = $this->modules->get('InputfieldSelect');
+            $commentsField->label = $this->_('Comments field');
+            $commentsField->attr('id+name', 'fc-commentsfield');
+            $commentsField->required = 1;
+            foreach ($this->getCommentFields() as $field) {
+                $label = $field->name;
+                $unapproved = $this->getWaitingApproval($field);
+                if ($unapproved) {
+                    $text = $this->_n($this->_('comment is'),
+                        $this->_('comments are'), $unapproved);
+                    $label = $label . ' (' . $unapproved . ' ' . $text . ' ' . $this->_('waiting for approval') . ')';
+                }
+                $commentsField->addOption($field->id, $label);
+            }
+            $commentsField->defaultValue = $this->getCommentFields()->first()->id;
+            $commentsField->value = wire('input')->post->fc_commentsfield;
+            $commentsField->columnWidth = 40;
+            $filterFieldset->add($commentsField);
+
+            // Filters select for the number of comments displayed
+            $numberField = $this->modules->get('InputfieldSelect');
+            $numberField->label = $this->_('Number of comments to display');
+            $numberField->attr('id+name', 'fc-filternumber');
+            $numberField->required = 1;
+            $options = [
+                '1' => '1',
+                '2' => '2',
+                '10' => '10',
+                '20' => '20',
+                '30' => '30',
+                '40' => '40',
+                '50' => '50',
+                'all' => $this->_('all'),
+            ];
+            $numberField->addOptions($options);
+            $numberField->value = wire('input')->post->filternumber;
+            $numberField->defaultValue = $this->defaultNumber;
+            $numberField->columnWidth = 30;
+            $filterFieldset->add($numberField);
+
+            // Filter select for the status of the comments
+            $statusField = $this->modules->get('InputfieldSelect');
+            $statusField->label = $this->_('Status of comments');
+            $statusField->attr('id+name', 'filterstatus');
+            $statusField->required = 1;
+            $options = [
+                FieldtypeFrontendComments::pendingApproval => $this->_('Waiting approval'),
+                FieldtypeFrontendComments::approved => $this->_('Approved'),
+                FieldtypeFrontendComments::spam => $this->_('SPAM'),
+                '3' => $this->_('all'),
+            ];
+            $statusField->addOptions($options);
+            $statusField->defaultValue = 3;
+            $statusField->columnWidth = 30;
+            $filterFieldset->add($statusField);
+
+            $managingFieldset->add($filterFieldset);
+
+            $tableout = '';
+            // create table
+            $tableField = $this->modules->get('InputfieldMarkup');
+
+            // create new table content after Ajax call
+            if ($this->wire('config')->ajax) {
+
+                // Field
+                $fieldID = $this->input->get('fc-commentsfield');
+                // get the field object
+                $this->field = $this->commentFields->findOne('id=' . $fieldID);
+
+                // Number of comments inside the table
+                $number = $this->input->get('fc-filternumber');
+                $number = wire('sanitizer')->int($number);
+
+                // Status of the comments
+                $status = $this->input->get('filterstatus');
+                $status = wire('sanitizer')->int($status, ['min' => 0, 'max' => 3]);
+
+                if ($status < 3) { // value is not "all"
+                    $selectors[] = 'status=' . $status;
+                }
+
+                // find all comments according to the filter settings
+                $comments = $this->findComments($this->field, $selectors, $number);
+
+                if ($comments->count) {
+                    // create the new table containing the comments found
+                    $tableMarkup = $this->___executeTable($comments, $form);
+                } else {
+                    // create only text
+                    if ($this->getTotal($this->field)) {
+                        $text = $this->_('No comments match your selected filter criteria.');
+                    } else {
+                        $text = $this->_('This comment field does not contain any comments.');
+                    }
+                    $tableMarkup = '<div class="fc-nocomments">' . $text . '</div>';
+
+                }
+
+                $tableout .= '<div id="ajax-comments-table" data-number="' . $this->getTotal($this->field) . '">' . $tableMarkup . '</div>';
+            }
+
+            $tableMarkup = $this->___executeTable($comments, $form);
+
+            if ($comments->count) {
+                $tableout .= '<div class="fc-totalcount">' . sprintf($this->_('Total number of comments: %s'), '<span id="fc-totalnumber">' . $this->getTotal($this->field) . '</span>') . '</div>';
+                if ($this->getTotal($this->field) > 0) {
+                    $tableout .= '<p id="changetext">' . $this->_('Change the status of each comment to your needs and press the button to save your changes.') . '</p>';
+                }
+                $tableout .= '<div id="comments-table">' . $tableMarkup . '</div>';
+            } else {
+                // add only text
+                $tableout .= '<div id="comments-table" class="fc-nocomments">' . $this->_('There are no comments to display.') . '</div>';
+            }
+
+            $tableField->value = $tableout;
+            $managingFieldset->add($tableField);
+
+            // add submit button
+            if ($comments->count) {
+                // show save button only if there are comments
+                $button = $this->modules->get('InputfieldSubmit');
+                $button->value = 'Save changes';
+                $button->icon = 'floppy-o';
+                $managingFieldset->add($button);
+            }
+
+            $form->add($managingFieldset);
+
+            $out .= $form->render();
+            $out .= '</div>';
+
+            $this->___executeComments($totalComments);
+
+            return $out;
+        }
+
+    }
