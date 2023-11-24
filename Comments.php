@@ -24,7 +24,7 @@
     namespace FrontendComments;
 
     use FrontendForms\TextElements;
-    use ProcessWire\InputfieldFrontendComments;
+    use ProcessWire\FieldtypeFrontendComments;
     use ProcessWire\Wire;
     use ProcessWire\Field;
     use ProcessWire\Page;
@@ -41,6 +41,10 @@
         protected Field $field;
         protected Page $page;
 
+        /**
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
+         */
         public function __construct(CommentArray $comments)
         {
             parent::__construct();
@@ -63,10 +67,6 @@
                 $headline = $this->frontendCommentsConfig['input_fc_commentsheadline'];
             }
             $this->commentsHeadline->setText($headline);
-
-
-
-
 
             // create properties of FrontendComments configuration values
             $properties =  ['input_fc_sort'];
@@ -92,6 +92,60 @@
         public function numberOfChildren(Comment $comment): int
         {
             return $this->comments->find('parent_id=' . $comment->id)->count;
+        }
+
+
+        /**
+         * Render a pagination for the comments
+         * @param \FrontendComments\CommentArray $comments
+         * @param $options
+         * @return string
+         * @throws \ProcessWire\WireException
+         */
+        function renderPagination(CommentArray $comments, $options = array()) {
+
+            if(!$comments->count) {
+                if($this->wire('input')->pageNum > 1) {
+                    // redirect to first pagination if accessed at an out-of-bounds pagination
+                    $this->wire('session')->redirect($this->wire('page')->url);
+                }
+                return '';
+            }
+
+            $defaults = array(
+                'id' => 'comments',
+                'paginate' => false,
+                'limit' => 2,
+            );
+
+            $options = array_merge($defaults, $options);
+
+            $language = $this->wire('user')->language->id;
+            $comments = $comments->find("language=$language");
+
+            if($options['paginate']) {
+                $limit = $options['limit'];
+                $start = ($this->wire('input')->pageNum - 1) * $limit;
+                $total = $comments->count();
+                $comments = $comments->slice($start, $limit);
+                $comments->setLimit($limit);
+                $comments->setStart($start);
+                $comments->setTotal($total);
+            } //>>>>>NEW-end
+
+            $out = "<ul id='$options[id]' class='uk-comment-list'>";
+
+            foreach($comments as $comment) {
+                $out .= "<li class='uk-margin'>" . ukComment($comment) . "</li>";
+            }
+
+            $out .= "</ul>";
+
+            if($options['paginate'] && $comments->getTotal() > $comments->count()) { //>>>>>NEW-start
+                $out .= ukPagination($comments);
+            }
+
+            return $out;
         }
 
         /**
@@ -121,8 +175,8 @@
         {
 
             $out = '';
-
-
+            if($this->comments->count === 0)
+                return $out; //output nothing
 
             // convert $queryId to int (could be null too)
             $queryId = (int)$queryId;
@@ -161,7 +215,7 @@
             // get all comments with status approved (=1)
             if (!is_null($parent_id)) {
 
-                foreach ($comments->find('parent_id=' . $parent_id . ',status=' . InputfieldFrontendComments::approved.'|'.InputfieldFrontendComments::spamReplies) as $data) {
+                foreach ($comments->find('parent_id=' . $parent_id . ',status=' . FieldtypeFrontendComments::approved.'|'.FieldtypeFrontendComments::spamReplies) as $data) {
                     if ($data instanceof Comment) {
 
                         $out .= '<li id="comment-' . $data->id . '" class="fc-listitem">' . $this->renderSingleComment($data,
