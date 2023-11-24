@@ -363,19 +363,19 @@
         {
             switch ($this->frontendCommentsConfig['input_fc_moderate']) {
                 case(FieldtypeFrontendComments::moderateNone);
-                    $status = InputfieldFrontendComments::approved;
+                    $status = FieldtypeFrontendComments::approved;
                     break;
                 case(FieldtypeFrontendComments::moderateNew);
                     // count the number of approved comments for the given email address
                     $entries = $this->comments->find('email=' . $comment->email . ',status=1')->count;
                     if ($entries) {
-                        $status = InputfieldFrontendComments::approved;
+                        $status = FieldtypeFrontendComments::approved;
                     } else {
-                        $status = InputfieldFrontendComments::pendingApproval;
+                        $status = FieldtypeFrontendComments::pendingApproval;
                     }
                     break;
                 default:
-                    $status = InputfieldFrontendComments::pendingApproval;
+                    $status = FieldtypeFrontendComments::pendingApproval;
             }
             return $status;
         }
@@ -594,7 +594,8 @@
                         // overwrite stars status if it is present inside the array
                         if (array_key_exists($fieldName . '-rating', $values)) {
                             $ratingValue = $values[$fieldName . '-notification'];
-                            $values[$fieldName . '-notification'] = $ratingValue - ' ' . $this->_n('Star', 'Stars', $ratingValue);
+                            $values[$fieldName . '-notification'] = $ratingValue - ' ' . $this->_n($this->_('Star'),
+                                    $this->_('Stars'), $ratingValue);
                         }
 
                         if ($this->notifications->sendNotificationAboutNewComment($values, $newComment, $this)) {
@@ -640,7 +641,7 @@
 
                     // status is approved -> create the "to the comment" jump link
                     $jumpLink = '';
-                    if ($newStatus === InputfieldFrontendComments::approved) {
+                    if ($newStatus === FieldtypeFrontendComments::approved) {
                         $jumpLink = ' (<a href="#comment-' . $commentId . '" title="' . $this->_('Directly to the comment') . '">' .
                             $this->_('To the comment') . '</a>)';
                     }
