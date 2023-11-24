@@ -318,7 +318,7 @@
          * Create a new blank CommentArray and add a page and field to it
          * @return \ProcessWire\WireArray
          */
-        public function makeNew(): WireArray
+        public function makeNew(): CommentArray
         {
             $a = parent::makeNew();
             if ($this->page) $a->setPage($this->page);
@@ -544,7 +544,8 @@
                                 // create the alert box
                                 $alert = new Alert();
                                 $dayslocked = $this->getFrontendCommentsInputfieldConfigValues()['input_fc_voting_lock'];
-                                $timePeriod = $dayslocked . ' ' . $this->_n('day', 'days', $dayslocked);
+                                $timePeriod = $dayslocked . ' ' . $this->_n($this->_('day'),
+                                        $this->_('days'), $dayslocked);
                                 $alert->setContent(sprintf($this->_('It seems that you have rated this comment within the last %s. In this case, you may not vote again.'), $timePeriod));
                                 $alert->setCSSClass('alert_warningClass');
 
