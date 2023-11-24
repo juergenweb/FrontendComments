@@ -145,7 +145,7 @@
                 $body .= '<tr><td colspan="2"><hr style="margin:0;height:0;border-top: 1px solid #f6f6f6"/></td></tr><tr>';
             }
 
-            if ($newComment->status == InputfieldFrontendComments::approved) {
+            if ($newComment->status == FieldtypeFrontendComments::approved) {
                 $color = '#7BA428';
             } else {
                 $color = '#FD953A';
@@ -162,7 +162,7 @@
             $body .= '</table>';
 
             // create a link for approving the comment if the status has been set to 0
-            if ($newComment->status == InputfieldFrontendComments::pendingApproval) {
+            if ($newComment->status == FieldtypeFrontendComments::pendingApproval) {
                 $url = $this->page->httpUrl . '?code=' . $newComment->code . '&status=1#' . $form->getID() . '-form-wrapper';
                 $body .= self::renderButton($this->_('Publish the comment'), '#7BA428', '#ffffff',
                     '#7BA428', $url);
