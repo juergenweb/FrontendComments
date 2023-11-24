@@ -22,10 +22,7 @@
 
         use configValues;
 
-        const pendingApproval = 0; // status waiting for approvement
-        const approved = 1; // status approved
-        const spam = 2; // status SPAM
-        const spamReplies = 3; // status SPAM but comment has replies and therefore is not allowed to delete
+
 
         protected array $frontendFormsConfig = [];
 
@@ -220,12 +217,12 @@
                 $status->label = $this->_('Status');
                 $status->attr('id|name', $this->name . '_status_' . $comment->id);
                 $status->attr('value', $comment->status);
-                $status->addOption(self::pendingApproval, $this->_('Pending approval'), ['disabled' => 'disabled']);
-                $status->addOption(self::approved, $this->_('Approved'));
+                $status->addOption(FieldtypeFrontendComments::pendingApproval, $this->_('Pending approval'), ['disabled' => 'disabled']);
+                $status->addOption(FieldtypeFrontendComments::approved, $this->_('Approved'));
                 if ($comment->getReplies()->count) {
-                    $status->addOption(self::spamReplies, $this->_('SPAM'));
+                    $status->addOption(FieldtypeFrontendComments::spamReplies, $this->_('SPAM'));
                 } else {
-                    $status->addOption(self::spam, $this->_('SPAM'));
+                    $status->addOption(FieldtypeFrontendComments::spam, $this->_('SPAM'));
                 }
                 $status->notes = $this->_('Status "Pending approval" cannot be selected.');
                 $commentfieldset->add($status);
