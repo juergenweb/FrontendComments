@@ -33,6 +33,7 @@
     require_once($dirname . "/InputfieldFrontendComments.php");
     require_once($dirname . "/Uikit3Comment.php");
     require_once($dirname . "/Bootstrap5Comment.php");
+    require_once($dirname . "/Bootstrap5Comment.php");
 
     class FieldtypeFrontendComments extends FieldtypeMulti
     {
@@ -42,6 +43,11 @@
         const moderateNone = 0; // no moderation - all comments will be published immediately
         const moderateAll = 1; // all comments need to be approved
         const moderateNew = 2; // only new comments need to be approved
+        const pendingApproval = 0; // status waiting for approvement
+        const approved = 1; // status approved
+        const spam = 2; // status SPAM
+        const spamReplies = 3; // status SPAM but comment has replies and therefore is not allowed to delete
+
         protected FrontendForms $frontendForms;
 
         // configuration values
@@ -121,7 +127,7 @@
                     __FILE__),
                 'href' => 'https://github.com/juergenweb/FieldtypeFrontendComments',
                 'icon' => 'comment',
-                'installs' => 'InputfieldFrontendComments',
+                'installs' => ['InputfieldFrontendComments', 'FrontendCommentsAdmin'],
                 'permanent' => false,
                 'version' => '1.0.0',
                 'requires' => [
@@ -148,7 +154,13 @@
             $this->addHookAfter('LazyCron::every30Seconds', $this, 'sendQueuedEmails');
             $this->addHookAfter('FieldtypeMulti::savePageField', $this, 'sendStatusChangeMail');
 
+            // add CSS and JS to the backend
+            //$version = $this->getModuleInfo()['version'] . '-' . time();
+            //$this->wire('config')->styles->add($this->wire('config')->urls->{$this->className} . 'backend-assets/frontendcommentsadmin.css?v=' . $version . '&time=' . time());
+            //$this->wire('config')->scripts->add($this->wire('config')->urls->{$this->className} . 'backend/frontendforms.js?v=' . $version . '&time=' . time());
+
         }
+
 
         /**
          * Delete comments marked as SPAM after a given time as set in the input field configuration
@@ -167,7 +179,7 @@
                 // delete old spam after a given time in days
                 $expiredTime = time() - (86400 * $field->input_fc_spam);
                 $query = $this->database->prepare("DELETE FROM `$table` WHERE status=:status AND created < :expiredTime");
-                $query->bindValue(":status", InputfieldFrontendComments::spam, PDO::PARAM_INT);
+                $query->bindValue(":status", self::spam, PDO::PARAM_INT);
                 $query->bindValue(":expiredTime", $expiredTime);
                 $query->execute();
             }
@@ -231,7 +243,7 @@
             foreach ($result as $comment) {
 
                 // send mails only if status is approved or spam
-                if (in_array((int)$comment->status, [InputfieldFrontendComments::approved, InputfieldFrontendComments::pendingApproval])) {
+                if (in_array((int)$comment->status, [self::approved, self::pendingApproval])) {
 
                     // check if sending of emails for this status is enabled
                     if (array_key_exists($comment->status, $this->frontendCommentsConfig)) {
@@ -696,7 +708,7 @@
                             $newStatus = $this->wire('sanitizer')->int($newStatus);
 
                             // check if comment has remote_flag = 0, which means the status has not been changed before
-                            if ($comment->remote_flag === InputfieldFrontendComments::pendingApproval) {
+                            if ($comment->remote_flag === FieldtypeFrontendComments::pendingApproval) {
 
                                 $sql = "UPDATE $table SET status=:status, remote_flag=:remote_flag WHERE id=:id";
 
@@ -713,7 +725,7 @@
                                         // set the status of the new comment to a session variable for later output of the success message
                                         $this->wire('session')->set('commentstatuschange', $newStatus);
                                         // make a redirect if comment status has been changed to approved to show the new comment
-                                        if ($newStatus === InputfieldFrontendComments::approved) {
+                                        if ($newStatus === FieldtypeFrontendComments::approved) {
                                             $this->wire('session')->set('approvedid', $comment->id);
                                             $this->wire('session')->redirect('.');
                                         }
@@ -897,12 +909,25 @@
          * @return Module|null
          * @throws WirePermissionException|WireException
          */
-        public function getInputfield(Page $page, Field $field): Module|null
-        {
+        public function getInputfield(Page $page, Field $field) {
             $inputfield = $this->wire()->modules->get('InputfieldFrontendComments');
-            if (!$inputfield) return null;
-            $inputfield->class = $this->className();
+            if(!$inputfield) return null;
+            $inputfield->set('class', $this->className());
             return $inputfield;
+        }
+
+        /**
+         * Find all comments of a specific field, that matches the given selector if set
+         * @param $field
+         * @param $selectorString
+         * @return mixed
+         * @throws \ProcessWire\WireException
+         */
+        static public function findComments($field, $selectorString) {
+            if(is_string($field)) $field = wire()->fields->get($field);
+            if(!$field instanceof Field) throw new WireException('Arg 1 to findComments() must be a field');
+            $fieldtype = $field->type;
+            return $fieldtype->find($field, $selectorString);
         }
 
         /**
@@ -1105,8 +1130,8 @@
             $statusnotification->attr('name', 'input_fc_status_change_notification');
             $statusnotification->label = $this->_('Send notification email to commenter on status change');
             $statusnotification->description = $this->_('If a moderator changes the status of a comment, select on which status change the commenter should be informed via email.');
-            $statusnotification->addOption(InputfieldFrontendComments::approved, sprintf($this->_('Send notification email if status has been changed to approved'), InputfieldFrontendComments::statusTexts()[InputfieldFrontendComments::approved]));
-            $statusnotification->addOption(InputfieldFrontendComments::spam, sprintf($this->_('Send notification email if status has been changed to SPAM'), InputfieldFrontendComments::statusTexts()[InputfieldFrontendComments::approved]));
+            $statusnotification->addOption(FieldtypeFrontendComments::approved, sprintf($this->_('Send notification email if status has been changed to approved'), InputfieldFrontendComments::statusTexts()[FieldtypeFrontendComments::approved]));
+            $statusnotification->addOption(FieldtypeFrontendComments::spam, sprintf($this->_('Send notification email if status has been changed to SPAM'), InputfieldFrontendComments::statusTexts()[FieldtypeFrontendComments::approved]));
             $statusnotification->attr('value', (int)$field->get('input_fc_status_change_notification'));
             $statusnotification->notes = $this->_('If a box is checked, the commenter will receive an email if the comment status will be changed by a moderator in the backend or via email link. You can prevent this behavior by unchecking a box.');
             $emailFieldset->add($statusnotification);
@@ -1204,10 +1229,7 @@
             $privacy_show->notes = $this->_('You can disable the display of the privacy text/checkbox, but you should be aware that this may lead to legal consequences if a privacy notice is required in your country.');
             $formFieldset->append($privacy_show);
 
-
             $fieldset->append($formFieldset);
-
-
 
             /**  $commentlistFieldset */
             $commentFieldset = $modules->get('InputfieldFieldset');
@@ -1357,5 +1379,7 @@
             return $inputfields;
 
         }
+
+
 
     }
