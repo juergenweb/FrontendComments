@@ -108,7 +108,7 @@
             // get configuration values from the FrontendForms module
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
             // get configuration values from the FrontendComments input field
-            $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
+            $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues($this->field);
 
             // create properties of FrontendComments configuration values
             $properties = ['input_fc_stars', 'input_fc_voting'];
