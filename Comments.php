@@ -56,7 +56,7 @@
             // get configuration values from the FrontendForms module
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
             // get configuration values from the FrontendComments input field
-            $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
+            $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues($this->field);
 
             $this->commentsHeadline = new TextElements();
             $this->commentsHeadline->setTag('h3');
