@@ -13,6 +13,8 @@ namespace FrontendComments;
  */
 
 
+use ProcessWire\ProcessWire;
+
 trait configValues {
 
     /**
@@ -34,9 +36,9 @@ trait configValues {
      * @throws \ProcessWire\WireException
      * @throws \ProcessWire\WirePermissionException
      */
-    function getFrontendCommentsInputfieldConfigValues(): array {
+    function getFrontendCommentsInputfieldConfigValues(\ProcessWire\Field $field): array {
         $configValues = [];
-        foreach ($this->wire('fields')->get($this->field->name) as $key => $value) {
+        foreach ($this->wire('fields')->get($field->name) as $key => $value) {
             $configValues[$key] = $value;
         }
         return $configValues;
