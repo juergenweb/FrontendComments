@@ -433,7 +433,7 @@
          */
         public function render(): string
         {
-            if (array_key_exists('input_fc_outputorder', $this->getFrontendCommentsInputfieldConfigValues())) {
+            if (array_key_exists('input_fc_outputorder', $this->getFrontendCommentsInputfieldConfigValues($this->field))) {
                 $this->input_fc_outputorder = $this->getFrontendCommentsInputfieldConfigValues()['input_fc_outputorder'];
             }
 
