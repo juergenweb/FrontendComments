@@ -138,7 +138,7 @@
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
 
             // grab configuration values from the FrontendComments input field
-            $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
+            $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues($this->field);
 
             // create properties of FrontendComments configuration values
             $properties = ['input_fc_email', 'input_fc_sender', 'input_fc_title', 'input_fc_subject', 'input_fc_stars', 'input_fc_counter', 'input_fc_captcha'];
