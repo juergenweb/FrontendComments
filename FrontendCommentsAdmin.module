@@ -271,36 +271,46 @@
                 $commentids = $this->input->post->find('id_*');
                 foreach ($commentids as $id) {
 
-                    // get the comment with this id
-                    $comment = $totalComments->findOne($id);
+                    foreach ($totalComments as $comments) {
 
-                    // create new CommentArray -> needed for sending notification email
-                    $commentArray = new CommentArray();
-                    $commentArray->setField($this->field);
-                    $commentArray->setPage(wire('pages')->get($comment->pages_id));
-                    $commentArray->add($comment);
 
-                    // Compare old and new status if something has been changed
-                    $oldStatus = $comment->status;
-                    $newStatus = (int)$this->input->post('status_' . $id);
+                        // get the comment with this id
+                        $comment = $comments->findOne($id);
 
-                    if ($oldStatus != $newStatus) {
+                        if ($comment) {
 
-                        // status has been changed
-                        $table = $this->field->getTable();
-                        $sql = "UPDATE $table SET status=$newStatus WHERE id=$id";
-                        $query = wire('database')->prepare($sql);
 
-                        if ($query->execute()) {
-                            $updates[] = $id;
+                            // create new CommentArray -> needed for sending notification email
+                            $commentArray = new CommentArray();
+                            $commentArray->setField($this->field);
+                            $commentArray->setPage(wire('pages')->get($comment->pages_id));
+                            $commentArray->add($comment);
 
-                            // Send mail to user if it is enabled inside the field configuration
-                            $notification = new Notifications($commentArray);
-                            $notification->sendStatusChangeEmail($comment, $this->field, $this->frontendFormsConfig);
+                            // Compare old and new status if something has been changed
+                            $oldStatus = $comment->status;
+                            $newStatus = (int)$this->input->post('status_' . $id);
 
+                            if ($oldStatus != $newStatus) {
+
+                                // status has been changed
+                                $table = $this->field->getTable();
+                                $sql = "UPDATE $table SET status=$newStatus WHERE id=$id";
+                                $query = wire('database')->prepare($sql);
+
+                                if ($query->execute()) {
+
+                                    // set new status to the comment
+                                    $comment->status = $newStatus;
+                                    $updates[] = $id;
+
+                                    // Send mail to user if it is enabled inside the field configuration
+                                    $notification = new Notifications($commentArray);
+                                    $notification->sendStatusChangeEmail($comment, $this->field, $this->frontendFormsConfig);
+
+                                }
+                            }
                         }
                     }
-
                 }
 
                 // output a message
