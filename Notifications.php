@@ -7,7 +7,7 @@
      *
      * Created by Jürgen K.
      * https://github.com/juergenweb
-     * File name: Comment.php
+     * File name: Notifications.php
      * Created: 31.10.2023
      *
      * @property protected array $frontendCommentsConfig: array containing all module config values
@@ -27,12 +27,12 @@
 
         use configValues;
 
-        protected array $statusTexts = [];
+        // Array containing the FrontendComments configuration values
         protected array $frontendCommentsConfig = [];
+        // Array containing the FrontendForms configuration values
         protected array $frontendFormsConfig = [];
+        // The CommentArray containing the comments
         protected CommentArray $comments;
-        protected Page $page;
-        protected Field $field;
 
         public function __construct(CommentArray $comments)
         {
@@ -41,14 +41,10 @@
 
             // set default values
             $this->comments = $comments; // the comment text object
-            $this->page = $comments->getPage(); // the current page object, which contains the comment field
-            $this->field = $comments->getField(); // Processwire comment field object
-
-            // get the status names array
-            $this->statusTexts = InputfieldFrontendComments::statusTexts();
 
             // grab configuration values from the FrontendComments input field
-            $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues();
+            $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues($comments->getField());
+
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
         }
 
@@ -91,11 +87,7 @@
          */
         protected function renderMailHeadline(string|null $headline = null, int $level = 1): string
         {
-            $out = '';
-            if ($headline) {
-                $out = '<h' . $level . '>' . $headline . '</h' . $level . '>';
-            }
-            return $out;
+            return ($headline) ? '<h' . $level . '>' . $headline . '</h' . $level . '>' : '';
         }
 
         /**
@@ -150,7 +142,7 @@
             } else {
                 $color = '#FD953A';
             }
-            $body .= '<tr style="padding: 10px 0;"><td style="font-weight:bold;white-space: nowrap">' . $this->_('Comment status') . ':&nbsp;</td><td><span style="padding:3px;display:inline-block;background:' . $color . ';color:#fff;">&nbsp;' . $this->statusTexts[$newComment->status] . '&nbsp;</span></td></tr>';
+            $body .= '<tr style="padding: 10px 0;"><td style="font-weight:bold;white-space: nowrap">' . $this->_('Comment status') . ':&nbsp;</td><td><span style="padding:3px;display:inline-block;background:' . $color . ';color:#fff;">&nbsp;' . InputfieldFrontendComments::statusTexts()[$newComment->status] . '&nbsp;</span></td></tr>';
             $body .= '<tr><td colspan="2"><hr style="margin:0;height:0;border-top: 1px solid #f6f6f6;"/></td></tr><tr>';
             $body .= '<tr style="padding: 10px 0;"><td style="font-weight:bold;">[[CURRENTURLLABEL]]:&nbsp;</td><td>[[CURRENTURLVALUE]]</td></tr>';
             $body .= '<tr><td colspan="2"><hr style="margin:0;height:0;border-top: 1px solid #f6f6f6"/></td></tr><tr>';
@@ -163,13 +155,13 @@
 
             // create a link for approving the comment if the status has been set to 0
             if ($newComment->status == FieldtypeFrontendComments::pendingApproval) {
-                $url = $this->page->httpUrl . '?code=' . $newComment->code . '&status=1#' . $form->getID() . '-form-wrapper';
+                $url = $this->comments->getPage()->httpUrl . '?code=' . $newComment->code . '&status=1#' . $form->getID() . '-form-wrapper';
                 $body .= self::renderButton($this->_('Publish the comment'), '#7BA428', '#ffffff',
                     '#7BA428', $url);
             }
 
             // create button to mark comment as SPAM
-            $spamUrl = $this->page->httpUrl . '?code=' . $newComment->code . '&status=2#' . $form->getID() . '-form-wrapper';
+            $spamUrl = $this->comments->getPage()->httpUrl . '?code=' . $newComment->code . '&status=2#' . $form->getID() . '-form-wrapper';
             $body .= self::renderButton($this->_('Mark this comment as SPAM'), '#ED2939',
                 '#ffffff', '#ED2939', $spamUrl);
 
@@ -263,7 +255,7 @@
          */
         public function sendNotificationAboutNewReply(Comment $comment, Page $page, Field $field, string $code, string $email): bool
         {
-            bd('start');
+
             // create WireMail instance
             $mail = new WireMail();
 
@@ -287,7 +279,6 @@
 
             $mail->bodyHTML($body);
             $mail->to($email);
-            bd('send');
             return $mail->send();
         }
 
@@ -312,7 +303,7 @@
                 $backgroundcolor = FieldtypeFrontendComments::$dangerBg;
             }
 
-            $body .= '<table style="width:100%;background-color:' . $backgroundcolor . ';"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;text-align:center;"><p style="margin:12px;color:#FFFFFF;">' . $this->statusTexts[$comment->status] . '</p></td></tr></table></td></tr></table>';
+            $body .= '<table style="width:100%;background-color:' . $backgroundcolor . ';"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;text-align:center;"><p style="margin:12px;color:#FFFFFF;">' . InputfieldFrontendComments::statusTexts()[$comment->status] . '</p></td></tr></table></td></tr></table>';
 
             if ($comment->status === '1') {
                 $body .= '<p>' . $this->_('Your comment is now published and visible to all.') . '</p>';
@@ -331,30 +322,36 @@
          */
         public function sendStatusChangeEmail(Comment $comment, $field, array $frontendFormsConfig): bool
         {
+            $send = false;
+            // check if sending email is enabled inside the configuration
+            if (array_key_exists('input_fc_status_change_notification', $this->frontendCommentsConfig)) {
 
-            $mail = new WireMail();
+                if (in_array($comment->status, $this->frontendCommentsConfig['input_fc_status_change_notification'])) {
+                    $mail = new WireMail();
 
-            // set the sender email address
-            $emailSender = $field->input_fc_email ?: $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
-            $mail->from($emailSender);
+                    // set the sender email address
+                    $emailSender = $field->input_fc_email ?: $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
+                    $mail->from($emailSender);
 
-            // set from name if present
-            if ($field->input_fc_sender) {
-                $mail->fromName($this->input_fc_sender);
+                    // set from name if present
+                    if ($field->input_fc_sender) {
+                        $mail->fromName($this->input_fc_sender);
+                    }
+
+                    $mail->subject($this->_('Comment status has been changed'));
+                    $mail->title(sprintf($this->_('Your comment status has been changed to %s'), InputfieldFrontendComments::statusTexts()[$comment->status]));
+
+                    // set email template depending on config settings
+                    $template = $field->input_fc_emailTemplate === 'inherit' ? $frontendFormsConfig['input_emailTemplate'] : $field->input_fc_emailTemplate;
+                    $mail->mailTemplate($template);
+
+                    $mail->bodyHTML($this->renderStatusChangeBody($comment));
+                    $mail->to($comment->email);
+
+                    $send = $mail->send();
+                }
             }
-
-            $mail->subject($this->_('Comment status has been changed'));
-            $mail->title(sprintf($this->_('Your comment status has been changed to %s'), $this->statusTexts[$comment->status]));
-
-            // set email template depending on config settings
-            $template = $field->input_fc_emailTemplate === 'inherit' ? $frontendFormsConfig['input_emailTemplate'] : $field->input_fc_emailTemplate;
-            $mail->mailTemplate($template);
-
-            $mail->bodyHTML($this->renderStatusChangeBody($comment));
-            $mail->to($comment->email);
-
-            return $mail->send();
-
+            return $send;
         }
 
     }
