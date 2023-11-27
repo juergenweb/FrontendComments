@@ -322,11 +322,11 @@
          */
         public function sendStatusChangeEmail(Comment $comment, $field, array $frontendFormsConfig): bool
         {
+
             $send = false;
             // check if sending email is enabled inside the configuration
-            if (array_key_exists('input_fc_status_change_notification', $this->frontendCommentsConfig)) {
+            if ($field->input_fc_status_change_notification) {
 
-                if (in_array($comment->status, $this->frontendCommentsConfig['input_fc_status_change_notification'])) {
                     $mail = new WireMail();
 
                     // set the sender email address
@@ -343,13 +343,15 @@
 
                     // set email template depending on config settings
                     $template = $field->input_fc_emailTemplate === 'inherit' ? $frontendFormsConfig['input_emailTemplate'] : $field->input_fc_emailTemplate;
-                    $mail->mailTemplate($template);
+                    if($template !== 'text'){
+                        $mail->mailTemplate($template);
+                    }
 
                     $mail->bodyHTML($this->renderStatusChangeBody($comment));
                     $mail->to($comment->email);
 
                     $send = $mail->send();
-                }
+
             }
             return $send;
         }
