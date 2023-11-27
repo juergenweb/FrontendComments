@@ -28,5 +28,10 @@ $(document).ready(function () {
         event.preventDefault();
     });
 
+    // reload the page after modal has been closed to get all updated values
+    $('button').on('pw-modal-closed', function() {
+        location.reload();
+    });
+
 
 });
