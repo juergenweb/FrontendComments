@@ -76,6 +76,7 @@
         protected int|bool|null $input_fc_stars = false;
         protected int|bool|null $input_fc_voting = false;
 
+
         protected CommentArray $comments; // the array containing all comments of this page
         protected Field $field;
         protected Page $page;
@@ -120,6 +121,7 @@
                 $this->set($name, $value);
                 $this->$name = $value;
             }
+
 
             // Instantiate all the elements for the comment and set the properties
 
