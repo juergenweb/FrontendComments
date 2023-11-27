@@ -110,6 +110,9 @@
             // grab configuration values from the FrontendForms module
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
 
+
+
+
             // set database object
             $this->database = $this->wire()->database;
 
@@ -208,6 +211,20 @@
             }
         }
 
+        /** Static method to remove all numeric keys from an assoc. array
+         * @param array $array
+         * @return array
+         */
+        public static function removeNumericKeysFromArray(array $array = []): array
+        {
+            foreach($array as $key => $value){
+                if (is_int($key)) {
+                    unset($array[$key]);
+                }
+            }
+            return $array;
+        }
+
         /**
          * Send notification mail to a commenter if the status of his comment has been changed
          * fe from pending approval to approve
@@ -247,6 +264,7 @@
 
                     // check if sending of emails for this status is enabled
                     if (array_key_exists($comment->status, $this->frontendCommentsConfig)) {
+
                         $notifications->sendStatusChangeEmail($comment, $field, $this->frontendFormsConfig);
                     }
 
