@@ -19,6 +19,10 @@
     use FrontendComments\Notifications;
     use PDO;
 
+    // include all necessary files
+    $dirname = dirname(__FILE__);
+    require_once($dirname . "/traits/configValues.php");
+
     class FrontendCommentsAdmin extends Process
     {
 
