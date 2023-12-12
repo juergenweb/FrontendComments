@@ -574,10 +574,11 @@
         public function ___renderComment(Comment $comment, bool $levelStatus, int $level): string
         {
 
-            $out = '<div id="' . $this->field->name . '-' . $comment->id . '-novote"></div>'; // wrapper for no vote alert box
+            $out = '';
+            //$out .= '<div id="' . $this->field->name . '-' . $comment->id . '-novote"></div>'; // wrapper for no vote alert box
 
             if ($level === 0) {
-                $out .= '<div id="comment-wrapper-' . $comment->id . '" class="fc-comment-main-level">';
+                //$out .= '<div id="comment-wrapper-' . $comment->id . '" class="fc-comment-main-level">';
             }
 
             // render the comment markup depending on CSS framework set in the configuration
@@ -634,7 +635,7 @@
             }
 
             if ($level === 0) {
-                $out .= '</div>';
+                //$out .= '</div>';
             }
             return $out;
         }
