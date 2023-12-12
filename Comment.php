@@ -115,8 +115,12 @@
             $this->createPropertiesOfArray($this->frontendCommentsConfig, $properties);
 
             // set all comment values provided via the constructor as property
+
             foreach ($comment as $name => $value) {
                 if ($name === 'data') $name = 'text';
+                if($name === 'author'){
+                    $value = ($value == '') ? $this->_('Guest') : $value;
+                }
                 $this->set($name, $value);
                 $this->$name = $value;
             }
@@ -303,7 +307,7 @@
         }
 
         /**
-         * Get the name of the author text object
+         * Get the author text object
          * @return \FrontendForms\TextElements
          */
         public function getAuthorElement(): TextElements
