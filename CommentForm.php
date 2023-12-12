@@ -231,10 +231,13 @@
                 }
                 // set clear-able to true
                 $options[] = '&quot;clearable&quot;:true';
+                // add translatable string for the default "Select a rating" text
+                $options[] = '&quot;tooltip&quot;:&quot;'.$this->_('Select a rating').'&quot;';
 
                 if ($options) {
                     // create the data-options attribute
                     $optionString = implode(',', $options);
+                    bd($optionString);
                     $this->stars->setAttribute('data-options', '{' . $optionString . '}');
                 }
 
