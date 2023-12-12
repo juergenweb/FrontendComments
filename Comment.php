@@ -57,6 +57,7 @@
 
         use configValues;
 
+        // Declare all properties and constantes
         const flagNotifyReply = 1; //Flag to indicate the author of this comment wants to be notified of replies to their comment
         const flagNotifyAll = 2; // Flag to indicate the author of this comment wants to be notified of all comments on the page
 
@@ -75,8 +76,6 @@
         protected array $frontendCommentsConfig = [];
         protected int|bool|null $input_fc_stars = false;
         protected int|bool|null $input_fc_voting = false;
-
-
         protected CommentArray $comments; // the array containing all comments of this page
         protected Field $field;
         protected Page $page;
@@ -122,9 +121,7 @@
                 $this->$name = $value;
             }
 
-
             // Instantiate all the elements for the comment and set the properties
-
 
             // Image
             $this->userImage = $this->getUserImage();
@@ -155,7 +152,6 @@
             $this->replyLink->setAttribute('data-id', $this->id);
             $this->replyLink->setLinkText($this->_('Reply'));
             $this->replyLink->wrap('span')->setAttribute('class', 'icon-box');
-
 
             // Up-vote link
             $this->upvote = new Link();
@@ -199,7 +195,6 @@
             $this->form->setAttribute('action', $this->page->url . '?commentid=' . $this->getId() . '&formid=reply-form-' . $this->getId() . '#reply-comment-form-' . $this->field->name . '-reply-' . $this->getId());
             $this->form->setSubmitWithAjax();
 
-
             // get the submit button object and change the name attribute
             $submitButton = $this->form->getSubmitButton();
             $submitButton->setAttribute('name', 'reply-form-' . $this->getId() . '-submit');
@@ -210,7 +205,8 @@
          * Get the page object, where the comment belongs to
          * @return \ProcessWire\Page
          */
-        public function getPage() {
+        public function getPage()
+        {
             return $this->page;
         }
 
@@ -218,7 +214,8 @@
          * Get the field object, where the comment belongs to
          * @return \ProcessWire\Field
          */
-        public function getField() {
+        public function getField()
+        {
             return $this->field;
         }
 
@@ -305,6 +302,10 @@
             return $this->avatar;
         }
 
+        /**
+         * Get the name of the author text object
+         * @return \FrontendForms\TextElements
+         */
         public function getAuthorElement(): TextElements
         {
             return $this->commentAuthor;
@@ -319,21 +320,37 @@
             return $this->commentCreated;
         }
 
+        /**
+         * Get the reply link object
+         * @return \FrontendForms\Link
+         */
         public function getReplyElement(): Link
         {
             return $this->replyLink;
         }
 
+        /**
+         * Get the upvote text object
+         * @return \FrontendForms\TextElements
+         */
         public function getUpVoteElement(): TextElements
         {
             return $this->upvote;
         }
 
+        /**
+         * Get the downvote text object
+         * @return \FrontendForms\TextElements
+         */
         public function getDownVoteElement(): TextElements
         {
             return $this->downvote;
         }
 
+        /**
+         * Get the "Comment removed by a moderator" text object
+         * @return \FrontendForms\TextElements
+         */
         public function getCommentRemovedTextElement(): TextElements
         {
             return $this->commentRemoved;
@@ -361,11 +378,34 @@
             return null;
         }
 
+        /**
+         * Return children comments, if applicable
+         *
+         * @return CommentArray
+         *
+         */
+        public function children(): CommentArray
+        {
+
+            $page = $this->getPage();
+            $field = $this->getField();
+            $comments = $page->get($field->name);
+            $children = $comments->makeNew();
+            $children->setPage($this->getPage());
+            if ($field) $children->setField($this->getField());
+            $id = $this->id;
+            foreach ($comments as $comment) {
+                /** @var Comment $comment */
+                if (!$comment->parent_id) continue;
+                if ($comment->parent_id == $id) $children->add($comment);
+            }
+            return $children;
+        }
+
 
         /**
          * Render methods
          */
-
 
         /**
          * Render the image tag for the avatar image
@@ -399,11 +439,20 @@
             return $out;
         }
 
+        /**
+         * Output the datetime of the creation markup
+         * @return string
+         */
         public function ___renderCreated(): string
         {
             return $this->getCreatedElement()->___render();
         }
 
+        /**
+         * Output the reply comment markup
+         * @param bool $levelStatus
+         * @return string
+         */
         public function ___renderReply(bool $levelStatus): string
         {
             $out = '';
@@ -413,6 +462,10 @@
             return $out;
         }
 
+        /**
+         * Output the votes markup
+         * @return string
+         */
         public function ___renderVotes(): string
         {
             $out = '';
@@ -425,6 +478,10 @@
             return $out;
         }
 
+        /**
+         * Output the stars markup
+         * @return string
+         */
         public function ___renderRating(): string
         {
             $out = '';
@@ -435,6 +492,10 @@
             return $out;
         }
 
+        /**
+         * Output the comment text markup
+         * @return string
+         */
         public function ___renderText(): string
         {
             if ($this->status == '1') {
@@ -456,12 +517,12 @@
         }
 
         /**
+         * Render the complete comment and output the markup
          * @param bool $levelStatus
          * @return string
          */
         public function ___renderCommentMarkup(bool $levelStatus): string
         {
-
 
             $out = '<div class="fc-comment-head">';
 
@@ -485,7 +546,6 @@
             $out .= '</div>';
 
             $out .= '</div>';
-
 
             $out .= '</div>';
 
@@ -567,9 +627,6 @@
                 default:
                     $out .= '</div>';
             }
-
-
-            //$out .= '</div>';
 
             if ($level === 0) {
                 $out .= '</div>';
