@@ -22,8 +22,7 @@
 
         use configValues;
 
-
-
+        // Declare all properties
         protected array $frontendFormsConfig = [];
 
 
@@ -69,7 +68,7 @@
         public static function statusTexts(): array
         {
             return [
-                __('pending Approval'),
+                __('pending approval'),
                 __('approved'),
                 __('SPAM'),
                 __('SPAM, but has replies')
@@ -114,7 +113,11 @@
             require_once(__DIR__ . '/FieldtypeFrontendComments.module');
         }
 
-
+        /**
+         * Process the configuration form of the field
+         * @param \ProcessWire\WireInputData $input
+         * @return $this
+         */
         public function ___processInput(WireInputData $input): InputfieldFrontendComments
         {
 
