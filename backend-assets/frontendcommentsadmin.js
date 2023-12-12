@@ -16,9 +16,9 @@ $(document).ready(function () {
                 numberWrapper.text(number);
                 let changeText = $('#changetext');
                 let submitButton = $('button[name="submit"]');
-                if(number === '0'){
-                    changeText.css({ display: "none" });
-                    submitButton.css({ display: "none" });
+                if (number === '0') {
+                    changeText.css({display: "none"});
+                    submitButton.css({display: "none"});
                 } else {
                     changeText.removeAttr('style')
                     submitButton.removeAttr('style');
@@ -28,8 +28,9 @@ $(document).ready(function () {
         event.preventDefault();
     });
 
-    // reload the page after modal has been closed to get all updated values
-    $('button').on('pw-modal-closed', function() {
+
+// reload the page after modal has been closed to get all updated values
+    $('button').on('pw-modal-closed', function () {
         location.reload();
     });
 
