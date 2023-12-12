@@ -432,7 +432,7 @@
         public function render(): string
         {
             if (array_key_exists('input_fc_outputorder', $this->getFrontendCommentsInputfieldConfigValues($this->field))) {
-                $this->input_fc_outputorder = $this->getFrontendCommentsInputfieldConfigValues()['input_fc_outputorder'];
+                $this->input_fc_outputorder = $this->getFrontendCommentsInputfieldConfigValues($this->field)['input_fc_outputorder'];
             }
 
             // check if rating is enabled;
@@ -541,7 +541,7 @@
 
                                 // create the alert box
                                 $alert = new Alert();
-                                $dayslocked = $this->getFrontendCommentsInputfieldConfigValues()['input_fc_voting_lock'];
+                                $dayslocked = $this->getFrontendCommentsInputfieldConfigValues($this->field)['input_fc_voting_lock'];
                                 $timePeriod = $dayslocked . ' ' . $this->_n($this->_('day'),
                                         $this->_('days'), $dayslocked);
                                 $alert->setContent(sprintf($this->_('It seems that you have rated this comment within the last %s. In this case, you may not vote again.'), $timePeriod));
