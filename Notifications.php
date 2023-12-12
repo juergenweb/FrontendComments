@@ -27,6 +27,7 @@
 
         use configValues;
 
+        // Declare all properties
         // Array containing the FrontendComments configuration values
         protected array $frontendCommentsConfig = [];
         // Array containing the FrontendForms configuration values
@@ -327,30 +328,30 @@
             // check if sending email is enabled inside the configuration
             if ($field->input_fc_status_change_notification) {
 
-                    $mail = new WireMail();
+                $mail = new WireMail();
 
-                    // set the sender email address
-                    $emailSender = $field->input_fc_email ?: $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
-                    $mail->from($emailSender);
+                // set the sender email address
+                $emailSender = $field->input_fc_email ?: $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
+                $mail->from($emailSender);
 
-                    // set from name if present
-                    if ($field->input_fc_sender) {
-                        $mail->fromName($this->input_fc_sender);
-                    }
+                // set from name if present
+                if ($field->input_fc_sender) {
+                    $mail->fromName($this->input_fc_sender);
+                }
 
-                    $mail->subject($this->_('Comment status has been changed'));
-                    $mail->title(sprintf($this->_('Your comment status has been changed to %s'), InputfieldFrontendComments::statusTexts()[$comment->status]));
+                $mail->subject($this->_('Comment status has been changed'));
+                $mail->title(sprintf($this->_('Your comment status has been changed to %s'), InputfieldFrontendComments::statusTexts()[$comment->status]));
 
-                    // set email template depending on config settings
-                    $template = $field->input_fc_emailTemplate === 'inherit' ? $frontendFormsConfig['input_emailTemplate'] : $field->input_fc_emailTemplate;
-                    if($template !== 'text'){
-                        $mail->mailTemplate($template);
-                    }
+                // set email template depending on config settings
+                $template = $field->input_fc_emailTemplate === 'inherit' ? $frontendFormsConfig['input_emailTemplate'] : $field->input_fc_emailTemplate;
+                if ($template !== 'text') {
+                    $mail->mailTemplate($template);
+                }
 
-                    $mail->bodyHTML($this->renderStatusChangeBody($comment));
-                    $mail->to($comment->email);
+                $mail->bodyHTML($this->renderStatusChangeBody($comment));
+                $mail->to($comment->email);
 
-                    $send = $mail->send();
+                $send = $mail->send();
 
             }
             return $send;
