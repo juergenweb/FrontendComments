@@ -33,6 +33,7 @@
     {
         use configValues;
 
+        // Declare all properties
         protected array $frontendFormsConfig = [];
         protected bool|int|null $input_fc_sort = false;
         protected TextElements $commentsHeadline;
@@ -59,21 +60,20 @@
             $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues($this->field);
 
             $this->commentsHeadline = new TextElements();
-            $this->commentsHeadline->setTag('h3');
+            $commentsHeadlineType = array_key_exists('input_fc_commentsheadtype', $this->frontendCommentsConfig) ? $this->frontendCommentsConfig['input_fc_commentsheadtype'] : 'h3';
+            $this->commentsHeadline->setTag($commentsHeadlineType);
             $this->commentsHeadline->setAttribute('class', 'fc-comments-headline');
-            $headline = $this->_('Comments');
+            $this->commentsHeadline->setText($this->_('Comments'));
 
-            if(isset($this->frontendCommentsConfig['input_fc_commentsheadline']) && ($this->frontendCommentsConfig['input_fc_commentsheadline'] != '')){
-                $headline = $this->frontendCommentsConfig['input_fc_commentsheadline'];
-            }
-            $this->commentsHeadline->setText($headline);
+            // add or remove the headline for the comments depending on the settings
+            $headConfig = (array_key_exists('input_fc_commentsheadline', $this->frontendCommentsConfig)) ? $this->frontendCommentsConfig['input_fc_commentsheadline'] : '';
+            $this->addHeadline($headConfig);
 
             // create properties of FrontendComments configuration values
-            $properties =  ['input_fc_sort'];
-            $this->createPropertiesOfArray($this->frontendCommentsConfig,$properties);
+            $properties = ['input_fc_sort'];
+            $this->createPropertiesOfArray($this->frontendCommentsConfig, $properties);
 
         }
-
 
         /**
          * Get the comments headline object for further manipulations
@@ -82,6 +82,24 @@
         public function getCommentsHeadline(): TextElements
         {
             return $this->commentsHeadline;
+        }
+
+        /**
+         * Add or remove a headline above the comments
+         * @param string $headline
+         * @return void
+         */
+        public function addHeadline(string|null $headline): void
+        {
+            if (!is_null($headline)) {
+                if ($headline === 'none') {
+                    // remove the headline
+                    $this->getCommentsHeadline()->setText('');
+                } else {
+                    if ($headline != '')
+                        $this->getCommentsHeadline()->setText($headline);
+                }
+            }
         }
 
         /**
@@ -94,7 +112,6 @@
             return $this->comments->find('parent_id=' . $comment->id)->count;
         }
 
-
         /**
          * Render a pagination for the comments
          * @param \FrontendComments\CommentArray $comments
@@ -102,10 +119,11 @@
          * @return string
          * @throws \ProcessWire\WireException
          */
-        function renderPagination(CommentArray $comments, $options = array()) {
+        function renderPagination(CommentArray $comments, $options = array())
+        {
 
-            if(!$comments->count) {
-                if($this->wire('input')->pageNum > 1) {
+            if (!$comments->count) {
+                if ($this->wire('input')->pageNum > 1) {
                     // redirect to first pagination if accessed at an out-of-bounds pagination
                     $this->wire('session')->redirect($this->wire('page')->url);
                 }
@@ -123,7 +141,7 @@
             $language = $this->wire('user')->language->id;
             $comments = $comments->find("language=$language");
 
-            if($options['paginate']) {
+            if ($options['paginate']) {
                 $limit = $options['limit'];
                 $start = ($this->wire('input')->pageNum - 1) * $limit;
                 $total = $comments->count();
@@ -135,13 +153,13 @@
 
             $out = "<ul id='$options[id]' class='uk-comment-list'>";
 
-            foreach($comments as $comment) {
+            foreach ($comments as $comment) {
                 $out .= "<li class='uk-margin'>" . ukComment($comment) . "</li>";
             }
 
             $out .= "</ul>";
 
-            if($options['paginate'] && $comments->getTotal() > $comments->count()) { //>>>>>NEW-start
+            if ($options['paginate'] && $comments->getTotal() > $comments->count()) { //>>>>>NEW-start
                 $out .= ukPagination($comments);
             }
 
@@ -175,7 +193,7 @@
         {
 
             $out = '';
-            if($this->comments->count === 0)
+            if ($this->comments->count === 0)
                 return $out; //output nothing
 
             // convert $queryId to int (could be null too)
@@ -194,28 +212,26 @@
 
             if ($levelStatus) {
 
-                if($level == 0)
-                {
+                if ($level == 0) {
                     $out .= '<div class="fc-comments-wrapper">';
                     // render the comments headline if present
-                    $out .= $this->commentsHeadline->___render();
+                    $out .= $this->getCommentsHeadline()->___render();
                 }
 
                 $levelClass = ($level == 0) ? ' fc-comments-list uk-comment-list' : ' fc-comments-list fc-reply-list'; // add additional class for sublevels
                 $out .= '<ul id="' . $this->comments->getField()->name . '-list-' . $parent_id . '" class="fc-list level-' . $level . $levelClass . '">';
             }
-
-
+            
             // change the sort order if set
             $comments = $this->comments;
-            if($this->input_fc_sort){
+            if ($this->input_fc_sort) {
                 $comments = $this->comments->reverse();
             }
 
             // get all comments with status approved (=1)
             if (!is_null($parent_id)) {
 
-                foreach ($comments->find('parent_id=' . $parent_id . ',status=' . FieldtypeFrontendComments::approved.'|'.FieldtypeFrontendComments::spamReplies) as $data) {
+                foreach ($comments->find('parent_id=' . $parent_id . ',status=' . FieldtypeFrontendComments::approved . '|' . FieldtypeFrontendComments::spamReplies) as $data) {
                     if ($data instanceof Comment) {
 
                         $out .= '<li id="comment-' . $data->id . '" class="fc-listitem">' . $this->renderSingleComment($data,
@@ -235,8 +251,7 @@
             if ($levelStatus) {
 
                 $out .= '</ul>';
-                if($level == 0)
-                {
+                if ($level == 0) {
                     $out .= '</div>';
                 }
             }
