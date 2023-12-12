@@ -6,7 +6,6 @@
     /**
      * Class to render the comment with Bootstrap 5 markup
      */
-
     class Bootstrap5Comment extends Comment
     {
 
@@ -15,7 +14,7 @@
             parent::__construct($comment, $comments);
 
             // Image
-            if(!is_null($this->userImage)) {
+            if (!is_null($this->userImage)) {
                 $this->avatar->removeAttribute('class');
                 $this->avatar->setAttribute('class', 'rounded-circle me-2');
                 $this->avatar->setAttribute('width', '60');
@@ -53,39 +52,44 @@
             $this->replayFormHeadline->setAttribute('class', 'mt-3');
         }
 
+        /**
+         * Render the Markup for a comment using Bootstrap 5 Framework
+         * @param bool $levelStatus
+         * @return string
+         */
         public function ___renderCommentMarkup(bool $levelStatus): string
         {
-            return  '<div class="d-flex justify-content-center row">
+            return '<div class="d-flex justify-content-center row">
                             <div class="col-md-12">
                                 <div class="d-flex flex-column comment-section">
                                     <div class="bg-white p-2">
                                         <div class="d-flex align-items-center pt-2">
                                             <div class="flex-shrink-0">'
-                                            .$this->___renderImage().
+                                                . $this->___renderImage() .
                                             '</div>
                                             
                                             <div class="flex-grow-1">              
                                                 
                                               <div class="px-2 float-start">  
-                                                <div class="px-2 float-start">'.$this->___renderAuthor().'</div>
-                                                <div class="px-2 float-start">'.$this->___renderCreated().'</div> 
-                                                 <div class="px-2 clearfix">'.$this->___renderRating().'</div>
+                                                <div class="px-2 float-start">' . $this->___renderAuthor() . '</div>
+                                                <div class="px-2 float-start">' . $this->___renderCreated() . '</div> 
+                                                 <div class="px-2 clearfix">' . $this->___renderRating() . '</div>
                                              </div> 
                                              
                                              <div class="float-end">
-                                                <div class="px-2 flex-grow float-end">'.$this->___renderReply($levelStatus).'</div>
+                                                <div class="px-2 flex-grow float-end">' . $this->___renderReply($levelStatus) . '</div>
                                              </div>
 
                                              </div>                                             
                                         </div>
                                          
                                         <div class="card-body mt-2">'
-                                            .$this->___renderText().
+                                            . $this->___renderText() .
                                         '</div>
                                     </div>
                                     <div class="bg-white card-footer">
                                         <div class="d-flex flex-row float-end">
-                                            <div class="p-2">'.$this->___renderVotes().'</div>
+                                            <div class="p-2">' . $this->___renderVotes() . '</div>
                                             
                                         </div>
                                     </div>
@@ -93,7 +97,5 @@
                             </div>
                         </div>';
         }
-
-
 
     }
