@@ -57,7 +57,7 @@
 
         use configValues;
 
-        // Declare all properties and constantes
+        // Declare all properties and constants
         const flagNotifyReply = 1; //Flag to indicate the author of this comment wants to be notified of replies to their comment
         const flagNotifyAll = 2; // Flag to indicate the author of this comment wants to be notified of all comments on the page
 
@@ -575,7 +575,7 @@
         {
 
             $out = '';
-            //$out .= '<div id="' . $this->field->name . '-' . $comment->id . '-novote"></div>'; // wrapper for no vote alert box
+            $out .= '<div id="' . $this->field->name . '-' . $comment->id . '-novote"></div>'; // wrapper for no vote alert box
 
             if ($level === 0) {
                 //$out .= '<div id="comment-wrapper-' . $comment->id . '" class="fc-comment-main-level">';
