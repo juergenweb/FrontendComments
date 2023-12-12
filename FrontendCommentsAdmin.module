@@ -28,10 +28,11 @@
 
         use configValues;
 
-        protected Field $field; // A single FrontendComments field;
+        // Declare all properties
         protected int $defaultNumber = 20; // The default number of comments to display in the table
         protected WireArray $commentFields; // Wire array containing all FrontendComments field objects
         protected array $frontendFormsConfig = [];
+        protected Field $field; // A single FrontendComments field;
 
 
         /**
@@ -58,7 +59,6 @@
                 $this->field = $this->commentFields->first();
 
             }
-
 
         }
 
@@ -92,53 +92,8 @@
             $this->wire('config')->styles->add($this->wire('config')->urls->{$this->className} . 'backend-assets/frontendcommentsadmin.css?v=' . $version . '&time=' . time());
             $this->wire('config')->scripts->add($this->wire('config')->urls->{$this->className} . 'backend-assets/frontendcommentsadmin.js?v=' . $version . '&time=' . time());
 
-            $this->modules->get('JqueryUI')->use('modal');
-        }
-
-        /**
-         * Create the Select input field for changing the status of a comment inside the table
-         * @param \FrontendComments\Comment $comment
-         * @return string
-         * @throws \ProcessWire\WireException
-         * @throws \ProcessWire\WirePermissionException
-         */
-        protected function ___createStatusSelect(Comment $comment): string
-        {
-            $select = wire('modules')->get('InputfieldSelect');
-            $selectName = 'status_' . $comment->id;
-            $select->attr('id+name', $selectName);
-            $statusOptions = [
-                FieldtypeFrontendComments::pendingApproval => $this->_('Waiting for approval'),
-                FieldtypeFrontendComments::approved => $this->_('Approved'),
-                FieldtypeFrontendComments::spam => $this->_('SPAM'),
-            ];
-            $select->addOptions($statusOptions);
-            $value = (wire('input')->post->$selectName) ?? $comment->status;
-            $select->attr('value', $value);
-            return $select->render();
-        }
-
-        /**
-         * Render the button for opening the comment editing form inside the modal window
-         * @param int $commentID
-         * @param int $pageID
-         * @param int $fieldID
-         * @return string
-         * @throws \ProcessWire\WireException
-         * @throws \ProcessWire\WirePermissionException
-         */
-        public function ___createDetailButton(int $commentID, int $pageID, int $fieldID): string
-        {
-            $button = wire('modules')->get('InputfieldButton');
-            $button->setSecondary();
-            $button->attr('data-buttons', 'button#submitdetail');
-            $button->attr('data-autoclose', '');
-            $button->attr('data-href', wire('input')->url() . 'detail?commentid=' . $commentID . '&pageid=' . $pageID . '&fieldid=' . $fieldID);
-            $button->addClass('pw-modal');
-            $button->text = $this->_('Edit full comment');
-            $button->icon = 'pencil';
-            $button->value = $commentID;
-            return $button->render();
+            // activate modal windows
+            wire('modules')->get('JqueryUI')->use('modal');
         }
 
         /**
@@ -281,11 +236,13 @@
                             if ($query->execute()) {
 
                                 // send notification email on status change if enabled inside the module configuration
-                                if (in_array($input->post->detailstatus, $field->input_fc_status_change_notification)) {
-                                    $notification = new Notifications($comments);
-                                    // add new status to the comment
-                                    $comment->status = $input->post->detailstatus;
-                                    $notification->sendStatusChangeEmail($comment, $this->field, $this->frontendFormsConfig);
+                                if ($comment->status != $input->post->detailstatus) {
+                                    if (in_array($input->post->detailstatus, $field->input_fc_status_change_notification)) {
+                                        $notification = new Notifications($comments);
+                                        // add new status to the comment
+                                        $comment->status = $input->post->detailstatus;
+                                        $notification->sendStatusChangeEmail($comment, $this->field, $this->frontendFormsConfig);
+                                    }
                                 }
                                 $session->message($this->_('Your changes have been saved'));
                             } else {
@@ -328,13 +285,9 @@
             // table head
             $table->headerRow([
                 '#',
-                $this->_('Created'),
-                $this->_('Page'),
-                $this->_('Author'),
-                $this->_('Email'),
+                $this->_('Data'),
                 $this->_('Text'),
-                $this->_('Status'),
-                $this->_('Detail')
+                $this->_('Status')
             ]);
 
             foreach ($comments as $commentArray) {
@@ -348,16 +301,43 @@
                     $commentId->attr('commentid+name', $commentIdName);
                     $commentId->value = $comment->id;
 
+                    // Create the status select field
+                    $selectStatus = wire('modules')->get('InputfieldSelect');
+                    $selectName = 'status_' . $comment->id;
+                    $selectStatus->attr('id+name', $selectName);
+                    $statusOptions = [
+                        FieldtypeFrontendComments::pendingApproval => $this->_('Waiting for approval'),
+                        FieldtypeFrontendComments::approved => $this->_('Approved'),
+                        FieldtypeFrontendComments::spam => $this->_('SPAM'),
+                    ];
+                    $selectStatus->addOptions($statusOptions);
+                    $value = (wire('input')->post->$selectName) ?? $comment->status;
+                    $selectStatus->attr('value', $value);
+
+                    $button = wire('modules')->get('InputfieldButton');
+                    $button->setSecondary();
+                    $button->attr('data-buttons', 'button#submitdetail');
+                    $button->attr('data-autoclose', '');
+                    $button->attr('data-href', wire('input')->url() . 'detail?commentid=' . $comment->id . '&pageid=' . $comment->getPage()->id . '&fieldid=' . $comment->getField()->id);
+                    $button->addClass('pw-modal');
+                    $button->text = $this->_('Edit full comment');
+                    $button->icon = 'pencil';
+                    $button->value = $comment->id;
+
+                    $dataTable = '<table class="fc-data-table">
+                        <tr><td class="fc-table-label">' . $this->_('Created') . '</td><td>' . wire('datetime')->date($dateFormats[4], $comment['created']) . '</td></tr>
+                        <tr><td class="fc-table-label">' . $this->_('Page') . '</td><td><a href="' . $comment->getPage()->url . '" target="_blank">' . $comment->getPage()->title . '</a></td></tr>
+                        <tr><td class="fc-table-label">' . $this->_('Author') . '</td><td>' . $comment->author . '</td></tr>
+                        <tr><td class="fc-table-label">' . $this->_('Email') . '</td><td>' . $comment->email . '</td></tr>
+                    </table>
+                    <div class="fc-edit-comment">' . $button->render() . '</div>';
+
                     $table->row([
                         $key + 1,
-                        wire('datetime')->date($dateFormats[4], $comment['created']),
-                        '<a href="' . $comment->getPage()->url . '" target="_blank">' . $comment->getPage()->title . '</a>',
-                        $comment->author,
-                        $comment->email,
+                        $dataTable,
                         $comment->text,
-                        $this->___createStatusSelect($comment),
-                        $commentId->render(),
-                        $this->___createDetailButton($comment->id, $comment->getPage()->id, $comment->getField()->id)
+                        $selectStatus->render(),
+                        $commentId->render()
                     ]);
                 }
             }
@@ -369,8 +349,7 @@
          * @param $criteria
          * @return array
          */
-        protected
-        function groupBy($arr, $criteria): array
+        protected function groupBy($arr, $criteria): array
         {
             return array_reduce($arr, function ($accumulator, $item) use ($criteria) {
                 $key = (is_callable($criteria)) ? $criteria($item) : $item[$criteria];
@@ -390,8 +369,7 @@
          * @return \ProcessWire\WireArray
          * @throws \ProcessWire\WireException
          */
-        protected
-        function findComments(Field $field, array|null $selectors = [], int $limit = 0): WireArray
+        protected function findComments(Field $field, array|null $selectors = [], int $limit = 0): WireArray
         {
 
             $allComments = new WireArray();
@@ -455,31 +433,15 @@
          * @throws \ProcessWire\WireException
          * @throws \ProcessWire\WirePermissionException
          */
-        public
-        function ___executeComments(WireArray $totalComments): void
+        public function ___executeComments(WireArray $totalComments): void
         {
             if ($this->input->post('submit')) {
-
-/*
-                // Get different values
-                $commentID = (int)$res['commentid'];
-                $pageID = (int)$res['pageid'];
-                $fieldID = (int)$res['fieldid'];
-
-                $page = wire('pages')->get($pageID);
-                $field = wire('fields')->get($fieldID);
-                $fieldName = $field->name;
-                $comments = $page->$fieldName; // get the CommentsArray of this field
-                $table = $field->getTable();
-                $comment = $comments->findOne($commentID);
-                */
 
                 // ID of the selected FieldtypeComments field from the filter
                 $fieldID = (int)$this->input->post('fc-commentsfield');
 
                 // Set new $field property according to the select POST value
                 $field = wire('fields')->get($fieldID);
-
 
                 // Get all FrontendForms configuration values
                 $frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues($field);
@@ -493,12 +455,10 @@
 
                     foreach ($totalComments as $comments) {
 
-
                         // get the comment with this id
                         $comment = $comments->findOne($id);
 
                         if ($comment) {
-
 
                             // create new CommentArray -> needed for sending notification email
                             $commentArray = new CommentArray();
@@ -524,6 +484,7 @@
                                     $updates[] = $id;
 
                                     if (in_array($comment->status, $field->input_fc_status_change_notification)) {
+
                                         $notification = new Notifications($commentArray);
                                         // add new status to the comment
                                         $notification->sendStatusChangeEmail($comment, $field, $this->frontendFormsConfig);
@@ -553,8 +514,7 @@
          * @return \ProcessWire\WireArray
          * @throws \ProcessWire\WireException
          */
-        public
-        function getCommentFields(): WireArray
+        public function getCommentFields(): WireArray
         {
             $commentFields = new WireArray();
             foreach (wire('fields')->findByType('FieldtypeFrontendComments') as $field) {
@@ -570,8 +530,7 @@
          * @return int
          * @throws \ProcessWire\WireException
          */
-        public
-        function getNumberOfCommentsBySelector(Field $field, array $selector = []): int
+        public function getNumberOfCommentsBySelector(Field $field, array $selector = []): int
         {
             $number = 0;
             foreach ($this->findComments($field, $selector) as $comment) {
@@ -586,8 +545,7 @@
          * @return int
          * @throws \ProcessWire\WireException
          */
-        public
-        function getTotal(Field $field): int
+        public function getTotal(Field $field): int
         {
             return $this->getNumberOfCommentsBySelector($field);
         }
@@ -598,8 +556,7 @@
          * @return int
          * @throws \ProcessWire\WireException
          */
-        public
-        function getApproved(Field $field): int
+        public function getApproved(Field $field): int
         {
             return $this->getNumberOfCommentsBySelector($field, ['status=' . FieldtypeFrontendComments::approved]);
         }
@@ -610,8 +567,7 @@
          * @return int
          * @throws \ProcessWire\WireException
          */
-        public
-        function getWaitingApproval(Field $field): int
+        public function getWaitingApproval(Field $field): int
         {
             return $this->getNumberOfCommentsBySelector($field, ['status=' . FieldtypeFrontendComments::pendingApproval]);
         }
@@ -622,8 +578,7 @@
          * @return int
          * @throws \ProcessWire\WireException
          */
-        public
-        function getSpam(Field $field): int
+        public function getSpam(Field $field): int
         {
             return $this->getNumberOfCommentsBySelector($field, ['status=' . FieldtypeFrontendComments::spam]);
         }
@@ -634,8 +589,7 @@
          * @throws \ProcessWire\WireException
          * @throws \ProcessWire\WirePermissionException
          */
-        public
-        function ___execute(): string
+        public function ___execute(): string
         {
 
             // No FrontendComments field exists
