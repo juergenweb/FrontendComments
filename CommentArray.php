@@ -54,6 +54,7 @@
 
         use configValues;
 
+        // Declare all properties
         protected Page|null $page = null;
         protected Field|null $field = null;
         protected int $commentId = 0;
@@ -128,7 +129,7 @@
         public static function ___renderStarsOnly(float|int|null $stars, bool $showNull = false): string
         {
             $out = '';
-            if($showNull && $stars == null){
+            if ($showNull && $stars == null) {
                 $stars = 0;
             }
             if (!is_null($stars)) {
@@ -139,15 +140,15 @@
                 $halfStars = (($stars - $fullStars) === 0.0) ? 0 : 1;
                 $emptyStars = 5 - $fullStars - $halfStars;
                 // full stars
-                if($fullStars){
+                if ($fullStars) {
                     for ($x = 1; $x <= $fullStars; $x++) {
                         $out .= '<span class="full-star"></span>';
                     }
                 }
-                if($halfStars){
+                if ($halfStars) {
                     $out .= '<span class="half-star"></span>';
                 }
-                if($emptyStars){
+                if ($emptyStars) {
                     for ($x = 1; $x <= $emptyStars; $x++) {
                         $out .= '<span class="empty-star"></span>';
                     }
@@ -311,8 +312,6 @@
             $this->field->input_fc_captcha = $captcha;
             return $this;
         }
-        // input_fc_captcha
-
 
         /**
          * Create a new blank CommentArray and add a page and field to it
@@ -421,7 +420,6 @@
          */
         public function ___render(): string
         {
-
             $form = $this->getCommentForm();
             return $form->___render();
         }
@@ -555,7 +553,6 @@
                     }
                 }
             }
-
 
             // show the form on top only if id=0 or id is different, but query string with code is present
             $form = '';
