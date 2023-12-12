@@ -14,7 +14,7 @@
             parent::__construct($comment, $comments);
 
             // Avatar image
-            if(!is_null($this->userImage)) {
+            if (!is_null($this->userImage)) {
                 $this->avatar->removeAttribute('class');
                 $this->avatar->setAttribute('class', 'uk-comment-avatar');
                 $this->avatar->setAttribute('width', '80');
@@ -62,28 +62,23 @@
         {
             return '<header class="uk-comment-header uk-position-relative">
                         <div class="uk-grid-medium uk-flex-middle" data-uk-grid>'
-                            .$this->___renderImage().
-                            '<div class="uk-width-expand">'
-                                .$this->___renderAuthor()
-                                .$this->___renderCreated().
-                            '</div>
+                . $this->___renderImage() .
+                '<div class="uk-width-expand">'
+                . $this->___renderAuthor()
+                . $this->___renderCreated() .
+                '</div>
                              <div class="uk-position-top-right uk-position-small">'
-                                .$this->___renderReply($levelStatus).
-                             '</div> 
-                             
+                . $this->___renderReply($levelStatus) .
+                '</div> 
                                      <div class="uk-width-1-1 uk-margin-small-top"><ul class="uk-comment-meta uk-subnav uk-subnav-divider uk-margin-remove-top">'
-                .$this->___renderRating()
-                .$this->___renderVotes().
-                '</ul></div> 
-                             
-                                         
-                        </div>
-                        
-                        
+                . $this->___renderRating()
+                . $this->___renderVotes() .
+                '</ul></div>                   
+                        </div>                      
                     </header>
                     <div class="uk-comment-body">'
-                        .$this->___renderText().
-                    '</div>';
+                . $this->___renderText() .
+                '</div>';
         }
 
     }
