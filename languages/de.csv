@@ -1,168 +1,260 @@
-en,de,description,file,hash
-"Reply to this comment","Auf diesen Kommentar antworten",,site/modules/FieldtypeFrontendComments/Comment.php,bc9e60a9d89ccff64f5282425aa1374e
-Reply,Antworten,,site/modules/FieldtypeFrontendComments/Comment.php,25d8df6e580905091a0d5ef5b9e05bf0
-"Write an answer to this comment","Eine Antwort auf diesen Kommentar schreiben",,site/modules/FieldtypeFrontendComments/Comment.php,6f38352564cd325f0ed01d3959301594
-"Like the comment","Der Kommentar gefällt",,site/modules/FieldtypeFrontendComments/Comment.php,32a1bab8a685376f9632903067d90a2e
-"Dislike the comment","Der Kommentar gefällt nicht",,site/modules/FieldtypeFrontendComments/Comment.php,fd395bf6e34455835034bcd2c3a06d22
-en,de,description,file,hash
-"It seems that you have rated this comment within the last %s. In this case, you may not vote again.","Es scheint, dass Sie diesen Kommentar innerhalb der letzten %s bewertet haben. In diesem Fall dürfen Sie nicht erneut abstimmen.",,site/modules/FieldtypeFrontendComments/CommentArray.php,f7d296ae2eaceb967af861bc18a96135
-en,de,description,file,hash
-"Comment page",Kommentar-Seite,,site/modules/FieldtypeFrontendComments/CommentForm.php,e7663040950627ad4d49f433acbec336
-Name,Name,,site/modules/FieldtypeFrontendComments/CommentForm.php,49ee3087348e8d44e1feda1917443987
-Comment,Kommentar,,site/modules/FieldtypeFrontendComments/CommentForm.php,0be8406951cdfda82f00f79328cf4efc
-"HTML is not allowed.","HTML ist nicht erlaubt",,site/modules/FieldtypeFrontendComments/CommentForm.php,458a8bd4c7dd305769961f96822e1e05
-Rating,Bewertung,,site/modules/FieldtypeFrontendComments/CommentForm.php,dda9c06f33071c9b6fc237ee164109d8
-"Notify me about new replies","Ich möchte über neue Antworten benachrichtigt werden",,site/modules/FieldtypeFrontendComments/CommentForm.php,7e8fa69cdef8e9e495ffb4a29dcb5b08
-"You can cancel the receiving of notification emails everytime by clicking the link inside the notification email.","Sie können den Empfang von Benachrichtigungs-E-Mails jederzeit beenden, indem Sie auf den Link in der Benachrichtigungs-E-Mail klicken.",,site/modules/FieldtypeFrontendComments/CommentForm.php,82e10f630644cddf1214fff13c065901
-"No notification","Keine Benachrichtigungen",,site/modules/FieldtypeFrontendComments/CommentForm.php,6b74ea635c096c7f10b7a6e504b76a80
-"Notify me about replies to this comment only","Benachrichtigungen nur über Antworten zu diesem Kommentar",,site/modules/FieldtypeFrontendComments/CommentForm.php,198ce0392725a9becf6ef87683683c16
-"Notify me about replies to all comments","Benachrichtigung auf Antworten zu allen Kommentaren",,site/modules/FieldtypeFrontendComments/CommentForm.php,374856ed936b1d67f6d33e8570777025
-Cancel,Abbrechen,,site/modules/FieldtypeFrontendComments/CommentForm.php,ea4788705e6873b424c65e91c2846b19
-"Click to cancel the reply","Klicken Sie, um die Antwort abzubrechen",,site/modules/FieldtypeFrontendComments/CommentForm.php,773f97d38b07322957d6c5bce8ab8aee
-"The status of the comment has already been changed. For security reasons, however, this is only allowed once via mail link. If you want to change the status once more, you have to login to the backend.","Der Status des Kommentars wurde bereits einmal geändert. Aus Sicherheitsgründen ist dies jedoch nur einmal per Mail-Link möglich. Wenn Sie den Status noch einmal ändern möchten, müssen Sie sich im Backend anmelden.",,site/modules/FieldtypeFrontendComments/CommentForm.php,259941302ddfda2ae40f80d4546a1c54
-No,Nein,,site/modules/FieldtypeFrontendComments/CommentForm.php,bafd7322c6e97d25b6299b5d6fe8920b
-Yes,Ja,,site/modules/FieldtypeFrontendComments/CommentForm.php,93cba07454f06a4a960172bbd6e2a435
-"We are sorry, but there was no comment with this code found in the database.","Es tut uns leid, aber es wurde kein Kommentar mit diesem Code in der Datenbank gefunden.",,site/modules/FieldtypeFrontendComments/CommentForm.php,962a48ab27f4b800092cf06b69152e3e
-"Directly to the comment","Direkt zum Kommentar",,site/modules/FieldtypeFrontendComments/CommentForm.php,cc87c5b3174c59a44feb9923a1c0d369
-"To the comment","Zum Kommentar",,site/modules/FieldtypeFrontendComments/CommentForm.php,4da927258b51836bf868124df5d1cc4a
-"Comment status has been changed from ""%s"" to ""%s"". %s","Der Kommentarstatus wurde von ""%s"" auf ""%s"" geändert. %s",,site/modules/FieldtypeFrontendComments/CommentForm.php,336d7a11e017f8c8e188844f85c05cd2
-"An error occured during the saving of the new comment status.","Beim Speichern des neuen Kommentarstatus ist ein Fehler aufgetreten.",,site/modules/FieldtypeFrontendComments/CommentForm.php,109399baaab87bfd0bd2a69a52894aa1
-"You have successfully unsubscribed from email notifications and you will no longer receive notifications of new replies.","Sie haben sich erfolgreich von den E-Mail-Benachrichtigungen abgemeldet und werden nicht mehr über neue Antworten benachrichtigt.",,site/modules/FieldtypeFrontendComments/CommentForm.php,1fb10ca777f60fbba90c339e9cae2f80
-"You have tried to unsubscribe from getting notifications, but your notification status is already disabled.","Sie haben versucht, den Erhalt von Benachrichtigungen abzubestellen, aber Ihr Benachrichtigungsstatus ist bereits deaktiviert.",,site/modules/FieldtypeFrontendComments/CommentForm.php,24dd9ac88f895072e81dc1a7fa4a3f18
-"Thank you! Your comment has been submitted successfully. %s","Vielen Dank! Ihr Kommentar wurde erfolgreich übermittelt. %s",,site/modules/FieldtypeFrontendComments/CommentForm.php,f654dbb1c71a8fb68d5dea761168de35
-"Thank you for your comment. Please be patient. Your comment has been submitted successfully and is waiting for approval.","Vielen Dank für Ihren Kommentar. Bitte haben Sie Geduld. Ihr Kommentar wurde erfolgreich übermittelt und wartet auf die Freischaltung.",,site/modules/FieldtypeFrontendComments/CommentForm.php,a0acc46c97fc136059a08eb445746993
-Star,Stern,"Singular Version",site/modules/FieldtypeFrontendComments/CommentForm.php,26f93e6e68e28a698377e941cb59f29a
-Stars,Sterne,"Plural Version",site/modules/FieldtypeFrontendComments/CommentForm.php,d37c550d781bfb93b0088a2470598bcf
-en,de,description,file,hash
-none,keine,,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,334c4a4c42fdb79d7ebc3e73b517e6f8
-"no selection","keine Auswahl","add an empty option",site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,00fd39176b23537f6b3660be8c197f5a
-"The status of the comment has already been changed. For security reasons, however, this is only allowed once via mail link. If you want to change the status once more, you have to login to the backend.","Der Status des Kommentars wurde bereits einmal geändert. Aus Sicherheitsgründen ist dies jedoch nur einmal per Mail-Link möglich. Wenn Sie den Status noch einmal ändern möchten, müssen Sie sich im Backend anmelden.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,259941302ddfda2ae40f80d4546a1c54
-"Comment moderation","Moderation von Kommentaren",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,c98106d2a3b2a0a14016f73894f59d10
-"This determines when a newly posted comment will appear on your site.","Damit wird festgelegt, wann ein neu eingestellter Kommentar auf Ihrer Website erscheint.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,18800239150e923984ade45f5e961fbd
-"None - Comments posted immediately","Keine - Kommentare werden sofort veröffentlicht",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,0c6e8a761530efc7ecfe773a5b5a6f7e
-"All - All comments must be approved by user with page edit access","Alle - Alle Kommentare müssen von einem Moderator genehmigt und freigeschalten werden",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,4f214f3246f03a94773427de4f2e7699
-"Only New - Only comments from users without prior approved comments require approval","Nur neue - Nur Kommentare von Nutzern ohne zuvor genehmigte Kommentare müssen genehmigt werden",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,d3a76eec189143c6945282d37bd81bb5
-"Quiet save?","Stilles Speichern?",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,e90234905413e689d67361b8f618b63f
-"When checked, the page modification time and user will not be updated when a comment will be changed in the backend.","Wenn diese Option aktiviert ist, werden die Änderungszeit der Seite und der Benutzer nicht aktualisiert, wenn ein Kommentar im Backend geändert wird.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,a7edd4158ae7a929a15306da82a9c7e2
-"Only to mention: The modification time and user will only be changed, if you save the page in the backend. Changing the comment status via mail link does not affect the modification time and user.","Hinweis: Die Änderungszeit und der Benutzer werden nur geändert, wenn Sie die Seite im Backend speichern. Das Ändern des Kommentarstatus per Mail-Link hat keinen Einfluss auf die Änderungszeit und den Benutzer.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,171aaf9f146e74a94bd0f49d66b37520
-"Form fields configuration","Konfiguration der Formularfelder",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,7efb7dbdb199c40215ee92697e332adb
-"Select the field for the user image","Wählen Sie das Feld für das Benutzerbild",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,1d151ffd45d242597a08de197a3035ae
-"Select the field of the user template which contains the user image","Wählen Sie das Feld aus der User-Vorlage, welches das das Benutzerbild enthält",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,9dca1f402b018bc81968130550cd0f09
-"Only user fields of the type ""FieldtypeImage"" and the configuration setting for a single image will be displayed (if present).","Es werden nur Benutzerfelder vom Typ ""FieldtypeImage"" und mit der Konfigurationseinstellung für ein einzelnes Bild angezeigt (falls vorhanden).",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,f5d3a8584d11f1af7b6bf10c7a168b4e
-"Set the size of the image","Größe des Bildes festlegen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,9316ab8c35ffd3009bea0dc20246d2f9
-"Enter a value in px. The image will be displayed squared.","Geben Sie einen Wert in px ein. Das Bild wird quadratisch angezeigt.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,c24ad35641109faa3e1fd3c33c4a561e
-"Default email configuration",Standard-E-Mail-Konfiguration,,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,7507729fd86157f8c6c06b36b11c9b92
-"Select an email template","Wählen Sie eine E-Mail-Vorlage aus",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,391b1c0e2e6a571d16ee13451bfe5740
-"inherit from FrontendForms settings","vom FrontendForms-Modul übernehmen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,78325c4af90ffc228c3798aa64c67ad1
-"no HTML template (plain text only)","Keine HTML-Vorlage (nur Text)",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,768e9766bf4b93f28bb332609b8e7429
-"Select if you want to use a HTML template for the notification emails or not.","Wählen Sie, ob Sie eine HTML-Vorlage für die Benachrichtigungs-E-Mails verwenden möchten oder nicht.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,b030d134af6397b6ed92850a4e90fff5
-"Inherit from FrontendForms will take the setting from this module.","Bei Übernahme aus dem FrontendForms-Module wird der dort angegebene Wert herangezogen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,0a6eca4828ea7f3fa67e27f3e5920330
-"Email address(es) for the notification email","E-Mail-Adresse(n) für die Benachrichtigungs-E-Mail",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,3e8111530d73ea308ec70d126e363f09
-"Select, if you want to enter the receiver email address(es) for the notification mails manually or if you want to select users as recipients.","Wählen Sie, ob Sie die Empfänger-E-Mail-Adresse(n) für die Benachrichtigungsmails manuell eingeben wollen oder ob Sie Benutzer als Empfänger auswählen möchten.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,345dd661feed7d2c4551cc86aa884f55
-"Enter email address(es) manually","E-Mail Adresse(n) manuell eingeben",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,b21811f7d308b36ebaabcce5733c84c4
-"Select users as recipients","Benutzer als Empfänger auswählen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,11d5afc2d606e7dcba69ea6a02fbf55c
-"Default email address(es) as text","Standard-E-Mail-Adresse(n) als Text",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,6c2c3ce201b61bb0f292ddd39547182e
-"Enter one ore more email addresses separated by a comma.","Geben Sie eine oder mehrere E-Mail-Adressen durch ein Komma getrennt ein.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,c1a7f5308258162ab5b2e2612300bf7f
-"Fe email1@mydomain.com,email2@mydomain.com.","Z.B. email1@mydomain.com,email2@mydomain.com.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,d10a52826a11d639fe9f043b49d3621f
-"Recipients for the notification email","Empfänger für die Benachrichtigungs-E-Mail",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,b4e60aaff24bc873a9cabdbe476dee92
-"Select one or more users that should receive a notification about new comments.","Einen oder mehrere Benutzer auswählen, die eine Benachrichtigung über neue Kommentare erhalten sollen.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,b07e22cf86d72200d151fce81d19095a
-"Users with the role ""registered"" will not be displayed, because they are not allowed to get notification emails.","Benutzer mit der Rolle ""registriert"" werden nicht angezeigt, da sie keine Berechtigung als Moderator besitzen Benachrichtigungs-E-Mails zu erhalten.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,1c591febfc27d24d1c2d104c663a3d37
-"From email address","Absender E-Mail-Adresse",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,6f6da7aec649851c977b6bf4e083977d
-"This email address will be displayed as the sender email address of the emails sent by this module.","Diese E-Mail-Adresse wird als Absender-E-Mail-Adresse für die von diesem Modul gesendeten E-Mails angezeigt.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,e1ca26eb2ee8afa47a146779d2cfbfe9
-"If no email address will be entered, %s will be displayed instead as the sender address.","Wenn keine E-Mail-Adresse eingegeben wird, wird stattdessen %s als Absenderadresse angezeigt.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,fbba3d8e1cdcf39fd8ed54db75bf6014
-"From name","Absender Name",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,c3a7ea0c38bac179a545dbfaf4ebb013
-"fe. My company","Z.B. Meine Firma",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,8eea8281628fde6ba6c3589554795bd2
-"This name will be displayed as the sender name of the emails sent by this module.","Dieser Name wird als Absendername für die von diesem Modul gesendeten E-Mails angezeigt.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,90069328ca4958e8adefa1ea08141195
-"If no sender name will be entered, than the sender email address will be used as the sender name.","Wenn kein Absendername eingegeben wird, wird die Absender-E-Mail-Adresse als Absendername verwendet.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,ddd87293a8b5d9914919b1a4f1b8f7a1
-"Commenter email notification","E-Mail-Benachrichtigung für Kommentatoren",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,caa865750c8c9f7b8b17373967219228
-"Send commenters notification emails about new replies","Senden Sie Kommentatoren Benachrichtigungs-E-Mails über neue Antworten",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,fc2a5437262402337914fe1fbf9500a7
-Disabled,Deaktiviert,,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,b9f5c797ebbf55adccdd8539a65a0241
-"Commenters can receive email notifications of replies to their comment only","Kommentatoren können nur E-Mail-Benachrichtigungen über Antworten auf ihren eigenen Kommentar erhalten",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,44f3f577cd5331fcb611a1b7cfbfea9e
-"Commenters can receive email notifications for all new replies to a comment on the page","Kommentatoren können E-Mail-Benachrichtigungen für alle neuen Antworten auf einen Kommentar auf der Seite erhalten",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,0bcb6b862be06326364a8e972509ac85
-"Send notification email to commenter on status change","Benachrichtigungs-E-Mail an den Kommentator bei Statusänderung senden",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,0de0e6789e667f75e611245a6404b0ca
-"If a moderator changes the status of a comment, select on which status change the commenter should be informed via email.","Wählen Sie aus, bei welcher Statusänderung der Kommentator per E-Mail informiert werden soll, wenn ein Moderator den Status eines Kommentars ändert.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,2eecc951f54fe76847fad93204b3d4df
-"Send notification email if status has been changed to approved","Benachrichtigung per E-Mail senden, wenn der Status in ""genehmigt"" geändert wurde",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,508ef57ce2a481bc139c0efdb58e36d3
-"Send notification email if status has been changed to SPAM","Benachrichtigung per E-Mail senden, wenn der Status auf SPAM geändert wurde",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,60825941739c69b3f3eb76f22351e176
-"If a box is checked, the commenter will receive an email if the comment status will be changed by a moderator in the backend or via email link. You can prevent this behavior by unchecking a box.","Wenn ein Kästchen aktiviert ist, erhält der Kommentator eine E-Mail, wenn der Kommentarstatus von einem Moderator im Backend oder per E-Mail-Link geändert wird. Sie können die Sendung eines E-Mails unterbinden, indem Sie die entsprechende Checkbox nicht markieren.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,1f2a9503d6e32f484514bce5ff3bba2b
-"Output rendering","Ausgabe im Frontend",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,e22428c686e2484d13fe958b6dd96ded
-"Change some parameters to get the preferred output.","Ändern Sie einige Parameter, um die gewünschte Ausgabe zu erhalten.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,2833803a0c429530b9493f78a4e01308
-"Replay depth","Antwort Tiefe",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,b84b8199c0856127d4343595613c43d9
-"Choose the number of depth for threaded comments","Wählen Sie die Anzahl der Levels für Kommentare im Thread",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,9e047418db24710c1f1ff3ff4595b406
-"Specify 0 for traditional flat chronological comments. For threaded comments (replies appear with comment being replied to) specify the maximum depth allowed for replies (0 to 3 recommended).","Geben Sie 0 für traditionelle flache chronologische Kommentare an. Für Kommentare mit Antworten (Antworten erscheinen unterhalb des Kommentars, auf welches geantwortet wird) geben Sie bitte die maximal zulässige Tiefe für Antworten an (0 bis 3 empfohlen).",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,6e97fb6e5fbbe1d65533fa0677586336
-"Sort order",Sortierreihenfolge,,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,06f1ac65b0a6a548339a38b348e64d79
-"Sort newest to oldest","Neueste bis älteste Sortierung",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,3a9e45e8efa2abf76ef63223e22daa36
-"Set the sort order for the comments","Legen Sie die Sortierreihenfolge für die Kommentare fest",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,e7c521055168c478ad42c2dfd34e71f1
-"By default, comments will be sort chronologically (oldest to newest). To reverse that behavior check this box.","Standardmäßig werden die Kommentare chronologisch sortiert (vom ältesten zum neuesten). Um dieses Verhalten umzukehren, aktivieren Sie dieses Kästchen.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,acb226b83940bbb68550a607cbd31fc1
-"Output order","Reihenfolge der Ausgabe",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,735ab173723a6556cf4e84d74ba8c245
-"Show form after comments","Formular nach Kommentaren anzeigen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,c6fd6e97fb9371b474b799f957b66081
-"Reverse the order of the output of form and comments","Umkehrung der Reihenfolge der Ausgabe von Formular und Kommentaren",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,9585b41c3a813f0f87e79b18ba861f2b
-"By default, the form will be displayed before the comments. To reverse that behavior check this box.","Standardmäßig wird das Formular vor den Kommentaren angezeigt. Um dieses Verhalten umzukehren, aktivieren Sie dieses Kästchen.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,a27c0484f63893d21bc0b862d8bb3bad
-"Use star rating","Sterne-Bewertung verwenden",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,ba157aa98e6e03109702ab42bd4bbf58
-"Show star rating","Sternebewertung anzeigen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,98f4d588aac4f2b4955ff989194292cd
-"If you want to offer star rating, please check the box","Wenn Sie eine Sternebewertung anbieten möchten, markieren Sie bitte das Kästchen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,6ffb8cc1b5828213da5ecf672f3ec4dc
-"Show/hide character counter under the textarea field","Zeichenzähler unter dem Textarea-Feld ein-/ausblenden",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,a193c5db4e9caf13d07c5cfb137f4ba5
-"Hide character counter","Zeichenzähler ausblenden",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,834dc45731b9a10799aedacd7c09d997
-"By default, a character counter will be displayed under the comment text field to inform the user, how many characters are left until the max. limit of 1024 characters is reached.","Standardmäßig wird unter dem Feld für den Kommentartext ein Zeichenzähler angezeigt, um den Benutzer darüber zu informieren, wie viele Zeichen noch übrig sind, bis die Höchstgrenze von 1024 Zeichen erreicht ist.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,dc4caf692f42ac6c96a7aec170e14463
-"Show/hide voting of comments","Abstimmung von Kommentaren anzeigen/ausblenden",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,7cacb7f44d31e07288195d7491114a52
-"Enable voting of comments","Abstimmen von Kommentaren zulassen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,9a799cddb654e7ff5c480b745d4ebf8a
-"By checking the box you offer visitors the possibility to rate comments (up-votes and down-votes).","Indem Sie das Kästchen ankreuzen, bieten Sie den Besuchern die Möglichkeit, Kommentare zu bewerten (Up- und Down-Votes).",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,637d15266d2ef7f39160da733e288f6b
-"Lock in days before voting can be done again","Sperren von Tagen, bevor wieder gewählt werden kann",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,ab2d1a0086937c5c8ca65b66ba3ddfae
-"To prevent multiple ratings from the same user, this module checks if the user have voted before. Please enter a time period in days during which further rating is not allowed.","Um Mehrfachbewertungen durch denselben Benutzer zu verhindern, prüft dieses Modul, ob der Benutzer schon einmal bewertet hat. Bitte geben Sie einen Zeitraum in Tagen an, in dem eine weitere Bewertung nicht erlaubt ist.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,0a068b72a2ebbd95f672f7207f80d38e
-"The user will be identified by using data of his Internet fingerprint. This means that the IP address, the browser system and the user ID will be compared with entries in the database. If an entry with the same data will be found, then the rating is not allowed. Entries in the database which are older than the time period selected above will be deleted automatically and the user will be allowed to rate again.","Der Nutzer wird anhand der Daten seines Internet-Fingerabdrucks identifiziert. Das bedeutet, dass die IP-Adresse, das Browsersystem und die Benutzerkennung mit Einträgen in der Datenbank verglichen werden. Wird ein Eintrag mit den gleichen Daten gefunden, so ist die Bewertung nicht zulässig. Einträge in der Datenbank, die älter als der oben gewählte Zeitraum sind, werden automatisch gelöscht und der Nutzer darf erneut bewerten.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,7232c1e17dae3634adbc9196eee40351
-"Add privacy text or privacy checkbox to the form","Datenschutztext oder Datenschutz-Checkbox zum Formular hinzufügen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,52b7eac43569326f5fd14232ef8c8994
-"Select if you want to show a privacy text only or a privacy checkbox above the submit button","Wählen Sie aus, ob Sie nur einen Datenschutztext oder ein Datenschutz-Checkbox über der Schaltfläche ""Senden"" anzeigen möchten.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,f25ff33f3e8c3f873dc85b3a401809eb
-"Do not show anything","Nichts anzeigen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,89ca52172700db318a89a30e1b677ddc
-"Show checkbox","Checkbox anzeigen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,0e99c9e8c94dc2a1c42561e4862923ae
-"Show text","Text anzeigen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,823dbdeca8e8e353dde97aa7708ff251
-"You can disable the display of the privacy text/checkbox, but you should be aware that this may lead to legal consequences if a privacy notice is required in your country.","Sie können die Anzeige des Datenschutztextes bzw. der Checkbox deaktivieren, Sie sollten sich aber darüber im Klaren sein, dass dies zu rechtlichen Konsequenzen führen kann, wenn in Ihrem Land ein Datenschutzhinweis gefordert wird.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,57e0942ea0dc40513cfa36f66cf8a29c
-"Spam protection","Schutz vor Spam",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,2932b465b48cf0d7c9caaf511d0c0e61
-"Number of days after which to delete spam","Anzahl der Tage, nach denen ein mit Status SPAM gekennzeichnetes Kommentar gelöscht werden soll",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,bf31492fe5d4821b483bc7cb8cfe07a3
-"After the number of days indicated, spam will be automatically deleted.","Nach der angegebenen Anzahl von Tagen wird der Spam-Kommentar automatisch gelöscht.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,72fe450a750c9f11bf0531e5395e6e75
-CAPTCHA,=,,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,291d6945a9da1c9a56be64a04e003112
-"Select, if you want to use a CAPTCHA for the comment form.","Wählen Sie, ob Sie ein CAPTCHA für das Kommentarformular verwenden möchten.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,03a342a1eb34897b1a2571498eaefe9e
-"If you receive a lot of spam comments, you can enable a CAPTCHA to prevent spam bots from filling out the form.","Wenn Sie viele Spam-Kommentare erhalten, können Sie ein CAPTCHA aktivieren, um Spam-Bots am Ausfüllen des Formulars zu hindern.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,ebb7b1091b44d7c661da133022fe59e0
-"Inherit from FrontendForms","Vom FrontendForms-Modul übernehmen",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,5bfe6a369b802afdb9bb4909ac726c2d
-"No CAPTCHA","kein CAPTCHA",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,b23bb4764e36673626f332b94178c5ec
-"JS and CSS","JavaScript und CSS",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,a1e0f2aa6605e84a010c507d52717e0e
-"CSS for front-end comments output","CSS für die Ausgabe von der Kommentare im Frontend",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,2b961475041b8a085eae4ed1a597f76a
-"JS for front-end comments output","JavaScript für die Kommentare im Frontend",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,4a08db526853d7aa35400a97c968e60d
-FrontendComments,=,,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,6b8c682577d63258030293d8bac4919b
-"Field that let you store user comments on a page using the FrontendForms module.","Feld, mit dem Sie Benutzerkommentare auf einer Seite unter Verwendung des FrontendForms-Moduls speichern können.",,site/modules/FieldtypeFrontendComments/FieldtypeFrontendComments.module,bbe8f47078082191d89866cabaad534d
-en,de,description,file,hash
-"Updated %s for comment #%d","Aktualisiert %s für Kommentar #%d",,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,58b6f822b062991647cf2e70b0140352
-Comments,Kommentare,,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,8413c683b4b27cc3f4dbd4c90329d8ba
-"No comments at the moment.","Im Moment gibt es keine Kommentare.",,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,887cf850292de23cde65763458aa003a
-Comment,Kommentar,,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,0be8406951cdfda82f00f79328cf4efc
-Email,E-Mail,,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,ce8ae9da5b7cd6c3df2929543a9af92d
-Author,Verfasser,,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,a517747c3d12f99244ae598910d979c5
-Status,=,,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,ec53a8c4f07baed5d8825072c89799be
-"Pending approval","Wartet auf Freigabe",,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,b8e2c23a15e49a10d6f0562a3dce2538
-Approved,Freigegeben,,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,6f8063417ab31f38d864c28302f3de2f
-SPAM,=,,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,c72beebe6ecbdddff71b846c4858ebcb
-FrontendComments,=,,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,6b8c682577d63258030293d8bac4919b
-"Inputfield for managing comments on a page.","Eingabefeld für die Verwaltung von Kommentaren auf einer Seite.",,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,b28e4f256b1d9cf092c2d20c9f3a2072
-"pending Approval","Wartet auf Freigabe",,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,b652354b99a077535119e223776f3110
-approved,Freigegeben,,site/modules/FieldtypeFrontendComments/InputfieldFrontendComments.php,787d5f05953ec39b108869dfdd7733e6
-en,de,description,file,hash
-"A new comment has been submitted","Es wurde ein neuer Kommentar eingereicht",,site/modules/FieldtypeFrontendComments/Notifications.php,b8bfb1838004df66c035d63b9da9ffe9
-"Comment status",Kommentar-Status,,site/modules/FieldtypeFrontendComments/Notifications.php,693e14c3c0dd3757d95b4ee5cf0d7bb3
-"Publish the comment","Den Kommentar veröffentlichen",,site/modules/FieldtypeFrontendComments/Notifications.php,6b6304f063e87c3dee21decab212a84b
-"Mark this comment as SPAM","Dem Kommentar als SPAM markieren",,site/modules/FieldtypeFrontendComments/Notifications.php,29eaf723511eeb59761c47306b96da22
-comment-notification,Kommentar-Benachrichtigung,,site/modules/FieldtypeFrontendComments/Notifications.php,cb4e3114336d9bafb764a393cde7fcda
-"A new reply has been posted","Es wurde eine neue Antwort getätigt",,site/modules/FieldtypeFrontendComments/Notifications.php,f705e618788426fa888d4f61524b670c
-"A new reply has been submitted","Es wurde eine neue Antwort übermittelt",,site/modules/FieldtypeFrontendComments/Notifications.php,1d833f9fc1cdde2141e734b011366ede
-"You are receiving this email because you have agreed to be notified when a new reply has been posted.","Sie erhalten diese E-Mail, weil Sie zugestimmt haben, benachrichtigt zu werden, wenn eine neue Antwort veröffentlicht wurde.",,site/modules/FieldtypeFrontendComments/Notifications.php,ed5bf3f989f7bcb0cb50f883ef6e7e44
-"New comment","Neuer Kommentar",,site/modules/FieldtypeFrontendComments/Notifications.php,186c30cab59f6b64a453778330d4bbf0
-Author,Verfasser,,site/modules/FieldtypeFrontendComments/Notifications.php,a517747c3d12f99244ae598910d979c5
-"Link to the page of the comment","Link zur Seite des Kommentars",,site/modules/FieldtypeFrontendComments/Notifications.php,cd9ba3529709aad17284cef5ef76109f
-"If you do not want to receive further mails about new replies, please click the link below","Wenn Sie keine weiteren Mails über neue Antworten erhalten möchten, klicken Sie bitte auf den folgenden Link",,site/modules/FieldtypeFrontendComments/Notifications.php,18598d7ecd6e1628453abf0380022ddf
-"Stop sending me further notification mails about new comments","Keine weiteren Benachrichtigungsmails über neue Kommentare mehr schicken",,site/modules/FieldtypeFrontendComments/Notifications.php,d4ca2f5e9339a7dd75747d396760f67f
-"New reply to a comment","Neue Antwort auf einen Kommentar",,site/modules/FieldtypeFrontendComments/Notifications.php,b424841ebd158f5a05338850f5a3e60e
-"The status of your comment has been changed by a moderator","Der Status Ihres Kommentars wurde von einem Moderator geändert",,site/modules/FieldtypeFrontendComments/Notifications.php,8128b8bae3e78a77db90f8d948926c72
-"We would like to inform you that the following comment you wrote has now been reviewed by a moderator:","Wir möchten Sie darüber informieren, dass der folgende Kommentar, den Sie geschrieben haben, nun von einem Moderator überprüft wurde:",,site/modules/FieldtypeFrontendComments/Notifications.php,367818acd5ca55baad45049e66136360
-"The status of the comment has been changed to:","Der Status des Kommentars wurde geändert auf:",,site/modules/FieldtypeFrontendComments/Notifications.php,89d59b6a2e328a01b01f0dec2cd23275
-"Your comment is now published and visible to all.","Ihr Kommentar ist nun veröffentlicht und für alle sichtbar.",,site/modules/FieldtypeFrontendComments/Notifications.php,09789237402e2ad6257d0c5bb4a4f3d3
-"Link to the comment page","Link zur Kommentarseite",,site/modules/FieldtypeFrontendComments/Notifications.php,963704b9cc7e54e0d111c634a5ae26ca
-"Comment status has been changed","Der Kommentarstatus wurde geändert",,site/modules/FieldtypeFrontendComments/Notifications.php,1351a9eb61a28d8c8c5ba8bdd56fc97b
-"Your comment status has been changed to %s","Ihr Kommentarstatus wurde auf %s geändert",,site/modules/FieldtypeFrontendComments/Notifications.php,40994b502d147cb982c49808562ae426
-
+en,default,description,file,hash
+"Reply to this comment","Auf diesen Kommentar antworten",,site/modules/FrontendComments/Comment.php,bc9e60a9d89ccff64f5282425aa1374e
+Reply,Antworten,,site/modules/FrontendComments/Comment.php,25d8df6e580905091a0d5ef5b9e05bf0
+"Like the comment","Dieser Kommentar gefällt mir",,site/modules/FrontendComments/Comment.php,32a1bab8a685376f9632903067d90a2e
+Like,"Gefällte mir",,site/modules/FrontendComments/Comment.php,98b82c200a2e309b24cb481970f3fcc4
+"Dislike the comment","Dieser Kommentar gefällt mir nicht",,site/modules/FrontendComments/Comment.php,fd395bf6e34455835034bcd2c3a06d22
+Dislike,"Gefällt mir nicht",,site/modules/FrontendComments/Comment.php,ea04e7ef514a25e465197a31c71f52f0
+"This comment has been removed by a moderator because it does not comply with our comment guidelines.","Dieser Kommentar wurde von einem Moderator entfernt, da er nicht den Kommentarrichtlinien entspricht.",,site/modules/FrontendComments/Comment.php,0f2363a16de7b886c058ee57b350392f
+"Write an answer to this comment","Eine Antwort zu diesem Kommentar schreiben",,site/modules/FrontendComments/Comment.php,6f38352564cd325f0ed01d3959301594
+en,default,description,file,hash
+day,Tag,,site/modules/FrontendComments/CommentArray.php,628b7db04235f228d40adc671413a8c8
+days,Tage,,site/modules/FrontendComments/CommentArray.php,44fdec47036f482b68b748f9d786801b
+"It seems that you have rated this comment within the last %s. In this case, you may not vote again.","Es scheint so, als hätten Sie bereits eine Wertung für diesen Kommentar innerhalb von %s abgegeben. In diesem Fall dürfen Sie keine weitere Wertung mehr abgeben.",,site/modules/FrontendComments/CommentArray.php,f7d296ae2eaceb967af861bc18a96135
+en,default,description,file,hash
+"Comment page",Kommentarseite,,site/modules/FrontendComments/CommentForm.php,e7663040950627ad4d49f433acbec336
+"Leave a comment","Hinterlasse einen Kommentar",,site/modules/FrontendComments/CommentForm.php,4d475654cf26db0264212bc50e9cf6d2
+Name,=,,site/modules/FrontendComments/CommentForm.php,49ee3087348e8d44e1feda1917443987
+Comment,Kommentar,,site/modules/FrontendComments/CommentForm.php,0be8406951cdfda82f00f79328cf4efc
+"HTML is not allowed.","HTML ist nicht erlaubt.",,site/modules/FrontendComments/CommentForm.php,458a8bd4c7dd305769961f96822e1e05
+Rating,Bewertung,,site/modules/FrontendComments/CommentForm.php,dda9c06f33071c9b6fc237ee164109d8
+"Select a rating","Wählen Sie eine Wertung aus",,site/modules/FrontendComments/CommentForm.php,e44ea373da30c4843546072fb74e8b27
+Excellent,Ausgezeichnet,,site/modules/FrontendComments/CommentForm.php,fcc2d28a33d2df558f18766e067569c6
+"Very Good","Sehr gut",,site/modules/FrontendComments/CommentForm.php,c0e54054d2efa466c477ca3e478549a3
+Average,Durchschnittlich,,site/modules/FrontendComments/CommentForm.php,b1897515d548a960afe49ecf66a29021
+Poor,Schlecht,,site/modules/FrontendComments/CommentForm.php,0e94d01753f69bda9b5060a18994540d
+Terrible,Schrecklich,,site/modules/FrontendComments/CommentForm.php,33cf5ec0ada0b91b96379f7a2e7dd558
+"Notify me about new replies","Benachrichtigen Sie mich über neue Antworten",,site/modules/FrontendComments/CommentForm.php,7e8fa69cdef8e9e495ffb4a29dcb5b08
+"You can cancel the receiving of notification emails everytime by clicking the link inside the notification email.","Sie können den Empfang von Benachrichtigungs-E-Mails jederzeit beenden, indem Sie auf den Link in der Benachrichtigungs-E-Mail klicken.",,site/modules/FrontendComments/CommentForm.php,82e10f630644cddf1214fff13c065901
+"No notification","Keine Benachrichtigung",,site/modules/FrontendComments/CommentForm.php,6b74ea635c096c7f10b7a6e504b76a80
+"Notify me about replies to this comment only","Benachrichtigen Sie mich nur über Antworten auf diesen Kommentar",,site/modules/FrontendComments/CommentForm.php,198ce0392725a9becf6ef87683683c16
+"Notify me about replies to all comments","Benachrichtigen Sie mich über Antworten auf alle Kommentare",,site/modules/FrontendComments/CommentForm.php,374856ed936b1d67f6d33e8570777025
+Cancel,Abbrechen,,site/modules/FrontendComments/CommentForm.php,ea4788705e6873b424c65e91c2846b19
+"Click to cancel the reply","Klicken Sie hier, um die Antwort abzubrechen",,site/modules/FrontendComments/CommentForm.php,773f97d38b07322957d6c5bce8ab8aee
+"The status of the comment has already been changed. For security reasons, however, this is only allowed once via mail link. If you want to change the status once more, you have to login to the backend.","Der Status des Kommentars wurde bereits geändert. Aus Sicherheitsgründen ist dies jedoch nur einmal per Mail-Link erlaubt. Wenn Sie den Status noch einmal ändern möchten, müssen Sie sich im Backend anmelden.",,site/modules/FrontendComments/CommentForm.php,259941302ddfda2ae40f80d4546a1c54
+No,Nein,,site/modules/FrontendComments/CommentForm.php,bafd7322c6e97d25b6299b5d6fe8920b
+Yes,Ja,,site/modules/FrontendComments/CommentForm.php,93cba07454f06a4a960172bbd6e2a435
+Star,Stern,,site/modules/FrontendComments/CommentForm.php,26f93e6e68e28a698377e941cb59f29a
+Stars,Sterne,,site/modules/FrontendComments/CommentForm.php,d37c550d781bfb93b0088a2470598bcf
+"We are sorry, but there was no comment with this code found in the database.","Es tut uns leid, aber es wurde kein Kommentar mit diesem Code in der Datenbank gefunden.",,site/modules/FrontendComments/CommentForm.php,962a48ab27f4b800092cf06b69152e3e
+"Directly to the comment","Direkt zum Kommentar",,site/modules/FrontendComments/CommentForm.php,cc87c5b3174c59a44feb9923a1c0d369
+"To the comment","Zum Kommentar",,site/modules/FrontendComments/CommentForm.php,4da927258b51836bf868124df5d1cc4a
+"Comment status has been changed from ""%s"" to ""%s"". %s","Der Kommentarstatus wurde von ""%s"" in ""%s"" geändert. %s",,site/modules/FrontendComments/CommentForm.php,336d7a11e017f8c8e188844f85c05cd2
+"An error occured during the saving of the new comment status.","Beim Speichern des neuen Kommentarstatus ist ein Fehler aufgetreten.",,site/modules/FrontendComments/CommentForm.php,109399baaab87bfd0bd2a69a52894aa1
+"You have successfully unsubscribed from email notifications and you will no longer receive notifications of new replies.","Sie haben sich erfolgreich von E-Mail-Benachrichtigungen abgemeldet und erhalten keine Benachrichtigungen mehr über neue Antworten.",,site/modules/FrontendComments/CommentForm.php,1fb10ca777f60fbba90c339e9cae2f80
+"You have tried to unsubscribe from getting notifications, but your notification status is already disabled.","Sie haben versucht, sich vom Erhalt von Benachrichtigungen abzumelden, aber Ihr Benachrichtigungsstatus ist bereits deaktiviert.",,site/modules/FrontendComments/CommentForm.php,24dd9ac88f895072e81dc1a7fa4a3f18
+"Thank you! Your comment has been submitted successfully. %s","Vielen Dank! Ihr Kommentar wurde erfolgreich übermittelt. %s",,site/modules/FrontendComments/CommentForm.php,f654dbb1c71a8fb68d5dea761168de35
+"Thank you for your comment. Please be patient. Your comment has been submitted successfully and is waiting for approval.","Vielen Dank für Ihren Kommentar. Bitte haben Sie etwas Geduld. Ihr Kommentar wurde erfolgreich übermittelt und wartet nun auf die Genehmigung.",,site/modules/FrontendComments/CommentForm.php,a0acc46c97fc136059a08eb445746993
+en,default,description,file,hash
+Comments,Kommentare,,site/modules/FrontendComments/Comments.php,8413c683b4b27cc3f4dbd4c90329d8ba
+en,default,description,file,hash
+none,nichts,,site/modules/FrontendComments/FieldtypeFrontendComments.module,334c4a4c42fdb79d7ebc3e73b517e6f8
+"no selection","Keine Auswahl","add an empty option",site/modules/FrontendComments/FieldtypeFrontendComments.module,00fd39176b23537f6b3660be8c197f5a
+"The status of the comment has already been changed. For security reasons, however, this is only allowed once via mail link. If you want to change the status once more, you have to login to the backend.","Der Status des Kommentars wurde bereits geändert. Aus Sicherheitsgründen ist dies jedoch nur einmal per Mail-Link erlaubt. Wenn Sie den Status noch einmal ändern möchten, müssen Sie sich im Backend anmelden.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,259941302ddfda2ae40f80d4546a1c54
+"Comment moderation","Moderation von Kommentaren",,site/modules/FrontendComments/FieldtypeFrontendComments.module,c98106d2a3b2a0a14016f73894f59d10
+"This determines when a newly posted comment will appear on your site.","Dadurch wird festgelegt, wann ein neu geposteter Kommentar auf Ihrer Website angezeigt wird.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,18800239150e923984ade45f5e961fbd
+"None - Comments posted immediately","Keine - Kommentare werden sofort gepostet",,site/modules/FrontendComments/FieldtypeFrontendComments.module,0c6e8a761530efc7ecfe773a5b5a6f7e
+"All - All comments must be approved by user with page edit access","Alle - Alle Kommentare müssen von einem Benutzer mit Seitenbearbeitungszugriff genehmigt werden",,site/modules/FrontendComments/FieldtypeFrontendComments.module,4f214f3246f03a94773427de4f2e7699
+"Only New - Only comments from users without prior approved comments require approval","Nur Neue -  Nur Kommentare von Benutzern ohne vorherige genehmigte Kommentare müssen genehmigt werden.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,d3a76eec189143c6945282d37bd81bb5
+"Quiet save?","Leises speichern?",,site/modules/FrontendComments/FieldtypeFrontendComments.module,e90234905413e689d67361b8f618b63f
+"When checked, the page modification time and user will not be updated when a comment will be changed in the backend.","Wenn diese Option aktiviert ist, werden die Seitenänderungszeit und der Benutzer nicht aktualisiert, wenn ein Kommentar im Backend geändert wird.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,a7edd4158ae7a929a15306da82a9c7e2
+"Only to mention: The modification time and user will only be changed, if you save the page in the backend. Changing the comment status via mail link does not affect the modification time and user.","Hinweis: Die Änderungszeit und der Benutzer werden nur geändert, wenn Sie die Seite im Backend speichern. Das Ändern des Kommentarstatus per E-Mail-Link hat keinen Einfluss auf den Änderungszeitpunkt und den Benutzer.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,171aaf9f146e74a94bd0f49d66b37520
+"Form fields configuration","Konfiguration der Formularfelder",,site/modules/FrontendComments/FieldtypeFrontendComments.module,7efb7dbdb199c40215ee92697e332adb
+"Select the field for the user image","Wählen Sie das Feld für das Benutzerbild aus",,site/modules/FrontendComments/FieldtypeFrontendComments.module,1d151ffd45d242597a08de197a3035ae
+"Select the field of the user template which contains the user image","Wählen Sie das Feld der Benutzervorlage aus, welches das Benutzerbild enthält",,site/modules/FrontendComments/FieldtypeFrontendComments.module,9dca1f402b018bc81968130550cd0f09
+"Only user fields of the type ""FieldtypeImage"" and the configuration setting for a single image will be displayed (if present).","Es werden nur Benutzerfelder vom Typ ""FieldtypeImage"" mit der Konfigurationseinstellung für ein einzelnes Bild angezeigt (falls vorhanden).",,site/modules/FrontendComments/FieldtypeFrontendComments.module,f5d3a8584d11f1af7b6bf10c7a168b4e
+"Set the size of the image","Festlegen der Größe des Bildes",,site/modules/FrontendComments/FieldtypeFrontendComments.module,9316ab8c35ffd3009bea0dc20246d2f9
+"Enter a value in px. The image will be displayed squared.","Geben Sie einen Wert in px ein. Das Bild wird quadratisch dargestellt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,c24ad35641109faa3e1fd3c33c4a561e
+"Default email configuration",Standard-E-Mail-Konfiguration,,site/modules/FrontendComments/FieldtypeFrontendComments.module,7507729fd86157f8c6c06b36b11c9b92
+"Select an email template","Wählen Sie eine E-Mail-Vorlage aus",,site/modules/FrontendComments/FieldtypeFrontendComments.module,391b1c0e2e6a571d16ee13451bfe5740
+"inherit from FrontendForms settings","von FrontendForms-Einstellungen übernehmen",,site/modules/FrontendComments/FieldtypeFrontendComments.module,78325c4af90ffc228c3798aa64c67ad1
+"no HTML template (plain text only)","kein HTML-Template (nur reiner Text)",,site/modules/FrontendComments/FieldtypeFrontendComments.module,768e9766bf4b93f28bb332609b8e7429
+"Select if you want to use a HTML template for the notification emails or not.","Wählen Sie aus, ob Sie eine HTML-Vorlage für die Benachrichtigungs-E-Mails verwenden möchten oder nicht",,site/modules/FrontendComments/FieldtypeFrontendComments.module,b030d134af6397b6ed92850a4e90fff5
+"Inherit from FrontendForms will take the setting from this module.","von FrontendForms-Einstellungen übernehmen übernimmt die Einstellung aus diesem Modul.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,0a6eca4828ea7f3fa67e27f3e5920330
+"Email address(es) for the notification email","E-Mail-Adresse(n) für die Benachrichtigungs-E-Mail",,site/modules/FrontendComments/FieldtypeFrontendComments.module,3e8111530d73ea308ec70d126e363f09
+"Select, if you want to enter the receiver email address(es) for the notification mails manually or if you want to select users as recipients.","Wählen Sie aus, ob Sie die Empfänger-E-Mail-Adresse(n) für die Benachrichtigungsmails manuell eingeben oder ob Sie Benutzer als Empfänger auswählen möchten.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,345dd661feed7d2c4551cc86aa884f55
+"Enter email address(es) manually","E-Mail-Adresse(n) manuell eingeben",,site/modules/FrontendComments/FieldtypeFrontendComments.module,b21811f7d308b36ebaabcce5733c84c4
+"Select users as recipients","Auswählen von Benutzern als Empfänger",,site/modules/FrontendComments/FieldtypeFrontendComments.module,11d5afc2d606e7dcba69ea6a02fbf55c
+"Default email address(es) as text","Standard-E-Mail-Adresse(n) als Text",,site/modules/FrontendComments/FieldtypeFrontendComments.module,6c2c3ce201b61bb0f292ddd39547182e
+"Enter one ore more email addresses separated by a comma.","Geben Sie eine oder mehrere E-Mail-Adressen ein, die durch ein Komma getrennt sind.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,c1a7f5308258162ab5b2e2612300bf7f
+"Fe email1@mydomain.com,email2@mydomain.com.","Z.B. email1@mydomain.com, email2@mydomain.com.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,d10a52826a11d639fe9f043b49d3621f
+"Recipients for the notification email","Empfänger für die Benachrichtigungs-E-Mail",,site/modules/FrontendComments/FieldtypeFrontendComments.module,b4e60aaff24bc873a9cabdbe476dee92
+"Select one or more users that should receive a notification about new comments.","Wählen Sie einen oder mehrere Benutzer aus, die eine Benachrichtigung über neue Kommentare erhalten sollen.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,b07e22cf86d72200d151fce81d19095a
+"Users with the role ""registered"" will not be displayed, because they are not allowed to get notification emails.","Benutzer mit der Rolle ""registriert"" werden nicht angezeigt, da sie keine Benachrichtigungs-E-Mails erhalten dürfen.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,1c591febfc27d24d1c2d104c663a3d37
+"From email address",Absender-E-Mail-Adresse,,site/modules/FrontendComments/FieldtypeFrontendComments.module,6f6da7aec649851c977b6bf4e083977d
+"This email address will be displayed as the sender email address of the emails sent by this module.","Diese E-Mail-Adresse wird als Absender-E-Mail-Adresse in den von diesem Modul gesendeten E-Mails angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,e1ca26eb2ee8afa47a146779d2cfbfe9
+"If no email address will be entered, %s will be displayed instead as the sender address.","Wenn keine E-Mail-Adresse eingegeben wird, wird stattdessen %s als Absenderadresse angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,fbba3d8e1cdcf39fd8ed54db75bf6014
+"From name","Absender Name",,site/modules/FrontendComments/FieldtypeFrontendComments.module,c3a7ea0c38bac179a545dbfaf4ebb013
+"fe. My company","Z.B Meine Firma",,site/modules/FrontendComments/FieldtypeFrontendComments.module,8eea8281628fde6ba6c3589554795bd2
+"This name will be displayed as the sender name of the emails sent by this module.","Dieser Name wird als Absendername in den von diesem Modul gesendeten E-Mails angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,90069328ca4958e8adefa1ea08141195
+"If no sender name will be entered, than the sender email address will be used as the sender name.","Wenn kein Absendername eingegeben wird, wird die Absender-E-Mail-Adresse als Absendername verwendet.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,ddd87293a8b5d9914919b1a4f1b8f7a1
+"Commenter email notification","E-Mail-Benachrichtigung für Kommentatoren",,site/modules/FrontendComments/FieldtypeFrontendComments.module,caa865750c8c9f7b8b17373967219228
+"Send commenters notification emails about new replies","Benachrichtigungs-E-Mails an Kommentatoren über neue Antworten senden",,site/modules/FrontendComments/FieldtypeFrontendComments.module,fc2a5437262402337914fe1fbf9500a7
+Disabled,Deaktiviert,,site/modules/FrontendComments/FieldtypeFrontendComments.module,b9f5c797ebbf55adccdd8539a65a0241
+"Commenters can receive email notifications of replies to their comment only","Kommentatoren können nur E-Mail-Benachrichtigungen über Antworten auf ihren eigenen Kommentar erhalten",,site/modules/FrontendComments/FieldtypeFrontendComments.module,44f3f577cd5331fcb611a1b7cfbfea9e
+"Commenters can receive email notifications for all new replies to a comment on the page","Kommentatoren können E-Mail-Benachrichtigungen für alle neuen Antworten auf einen Kommentar auf der Seite erhalten",,site/modules/FrontendComments/FieldtypeFrontendComments.module,0bcb6b862be06326364a8e972509ac85
+"Send notification email to commenter on status change","Benachrichtigungs-E-Mail an den Kommentator bei Statusänderung senden",,site/modules/FrontendComments/FieldtypeFrontendComments.module,0de0e6789e667f75e611245a6404b0ca
+"If a moderator changes the status of a comment, select on which status change the commenter should be informed via email.","Wenn ein Moderator den Status eines Kommentars ändert können Sie auswählen, bei welcher Statusänderung der Kommentator per E-Mail informiert werden soll.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,2eecc951f54fe76847fad93204b3d4df
+"Send notification email if status has been changed to approved","Benachrichtigungs-E-Mail senden, wenn der Status in ""Genehmigt"" geändert wurde",,site/modules/FrontendComments/FieldtypeFrontendComments.module,508ef57ce2a481bc139c0efdb58e36d3
+"Send notification email if status has been changed to SPAM","Benachrichtigungs-E-Mail senden, wenn der Status in SPAM geändert wurde",,site/modules/FrontendComments/FieldtypeFrontendComments.module,60825941739c69b3f3eb76f22351e176
+"If a box is checked, the commenter will receive an email if the comment status will be changed by a moderator in the backend or via email link. You can prevent this behavior by unchecking a box.","Wenn ein Häkchen gesetzt ist, erhält der Kommentator eine E-Mail, wenn der Kommentarstatus von einem Moderator im Backend oder per E-Mail-Link geändert wird. Sie können dieses Verhalten verhindern, indem das Kontrollkästchen deaktivieren.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,1f2a9503d6e32f484514bce5ff3bba2b
+"Output rendering",Ausgabe-Rendering,,site/modules/FrontendComments/FieldtypeFrontendComments.module,e22428c686e2484d13fe958b6dd96ded
+"Change some parameters to get the preferred output.","Ändern Sie einige Parameter, um die bevorzugte Ausgabe zu erhalten.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,2833803a0c429530b9493f78a4e01308
+"General output settings","Allgemeine Ausgabeeinstellungen",,site/modules/FrontendComments/FieldtypeFrontendComments.module,e6b8e78a67e641ac0c2159b6a3865315
+"Output order","Reihenfolge der Ausgabe",,site/modules/FrontendComments/FieldtypeFrontendComments.module,735ab173723a6556cf4e84d74ba8c245
+"Show form after comments","Formular nach den Kommentaren anzeigen",,site/modules/FrontendComments/FieldtypeFrontendComments.module,c6fd6e97fb9371b474b799f957b66081
+"Reverse the order of the output of form and comments","Umkehren der Reihenfolge der Ausgabe von Formular und Kommentaren",,site/modules/FrontendComments/FieldtypeFrontendComments.module,9585b41c3a813f0f87e79b18ba861f2b
+"By default, the form will be displayed before the comments. To reverse that behavior check this box.","Standardmäßig wird das Formular vor den Kommentaren angezeigt. Um dieses Verhalten umzukehren, aktivieren Sie dieses Kontrollkästchen.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,a27c0484f63893d21bc0b862d8bb3bad
+"Comment form settings","Einstellungen für das Kommentarformular",,site/modules/FrontendComments/FieldtypeFrontendComments.module,96d606ff5296a70b10591abf34cec9fb
+"Form headline",Formular-Überschrift,,site/modules/FrontendComments/FieldtypeFrontendComments.module,c7ecf545f5f6de587ac6ec06d13f5ffd
+"To disable the display of the default heading, enter ""none"" inside the input field.","Um die Anzeige der Standardüberschrift zu deaktivieren, geben Sie ""none"" in das Eingabefeld ein.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,a047a17dc9aa1ca2c23e2a519e4c1858
+"To disable the display of the default heading, enter ""none"" inside the input field of the default language.","Um die Anzeige der Standardüberschrift zu deaktivieren, geben Sie ""none"" in das Eingabefeld der Standardsprache ein.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,f213f06d1c3edb31b65dfd68aae4c239
+"This heading appears at the top of the comment form.","Diese Überschrift wird oberhalb des Kommentarformulars angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,88da20c0f0154fa2951b3e3cc52a38f7
+"If no heading is entered, ""Leave a comment"" will be displayed as the default heading.","Wenn keine Überschrift eingegeben wird, wird stattdessen ""Hinterlassen Sie einen Kommentar"" als Standardüberschrift angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,95e2f94b6dc388eef22bf9f1414330d3
+"Headline type for the form heading","Überschriftentyp für die Formularüberschrift",,site/modules/FrontendComments/FieldtypeFrontendComments.module,1a78854d05cfcf0cebcf11e9ce24d464
+"Select the type of the form heading (from h1 to h5).","Wählen Sie den Typ der Formularüberschrift (von h1 bis h5) aus.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,6bee235ae45a97c74b79322dea6d3ce2
+"Headline 1","Überschrift 1",,site/modules/FrontendComments/FieldtypeFrontendComments.module,97c112fb954c6d49941285b0a10f2159
+"Headline 2","Überschrift 2",,site/modules/FrontendComments/FieldtypeFrontendComments.module,122f44489828e6beb295ad2217765c0b
+"Headline 3","Überschrift 3",,site/modules/FrontendComments/FieldtypeFrontendComments.module,a582b115656aa341666ea36dff388f04
+"Headline 4","Überschrift 4",,site/modules/FrontendComments/FieldtypeFrontendComments.module,8071e7b053449b15dc1d1ced6543ca12
+"Headline 5","Überschrift 5",,site/modules/FrontendComments/FieldtypeFrontendComments.module,4519b4f0c69d0bfff7de56da4315107a
+"Use star rating","Sternebewertung verwenden",,site/modules/FrontendComments/FieldtypeFrontendComments.module,ba157aa98e6e03109702ab42bd4bbf58
+"Yes (star rating optional)","Ja (Sternebewertung optional)",,site/modules/FrontendComments/FieldtypeFrontendComments.module,359310b90581d6b9baa3cdccc10607b2
+"Yes (star rating required)","Ja (Sternebewertung erforderlich)",,site/modules/FrontendComments/FieldtypeFrontendComments.module,806e88271605e15a20e9d6d47673f42e
+"Please select, if you want to offer a star rating.","Bitte wählen Sie aus, ob Sie eine Sternebewertung anbieten möchten.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,df7b50c9723d92052eaeffab7bb35f51
+"Disable tooltip next to the star rating","Deaktivieren Sie den Tooltip neben der Sternebewertung",,site/modules/FrontendComments/FieldtypeFrontendComments.module,4f92b1f6a672e400f1aca8f604eed171
+"Disable the display of the tooltip beside the star rating","Deaktivieren Sie die Anzeige des Tooltips neben der Sternebewertung",,site/modules/FrontendComments/FieldtypeFrontendComments.module,54baab221960e2064bdbf55b28e5f0a2
+"By default, a tooltip showing the current rating on hover, will be displayed next to the star rating. Check the checkbox to hide the tooltip.","Standardmäßig wird neben der Sternebewertung ein Tooltip angezeigt, der die aktuelle Bewertung beim Bewegen des Mauszeigers anzeigt. Aktivieren Sie das Kontrollkästchen, um diese QuickInfo auszublenden.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,242745c9a54b42645d33f00895da5a6d
+"Show/hide character counter under the textarea field","Ein-/Ausblenden des Zeichenzählers unter dem Kommentarfeld",,site/modules/FrontendComments/FieldtypeFrontendComments.module,a193c5db4e9caf13d07c5cfb137f4ba5
+"Hide character counter","Zeichenzähler ausblenden",,site/modules/FrontendComments/FieldtypeFrontendComments.module,834dc45731b9a10799aedacd7c09d997
+"By default, a character counter will be displayed under the comment text field to inform the user, how many characters are left until the max. limit of 1024 characters is reached.","Standardmäßig wird unter dem Kommentartextfeld ein Zeichenzähler angezeigt, der den Benutzer darüber informiert, wie viele Zeichen noch übrig sind, bis das maximale Limit von 1024 Zeichen erreicht ist.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,dc4caf692f42ac6c96a7aec170e14463
+"Add privacy text or privacy checkbox to the form","Fügen Sie dem Formular einen Datenschutztext oder ein Kontrollkästchen für den Datenschutz hinzu",,site/modules/FrontendComments/FieldtypeFrontendComments.module,52b7eac43569326f5fd14232ef8c8994
+"Select if you want to show a privacy text only or a privacy checkbox above the submit button","Wählen Sie aus, ob Sie nur einen Datenschutztext oder ein Datenschutz-Kontrollkästchen über der Schaltfläche ""Senden"" anzeigen möchten",,site/modules/FrontendComments/FieldtypeFrontendComments.module,f25ff33f3e8c3f873dc85b3a401809eb
+"Do not show anything","Nichts zeigen",,site/modules/FrontendComments/FieldtypeFrontendComments.module,89ca52172700db318a89a30e1b677ddc
+"Show checkbox","Checkbox anzeigen",,site/modules/FrontendComments/FieldtypeFrontendComments.module,0e99c9e8c94dc2a1c42561e4862923ae
+"Show text","Text anzeigen",,site/modules/FrontendComments/FieldtypeFrontendComments.module,823dbdeca8e8e353dde97aa7708ff251
+"You can disable the display of the privacy text/checkbox, but you should be aware that this may lead to legal consequences if a privacy notice is required in your country.","Sie können die Anzeige des Datenschutztextes/der Checkbox deaktivieren, sollten sich jedoch darüber im Klaren sein, dass dies zu rechtlichen Konsequenzen führen kann, wenn in Ihrem Land eine Datenschutzerklärung erforderlich ist.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,57e0942ea0dc40513cfa36f66cf8a29c
+"Comment list settings","Einstellungen für die Kommentarliste",,site/modules/FrontendComments/FieldtypeFrontendComments.module,b70effa6245be35d488a946483a4f09d
+"Comment list headline","Überschrift der Kommentarliste",,site/modules/FrontendComments/FieldtypeFrontendComments.module,ce8737484e016d6e05953f8f3ceefa39
+"To disable the display of the heading enter ""none"" inside the input field.","Um die Anzeige der Überschrift zu deaktivieren, geben Sie ""none"" in das Eingabefeld ein.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,6108785bf0c89fb74a43a586484263a4
+"To disable the display of the heading enter ""none"" inside the input field of the default language.","Um die Anzeige der Überschrift zu deaktivieren, geben Sie ""none"" in das Eingabefeld der Standardsprache ein.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,adac381451006d24739fffac2ccb01b3
+"This heading appears at the top of the comment list.","Diese Überschrift wird oberhalb der Kommentarliste angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,98078e88590430c293bbed827d48c1d3
+"If no heading is entered, ""Comments"" will will be displayed as the default heading.","Wenn keine Überschrift eingegeben wird, wird ""Kommentare"" als Standardüberschrift angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,4879128bcd4ad0739d728b7ab7678248
+"Headline type for the comments heading","Überschriftentyp für die Kommentare-Überschrift",,site/modules/FrontendComments/FieldtypeFrontendComments.module,8be79f89a1e70811885864262663b22c
+"Select the type of the comments heading (from h1 to h5).","Wählen Sie den Typ für die Kommentarüberschrift aus (von h1 bis h5).",,site/modules/FrontendComments/FieldtypeFrontendComments.module,525d41ed41a046cce9b966d2d72db275
+"Reply depth",Antwort-Tiefe,,site/modules/FrontendComments/FieldtypeFrontendComments.module,9e6530a34353d7610fd5455767b28df4
+"Choose the number of depth for threaded comments","Wählen Sie die Tiefe für Thread-Kommentare",,site/modules/FrontendComments/FieldtypeFrontendComments.module,9e047418db24710c1f1ff3ff4595b406
+"Specify 0 for traditional flat chronological comments. For threaded comments (replies appear with comment being replied to) specify the maximum depth allowed for replies (0 to 3 recommended).","Geben Sie 0 für herkömmliche flache chronologische Kommentare an. Geben Sie für Threadkommentare (Antworten werden für ein Kommentar angezeigt, auf den geantwortet wird) die maximal zulässige Tiefe für Antworten an (0 bis 3 empfohlen).",,site/modules/FrontendComments/FieldtypeFrontendComments.module,6e97fb6e5fbbe1d65533fa0677586336
+"Sort order",Sortierreihenfolge,,site/modules/FrontendComments/FieldtypeFrontendComments.module,06f1ac65b0a6a548339a38b348e64d79
+"Sort newest to oldest","Vom Neuesten zum Ältesten sortieren",,site/modules/FrontendComments/FieldtypeFrontendComments.module,3a9e45e8efa2abf76ef63223e22daa36
+"Set the sort order for the comments","Festlegen der Sortierreihenfolge für die Kommentare",,site/modules/FrontendComments/FieldtypeFrontendComments.module,e7c521055168c478ad42c2dfd34e71f1
+"By default, comments will be sort chronologically (oldest to newest). To reverse that behavior check this box.","Standardmäßig werden Kommentare chronologisch sortiert (vom ältesten zum neuesten). Um dieses Verhalten umzukehren, aktivieren Sie dieses Kontrollkästchen.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,acb226b83940bbb68550a607cbd31fc1
+"Show/hide voting of comments","Ein-/Ausblenden der Bewertung für Kommentare",,site/modules/FrontendComments/FieldtypeFrontendComments.module,7cacb7f44d31e07288195d7491114a52
+"Enable voting of comments","Bewertung von Kommentaren aktivieren",,site/modules/FrontendComments/FieldtypeFrontendComments.module,9a799cddb654e7ff5c480b745d4ebf8a
+"By checking the box you offer visitors the possibility to rate comments (up-votes and down-votes).","Durch das Ankreuzen des Kästchens bieten Sie Besuchern die Möglichkeit, Kommentare zu bewerten (Up-Votes und Down-Votes).",,site/modules/FrontendComments/FieldtypeFrontendComments.module,637d15266d2ef7f39160da733e288f6b
+"Number of days before voting can be done again","Anzahl der Tage, bevor erneut abgestimmt werden kann",,site/modules/FrontendComments/FieldtypeFrontendComments.module,ad60a64d03fa5db8f3de8f54dc4b40ab
+"To prevent multiple ratings from the same user, this module checks if the user have voted before. Please enter a time period in days during which further rating is not allowed.","Um zu verhindern, dass mehrere Bewertungen vom selben Benutzer abgegeben werden, prüft dieses Modul, ob der Benutzer bereits abgestimmt hat. Bitte geben Sie einen Zeitraum in Tagen an, in dem keine weitere Bewertung zulässig ist.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,0a068b72a2ebbd95f672f7207f80d38e
+"The user will be identified by using data of his Internet fingerprint. This means that the IP address, the browser system and the user ID will be compared with entries in the database. If an entry with the same data will be found, then the rating is not allowed. Entries in the database which are older than the time period selected above will be deleted automatically and the user will be allowed to rate again.","Der Benutzer wird anhand der Daten seines Internet-Fingerabdrucks identifiziert. Das bedeutet, dass die IP-Adresse, das Browsersystem und die User-ID mit Einträgen in der Datenbank abgeglichen werden. Wenn ein Eintrag mit den gleichen Daten gefunden wird, dann ist die Bewertung nicht zulässig. Einträge in der Datenbank, die älter als der oben gewählte Zeitraum sind, werden automatisch gelöscht und der Benutzer kann erneut bewerten.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,7232c1e17dae3634adbc9196eee40351
+"Date/time format for comments","Datums-/Uhrzeitformat für Kommentare",,site/modules/FrontendComments/FieldtypeFrontendComments.module,bfaf2f2e5431a236eb6bb536db04f9c0
+"Select if you want to show the date/time of a comment as a full or a relative date string.","Wählen Sie aus, ob Sie das Datum/die Uhrzeit eines Kommentars als vollständige oder relative Datumszeichenfolge anzeigen möchten.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,d3721897c8cc5c256af7d5275329c762
+"full date","Vollständiges Datum",,site/modules/FrontendComments/FieldtypeFrontendComments.module,4a8f50856ac0810b9b83fde90449edcf
+relative,"Relatives Datum",,site/modules/FrontendComments/FieldtypeFrontendComments.module,99c483e1d11b1a279a2a1a3960528487
+"The format of a full date string can be defined in the configuration of the FrontendForms module.","Das Format eines vollständigen Datumsstrings kann in der Konfiguration des FrontendForms-Moduls definiert werden.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,761748058bd227a341891f6a3c578db6
+"Spam protection",Spam-Schutz,,site/modules/FrontendComments/FieldtypeFrontendComments.module,2932b465b48cf0d7c9caaf511d0c0e61
+"Number of days after which to delete spam","Anzahl der Tage, nach denen ein Spam-Kommentar gelöscht werden soll",,site/modules/FrontendComments/FieldtypeFrontendComments.module,bf31492fe5d4821b483bc7cb8cfe07a3
+"After the number of days indicated, spam will be automatically deleted.","Nach Ablauf der angegebenen Anzahl von Tagen wird Spam automatisch gelöscht.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,72fe450a750c9f11bf0531e5395e6e75
+CAPTCHA,=,,site/modules/FrontendComments/FieldtypeFrontendComments.module,291d6945a9da1c9a56be64a04e003112
+"Select, if you want to use a CAPTCHA for the comment form.","Wählen Sie aus, ob Sie ein CAPTCHA für das Kommentarformular verwenden möchten.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,03a342a1eb34897b1a2571498eaefe9e
+"If you receive a lot of spam comments, you can enable a CAPTCHA to prevent spam bots from filling out the form.","Wenn Sie viele Spam-Kommentare erhalten, können Sie ein CAPTCHA aktivieren, um zu verhindern, dass Spam-Bots das Formular ausfüllen.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,ebb7b1091b44d7c661da133022fe59e0
+"Inherit from FrontendForms","Von FrontendForms übernehmen",,site/modules/FrontendComments/FieldtypeFrontendComments.module,5bfe6a369b802afdb9bb4909ac726c2d
+"No CAPTCHA","Kein CAPTCHA",,site/modules/FrontendComments/FieldtypeFrontendComments.module,b23bb4764e36673626f332b94178c5ec
+FrontendComments,=,,site/modules/FrontendComments/FieldtypeFrontendComments.module,6b8c682577d63258030293d8bac4919b
+"Field that let you store user comments on a page using the FrontendForms module.","Feld, mit dem Sie Benutzerkommentare auf einer Seite mithilfe des FrontendForms-Moduls speichern können.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,bbe8f47078082191d89866cabaad534d
+en,default,description,file,hash
+"Sorry, but something went wrong. Too less parameters will be sent via this request.","Es tut uns leid, aber irgendetwas ist schief gelaufen. Über diese Anfrage werden zu wenige Parameter gesendet.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,57741e54a806296171a5915d93effd42
+Author,Kommentator,,site/modules/FrontendComments/FrontendCommentsAdmin.module,a517747c3d12f99244ae598910d979c5
+Email,E-Mail,,site/modules/FrontendComments/FrontendCommentsAdmin.module,ce8ae9da5b7cd6c3df2929543a9af92d
+Comment,Kommentar,,site/modules/FrontendComments/FrontendCommentsAdmin.module,0be8406951cdfda82f00f79328cf4efc
+Status,=,,site/modules/FrontendComments/FrontendCommentsAdmin.module,ec53a8c4f07baed5d8825072c89799be
+"Waiting for approval","Wartet auf Bestätigung",,site/modules/FrontendComments/FrontendCommentsAdmin.module,aa542f2fdd46d02964592afdb5e950ee
+Approved,Bestätigt,,site/modules/FrontendComments/FrontendCommentsAdmin.module,6f8063417ab31f38d864c28302f3de2f
+SPAM,=,,site/modules/FrontendComments/FrontendCommentsAdmin.module,c72beebe6ecbdddff71b846c4858ebcb
+"Star rating",Sterne-Bewertung,,site/modules/FrontendComments/FrontendCommentsAdmin.module,63774fbee49655e7b74d88c24884e882
+"%s star","%s Stern",,site/modules/FrontendComments/FrontendCommentsAdmin.module,54e7ab179a80b1a740e405cbeca670ff
+"%s stars","%s Sterne",,site/modules/FrontendComments/FrontendCommentsAdmin.module,65cd4b972052588b238e55d5ddad73da
+"Save the comment","Kommentar speichern",,site/modules/FrontendComments/FrontendCommentsAdmin.module,ed1a82e47597deb149b23c2e6bcd32d4
+"There are errors! Please check your inputs once more.","Es gibt Fehler! Bitte überprüfen Sie Ihre Eingaben noch einmal.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,b741c5d1012d05f5483cd16e64f1b166
+"Your changes have been saved","Ihre Änderungen wurden gespeichert",,site/modules/FrontendComments/FrontendCommentsAdmin.module,0e5792624043c28776513b384295b8dc
+"An error occured during the saving process and the data could not be saved.","Beim Speichern ist ein Fehler aufgetreten und die Daten konnten nicht gespeichert werden.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,fcfd85deee75bb44913b8b315f47c306
+"Sorry, but a comment with the data provided does not exist.","Tut uns leid, aber ein Kommentar mit den angegebenen Daten existiert nicht.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,8dccde45991f329d235ffdbc8c83c06d
+Data,Daten,,site/modules/FrontendComments/FrontendCommentsAdmin.module,f6068daa29dbb05a7ead1e3b5a48bbee
+Text,=,,site/modules/FrontendComments/FrontendCommentsAdmin.module,9dffbf69ffba8bc38bc4e01abf4b1675
+"Edit full comment","Komplettes Kommentar bearbeiten",,site/modules/FrontendComments/FrontendCommentsAdmin.module,3d62414ceb4535c21b46a4d272ede5c3
+Created,"Erstellt am",,site/modules/FrontendComments/FrontendCommentsAdmin.module,0eceeb45861f9585dd7a97a3e36f85c6
+Page,Seite,,site/modules/FrontendComments/FrontendCommentsAdmin.module,193cfc9be3b995831c6af2fea6650e60
+"The status of 1 comment has been updated","Der Status von 1 Kommentar wurde aktualisiert",,site/modules/FrontendComments/FrontendCommentsAdmin.module,652e57936ef304a3a7467de19c9abb8b
+"The status of %s comments has been updated","Der Status von %s Kommentaren wurde aktualisiert",,site/modules/FrontendComments/FrontendCommentsAdmin.module,9628ad1e5c85152333f32e97bc049a20
+"No comments have been updated","Es wurden keine Kommentare aktualisiert",,site/modules/FrontendComments/FrontendCommentsAdmin.module,36c1f27ad875ea22478fa83484f765b4
+"Comment statistics",Kommentar-Statistik,,site/modules/FrontendComments/FrontendCommentsAdmin.module,9edbd4d02badda00a5d345564eb735e2
+"Field name","Name des Feldes",,site/modules/FrontendComments/FrontendCommentsAdmin.module,eff88d54854b0637031f4066736623bc
+"Total number of comments","Gesamtzahl der Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,fdbaa39130eb4efa8f3a92762c8c3349
+"Number of approved comments","Anzahl der genehmigten Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,11ff030c7c9dc6f79754ff18c7ebe444
+"Number of comments waiting for approval","Anzahl der Kommentare, die auf die Genehmigung warten",,site/modules/FrontendComments/FrontendCommentsAdmin.module,d47097b423ded1bffd5fea544162ec59
+"Number of comments declared as SPAM","Anzahl der als SPAM deklarierten Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,eb7a8e5421187f66314fbce26c4778e3
+"Manage the comments","Verwalten der Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,c4aae1548d36c3578727cf06c0487a88
+"Filter the comments","Kommentare filtern",,site/modules/FrontendComments/FrontendCommentsAdmin.module,44eeb880e7acb35af4ecc031b284555b
+"Comments field",Kommentare-Feld,,site/modules/FrontendComments/FrontendCommentsAdmin.module,46d882ebf206dc73721b9c3a9a5ebdce
+"comment is",Kommentar,,site/modules/FrontendComments/FrontendCommentsAdmin.module,bcc427a450888f72f7bd16032e81e3d3
+"comments are",Kommentare,,site/modules/FrontendComments/FrontendCommentsAdmin.module,0b508b769589b4e5eb31abadb42654d9
+"waiting for approval","warten/wartet auf Bestätigung",,site/modules/FrontendComments/FrontendCommentsAdmin.module,f90b90878625ff2d53483512de91d4c4
+"Number of comments to display","Anzahl der anzuzeigenden Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,016c287aa3ce93f23f9dabd05f879569
+all,alle,,site/modules/FrontendComments/FrontendCommentsAdmin.module,a181a603769c1f98ad927e7367c7aa51
+"Status of comments","Status der Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,ced27487cbb80860ad40ec36581cc991
+"Waiting approval","Warten auf Genehmigung",,site/modules/FrontendComments/FrontendCommentsAdmin.module,e14b266b893d0bf509831fc2048464a3
+"No comments match your selected filter criteria.","Keine Kommentare entsprechen den von Ihnen ausgewählten Filterkriterien.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,abf342966fc3476b5dd1514a914d7d6a
+"This comment field does not contain any comments.","Dieses Kommentarfeld enthält keine Kommentare.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,6ca29d3a69d42f0ea5cb261f671539fb
+"Total number of comments: %s","Gesamtzahl der Kommentare: %s",,site/modules/FrontendComments/FrontendCommentsAdmin.module,c79fcb07c6b8737366be8d32e0240699
+"Change the status of each comment to your needs and press the save button below to save your changes.","Ändern Sie den Status jedes Kommentars nach Ihren Wünschen und klicken Sie unten auf die Schaltfläche ""Speichern"", um Ihre Änderungen zu speichern.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,04c3b8d4fde21fe35937e0f54b0775ff
+"There are no comments to display.","Es gibt keine Kommentare zum Anzeigen.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,892b1fea64961731eb2314e8f2e1d56a
+"Comments manager","Kommentar Manager",,site/modules/FrontendComments/FrontendCommentsAdmin.module,e6cdd9466e5eb945e24fb667af223478
+"A custom page for the FrontendComments module to manage all comments in one place","Eine benutzerdefinierte Seite für das FrontendComments-Modul, um alle Kommentare an einem Ort zu verwalten",,site/modules/FrontendComments/FrontendCommentsAdmin.module,e7732e0f120a366180cf69faeaffa2f4
+en,default,description,file,hash
+"Updated %s for comment #%d","%s für Kommentar #%d aktualisiert",,site/modules/FrontendComments/InputfieldFrontendComments.php,58b6f822b062991647cf2e70b0140352
+Comments,Kommentare,,site/modules/FrontendComments/InputfieldFrontendComments.php,8413c683b4b27cc3f4dbd4c90329d8ba
+"No comments at the moment.","Es gibt derzeit keine Kommentare",,site/modules/FrontendComments/InputfieldFrontendComments.php,887cf850292de23cde65763458aa003a
+Comment,Kommentar,,site/modules/FrontendComments/InputfieldFrontendComments.php,0be8406951cdfda82f00f79328cf4efc
+"Posted on: %s","Geschrieben am: %s",,site/modules/FrontendComments/InputfieldFrontendComments.php,42d8cbb191daf2f2a757954b812a86be
+Email,E-Mail,,site/modules/FrontendComments/InputfieldFrontendComments.php,ce8ae9da5b7cd6c3df2929543a9af92d
+Author,Kommentator,,site/modules/FrontendComments/InputfieldFrontendComments.php,a517747c3d12f99244ae598910d979c5
+Status,=,,site/modules/FrontendComments/InputfieldFrontendComments.php,ec53a8c4f07baed5d8825072c89799be
+"Pending approval","Wartet auf Bestätigung",,site/modules/FrontendComments/InputfieldFrontendComments.php,b8e2c23a15e49a10d6f0562a3dce2538
+Approved,Bestätigt,,site/modules/FrontendComments/InputfieldFrontendComments.php,6f8063417ab31f38d864c28302f3de2f
+SPAM,=,,site/modules/FrontendComments/InputfieldFrontendComments.php,c72beebe6ecbdddff71b846c4858ebcb
+"Status ""Pending approval"" cannot be selected.","Der Status ""Wartet auf Genehmigung"" kann nicht ausgewählt werden.",,site/modules/FrontendComments/InputfieldFrontendComments.php,a20beaf67690d0f9f11ba2183aae4cf2
+FrontendComments,=,,site/modules/FrontendComments/InputfieldFrontendComments.php,6b8c682577d63258030293d8bac4919b
+"Inputfield for managing comments on a page.","Eingabefeld zum Verwalten von Kommentaren auf einer Seite.",,site/modules/FrontendComments/InputfieldFrontendComments.php,b28e4f256b1d9cf092c2d20c9f3a2072
+"pending approval","wartet auf Bestätigung",,site/modules/FrontendComments/InputfieldFrontendComments.php,e2702e8b9c1efdd2e4662873c3114be2
+approved,bestätigt,,site/modules/FrontendComments/InputfieldFrontendComments.php,787d5f05953ec39b108869dfdd7733e6
+"SPAM, but has replies","SPAM, aber besitzt Antworten",,site/modules/FrontendComments/InputfieldFrontendComments.php,792094a5f7cc15d8c58c81343c8bf83d
+en,default,description,file,hash
+"A new comment has been submitted","Es wurde ein neuer Kommentar abgegeben",,site/modules/FrontendComments/Notifications.php,b8bfb1838004df66c035d63b9da9ffe9
+"Comment status","Kommentar Status",,site/modules/FrontendComments/Notifications.php,693e14c3c0dd3757d95b4ee5cf0d7bb3
+"Publish the comment","Kommentar veröffentlichen",,site/modules/FrontendComments/Notifications.php,6b6304f063e87c3dee21decab212a84b
+"Mark this comment as SPAM","Diesen Kommentar als SPAM deklarieren",,site/modules/FrontendComments/Notifications.php,29eaf723511eeb59761c47306b96da22
+comment-notification,Kommentar-Benachrichtigung,,site/modules/FrontendComments/Notifications.php,cb4e3114336d9bafb764a393cde7fcda
+"A new reply has been posted","Eine neue Antwort wurde geschrieben",,site/modules/FrontendComments/Notifications.php,f705e618788426fa888d4f61524b670c
+"A new reply has been submitted","Eine neue Antwort wurde eingereicht",,site/modules/FrontendComments/Notifications.php,1d833f9fc1cdde2141e734b011366ede
+"You are receiving this email because you have agreed to be notified when a new reply has been posted.","Sie erhalten diese E-Mail, weil Sie zugestimmt haben, benachrichtigt zu werden, wenn eine neue Antwort abgegeben wurde.",,site/modules/FrontendComments/Notifications.php,ed5bf3f989f7bcb0cb50f883ef6e7e44
+"New comment","Neuer Kommentar",,site/modules/FrontendComments/Notifications.php,186c30cab59f6b64a453778330d4bbf0
+Author,Kommentator,,site/modules/FrontendComments/Notifications.php,a517747c3d12f99244ae598910d979c5
+"Link to the page of the comment","Link zur Seite des Kommentars",,site/modules/FrontendComments/Notifications.php,cd9ba3529709aad17284cef5ef76109f
+"If you do not want to receive further mails about new replies, please click the link below","Wenn Sie keine weiteren E-Mails über neue Antworten erhalten möchten, klicken Sie bitte auf den untenstehenden Link",,site/modules/FrontendComments/Notifications.php,18598d7ecd6e1628453abf0380022ddf
+"Stop sending me further notification mails about new comments","Bitte keine weiteren Benachrichtigungsmails über neue Kommentare mehr an mich senden",,site/modules/FrontendComments/Notifications.php,d4ca2f5e9339a7dd75747d396760f67f
+"New reply to a comment","Neue Antwort auf einen Kommentar",,site/modules/FrontendComments/Notifications.php,b424841ebd158f5a05338850f5a3e60e
+"The status of your comment has been changed by a moderator","Der Status Ihres Kommentars wurde von einem Moderator geändert",,site/modules/FrontendComments/Notifications.php,8128b8bae3e78a77db90f8d948926c72
+"We would like to inform you that the following comment you wrote has now been reviewed by a moderator:","Wir möchten Sie darüber informieren, dass der folgende Kommentar, den Sie geschrieben haben, nun von einem Moderator überprüft wurde:",,site/modules/FrontendComments/Notifications.php,367818acd5ca55baad45049e66136360
+"The status of the comment has been changed to:","Der Status des Kommentars wurde wie folgt geändert:",,site/modules/FrontendComments/Notifications.php,89d59b6a2e328a01b01f0dec2cd23275
+"Your comment is now published and visible to all.","Ihr Kommentar ist nun veröffentlicht und für alle sichtbar.",,site/modules/FrontendComments/Notifications.php,09789237402e2ad6257d0c5bb4a4f3d3
+"Link to the comment page","Link zur Kommentarseite",,site/modules/FrontendComments/Notifications.php,963704b9cc7e54e0d111c634a5ae26ca
+"Comment status has been changed","Der Kommentarstatus wurde geändert",,site/modules/FrontendComments/Notifications.php,1351a9eb61a28d8c8c5ba8bdd56fc97b
+"Your comment status has been changed to %s","Ihr Kommentarstatus wurde zu %s geändert.",,site/modules/FrontendComments/Notifications.php,40994b502d147cb982c49808562ae426
