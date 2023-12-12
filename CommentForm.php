@@ -202,7 +202,7 @@
             $this->comment->setLabel($this->_('Comment'));
             $this->comment->setRule('required');
             $this->comment->setRule('lengthMax', 1024);
-            if ($this->input_fc_counter) {
+            if (!$this->input_fc_counter) {
                 $this->comment->useCharacterCounter();
             }
             $this->comment->setSanitizer('maxLength'); // limit the length of the comment
