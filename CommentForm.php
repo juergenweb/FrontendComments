@@ -237,7 +237,6 @@
                 if ($options) {
                     // create the data-options attribute
                     $optionString = implode(',', $options);
-                    bd($optionString);
                     $this->stars->setAttribute('data-options', '{' . $optionString . '}');
                 }
 
