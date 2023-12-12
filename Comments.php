@@ -199,18 +199,24 @@
             // convert $queryId to int (could be null too)
             $queryId = (int)$queryId;
 
+            $ulLevelStatus = true;
             $levelStatus = true;
 
             if ($parent_id !== 0) {
+
 
                 // check if the level is not higher than the max level, otherwise set the max level
                 if ($level >= (int)$this->frontendCommentsConfig['input_fc_depth']) {
                     $level = (int)$this->frontendCommentsConfig['input_fc_depth'];
                     $levelStatus = false;
                 }
+
+                if ($level >= (int)$this->frontendCommentsConfig['input_fc_depth'] + 1) {
+                    $ulLevelStatus = true;
+                }
             }
 
-            if ($levelStatus) {
+            if ($ulLevelStatus) {
 
                 if ($level == 0) {
                     $out .= '<div class="fc-comments-wrapper">';
@@ -218,10 +224,11 @@
                     $out .= $this->getCommentsHeadline()->___render();
                 }
 
+
                 $levelClass = ($level == 0) ? ' fc-comments-list uk-comment-list' : ' fc-comments-list fc-reply-list'; // add additional class for sublevels
                 $out .= '<ul id="' . $this->comments->getField()->name . '-list-' . $parent_id . '" class="fc-list level-' . $level . $levelClass . '">';
             }
-            
+
             // change the sort order if set
             $comments = $this->comments;
             if ($this->input_fc_sort) {
@@ -248,7 +255,7 @@
                 }
             }
 
-            if ($levelStatus) {
+            if ($ulLevelStatus) {
 
                 $out .= '</ul>';
                 if ($level == 0) {
