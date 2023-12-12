@@ -40,14 +40,15 @@
 
         use configValues;
 
+        // Declare all properties
         const moderateNone = 0; // no moderation - all comments will be published immediately
         const moderateAll = 1; // all comments need to be approved
         const moderateNew = 2; // only new comments need to be approved
         const pendingApproval = 0; // status waiting for approvement
+        const delete = 3; // status waiting for approvement
         const approved = 1; // status approved
         const spam = 2; // status SPAM
         const spamReplies = 3; // status SPAM but comment has replies and therefore is not allowed to delete
-
         protected FrontendForms $frontendForms;
 
         // configuration values
@@ -64,6 +65,7 @@
         protected string $input_fc_email = '';
 
         protected string $input_fc_commentsheadline = '';
+        protected string $input_fc_formheadline = '';
         protected string $input_fc_sender = '';
         protected string $input_fc_subject = '';
         protected string $input_fc_title = '';
@@ -110,9 +112,6 @@
             // grab configuration values from the FrontendForms module
             $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
 
-
-
-
             // set database object
             $this->database = $this->wire()->database;
 
@@ -130,7 +129,7 @@
                     __FILE__),
                 'href' => 'https://github.com/juergenweb/FieldtypeFrontendComments',
                 'icon' => 'comment',
-                'installs' => ['InputfieldFrontendComments', 'FrontendCommentsAdmin'],
+                'installs' => ['InputfieldFrontendComments', 'FrontendCommentsManager'],
                 'permanent' => false,
                 'version' => '1.0.0',
                 'requires' => [
@@ -164,7 +163,6 @@
 
         }
 
-
         /**
          * Delete comments marked as SPAM after a given time as set in the input field configuration
          * @return void
@@ -181,10 +179,13 @@
 
                 // delete old spam after a given time in days
                 $expiredTime = time() - (86400 * $field->input_fc_spam);
+                // TODO muss korrigiert werden
+                /*
                 $query = $this->database->prepare("DELETE FROM `$table` WHERE status=:status AND created < :expiredTime");
                 $query->bindValue(":status", self::spam, PDO::PARAM_INT);
                 $query->bindValue(":expiredTime", $expiredTime);
                 $query->execute();
+                */
             }
 
         }
@@ -217,7 +218,7 @@
          */
         public static function removeNumericKeysFromArray(array $array = []): array
         {
-            foreach($array as $key => $value){
+            foreach ($array as $key => $value) {
                 if (is_int($key)) {
                     unset($array[$key]);
                 }
@@ -310,7 +311,6 @@
                 return;
             }
 
-            bd('queue hook runs');
             // get all FrontendComments fields
             $fields = $this->wire('fields')->findByType('FieldtypeFrontendComments');
 
@@ -699,7 +699,6 @@
             return true;
         }
 
-
         /**
          * @throws \ProcessWire\WireException
          */
@@ -784,7 +783,6 @@
                             }
                         }
                         break;
-
                 }
             }
         }
@@ -927,9 +925,10 @@
          * @return Module|null
          * @throws WirePermissionException|WireException
          */
-        public function getInputfield(Page $page, Field $field) {
+        public function getInputfield(Page $page, Field $field)
+        {
             $inputfield = $this->wire()->modules->get('InputfieldFrontendComments');
-            if(!$inputfield) return null;
+            if (!$inputfield) return null;
             $inputfield->set('class', $this->className());
             return $inputfield;
         }
@@ -941,9 +940,10 @@
          * @return mixed
          * @throws \ProcessWire\WireException
          */
-        static public function findComments($field, $selectorString) {
-            if(is_string($field)) $field = wire()->fields->get($field);
-            if(!$field instanceof Field) throw new WireException('Arg 1 to findComments() must be a field');
+        static public function findComments($field, $selectorString)
+        {
+            if (is_string($field)) $field = wire()->fields->get($field);
+            if (!$field instanceof Field) throw new WireException('Arg 1 to findComments() must be a field');
             $fieldtype = $field->type;
             return $fieldtype->find($field, $selectorString);
         }
@@ -1162,7 +1162,6 @@
             $fieldset->description = $this->_('Change some parameters to get the preferred output.');
             $fieldset->icon = 'fa-cog';
 
-
             /**  $generalFieldset */
             $generalFieldset = $modules->get('InputfieldFieldset');
             $generalFieldset->label = $this->_('General output settings');
@@ -1181,10 +1180,7 @@
             $f->notes = $this->_('By default, the form will be displayed before the comments. To reverse that behavior check this box.');
             $generalFieldset->append($f);
 
-
             $fieldset->append($generalFieldset);
-
-
 
             /**  $commentformFieldset */
             $formFieldset = $modules->get('InputfieldFieldset');
@@ -1193,6 +1189,43 @@
             $formFieldset->columnWidth = 100;
             $formFieldset->icon = 'fa-pencil';
 
+            // enter the headline of the comment list
+            $formHead = $modules->get('InputfieldText');
+            $formHead->label = $this->_('Form headline');
+            $formHead->attr('name', 'input_fc_formheadline');
+            $formHead->attr('value', $field->input_fc_formheadline);
+            $disableFormHead = $this->_('To disable the display of the default heading, enter "none" inside the input field.');
+            if ($languages) {
+                $formHead->useLanguages = true;
+                foreach ($languages as $language) {
+                    if ($language->isDefault()) continue;
+                    $formHead->attr("value$language", (string)$field->get("input_fc_formheadline$language->id"));
+                }
+                if ($languages->count() > 1)
+                    $disableFormHead = $this->_('To disable the display of the default heading, enter "none" inside the input field of the default language.');
+            }
+            $formHead->description = $this->_('This heading appears at the top of the comment form.');
+            $formHead->columnWidth = 100;
+            $formHead->notes = $this->_('If no heading is entered, "Leave a comment" will be displayed as the default heading.') . ' ' . $disableFormHead;
+            $formFieldset->add($formHead);
+
+            // Set the tag for the headline of the comments form
+            $formTagHead = $this->wire()->modules->get('InputfieldSelect');
+            $formTagHead->label = $this->_('Headline type for the form heading');
+            $formTagHead->description = $this->_('Select the type of the form heading (from h1 to h5).');
+            $options = [
+                'h1' => $this->_('Headline 1'),
+                'h2' => $this->_('Headline 2'),
+                'h3' => $this->_('Headline 3'),
+                'h4' => $this->_('Headline 4'),
+                'h5' => $this->_('Headline 5')
+            ];
+            $formTagHead->addOptions($options);
+            $formTagHead->defaultValue = 'h3';
+            $formTagHead->attr('value', $field->input_fc_formheadtype);
+            $formTagHead->attr('name', 'input_fc_formheadtype');
+            $formTagHead->required = true;
+            $formFieldset->append($formTagHead);
 
             // field to show or hide the star rating
             $f = $this->modules->get('InputfieldSelect');
@@ -1207,7 +1240,6 @@
             $f->addOptions($options);
             $f->description = $this->_('Please select, if you want to offer a star rating.');
             $formFieldset->append($f);
-
 
             // field to hide the tooltip next to the star rating
             $f = $this->modules->get('InputfieldCheckbox');
@@ -1229,7 +1261,6 @@
             $f->label2 = $this->_('Hide character counter');
             $f->description = $this->_('By default, a character counter will be displayed under the comment text field to inform the user, how many characters are left until the max. limit of 1024 characters is reached.');
             $formFieldset->append($f);
-
 
             // Show or hide privacy checkbox or text on form
             $privacy_show = $this->wire()->modules->get('InputfieldSelect');
@@ -1261,23 +1292,44 @@
             $commentHead->label = $this->_('Comment list headline');
             $commentHead->attr('name', 'input_fc_commentsheadline');
             $commentHead->attr('value', $field->input_fc_commentsheadline);
+            $disableCommentHead = $this->_('To disable the display of the heading enter "none" inside the input field.');
             if ($languages) {
                 $commentHead->useLanguages = true;
                 foreach ($languages as $language) {
                     if ($language->isDefault()) continue;
                     $commentHead->attr("value$language", (string)$field->get("input_fc_commentsheadline$language->id"));
                 }
+                if ($languages->count() > 1)
+                    $disableCommentHead = $this->_('To disable the display of the heading enter "none" inside the input field of the default language.');
             }
             $commentHead->description = $this->_('This heading appears at the top of the comment list.');
             $commentHead->columnWidth = 100;
-            $commentHead->notes = $this->_('If no heading is entered, "Comments" will appear as the default heading.');
+            $commentHead->notes = $this->_('If no heading is entered, "Comments" will will be displayed as the default heading.') . ' ' . $disableCommentHead;
             $commentFieldset->add($commentHead);
+
+            // Set the tag for the headline of the comments
+            $commentsTagHead = $this->wire()->modules->get('InputfieldSelect');
+            $commentsTagHead->label = $this->_('Headline type for the comments heading');
+            $commentsTagHead->description = $this->_('Select the type of the comments heading (from h1 to h5).');
+            $options = [
+                'h1' => $this->_('Headline 1'),
+                'h2' => $this->_('Headline 2'),
+                'h3' => $this->_('Headline 3'),
+                'h4' => $this->_('Headline 4'),
+                'h5' => $this->_('Headline 5')
+            ];
+            $commentsTagHead->addOptions($options);
+            $commentsTagHead->defaultValue = 'h3';
+            $commentsTagHead->attr('value', $field->input_fc_commentsheadtype);
+            $commentsTagHead->attr('name', 'input_fc_commentsheadtype');
+            $commentsTagHead->required = true;
+            $commentFieldset->append($commentsTagHead);
 
             // field to enter the number of decimals (fe 2) -> will be appended after the inputfield
             $f = $this->modules->get('InputfieldInteger');
             $f->attr('name+id', 'input_fc_depth');
             $f->attr('type', 'number');
-            $f->label = $this->_('Replay depth');
+            $f->label = $this->_('Reply depth');
             $value = (is_null($field->input_fc_depth)) ? $this->input_fc_depth : $field->input_fc_depth;
             $f->attr('value', $value);
             $f->attr('size', 10);
@@ -1316,7 +1368,7 @@
             $f = $this->modules->get('InputfieldInteger');
             $f->attr('name+id', 'input_fc_voting_lock');
             $f->attr('type', 'number');
-            $f->label = $this->_('Lock in days before voting can be done again');
+            $f->label = $this->_('Number of days before voting can be done again');
             $value = (is_null($field->input_fc_voting_lock)) ? $this->input_fc_voting_lock : $field->input_fc_voting_lock;
             $f->attr('value', $value);
             $f->attr('size', 10);
@@ -1341,7 +1393,6 @@
             $dateformat->attr('name', 'input_dateformatcomment');
             $dateformat->notes = $this->_('The format of a full date string can be defined in the configuration of the FrontendForms module.');
             $commentFieldset->append($dateformat);
-
 
             $fieldset->append($commentFieldset);
 
@@ -1397,7 +1448,5 @@
             return $inputfields;
 
         }
-
-
 
     }
