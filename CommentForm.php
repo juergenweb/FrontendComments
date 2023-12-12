@@ -59,6 +59,7 @@
     use FrontendForms\Button;
     use FrontendForms\Link;
     use FrontendForms\Alert;
+    use FrontendForms\TextElements;
     use PDO;
     use ProcessWire\FieldtypeFrontendComments;
     use ProcessWire\InputfieldFrontendComments;
@@ -74,6 +75,7 @@
 
         use configValues;
 
+        // Declare all properties
         protected array $frontendFormsConfig = [];
         protected array $frontendCommentsConfig = [];
         protected string $redirectUrl = '';
@@ -104,6 +106,7 @@
         protected Alert $alert; // The alert object of the form for further manipulations
         protected Link $cancel; // The cancel link object for replies
         protected Notifications $notifications;
+        protected TextElements $formHeadline; // the headline element above the form
 
         /**
          * @param CommentArray $comments - needed for getting the field for storage of the values inside the database
@@ -161,6 +164,17 @@
             // overwrite currenturllabel
             $this->setMailPlaceholder('currenturllabel', $this->_('Comment page'));
 
+            // Create the default form headline
+            $this->formHeadline = new TextElements();
+            $formHeadlineType = array_key_exists('input_fc_formheadtype', $this->frontendCommentsConfig) ? $this->frontendCommentsConfig['input_fc_formheadtype'] : 'h3';
+            $this->formHeadline->setTag($formHeadlineType);
+            $this->formHeadline->setAttribute('class', 'fc-form-headline');
+            $this->formHeadline->setText($this->_('Leave a comment'));
+
+            // add or remove the headline to the form depending on the settings
+            $headConfig = (array_key_exists('input_fc_formheadline', $this->frontendCommentsConfig)) ? $this->frontendCommentsConfig['input_fc_formheadline'] : '';
+            $this->addHeadline($headConfig);
+
             // Create all form fields
 
             // create privacy objects and add them to the form object
@@ -211,20 +225,20 @@
 
                 // create data-options string
                 $options = [];
-                if(isset($this->frontendCommentsConfig['input_fc_showtooltip'])){
+                if (isset($this->frontendCommentsConfig['input_fc_showtooltip'])) {
                     // disable tooltip
                     $options[] = '&quot;tooltip&quot;:false';
                 }
                 // set clear-able to true
-                $options[]= '&quot;clearable&quot;:true';
+                $options[] = '&quot;clearable&quot;:true';
 
-                if($options){
+                if ($options) {
                     // create the data-options attribute
                     $optionString = implode(',', $options);
-                    $this->stars->setAttribute('data-options', '{'.$optionString.'}');
+                    $this->stars->setAttribute('data-options', '{' . $optionString . '}');
                 }
 
-                if($this->frontendCommentsConfig['input_fc_stars'] == 2){
+                if ($this->frontendCommentsConfig['input_fc_stars'] == 2) {
                     $this->stars->setRule('required');
                 }
                 // add the post value of the star rating to the star rating render function after form submission
@@ -286,6 +300,34 @@
             // instantiate the Notifications object for creating the mail body text
             $this->notifications = new Notifications($this->comments);
 
+        }
+
+        /**
+         * Get the form headline text object for further manipulations
+         * @return \FrontendForms\TextElements
+         */
+        public function getFormHeadline(): TextElements
+        {
+            return $this->formHeadline;
+        }
+
+        /**
+         * Add or remove a headline above the form
+         * @param string $headline
+         * @return void
+         */
+        public function addHeadline(string|null $headline): void
+        {
+            if (!is_null($headline)) {
+                if ($headline === 'none') {
+                    // remove the headline
+                    $this->removePrepend();
+                } else {
+                    if ($headline != '')
+                        $this->getFormHeadline()->setText($headline);
+                    $this->prepend($this->getFormHeadline()->render());
+                }
+            }
         }
 
         /**
