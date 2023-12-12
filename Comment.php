@@ -118,6 +118,7 @@
 
             foreach ($comment as $name => $value) {
                 if ($name === 'data') $name = 'text';
+                // add "Guest" as name if no name is entered
                 if($name === 'author'){
                     $value = ($value == '') ? $this->_('Guest') : $value;
                 }
