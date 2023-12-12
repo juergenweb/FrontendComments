@@ -5,3 +5,7 @@
 .fc-nocomments {
     padding: 10px 0;
 }
+
+.fc-table-label {
+    font-weight: bold;
+}
