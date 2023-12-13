@@ -176,16 +176,12 @@
             foreach ($commentsFields as $field) {
 
                 $table = $this->database->escapeTable($field->table);
-
                 // delete old spam after a given time in days
-                $expiredTime = time() - (86400 * $field->input_fc_spam);
-                // TODO muss korrigiert werden
-                /*
-                $query = $this->database->prepare("DELETE FROM `$table` WHERE status=:status AND created < :expiredTime");
-                $query->bindValue(":status", self::spam, PDO::PARAM_INT);
-                $query->bindValue(":expiredTime", $expiredTime);
+                $expiration_time = time() - ((int)$field->input_fc_spam * 86400);
+                $query = $this->database->prepare("DELETE FROM `$table` WHERE spam_update < :expiration_time");
+                $query->bindValue(":expiration_time", $expiration_time, PDO::PARAM_INT);
                 $query->execute();
-                */
+
             }
 
         }
