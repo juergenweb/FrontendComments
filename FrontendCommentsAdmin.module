@@ -171,6 +171,7 @@
                     FieldtypeFrontendComments::pendingApproval => $this->_('Waiting for approval'),
                     FieldtypeFrontendComments::approved => $this->_('Approved'),
                     FieldtypeFrontendComments::spam => $this->_('SPAM'),
+                    FieldtypeFrontendComments::spamReplies => $this->_('SPAM, but has children')
                 ];
                 $fieldStatus->addOptions($statusOptions);
                 $fieldStatus->attr('value', $comment->status);
@@ -223,14 +224,30 @@
                         // try to save certain values form the edit form to the database
                         try {
 
-                            $sql = "UPDATE $table SET author=:author,email=:email,data=:data,status=:status,stars=:stars WHERE id=$commentID";
+                            $sql = "UPDATE $table SET author=:author,email=:email,data=:data,status=:status,stars=:stars,spam_update=:update_spam WHERE id=$commentID";
                             $query = $database->prepare($sql);
+
+                            // set value for the spam_update column
+                            $spam_update = NULL;
+
+                            // check if status has been set to spam
+                            if ($input->post->detailstatus == '2')  {
+                                $spam_update = time();
+                            }
+                            // check if comment has children at the moment - if yes set spam_update to null again
+                            if (($comment->getReplies()->count) && ($input->post->detailstatus == '2')) {
+                                $spam_update = NULL;
+                                $input->post->detailstatus = '3'; // set new status to 3 (SPAM, but has children) to prevent deletion of the comment
+                            }
+
+
 
                             $query->bindValue(':author', $input->post->detailname);
                             $query->bindValue(':email', $input->post->detailemail);
                             $query->bindValue(':data', $input->post->detailtext);
                             $query->bindValue(':status', $input->post->detailstatus, PDO::PARAM_INT);
                             $query->bindValue(':stars', $input->post->detailrating, PDO::PARAM_INT);
+                            $query->bindValue(':update_spam', $spam_update, PDO::PARAM_INT);
 
                             // execute the query to save the comment in the database
                             if ($query->execute()) {
@@ -309,6 +326,7 @@
                         FieldtypeFrontendComments::pendingApproval => $this->_('Waiting for approval'),
                         FieldtypeFrontendComments::approved => $this->_('Approved'),
                         FieldtypeFrontendComments::spam => $this->_('SPAM'),
+                        FieldtypeFrontendComments::spamReplies => $this->_('SPAM, but has children'),
                     ];
                     $selectStatus->addOptions($statusOptions);
                     $value = (wire('input')->post->$selectName) ?? $comment->status;
@@ -427,6 +445,44 @@
         }
 
         /**
+         * @param \ProcessWire\FieldtypeFrontendComments $field
+         * @param \FrontendComments\Comment $comment
+         * @param int $newStatus
+         * @return bool
+         */
+        protected function saveComment(Field $field, Comment $comment, int $newStatus): bool
+        {
+            // status has been changed
+            $table = $field->getTable();
+
+            // set value for the spam_update column
+            $spam_update = NULL;
+
+            // check if status has been set to spam
+            if ($newStatus == '2')  {
+                $spam_update = time();
+            }
+            // check if comment has children at the moment - if yes set spam_update to null again
+            if (($comment->getReplies()->count) && ($newStatus == '2')) {
+                $spam_update = NULL;
+                $newStatus = '3'; // set new status to 3 (SPAM, but has children) to prevent deletion of the comment
+            }
+
+            $sql = "UPDATE $table SET status=:status, spam_update=:spam_update WHERE id=:id";
+
+            // try to save the data to the database
+            try {
+                $query = wire('database')->prepare($sql);
+                $query->bindValue(":status", $newStatus, PDO::PARAM_INT);
+                $query->bindValue(":spam_update", $spam_update, PDO::PARAM_INT); // remove time stamp if present
+                $query->bindValue(":id", $comment->id, PDO::PARAM_INT);
+                return $query->execute();
+            } catch (Exception $e) {
+                return false;
+            }
+        }
+
+        /**
          * Output the new table according to the filters set
          * @param \FrontendComments\CommentArray $totalComments
          * @return void
@@ -472,7 +528,20 @@
 
                             if ($oldStatus != $newStatus) {
 
+                                if($this->saveComment($field, $comment, $newStatus)){
+                                    // set new status to the comment
+                                    $comment->status = $newStatus;
+                                    $updates[] = $id;
 
+                                    if (in_array($comment->status, [FieldtypeFrontendComments::approved, FieldtypeFrontendComments::spam])) {
+
+                                        $notification = new Notifications($commentArray);
+                                        // send email about the status change
+                                        $notification->sendStatusChangeEmail($comment, $field, $this->frontendFormsConfig);
+                                    }
+                                }
+
+                                /*
                                 // status has been changed
                                 $table = $field->getTable();
 
@@ -515,7 +584,7 @@
                                 } catch (Exception $e) {
 
                                 }
-
+                                */
 
                             }
                         }
