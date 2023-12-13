@@ -571,6 +571,7 @@
                     'stars' => $comment->stars,
                     'upvotes' => $comment->upvotes,
                     'downvotes' => $comment->downvotes,
+                    'spam' => $comment->spam,
                 );
 
                 $sleepValue[] = $a;
@@ -829,6 +830,7 @@
             $schema['stars'] = "tinyint(3) unsigned default NULL";
             $schema['upvotes'] = "int unsigned default 0";
             $schema['downvotes'] = "int unsigned default 0";
+            $schema['spam'] = "int unsigned NOT NULL";
 
             // indexes, for any fields that need to be searchable from selectors
             $schema['keys']['primary'] = "PRIMARY KEY (`id`)";
@@ -836,6 +838,7 @@
             $schema['keys']['status'] = "KEY `status` (`status`, `email`)";
             $schema['keys']['pages_id'] = "KEY `pages_id` (`pages_id`,`status`,`created`)";
             $schema['keys']['created'] = "KEY `created` (`created`, `status`)";
+            $schema['keys']['spam'] = "KEY `spam` (`spam`, `status`)";
             $schema['keys']['data'] = "FULLTEXT KEY `data` (`data`)";
             $schema['keys']['code'] = "KEY `code` (`code`, `status`)";
 
