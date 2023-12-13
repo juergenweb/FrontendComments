@@ -156,7 +156,7 @@
             // redirect to the same page after form passes validation (including anchor)
             $this->setRedirectUrlAfterAjax($this->page->url . '#' . $this->field->name . '-form-wrapper');
 
-            // TODO: delete or set new values afterwards - only for dev purposes set to 0
+            // TODO: set new values afterwards - only for dev purposes set to 0
             $this->setMaxAttempts(0);
             $this->setMinTime(0);
             $this->setMaxTime(0);
@@ -475,7 +475,14 @@
                                         $newStatus = 3;
                                     }
 
-                                    $sql = "UPDATE $table SET status=:status, remote_flag=:remote_flag WHERE id=:id";
+                                    if($newStatus == '2'){
+                                        // add timestamp to the database
+                                        $spamTS = time();
+                                    } else {
+                                        $spamTS = null;
+                                    }
+
+                                    $sql = "UPDATE $table SET status=:status, remote_flag=:remote_flag, spam_update=:spam_update WHERE id=:id";
 
                                     // try to save the data to the database
                                     try {
@@ -483,6 +490,7 @@
                                         $query = $this->database->prepare($sql);
                                         $query->bindValue(":status", $newStatus, PDO::PARAM_INT);
                                         $query->bindValue(":remote_flag", 1, PDO::PARAM_INT);
+                                        $query->bindValue(":spam_update", $spamTS, PDO::PARAM_INT);
                                         $query->bindValue(":id", $comment->id, PDO::PARAM_INT);
 
                                         // execute the query to save the comment in the database
