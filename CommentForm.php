@@ -225,14 +225,17 @@
 
                 // create data-options string
                 $options = [];
+                // add translatable string for the default "Select a rating" text
+                $tooltip = $this->_('Select a rating');
                 if (isset($this->frontendCommentsConfig['input_fc_showtooltip'])) {
                     // disable tooltip
-                    $options[] = '&quot;tooltip&quot;:false';
+                    $tooltip = false;
                 }
+                // set tooltip option depending on the settings
+                $options[] = '&quot;tooltip&quot;:&quot;'.$tooltip.'&quot;';
                 // set clear-able to true
                 $options[] = '&quot;clearable&quot;:true';
-                // add translatable string for the default "Select a rating" text
-                $options[] = '&quot;tooltip&quot;:&quot;'.$this->_('Select a rating').'&quot;';
+
 
                 if ($options) {
                     // create the data-options attribute
