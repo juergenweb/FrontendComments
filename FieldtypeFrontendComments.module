@@ -257,29 +257,53 @@
             foreach ($result as $comment) {
 
                 // send mails only if status is approved or spam
-                if (in_array((int)$comment->status, [self::approved, self::pendingApproval])) {
+                if (in_array((int)$comment->status, [self::approved, self::spam])) {
 
                     // check if sending of emails for this status is enabled
                     if (array_key_exists($comment->status, $this->frontendCommentsConfig)) {
-
                         $notifications->sendStatusChangeEmail($comment, $field, $this->frontendFormsConfig);
                     }
 
                 }
             }
 
+            $database = $this->wire('database');
+            $table = $database->escapeTable($field->table);
+
+            // add timestamp to the spam_update column or remove it from it
+            $spam_update = null;
+
+            if ($comment->status == '2') {
+                $spam_update = time();
+            }
+
+            // save the spam_update value to the database column
+            $sql = "UPDATE $table SET spam_update=:spam_update WHERE id=:id";
+
+            // try to save the data to the database
+            try {
+                $query = $this->database->prepare($sql);
+                $query->bindValue(":spam_update", $spam_update, PDO::PARAM_INT);
+                $query->bindValue(":id", $comment->id, PDO::PARAM_INT);
+
+                // execute the query to save the comment in the database
+                $query->execute();
+            } catch (Exception $e) {
+
+            }
+
             // check if comment has replies and if so, change the status to 3
             if (($comment->getReplies()->count) && ($comment->status == '2')) {
 
-                $database = $this->wire('database');
-                $table = $database->escapeTable($field->table);
+
                 // change comment status to 3 and save it to the database
-                $sql = "UPDATE $table SET status=:status WHERE id=:id";
+                $sql = "UPDATE $table SET status=:status, spam_update=:spam_update WHERE id=:id";
 
                 // try to save the data to the database
                 try {
                     $query = $this->database->prepare($sql);
                     $query->bindValue(":status", '3', PDO::PARAM_INT);
+                    $query->bindValue(":spam_update", NULL, PDO::PARAM_INT); // remove time stamp if present
                     $query->bindValue(":id", $comment->id, PDO::PARAM_INT);
 
                     // execute the query to save the comment in the database
