@@ -286,7 +286,7 @@
          */
         public function getAuthorId(): int
         {
-            return $this->user->id;
+            return $this->user_id;
         }
 
         /**
