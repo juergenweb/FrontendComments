@@ -472,6 +472,7 @@
 
                             if ($oldStatus != $newStatus) {
 
+
                                 // status has been changed
                                 $table = $field->getTable();
 
@@ -479,12 +480,13 @@
                                 $spam_update = NULL;
 
                                 // check if status has been set to spam
-                                if ($newStatus == '2') {
+                                if ($newStatus == '2')  {
                                     $spam_update = time();
                                 }
                                 // check if comment has children at the moment - if yes set spam_update to null again
                                 if (($comment->getReplies()->count) && ($newStatus == '2')) {
                                     $spam_update = NULL;
+                                    $newStatus = '3'; // set new status to 3 (SPAM, but has children) to prevent deletion of the comment
                                 }
 
                                 $sql = "UPDATE $table SET status=:status, spam_update=:spam_update WHERE id=:id";
