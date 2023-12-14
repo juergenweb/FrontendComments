@@ -8,7 +8,7 @@
      * A new custom admin page will be created
      * This page includes a statistic area about all comment fields installed and
      * a filterable table containing all comments of a certain FrontendComments field
-     * Modal window suppor for editing multiple values of a certain comment
+     * Modal window support for editing multiple values of a certain comment
      *
      */
 
@@ -230,7 +230,7 @@
                             // set value for the spam_update column
                             $spam_update = NULL;
 
-                            // check if status has been set to spam
+                            // check if the status has been set to spam
                             if ($input->post->detailstatus == '2')  {
                                 $spam_update = time();
                             }
@@ -445,10 +445,11 @@
         }
 
         /**
-         * @param \ProcessWire\FieldtypeFrontendComments $field
+         * @param \ProcessWire\Field $field
          * @param \FrontendComments\Comment $comment
          * @param int $newStatus
          * @return bool
+         * @throws \ProcessWire\WireException
          */
         protected function saveComment(Field $field, Comment $comment, int $newStatus): bool
         {
@@ -458,7 +459,7 @@
             // set value for the spam_update column
             $spam_update = NULL;
 
-            // check if status has been set to spam
+            // check if the status has been set to spam
             if ($newStatus == '2')  {
                 $spam_update = time();
             }
@@ -498,9 +499,6 @@
 
                 // Set new $field property according to the select POST value
                 $field = wire('fields')->get($fieldID);
-
-                // Get all FrontendForms configuration values
-                $frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues($field);
 
                 // array that should hold all updated commentIDs for later usage
                 $updates = [];
