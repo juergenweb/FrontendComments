@@ -745,11 +745,8 @@
             $managingFieldset->columnWidth = 100;
             $managingFieldset->icon = 'fa-cog';
 
-            // create filter fieldset
-            $filterFieldset = wire('modules')->get('InputfieldFieldset');
-            $filterFieldset->label = $this->_('Filter the comments');
-            $filterFieldset->columnWidth = 100;
-            $filterFieldset->icon = 'fa-filter';
+
+            $markup = '';
 
             // Filter select for the FrontendCommentsField
             $commentsField = $this->modules->get('InputfieldSelect');
@@ -768,8 +765,7 @@
             }
             $commentsField->defaultValue = $this->getCommentFields()->first()->id;
             $commentsField->value = wire('input')->post->fc_commentsfield;
-            $commentsField->columnWidth = 40;
-            $filterFieldset->add($commentsField);
+            $markup .= $commentsField->render();
 
             // Filters select for the number of comments displayed
             $numberField = $this->modules->get('InputfieldSelect');
@@ -789,8 +785,7 @@
             $numberField->addOptions($options);
             $numberField->value = wire('input')->post->filternumber;
             $numberField->defaultValue = $this->defaultNumber;
-            $numberField->columnWidth = 30;
-            $filterFieldset->add($numberField);
+            $markup .= $numberField->render();
 
             // Filter select for the status of the comments
             $statusField = $this->modules->get('InputfieldSelect');
@@ -805,10 +800,11 @@
             ];
             $statusField->addOptions($options);
             $statusField->defaultValue = 3;
-            $statusField->columnWidth = 30;
-            $filterFieldset->add($statusField);
+            $markup .= $statusField->render();
 
-            $managingFieldset->add($filterFieldset);
+            $filter = wire('modules')->get('InputfieldMarkup');
+            $filter->markupText = $markup;
+            $managingFieldset->add($filter);
 
             $tableout = '';
             // create table
