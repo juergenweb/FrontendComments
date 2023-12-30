@@ -82,6 +82,8 @@ function loadReplyForm() {
 
                     // add Ajax event listener function once more
                     subAjax('reply-form-' + commentId);
+                    // activate the textarea counter
+                    maxCharsCounterReverse();
 
                     let ratingStars = [...document.getElementsByClassName("star-rating")];
                     if (ratingStars.length > 0) {
