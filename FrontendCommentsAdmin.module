@@ -73,6 +73,7 @@
                 'summary' => __('A custom page for the FrontendComments module to manage all comments in one place', __FILE__),
                 'author' => 'Jürgen Kern',
                 'version' => '1.0.0',
+                'requires' => 'FieldtypeFrontendComments',
                 'page' => [
                     'name' => 'comments-manager',
                     'title' => __('Comments manager', __FILE__),
