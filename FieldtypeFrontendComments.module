@@ -1156,7 +1156,6 @@
             // input_fc_comment_notification
             $notification = $modules->get('InputfieldRadios');
             $notification->attr('name', 'input_fc_comment_notification');
-            $notification->optionColumns = 1;
             $notification->label = $this->_('Commenter email notification');
             $notification->description = $this->_('Send commenters notification emails about new replies');
             $notification->addOption(0, $this->_('Disabled'));
