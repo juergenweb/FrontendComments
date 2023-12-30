@@ -44,8 +44,7 @@
         const moderateNone = 0; // no moderation - all comments will be published immediately
         const moderateAll = 1; // all comments need to be approved
         const moderateNew = 2; // only new comments need to be approved
-        const pendingApproval = 0; // status waiting for approvement
-        const delete = 3; // status waiting for approvement
+        const pendingApproval = 0; // status waiting for approval
         const approved = 1; // status approved
         const spam = 2; // status SPAM
         const spamReplies = 3; // status SPAM but comment has replies and therefore is not allowed to delete
