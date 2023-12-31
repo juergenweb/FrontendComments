@@ -1470,4 +1470,30 @@
 
         }
 
+        /**
+         * Method which runs on install
+         * @return void
+         */
+        public function ___install(): void
+        {
+            // create comment edit permission if it is not found inside all permissions
+            if(!wire('permissions')->has('frontend-comments-edit')){
+                $permission = wire('permissions')->add('frontend-comments-edit');
+                $permission->title = 'Permission to edit comments created via the FrontendComments module.';
+                wire('permissions')->save( $permission);
+            }
+        }
+
+        /**
+         * Method which runs on uninstall
+         * @return void
+         */
+        public function ___uninstall(): void
+        {
+            // uninstall the FrontendCommentsAdmin module too if it is installed
+            if(wire('modules')->isInstalled('FrontendCommentsAdmin')){
+                wire('modules')->uninstall('FrontendCommentsAdmin');
+            }
+        }
+
     }
