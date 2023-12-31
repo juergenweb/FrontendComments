@@ -48,7 +48,7 @@
 
             // Output an error message if no FrontendComments fields have been found
             if (!$this->commentFields->count) {
-                wire()->waring($this->_('There are no FrontendComments fields installed. Please create a at least one FrontendComments field to be able to use this module.'));
+                //wire()->warning($this->_('There are no FrontendComments fields installed at the moment. Please create a at least one FrontendComments field to be able to use this module.'));
             } else {
 
                 // Get all FrontendForms configuration values
@@ -72,6 +72,8 @@
                 'summary' => __('A custom page for the FrontendComments module to manage all comments in one place', __FILE__),
                 'author' => 'Jürgen Kern',
                 'version' => '1.0.0',
+                'icon' => 'comments',
+                'permanent' => false,
                 'page' => [
                     'name' => 'comments-manager',
                     'title' => __('FrontendComments manager', __FILE__),
@@ -94,6 +96,27 @@
 
             // activate modal windows for full comment edit
             wire('modules')->get('JqueryUI')->use('modal');
+            $this->addHookAfter('Page::loaded', $this, 'showWarningMessage');
+        }
+
+
+
+        protected function showWarningMessage(HookEvent $event)
+        {
+            //if (!$this->commentFields->count) {
+            $this->warning('test');
+            $page = $event->object;
+            bd($this->commentFields->count);
+            // An 'after' hook can retrieve and/or modify the return value
+            $return = $event->return;
+            bd($return);
+
+            /* Your code here, perhaps modifying the return value */
+
+            // Populate back return value, if you have modified it
+            $event->return = $return;
+            //}
+
         }
 
         /**
