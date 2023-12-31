@@ -15,6 +15,10 @@
 
     namespace ProcessWire;
 
+    // include all necessary files
+    $dirname = dirname(__FILE__);
+    require_once($dirname . "/traits/configValues.php");
+
     use FrontendComments\configValues;
 
     class InputfieldFrontendComments extends Inputfield
