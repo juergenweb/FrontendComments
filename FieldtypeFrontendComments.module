@@ -128,7 +128,7 @@
                     __FILE__),
                 'href' => 'https://github.com/juergenweb/FieldtypeFrontendComments',
                 'icon' => 'comment',
-                'installs' => ['InputfieldFrontendComments', 'FrontendCommentsManager'],
+                'installs' => ['InputfieldFrontendComments', 'FrontendCommentsAdmin'],
                 'permanent' => false,
                 'version' => '1.0.0',
                 'requires' => [
