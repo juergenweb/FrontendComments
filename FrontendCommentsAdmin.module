@@ -73,7 +73,8 @@
                 'version' => '1.0.0',
                 'page' => [
                     'name' => 'comments-manager',
-                    'title' => __('Comments manager', __FILE__),
+                    'title' => __('FrontendComments manager', __FILE__),
+                    'parent' => 'setup'
                 ],
             ];
         }
