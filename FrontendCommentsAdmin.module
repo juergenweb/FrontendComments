@@ -20,8 +20,7 @@
     use PDO;
 
     // include all necessary files
-    $dirname = dirname(__FILE__);
-    require_once($dirname . "/traits/configValues.php");
+    require_once(__FILE__ . "/traits/configValues.php");
 
     class FrontendCommentsAdmin extends Process
     {
@@ -33,7 +32,6 @@
         protected WireArray $commentFields; // Wire array containing all FrontendComments field objects
         protected array $frontendFormsConfig = [];
         protected Field $field; // A single FrontendComments field;
-
 
         /**
          * @throws \ProcessWire\WireException
@@ -49,7 +47,7 @@
 
             // Output an error message if no FrontendComments fields have been found
             if (!$this->commentFields->count) {
-                wire()->error('There are no FrontendComments fields installed.');
+                wire()->waring($this->_('There are no FrontendComments fields installed. Please create a at least one FrontendComments field to be able to use this module.'));
             } else {
 
                 // Get all FrontendForms configuration values
@@ -73,7 +71,6 @@
                 'summary' => __('A custom page for the FrontendComments module to manage all comments in one place', __FILE__),
                 'author' => 'Jürgen Kern',
                 'version' => '1.0.0',
-                'requires' => 'FieldtypeFrontendComments',
                 'page' => [
                     'name' => 'comments-manager',
                     'title' => __('Comments manager', __FILE__),
@@ -93,7 +90,7 @@
             $this->wire('config')->styles->add($this->wire('config')->urls->{$this->className} . 'backend-assets/frontendcommentsadmin.css?v=' . $version . '&time=' . time());
             $this->wire('config')->scripts->add($this->wire('config')->urls->{$this->className} . 'backend-assets/frontendcommentsadmin.js?v=' . $version . '&time=' . time());
 
-            // activate modal windows
+            // activate modal windows for full comment edit
             wire('modules')->get('JqueryUI')->use('modal');
         }
 
