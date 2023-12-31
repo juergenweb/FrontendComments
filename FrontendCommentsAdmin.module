@@ -71,6 +71,7 @@
                 'version' => '1.0.0',
                 'icon' => 'comments',
                 'permanent' => false,
+                'permission' => 'frontend-comments-edit',
                 'page' => [
                     'name' => 'comments-manager',
                     'title' => __('FrontendComments manager', __FILE__),
@@ -116,6 +117,7 @@
             }
 
             $out = '';
+
 
             // Get different values
             $commentID = (int)$res['commentid'];
