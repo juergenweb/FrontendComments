@@ -155,11 +155,6 @@
             $this->addHookAfter('LazyCron::every30Seconds', $this, 'sendQueuedEmails');
             $this->addHookAfter('FieldtypeMulti::savePageField', $this, 'sendStatusChangeMail');
 
-            // add CSS and JS to the backend
-            //$version = $this->getModuleInfo()['version'] . '-' . time();
-            //$this->wire('config')->styles->add($this->wire('config')->urls->{$this->className} . 'backend-assets/frontendcommentsadmin.css?v=' . $version . '&time=' . time());
-            //$this->wire('config')->scripts->add($this->wire('config')->urls->{$this->className} . 'backend/frontendforms.js?v=' . $version . '&time=' . time());
-
         }
 
         /**
@@ -1104,16 +1099,19 @@
             $emailField->attr('name', 'input_fc_defaultPWField_to');
             $emailField->required = 1;
             $emailField->requiredIf = 'input_fc_emailtype=pwfield';
-            // create options that contain users (excluding registered)
+            // create options that contain users (excluding all users with no page edit permission)
             $users = $this->wire('users')->find('roles!=registered,id!=40,sort=roles');
             $userFields = [];
             foreach ($users as $user) {
-                $userFields[$user->email] = $user->name . ' [' . $user->email . ']';
+                if ($user->hasPermission('page-edit')) {
+                    $userFields[$user->email] = $user->name . ' [' . $user->email . ']';
+                }
             }
+
             $emailField->addOptions($userFields);
             $emailField->attr('value', $field->input_fc_defaultPWField_to);
             $emailField->description = $this->_('Select one or more users that should receive a notification about new comments.');
-            $emailField->notes = $this->_('Users with the role "registered" will not be displayed, because they are not allowed to get notification emails.');
+            $emailField->notes = $this->_('Only users with page edit permission will be displayed.');
             $emailField->columnWidth = 25;
             $emailField->showIf = 'input_fc_emailtype=pwfield';
             $emailFieldset->add($emailField);
@@ -1471,27 +1469,13 @@
         }
 
         /**
-         * Method which runs on install
-         * @return void
-         */
-        public function ___install(): void
-        {
-            // create comment edit permission if it is not found inside all permissions
-            if(!wire('permissions')->has('frontend-comments-edit')){
-                $permission = wire('permissions')->add('frontend-comments-edit');
-                $permission->title = 'Permission to edit comments created via the FrontendComments module.';
-                wire('permissions')->save( $permission);
-            }
-        }
-
-        /**
          * Method which runs on uninstall
          * @return void
          */
         public function ___uninstall(): void
         {
             // uninstall the FrontendCommentsAdmin module too if it is installed
-            if(wire('modules')->isInstalled('FrontendCommentsAdmin')){
+            if (wire('modules')->isInstalled('FrontendCommentsAdmin')) {
                 wire('modules')->uninstall('FrontendCommentsAdmin');
             }
         }
