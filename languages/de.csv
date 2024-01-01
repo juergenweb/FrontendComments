@@ -1,4 +1,5 @@
-en,default,description,file,hash
+en,de,description,file,hash
+Guest,Gast,,site/modules/FrontendComments/Comment.php,adb831a7fdd83dd1e2a309ce7591dff8
 "Reply to this comment","Auf diesen Kommentar antworten",,site/modules/FrontendComments/Comment.php,bc9e60a9d89ccff64f5282425aa1374e
 Reply,Antworten,,site/modules/FrontendComments/Comment.php,25d8df6e580905091a0d5ef5b9e05bf0
 "Like the comment","Dieser Kommentar gefällt mir",,site/modules/FrontendComments/Comment.php,32a1bab8a685376f9632903067d90a2e
@@ -7,11 +8,11 @@ Like,"Gefällte mir",,site/modules/FrontendComments/Comment.php,98b82c200a2e309b
 Dislike,"Gefällt mir nicht",,site/modules/FrontendComments/Comment.php,ea04e7ef514a25e465197a31c71f52f0
 "This comment has been removed by a moderator because it does not comply with our comment guidelines.","Dieser Kommentar wurde von einem Moderator entfernt, da er nicht den Kommentarrichtlinien entspricht.",,site/modules/FrontendComments/Comment.php,0f2363a16de7b886c058ee57b350392f
 "Write an answer to this comment","Eine Antwort zu diesem Kommentar schreiben",,site/modules/FrontendComments/Comment.php,6f38352564cd325f0ed01d3959301594
-en,default,description,file,hash
+en,de,description,file,hash
 day,Tag,,site/modules/FrontendComments/CommentArray.php,628b7db04235f228d40adc671413a8c8
 days,Tage,,site/modules/FrontendComments/CommentArray.php,44fdec47036f482b68b748f9d786801b
 "It seems that you have rated this comment within the last %s. In this case, you may not vote again.","Es scheint so, als hätten Sie bereits eine Wertung für diesen Kommentar innerhalb von %s abgegeben. In diesem Fall dürfen Sie keine weitere Wertung mehr abgeben.",,site/modules/FrontendComments/CommentArray.php,f7d296ae2eaceb967af861bc18a96135
-en,default,description,file,hash
+en,de,description,file,hash
 "Comment page",Kommentarseite,,site/modules/FrontendComments/CommentForm.php,e7663040950627ad4d49f433acbec336
 "Leave a comment","Hinterlasse einen Kommentar",,site/modules/FrontendComments/CommentForm.php,4d475654cf26db0264212bc50e9cf6d2
 Name,=,,site/modules/FrontendComments/CommentForm.php,49ee3087348e8d44e1feda1917443987
@@ -45,9 +46,9 @@ Stars,Sterne,,site/modules/FrontendComments/CommentForm.php,d37c550d781bfb93b008
 "You have tried to unsubscribe from getting notifications, but your notification status is already disabled.","Sie haben versucht, sich vom Erhalt von Benachrichtigungen abzumelden, aber Ihr Benachrichtigungsstatus ist bereits deaktiviert.",,site/modules/FrontendComments/CommentForm.php,24dd9ac88f895072e81dc1a7fa4a3f18
 "Thank you! Your comment has been submitted successfully. %s","Vielen Dank! Ihr Kommentar wurde erfolgreich übermittelt. %s",,site/modules/FrontendComments/CommentForm.php,f654dbb1c71a8fb68d5dea761168de35
 "Thank you for your comment. Please be patient. Your comment has been submitted successfully and is waiting for approval.","Vielen Dank für Ihren Kommentar. Bitte haben Sie etwas Geduld. Ihr Kommentar wurde erfolgreich übermittelt und wartet nun auf die Genehmigung.",,site/modules/FrontendComments/CommentForm.php,a0acc46c97fc136059a08eb445746993
-en,default,description,file,hash
+en,de,description,file,hash
 Comments,Kommentare,,site/modules/FrontendComments/Comments.php,8413c683b4b27cc3f4dbd4c90329d8ba
-en,default,description,file,hash
+en,de,description,file,hash
 none,nichts,,site/modules/FrontendComments/FieldtypeFrontendComments.module,334c4a4c42fdb79d7ebc3e73b517e6f8
 "no selection","Keine Auswahl","add an empty option",site/modules/FrontendComments/FieldtypeFrontendComments.module,00fd39176b23537f6b3660be8c197f5a
 "The status of the comment has already been changed. For security reasons, however, this is only allowed once via mail link. If you want to change the status once more, you have to login to the backend.","Der Status des Kommentars wurde bereits geändert. Aus Sicherheitsgründen ist dies jedoch nur einmal per Mail-Link erlaubt. Wenn Sie den Status noch einmal ändern möchten, müssen Sie sich im Backend anmelden.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,259941302ddfda2ae40f80d4546a1c54
@@ -80,7 +81,7 @@ none,nichts,,site/modules/FrontendComments/FieldtypeFrontendComments.module,334c
 "Fe email1@mydomain.com,email2@mydomain.com.","Z.B. email1@mydomain.com, email2@mydomain.com.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,d10a52826a11d639fe9f043b49d3621f
 "Recipients for the notification email","Empfänger für die Benachrichtigungs-E-Mail",,site/modules/FrontendComments/FieldtypeFrontendComments.module,b4e60aaff24bc873a9cabdbe476dee92
 "Select one or more users that should receive a notification about new comments.","Wählen Sie einen oder mehrere Benutzer aus, die eine Benachrichtigung über neue Kommentare erhalten sollen.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,b07e22cf86d72200d151fce81d19095a
-"Only users with page edit permission will be displayed.","Es werden nur Benutzer mit Seitenbearbeitungsrecht angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,1c591febfc27d24d1c2d104c663a3d37
+"Only users with page edit permission will be displayed.","Es werden nur Benutzer mit Seitenbearbeitungsrecht angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,6020d016d5ea7168df60089a9b6b4853
 "From email address",Absender-E-Mail-Adresse,,site/modules/FrontendComments/FieldtypeFrontendComments.module,6f6da7aec649851c977b6bf4e083977d
 "This email address will be displayed as the sender email address of the emails sent by this module.","Diese E-Mail-Adresse wird als Absender-E-Mail-Adresse in den von diesem Modul gesendeten E-Mails angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,e1ca26eb2ee8afa47a146779d2cfbfe9
 "If no email address will be entered, %s will be displayed instead as the sender address.","Wenn keine E-Mail-Adresse eingegeben wird, wird stattdessen %s als Absenderadresse angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,fbba3d8e1cdcf39fd8ed54db75bf6014
@@ -170,7 +171,7 @@ CAPTCHA,=,,site/modules/FrontendComments/FieldtypeFrontendComments.module,291d69
 "No CAPTCHA","Kein CAPTCHA",,site/modules/FrontendComments/FieldtypeFrontendComments.module,b23bb4764e36673626f332b94178c5ec
 FrontendComments,=,,site/modules/FrontendComments/FieldtypeFrontendComments.module,6b8c682577d63258030293d8bac4919b
 "Field that let you store user comments on a page using the FrontendForms module.","Feld, mit dem Sie Benutzerkommentare auf einer Seite mithilfe des FrontendForms-Moduls speichern können.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,bbe8f47078082191d89866cabaad534d
-en,default,description,file,hash
+en,de,description,file,hash
 "Sorry, but something went wrong. Too less parameters will be sent via this request.","Es tut uns leid, aber irgendetwas ist schief gelaufen. Über diese Anfrage werden zu wenige Parameter gesendet.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,57741e54a806296171a5915d93effd42
 Author,Kommentator,,site/modules/FrontendComments/FrontendCommentsAdmin.module,a517747c3d12f99244ae598910d979c5
 Email,E-Mail,,site/modules/FrontendComments/FrontendCommentsAdmin.module,ce8ae9da5b7cd6c3df2929543a9af92d
@@ -179,6 +180,7 @@ Status,=,,site/modules/FrontendComments/FrontendCommentsAdmin.module,ec53a8c4f07
 "Waiting for approval","Wartet auf Bestätigung",,site/modules/FrontendComments/FrontendCommentsAdmin.module,aa542f2fdd46d02964592afdb5e950ee
 Approved,Bestätigt,,site/modules/FrontendComments/FrontendCommentsAdmin.module,6f8063417ab31f38d864c28302f3de2f
 SPAM,=,,site/modules/FrontendComments/FrontendCommentsAdmin.module,c72beebe6ecbdddff71b846c4858ebcb
+"SPAM, but has replies","SPAM, besitzt aber Antworten",,site/modules/FrontendComments/FrontendCommentsAdmin.module,792094a5f7cc15d8c58c81343c8bf83d
 "Star rating",Sterne-Bewertung,,site/modules/FrontendComments/FrontendCommentsAdmin.module,63774fbee49655e7b74d88c24884e882
 "%s star","%s Stern",,site/modules/FrontendComments/FrontendCommentsAdmin.module,54e7ab179a80b1a740e405cbeca670ff
 "%s stars","%s Sterne",,site/modules/FrontendComments/FrontendCommentsAdmin.module,65cd4b972052588b238e55d5ddad73da
@@ -201,15 +203,12 @@ Page,Seite,,site/modules/FrontendComments/FrontendCommentsAdmin.module,193cfc9be
 "Number of approved comments","Anzahl der genehmigten Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,11ff030c7c9dc6f79754ff18c7ebe444
 "Number of comments waiting for approval","Anzahl der Kommentare, die auf die Genehmigung warten",,site/modules/FrontendComments/FrontendCommentsAdmin.module,d47097b423ded1bffd5fea544162ec59
 "Number of comments declared as SPAM","Anzahl der als SPAM deklarierten Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,eb7a8e5421187f66314fbce26c4778e3
-"Manage the comments","Kommentarverwaltung",,site/modules/FrontendComments/FrontendCommentsAdmin.module,c4aae1548d36c3578727cf06c0487a88
-"Filter the comments","Kommentare filtern",,site/modules/FrontendComments/FrontendCommentsAdmin.module,44eeb880e7acb35af4ecc031b284555b
-"Comments field",Kommentare-Feld,,site/modules/FrontendComments/FrontendCommentsAdmin.module,46d882ebf206dc73721b9c3a9a5ebdce
+"Manage the comments",Kommentarverwaltung,,site/modules/FrontendComments/FrontendCommentsAdmin.module,c4aae1548d36c3578727cf06c0487a88
 "comment is",Kommentar,,site/modules/FrontendComments/FrontendCommentsAdmin.module,bcc427a450888f72f7bd16032e81e3d3
 "comments are",Kommentare,,site/modules/FrontendComments/FrontendCommentsAdmin.module,0b508b769589b4e5eb31abadb42654d9
 "waiting for approval","warten/wartet auf Bestätigung",,site/modules/FrontendComments/FrontendCommentsAdmin.module,f90b90878625ff2d53483512de91d4c4
-"Number of comments to display","Anzahl der anzuzeigenden Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,016c287aa3ce93f23f9dabd05f879569
 all,alle,,site/modules/FrontendComments/FrontendCommentsAdmin.module,a181a603769c1f98ad927e7367c7aa51
-"Status of comments","Status der Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,ced27487cbb80860ad40ec36581cc991
+Number,Anzahl,,site/modules/FrontendComments/FrontendCommentsAdmin.module,b2ee912b91d69b435159c7c3f6df7f5f
 "Waiting approval","Warten auf Genehmigung",,site/modules/FrontendComments/FrontendCommentsAdmin.module,e14b266b893d0bf509831fc2048464a3
 "No comments match your selected filter criteria.","Keine Kommentare entsprechen den von Ihnen ausgewählten Filterkriterien.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,abf342966fc3476b5dd1514a914d7d6a
 "This comment field does not contain any comments.","Dieses Kommentarfeld enthält keine Kommentare.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,6ca29d3a69d42f0ea5cb261f671539fb
@@ -218,25 +217,26 @@ all,alle,,site/modules/FrontendComments/FrontendCommentsAdmin.module,a181a603769
 "There are no comments to display.","Es gibt keine Kommentare zum Anzeigen.",,site/modules/FrontendComments/FrontendCommentsAdmin.module,892b1fea64961731eb2314e8f2e1d56a
 "Comments manager","Kommentar Manager",,site/modules/FrontendComments/FrontendCommentsAdmin.module,e6cdd9466e5eb945e24fb667af223478
 "A custom page for the FrontendComments module to manage all comments in one place","Eine benutzerdefinierte Seite für das FrontendComments-Modul, um alle Kommentare an einem Ort zu verwalten",,site/modules/FrontendComments/FrontendCommentsAdmin.module,e7732e0f120a366180cf69faeaffa2f4
-en,default,description,file,hash
-"Updated %s for comment #%d","%s für Kommentar #%d aktualisiert",,site/modules/FrontendComments/InputfieldFrontendComments.php,58b6f822b062991647cf2e70b0140352
-Comments,Kommentare,,site/modules/FrontendComments/InputfieldFrontendComments.php,8413c683b4b27cc3f4dbd4c90329d8ba
-"No comments at the moment.","Es gibt derzeit keine Kommentare",,site/modules/FrontendComments/InputfieldFrontendComments.php,887cf850292de23cde65763458aa003a
-Comment,Kommentar,,site/modules/FrontendComments/InputfieldFrontendComments.php,0be8406951cdfda82f00f79328cf4efc
-"Posted on: %s","Geschrieben am: %s",,site/modules/FrontendComments/InputfieldFrontendComments.php,42d8cbb191daf2f2a757954b812a86be
-Email,E-Mail,,site/modules/FrontendComments/InputfieldFrontendComments.php,ce8ae9da5b7cd6c3df2929543a9af92d
-Author,Kommentator,,site/modules/FrontendComments/InputfieldFrontendComments.php,a517747c3d12f99244ae598910d979c5
-Status,=,,site/modules/FrontendComments/InputfieldFrontendComments.php,ec53a8c4f07baed5d8825072c89799be
-"Pending approval","Wartet auf Bestätigung",,site/modules/FrontendComments/InputfieldFrontendComments.php,b8e2c23a15e49a10d6f0562a3dce2538
-Approved,Bestätigt,,site/modules/FrontendComments/InputfieldFrontendComments.php,6f8063417ab31f38d864c28302f3de2f
-SPAM,=,,site/modules/FrontendComments/InputfieldFrontendComments.php,c72beebe6ecbdddff71b846c4858ebcb
-"Status ""Pending approval"" cannot be selected.","Der Status ""Wartet auf Genehmigung"" kann nicht ausgewählt werden.",,site/modules/FrontendComments/InputfieldFrontendComments.php,a20beaf67690d0f9f11ba2183aae4cf2
-FrontendComments,=,,site/modules/FrontendComments/InputfieldFrontendComments.php,6b8c682577d63258030293d8bac4919b
-"Inputfield for managing comments on a page.","Eingabefeld zum Verwalten von Kommentaren auf einer Seite.",,site/modules/FrontendComments/InputfieldFrontendComments.php,b28e4f256b1d9cf092c2d20c9f3a2072
-"pending approval","wartet auf Bestätigung",,site/modules/FrontendComments/InputfieldFrontendComments.php,e2702e8b9c1efdd2e4662873c3114be2
-approved,bestätigt,,site/modules/FrontendComments/InputfieldFrontendComments.php,787d5f05953ec39b108869dfdd7733e6
-"SPAM, but has replies","SPAM, aber besitzt Antworten",,site/modules/FrontendComments/InputfieldFrontendComments.php,792094a5f7cc15d8c58c81343c8bf83d
-en,default,description,file,hash
+"FrontendComments manager","FrontendComments Manager",,site/modules/FrontendComments/FrontendCommentsAdmin.module,13fe326d255dc633e2d4f2283aedce9b
+en,de,description,file,hash
+"Updated %s for comment #%d","%s aktualisiert für #%d",,site/modules/FrontendComments/InputfieldFrontendComments.module,58b6f822b062991647cf2e70b0140352
+Comments,Kommentare,,site/modules/FrontendComments/InputfieldFrontendComments.module,8413c683b4b27cc3f4dbd4c90329d8ba
+"No comments at the moment.","Derzeit gibt es keine Kommentare",,site/modules/FrontendComments/InputfieldFrontendComments.module,887cf850292de23cde65763458aa003a
+Comment,Kommentar,,site/modules/FrontendComments/InputfieldFrontendComments.module,0be8406951cdfda82f00f79328cf4efc
+"Posted on: %s","Geschrieben: %s",,site/modules/FrontendComments/InputfieldFrontendComments.module,42d8cbb191daf2f2a757954b812a86be
+Email,E-Mail,,site/modules/FrontendComments/InputfieldFrontendComments.module,ce8ae9da5b7cd6c3df2929543a9af92d
+Author,Kommentator,,site/modules/FrontendComments/InputfieldFrontendComments.module,a517747c3d12f99244ae598910d979c5
+Status,=,,site/modules/FrontendComments/InputfieldFrontendComments.module,ec53a8c4f07baed5d8825072c89799be
+"Pending approval","Wartet auf Bestätigung",,site/modules/FrontendComments/InputfieldFrontendComments.module,b8e2c23a15e49a10d6f0562a3dce2538
+Approved,Bestätigt,,site/modules/FrontendComments/InputfieldFrontendComments.module,6f8063417ab31f38d864c28302f3de2f
+SPAM,=,,site/modules/FrontendComments/InputfieldFrontendComments.module,c72beebe6ecbdddff71b846c4858ebcb
+"Status ""Pending approval"" cannot be selected.","Status ""Wartet auf Bestätigung"" kann nicht ausgewählt werden",,site/modules/FrontendComments/InputfieldFrontendComments.module,a20beaf67690d0f9f11ba2183aae4cf2
+FrontendComments,=,,site/modules/FrontendComments/InputfieldFrontendComments.module,6b8c682577d63258030293d8bac4919b
+"Inputfield for managing comments on a page.","Eingabefeld zur Verwaltung von Kommentaren auf einer Seite",,site/modules/FrontendComments/InputfieldFrontendComments.module,b28e4f256b1d9cf092c2d20c9f3a2072
+"pending approval","Wartet auf Bestätigung",,site/modules/FrontendComments/InputfieldFrontendComments.module,e2702e8b9c1efdd2e4662873c3114be2
+approved,Bestätigt,,site/modules/FrontendComments/InputfieldFrontendComments.module,787d5f05953ec39b108869dfdd7733e6
+"SPAM, but has replies","SPAM, besitzt aber Antworten",,site/modules/FrontendComments/InputfieldFrontendComments.module,792094a5f7cc15d8c58c81343c8bf83d
+en,de,description,file,hash
 "A new comment has been submitted","Es wurde ein neuer Kommentar abgegeben",,site/modules/FrontendComments/Notifications.php,b8bfb1838004df66c035d63b9da9ffe9
 "Comment status","Kommentar Status",,site/modules/FrontendComments/Notifications.php,693e14c3c0dd3757d95b4ee5cf0d7bb3
 "Publish the comment","Kommentar veröffentlichen",,site/modules/FrontendComments/Notifications.php,6b6304f063e87c3dee21decab212a84b
