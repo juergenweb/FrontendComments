@@ -71,7 +71,7 @@
                 'version' => '1.0.0',
                 'icon' => 'comments',
                 'permanent' => false,
-                'permission' => 'frontend-comments-edit',
+                'permission' => 'page-edit',
                 'page' => [
                     'name' => 'comments-manager',
                     'title' => __('FrontendComments manager', __FILE__),
@@ -751,8 +751,8 @@
 
             // Filter select for the FrontendCommentsField
             $commentsField = $this->modules->get('InputfieldSelect');
-            $commentsField->label = $this->_('Comments field');
             $commentsField->attr('id+name', 'fc-commentsfield');
+            $commentsField->attr('class', 'fc-commentsfilter');
             $commentsField->required = 1;
             foreach ($this->getCommentFields() as $field) {
                 $label = $field->name;
@@ -766,12 +766,13 @@
             }
             $commentsField->defaultValue = $this->getCommentFields()->first()->id;
             $commentsField->value = wire('input')->post->fc_commentsfield;
-            $markup .= $commentsField->render();
+            $label = '<label class="fc-filterlabel">'.$this->_('Field name').'</label>';
+            $markup .= '<div class="fc-filterelement">'.$label.$commentsField->render().'</div>';
 
             // Filters select for the number of comments displayed
             $numberField = $this->modules->get('InputfieldSelect');
-            $numberField->label = $this->_('Number of comments to display');
             $numberField->attr('id+name', 'fc-filternumber');
+            $numberField->attr('class', 'fc-commentsfilter');
             $numberField->required = 1;
             $options = [
                 '1' => '1',
@@ -786,12 +787,13 @@
             $numberField->addOptions($options);
             $numberField->value = wire('input')->post->filternumber;
             $numberField->defaultValue = $this->defaultNumber;
-            $markup .= $numberField->render();
+            $label = '<label class="fc-filterlabel">'.$this->_('Number').'</label>';
+            $markup .= '<div class="fc-filterelement">'.$label.$numberField->render().'</div>';
 
             // Filter select for the status of the comments
             $statusField = $this->modules->get('InputfieldSelect');
-            $statusField->label = $this->_('Status of comments');
             $statusField->attr('id+name', 'filterstatus');
+            $statusField->attr('class', 'fc-commentsfilter');
             $statusField->required = 1;
             $options = [
                 FieldtypeFrontendComments::pendingApproval => $this->_('Waiting approval'),
@@ -801,8 +803,9 @@
             ];
             $statusField->addOptions($options);
             $statusField->defaultValue = 3;
-            $markup .= $statusField->render();
-
+            $label = '<label class="fc-filterlabel">'.$this->_('Status').'</label>';
+            $markup .= '<div class="fc-filterelement">'.$label.$statusField->render().'</div>';
+            bd($statusField->label);
             $filter = wire('modules')->get('InputfieldMarkup');
             $filter->markupText = $markup;
             $managingFieldset->add($filter);
