@@ -66,7 +66,7 @@ none,nichts,,site/modules/FrontendComments/FieldtypeFrontendComments.module,334c
 "Only user fields of the type ""FieldtypeImage"" and the configuration setting for a single image will be displayed (if present).","Es werden nur Benutzerfelder vom Typ ""FieldtypeImage"" mit der Konfigurationseinstellung für ein einzelnes Bild angezeigt (falls vorhanden).",,site/modules/FrontendComments/FieldtypeFrontendComments.module,f5d3a8584d11f1af7b6bf10c7a168b4e
 "Set the size of the image","Festlegen der Größe des Bildes",,site/modules/FrontendComments/FieldtypeFrontendComments.module,9316ab8c35ffd3009bea0dc20246d2f9
 "Enter a value in px. The image will be displayed squared.","Geben Sie einen Wert in px ein. Das Bild wird quadratisch dargestellt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,c24ad35641109faa3e1fd3c33c4a561e
-"The user image will be displayed next to the comment.","Das Benutzerbild wird neben dem Kommentar angezeigt",,site/modules/FrontendComments/FieldtypeFrontendComments.module,4210b01b1f8d77bb13ac8f6957457434
+"The user image will be displayed next to the comment.","Das Benutzerbild wird neben dem Kommentar angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,4210b01b1f8d77bb13ac8f6957457434
 "Default email configuration",Standard-E-Mail-Konfiguration,,site/modules/FrontendComments/FieldtypeFrontendComments.module,7507729fd86157f8c6c06b36b11c9b92
 "Select an email template","Wählen Sie eine E-Mail-Vorlage aus",,site/modules/FrontendComments/FieldtypeFrontendComments.module,391b1c0e2e6a571d16ee13451bfe5740
 "inherit from FrontendForms settings","von FrontendForms-Einstellungen übernehmen",,site/modules/FrontendComments/FieldtypeFrontendComments.module,78325c4af90ffc228c3798aa64c67ad1
