@@ -9,3 +9,17 @@
 .fc-table-label {
     font-weight: bold;
 }
+
+
+.fc-filterelement {
+    display:inline-block;
+    margin-right: 20px;
+    text-align:center;
+}
+
+.fc-filterlabel {
+    display: block;
+    font-weight: bold;
+    text-align: center;
+    padding: 3px 0;
+}
