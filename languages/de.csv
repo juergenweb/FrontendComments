@@ -80,7 +80,7 @@ none,nichts,,site/modules/FrontendComments/FieldtypeFrontendComments.module,334c
 "Fe email1@mydomain.com,email2@mydomain.com.","Z.B. email1@mydomain.com, email2@mydomain.com.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,d10a52826a11d639fe9f043b49d3621f
 "Recipients for the notification email","Empfänger für die Benachrichtigungs-E-Mail",,site/modules/FrontendComments/FieldtypeFrontendComments.module,b4e60aaff24bc873a9cabdbe476dee92
 "Select one or more users that should receive a notification about new comments.","Wählen Sie einen oder mehrere Benutzer aus, die eine Benachrichtigung über neue Kommentare erhalten sollen.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,b07e22cf86d72200d151fce81d19095a
-"Users with the role ""registered"" will not be displayed, because they are not allowed to get notification emails.","Benutzer mit der Rolle ""registriert"" werden nicht angezeigt, da sie keine Benachrichtigungs-E-Mails erhalten dürfen.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,1c591febfc27d24d1c2d104c663a3d37
+"Only users with page edit permission will be displayed.","Es werden nur Benutzer mit Seitenbearbeitungsrecht angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,1c591febfc27d24d1c2d104c663a3d37
 "From email address",Absender-E-Mail-Adresse,,site/modules/FrontendComments/FieldtypeFrontendComments.module,6f6da7aec649851c977b6bf4e083977d
 "This email address will be displayed as the sender email address of the emails sent by this module.","Diese E-Mail-Adresse wird als Absender-E-Mail-Adresse in den von diesem Modul gesendeten E-Mails angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,e1ca26eb2ee8afa47a146779d2cfbfe9
 "If no email address will be entered, %s will be displayed instead as the sender address.","Wenn keine E-Mail-Adresse eingegeben wird, wird stattdessen %s als Absenderadresse angezeigt.",,site/modules/FrontendComments/FieldtypeFrontendComments.module,fbba3d8e1cdcf39fd8ed54db75bf6014
@@ -201,7 +201,7 @@ Page,Seite,,site/modules/FrontendComments/FrontendCommentsAdmin.module,193cfc9be
 "Number of approved comments","Anzahl der genehmigten Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,11ff030c7c9dc6f79754ff18c7ebe444
 "Number of comments waiting for approval","Anzahl der Kommentare, die auf die Genehmigung warten",,site/modules/FrontendComments/FrontendCommentsAdmin.module,d47097b423ded1bffd5fea544162ec59
 "Number of comments declared as SPAM","Anzahl der als SPAM deklarierten Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,eb7a8e5421187f66314fbce26c4778e3
-"Manage the comments","Verwalten der Kommentare",,site/modules/FrontendComments/FrontendCommentsAdmin.module,c4aae1548d36c3578727cf06c0487a88
+"Manage the comments","Kommentarverwaltung",,site/modules/FrontendComments/FrontendCommentsAdmin.module,c4aae1548d36c3578727cf06c0487a88
 "Filter the comments","Kommentare filtern",,site/modules/FrontendComments/FrontendCommentsAdmin.module,44eeb880e7acb35af4ecc031b284555b
 "Comments field",Kommentare-Feld,,site/modules/FrontendComments/FrontendCommentsAdmin.module,46d882ebf206dc73721b9c3a9a5ebdce
 "comment is",Kommentar,,site/modules/FrontendComments/FrontendCommentsAdmin.module,bcc427a450888f72f7bd16032e81e3d3
