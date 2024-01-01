@@ -172,7 +172,7 @@
                     FieldtypeFrontendComments::pendingApproval => $this->_('Waiting for approval'),
                     FieldtypeFrontendComments::approved => $this->_('Approved'),
                     FieldtypeFrontendComments::spam => $this->_('SPAM'),
-                    FieldtypeFrontendComments::spamReplies => $this->_('SPAM, but has children')
+                    FieldtypeFrontendComments::spamReplies => $this->_('SPAM, but has replies')
                 ];
                 $fieldStatus->addOptions($statusOptions);
                 $fieldStatus->attr('value', $comment->status);
@@ -238,7 +238,7 @@
                             // check if comment has children at the moment - if yes set spam_update to null again
                             if (($comment->getReplies()->count) && ($input->post->detailstatus == '2')) {
                                 $spam_update = NULL;
-                                $input->post->detailstatus = '3'; // set new status to 3 (SPAM, but has children) to prevent deletion of the comment
+                                $input->post->detailstatus = '3'; // set new status to 3 (SPAM, but has replies) to prevent deletion of the comment
                             }
 
 
@@ -327,7 +327,7 @@
                         FieldtypeFrontendComments::pendingApproval => $this->_('Waiting for approval'),
                         FieldtypeFrontendComments::approved => $this->_('Approved'),
                         FieldtypeFrontendComments::spam => $this->_('SPAM'),
-                        FieldtypeFrontendComments::spamReplies => $this->_('SPAM, but has children'),
+                        FieldtypeFrontendComments::spamReplies => $this->_('SPAM, but has replies'),
                     ];
                     $selectStatus->addOptions($statusOptions);
                     $value = (wire('input')->post->$selectName) ?? $comment->status;
@@ -467,7 +467,7 @@
             // check if comment has children at the moment - if yes set spam_update to null again
             if (($comment->getReplies()->count) && ($newStatus == '2')) {
                 $spam_update = NULL;
-                $newStatus = '3'; // set new status to 3 (SPAM, but has children) to prevent deletion of the comment
+                $newStatus = '3'; // set new status to 3 (SPAM, but has replies) to prevent deletion of the comment
             }
 
             $sql = "UPDATE $table SET status=:status, spam_update=:spam_update WHERE id=:id";
@@ -554,7 +554,7 @@
                                 // check if comment has children at the moment - if yes set spam_update to null again
                                 if (($comment->getReplies()->count) && ($newStatus == '2')) {
                                     $spam_update = NULL;
-                                    $newStatus = '3'; // set new status to 3 (SPAM, but has children) to prevent deletion of the comment
+                                    $newStatus = '3'; // set new status to 3 (SPAM, but has replies) to prevent deletion of the comment
                                 }
 
                                 $sql = "UPDATE $table SET status=:status, spam_update=:spam_update WHERE id=:id";
