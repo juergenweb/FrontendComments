@@ -1018,7 +1018,7 @@
             $userimage->attr('value', $value);
             $userimage->required = 1;
             $userimage->columnWidth = 50;
-            $userimage->description = $this->_('Select the field of the user template which contains the user image');
+            $userimage->description = $this->_('Select the field of the user template which contains the user image.');
             $userimage->notes = $this->_('Only user fields of the type "FieldtypeImage" and the configuration setting for a single image will be displayed (if present).');
             $confFieldset->add($userimage);
 
@@ -1030,6 +1030,7 @@
             $imagesize->description = $this->_('Enter a value in px. The image will be displayed squared.');
             $value = (is_null($field->input_fc_imagesize)) ? $this->input_fc_imagesize : $field->input_fc_imagesize;
             $imagesize->attr('value', $value);
+            $imagesize->notes = $this->_('The user image will be displayed next to the comment.');
             $confFieldset->add($imagesize, $inputfields);
 
             $inputfields->add($confFieldset);
@@ -1076,7 +1077,6 @@
             $emailtype->attr('value', $field->input_fc_emailtype);
             $emailtype->columnWidth = 50;
             $emailtype->required = 1;
-            $emailtype->notes = '';
             $emailFieldset->add($emailtype);
 
             // email address where the emails should be sent to (fe. noreply@mycompany.com)
@@ -1155,7 +1155,7 @@
             $notification = $modules->get('InputfieldRadios');
             $notification->attr('name', 'input_fc_comment_notification');
             $notification->label = $this->_('Commenter email notification');
-            $notification->description = $this->_('Send commenters notification emails about new replies');
+            $notification->description = $this->_('Send commenters notification emails about new replies.');
             $notification->addOption(0, $this->_('Disabled'));
             $notification->addOption(Comment::flagNotifyReply, $this->_('Commenters can receive email notifications of replies to their comment only'));
             $notification->addOption(Comment::flagNotifyAll, $this->_('Commenters can receive email notifications for all new replies to a comment on the page'));
@@ -1195,7 +1195,7 @@
             $f->attr('value', $field->input_fc_outputorder);
             $f->attr('checked', $field->input_fc_outputorder ? 'checked' : '');
             $f->label2 = $this->_('Show form after comments');
-            $f->description = $this->_('Reverse the order of the output of form and comments');
+            $f->description = $this->_('Reverse the order of the output of form and comments.');
             $f->notes = $this->_('By default, the form will be displayed before the comments. To reverse that behavior check this box.');
             $generalFieldset->append($f);
 
@@ -1284,7 +1284,7 @@
             // Show or hide privacy checkbox or text on form
             $privacy_show = $this->wire()->modules->get('InputfieldSelect');
             $privacy_show->label = $this->_('Add privacy text or privacy checkbox to the form');
-            $privacy_show->description = $this->_('Select if you want to show a privacy text only or a privacy checkbox above the submit button');
+            $privacy_show->description = $this->_('Select if you want to show a privacy text only or a privacy checkbox above the submit button.');
             $options = [
                 $this->_('Do not show anything'),
                 $this->_('Show checkbox'),
@@ -1355,7 +1355,7 @@
             $f->attr('min', 0);
             $f->attr('max', 10);
             $f->required(true);
-            $f->description = $this->_('Choose the number of depth for threaded comments');
+            $f->description = $this->_('Choose the number of depth for threaded comments.');
             $f->columnWidth = 50;
             $f->notes = $this->_('Specify 0 for traditional flat chronological comments. For threaded comments (replies appear with comment being replied to) specify the maximum depth allowed for replies (0 to 3 recommended).');
             $commentFieldset->append($f);
@@ -1367,7 +1367,7 @@
             $f->attr('value', $field->input_fc_sort);
             $f->attr('checked', $field->input_fc_sort ? 'checked' : '');
             $f->label2 = $this->_('Sort newest to oldest');
-            $f->description = $this->_('Set the sort order for the comments');
+            $f->description = $this->_('Set the sort order for the comments.');
             $f->columnWidth = 50;
             $f->notes = $this->_('By default, comments will be sort chronologically (oldest to newest). To reverse that behavior check this box.');
             $commentFieldset->append($f);
