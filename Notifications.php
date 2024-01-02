@@ -27,7 +27,7 @@
 
         use configValues;
 
-        // Declare all properties
+        // Declare all properties'
         // Array containing the FrontendComments configuration values
         protected array $frontendCommentsConfig = [];
         // Array containing the FrontendForms configuration values
