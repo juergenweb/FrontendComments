@@ -41,7 +41,9 @@
 
     namespace FrontendComments;
 
+    use Exception;
     use FrontendForms\Alert;
+    use PDO;
     use ProcessWire\Field;
     use ProcessWire\Page;
     use ProcessWire\PaginatedArray;
@@ -86,10 +88,10 @@
         }
 
         /**
-         * Helper function to round to certain steps (half, quarter,..)
+         * Helper function to round to certain steps (half, quarter, …)
          * @param $num
          * @param $parts -> 2 = half steps, 4 = quarter steps,....
-         * @return float|int
+         * @return float
          */
         protected function mRound($num, $parts): float
         {
@@ -100,9 +102,9 @@
 
         /**
          * Calculate the average Rating of all comments
-         * @return string
+         * @return float|null
          */
-        public function getAverageStarRating()
+        public function getAverageStarRating(): ?float
         {
             // find all comments with rating (not null)
             $values = [];
@@ -114,16 +116,16 @@
 
             if (count($values) > 0) {
                 $averageValue = array_sum($values) / count($values);
-                $rounded = round($averageValue, 1,);
-                $rounded = $this->mRound($rounded, 2);
-                return $rounded;
+                $rounded = round($averageValue, 1);
+                return $this->mRound($rounded, 2);
             }
             return null;
         }
 
         /**
-         * Render FontAwesome stars depending on half step number
-         * @param float $stars
+         * Render FontAwesome stars depending on half-step number
+         * @param float|int|null $stars
+         * @param bool $showNull
          * @return string
          */
         public static function ___renderStarsOnly(float|int|null $stars, bool $showNull = false): string
@@ -193,7 +195,7 @@
         }
 
         /**
-         * Public function to change the email addresses of the moderators, where the mails should sent to
+         * Public function to change the email addresses of the moderators, where the mails should be sent to
          * @param string $moderatoremail
          * @return $this
          */
@@ -317,7 +319,7 @@
          * Create a new blank CommentArray and add a page and field to it
          * @return \ProcessWire\WireArray
          */
-        public function makeNew(): CommentArray
+        public function makeNew(): WireArray
         {
             $a = parent::makeNew();
             if ($this->page) $a->setPage($this->page);
@@ -418,7 +420,7 @@
          * @return string
          * @throws WireException
          */
-        public function ___render(): string
+        public function ___renderForm(): string
         {
             $form = $this->getCommentForm();
             return $form->___render();
@@ -435,7 +437,7 @@
                 $this->input_fc_outputorder = $this->getFrontendCommentsInputfieldConfigValues($this->field)['input_fc_outputorder'];
             }
 
-            // check if rating is enabled;
+            // check if the rating is enabled;
             $field = $this->field;
             if (!is_null($field->input_fc_voting)) {
 
@@ -454,7 +456,7 @@
                             $votesTableName = 'field_' . $this->field->name . '_votes';
                             $comment = $this->find('id=' . $queryParams['votecommentid'])->first();
 
-                            // 1)check first if the user has not voted for this comment within a certain amount of days
+                            // 1) check first if the user has not voted for this comment within a certain number of days
 
                             // check the database if user has voted for this comment
                             $statement = "SELECT id 
@@ -466,44 +468,46 @@
 
                             $query = $database->prepare($statement);
 
-                            $query->bindValue(':comment_id', $queryParams['votecommentid'], \PDO::PARAM_INT);
-                            $query->bindValue(':user_id', $this->userdata['user_id'], \PDO::PARAM_INT);
-                            $query->bindValue(':user_agent', $this->userdata['user_agent'], \PDO::PARAM_STR);
-                            $query->bindValue(':ip', $this->userdata['ip'], \PDO::PARAM_STR);
+                            $query->bindValue(':comment_id', $queryParams['votecommentid'], PDO::PARAM_INT);
+                            $query->bindValue(':user_id', $this->userdata['user_id'], PDO::PARAM_INT);
+                            $query->bindValue(':user_agent', $this->userdata['user_agent']);
+                            $query->bindValue(':ip', $this->userdata['ip']);
 
+                            $rowsnumber = 0;
                             try {
                                 $query->execute();
                                 $rowsnumber = $query->rowCount();
                                 $query->closeCursor();
                                 $result = true;
-                            } catch (\Exception $e) {
+                            } catch (Exception $e) {
 
                                 $result = false;
                             }
 
                             if ($result && ($rowsnumber === 0)) {
 
-                                //2) save data to the votes table first
+                                //2) save data to the "votes" table first
                                 $statement = "INSERT INTO $votesTableName (comment_id, user_id, user_agent, ip, vote)" .
                                     " VALUES (:comment_id, :user_id, :user_agent, :ip, :vote)";
 
                                 $query = $database->prepare($statement);
 
-                                $query->bindValue(':comment_id', $queryParams['votecommentid'], \PDO::PARAM_INT);
-                                $query->bindValue(':ip', $this->userdata['ip'], \PDO::PARAM_STR);
-                                $query->bindValue(':user_id', $this->userdata['user_id'], \PDO::PARAM_INT);
-                                $query->bindValue(':user_agent', $this->userdata['user_agent'], \PDO::PARAM_STR);
+                                $query->bindValue(':comment_id', $queryParams['votecommentid'], PDO::PARAM_INT);
+                                $query->bindValue(':ip', $this->userdata['ip']);
+                                $query->bindValue(':user_id', $this->userdata['user_id'], PDO::PARAM_INT);
+                                $query->bindValue(':user_agent', $this->userdata['user_agent']);
 
                                 $value = ($vote === 'up') ? 1 : -1;
 
-                                $query->bindValue(':vote', $value, \PDO::PARAM_INT);
+                                $query->bindValue(':vote', $value, PDO::PARAM_INT);
 
+                                $result = 0;
                                 try {
                                     $query->execute();
                                     $result = $query->rowCount();
                                     $query->closeCursor();
-                                } catch (\Exception $e) {
-                                    $result = 0;
+                                } catch (Exception $e) {
+
                                 }
 
                                 if ($result) {
@@ -523,17 +527,16 @@
                                     $query = $database->prepare($statement);
 
                                     $newValue = $comment->{$updateCol} + 1;
-                                    $query->bindValue(':' . $updateCol, $newValue, \PDO::PARAM_INT);
+                                    $query->bindValue(':' . $updateCol, $newValue, PDO::PARAM_INT);
 
                                     try {
                                         $query->execute();
-                                        $result = $query->rowCount();
                                         $query->closeCursor();
-                                    } catch (\Exception $e) {
-                                        $result = 0;
+                                    } catch (Exception $e) {
+
                                     }
 
-                                    // finally add the new value to the result div
+                                    // finally, add the new value to the result div
                                     echo '<div id="fc-ajax-vote-result" data-votetype="' . $vote . '">' . $newValue . '</div>';
                                 }
                             } else {
@@ -547,7 +550,7 @@
                                 $alert->setContent(sprintf($this->_('It seems that you have rated this comment within the last %s. In this case, you may not vote again.'), $timePeriod));
                                 $alert->setCSSClass('alert_warningClass');
 
-                                echo '<div id="fc-ajax-noVote">' . $alert->render() . '</div>';
+                                echo '<div id="fc-ajax-noVote">' . $alert->___render() . '</div>';
                             }
                         }
                     }
@@ -557,7 +560,7 @@
             // show the form on top only if id=0 or id is different, but query string with code is present
             $form = '';
             if (($this->commentId === 0) || (($this->code))) {
-                $form = $this->___render();
+                $form = $this->___renderForm();
             }
 
             $content = array_filter([$form, $this->renderComments()]);
@@ -567,6 +570,14 @@
                 $content = array_reverse($content);
             }
             return implode('', $content);
+        }
+
+        /**
+         * @throws \ProcessWire\WireException
+         */
+        public function __toString()
+        {
+            return $this->render();
         }
 
     }
