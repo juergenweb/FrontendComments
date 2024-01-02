@@ -50,6 +50,7 @@
     use FrontendForms\TextElements;
     use FrontendForms\Image;
     use ProcessWire\WireException;
+    use ProcessWire\FieldtypeFrontendComments;
 
 
     class Comment extends WireData
@@ -75,6 +76,7 @@
         protected array $frontendFormsConfig = [];
         protected array $frontendCommentsConfig = [];
         protected int|bool|null $input_fc_stars = false;
+
         protected int|bool|null $input_fc_voting = false;
         protected CommentArray $comments; // the array containing all comments of this page
         protected Field $field;
@@ -110,6 +112,8 @@
             // get configuration values from the FrontendComments input field
             $this->frontendCommentsConfig = $this->getFrontendCommentsInputfieldConfigValues($this->field);
 
+            $this->adaptCommentStatus();
+
             // create properties of FrontendComments configuration values
             $properties = ['input_fc_stars', 'input_fc_voting'];
             $this->createPropertiesOfArray($this->frontendCommentsConfig, $properties);
@@ -119,7 +123,7 @@
             foreach ($comment as $name => $value) {
                 if ($name === 'data') $name = 'text';
                 // add "Guest" as name if no name is entered
-                if($name === 'author'){
+                if ($name === 'author') {
                     $value = ($value == '') ? $this->_('Guest') : $value;
                 }
                 $this->set($name, $value);
@@ -156,7 +160,7 @@
             $this->replyLink->setAttribute('data-parent_id', $this->parent_id);
             $this->replyLink->setAttribute('data-id', $this->id);
             $this->replyLink->setLinkText($this->_('Reply'));
-            $this->replyLink->wrap('span')->setAttribute('class', 'icon-box');
+            $this->replyLink->wrap()->setAttribute('class', 'icon-box');
 
             // Up-vote link
             $this->upvote = new Link();
@@ -207,10 +211,21 @@
         }
 
         /**
+         * Change the comment status depending on the moderation settings
+         * @return void
+         */
+        protected function adaptCommentStatus(): void
+        {
+            if ($this->frontendCommentsConfig['input_fc_moderate'] == FieldtypeFrontendComments::moderateNone) {
+                $this->status = 1;
+            }
+        }
+
+        /**
          * Get the page object, where the comment belongs to
          * @return \ProcessWire\Page
          */
-        public function getPage()
+        public function getPage(): Page
         {
             return $this->page;
         }
@@ -219,7 +234,7 @@
          * Get the field object, where the comment belongs to
          * @return \ProcessWire\Field
          */
-        public function getField()
+        public function getField(): Field
         {
             return $this->field;
         }
@@ -397,7 +412,7 @@
             $comments = $page->get($field->name);
             $children = $comments->makeNew();
             $children->setPage($this->getPage());
-            if ($field) $children->setField($this->getField());
+            $children->setField($this->getField());
             $id = $this->id;
             foreach ($comments as $comment) {
                 /** @var Comment $comment */
@@ -468,7 +483,7 @@
         }
 
         /**
-         * Output the votes markup
+         * Output the vote markup
          * @return string
          */
         public function ___renderVotes(): string
@@ -484,7 +499,7 @@
         }
 
         /**
-         * Output the stars markup
+         * Output the markup for the star rating
          * @return string
          */
         public function ___renderRating(): string
@@ -503,6 +518,7 @@
          */
         public function ___renderText(): string
         {
+
             if ($this->status == '1') {
                 $out = $this->getCommentText()->___render();
             } else {
@@ -574,12 +590,7 @@
         public function ___renderComment(Comment $comment, bool $levelStatus, int $level): string
         {
 
-            $out = '';
-            $out .= '<div id="' . $this->field->name . '-' . $comment->id . '-novote"></div>'; // wrapper for no vote alert box
-
-            if ($level === 0) {
-                //$out .= '<div id="comment-wrapper-' . $comment->id . '" class="fc-comment-main-level">';
-            }
+            $out = '<div id="' . $this->field->name . '-' . $comment->id . '-novote"></div>'; // wrapper for no vote alert box
 
             // render the comment markup depending on CSS framework set in the configuration
             $frameWork = ucfirst(pathinfo($this->frontendFormsConfig['input_framework'], PATHINFO_FILENAME));
@@ -591,16 +602,11 @@
             }
 
             // create outer wrapper container depending on the framework
-            switch ($this->frontendFormsConfig['input_framework']) {
-                case('uikit3.json'):
-                    $out .= '<article class="uk-comment uk-comment-primary" role="comment">';
-                    break;
-                case('bootstrap5.json'):
-                    $out .= '<div class="container card">';
-                    break;
-                default:
-                    $out .= '<div class="fc-comment-box">';
-            }
+            $out .= match ($this->frontendFormsConfig['input_framework']) {
+                'uikit3.json' => '<article class="uk-comment uk-comment-primary" role="comment">',
+                'bootstrap5.json' => '<div class="container card">',
+                default => '<div class="fc-comment-box">',
+            };
 
             $out .= $class->___renderCommentMarkup($levelStatus);
 
@@ -623,20 +629,11 @@
             $out .= '</div>';
 
             // outer wrapper container end
-            switch ($this->frontendFormsConfig['input_framework']) {
-                case('uikit3.json'):
-                    $out .= '</article>';
-                    break;
-                case('bootstrap5.json'):
-                    $out .= '</div>';
-                    break;
-                default:
-                    $out .= '</div>';
-            }
+            $out .= match ($this->frontendFormsConfig['input_framework']) {
+                'uikit3.json' => '</article>',
+                default => '</div>',
+            };
 
-            if ($level === 0) {
-                //$out .= '</div>';
-            }
             return $out;
         }
 
