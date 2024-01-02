@@ -55,8 +55,6 @@
          * Render method for the comment - outputs Uikit 3 comment markup
          * @param bool $levelStatus
          * @return string
-         * @throws \ProcessWire\WireException
-         * @throws \ProcessWire\WirePermissionException
          */
         public function ___renderCommentMarkup(bool $levelStatus): string
         {
