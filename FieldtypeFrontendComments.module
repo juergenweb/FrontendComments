@@ -184,6 +184,7 @@
          * Delete votes, which are older than the time period set inside the configuration
          * @return void
          * @throws \ProcessWire\WireException
+         * @throws \Exception
          */
         protected function deleteOldVoteEntries(): void
         {
@@ -352,6 +353,7 @@
                     // get the code from the database
                     $commentTable = $this->database->escapeTable($field->table);
                     $statement = "SELECT code, email FROM $commentTable WHERE id=:parent_id";
+                    $code = null;
                     try {
                         $query = $this->database->prepare($statement);
                         $query->bindValue(":parent_id", $parent_id, PDO::PARAM_INT);
@@ -359,7 +361,7 @@
                         $result = $query->fetchAll();
                         $code = $result[0]['code'];
                     } catch (Exception $e) {
-                        $error = $e->getMessage();
+
                     }
 
                     // get the page object
@@ -393,7 +395,7 @@
                                     $query->bindValue(":id", $deleteRowID, PDO::PARAM_INT);
                                     $query->execute();
                                 } catch (Exception $e) {
-                                    $error = $e->getMessage();
+
                                 }
                             }
                         }
@@ -404,7 +406,7 @@
 
         /**
          * Get all fields inside the user template which can be selected to map form fields.
-         * Please note: Only user fields, which are editable by the user will be taken into account
+         * Please note: Only user fields, which are editable by the user, will be taken into account
          * @return array - key: field ID, value: field name
          * @throws WireException
          * @throws WirePermissionException
@@ -715,9 +717,15 @@
         }
 
         /**
+         * @param null $comment
+         * @param array $queryParams
+         * @param $table
+         * @param $notification
+         * @param $code
+         * @param $alert
          * @throws \ProcessWire\WireException
          */
-        public function ___updateStatus($comment = null, array $queryParams, $table, $notification, $code, $alert)
+        public function ___updateStatus($comment = null, array $queryParams, $table, $notification, $code, $alert): void
         {
             if (!is_null($comment)) {
 
@@ -942,7 +950,7 @@
          * @return Module|null
          * @throws WirePermissionException|WireException
          */
-        public function getInputfield(Page $page, Field $field)
+        public function getInputfield(Page $page, Field $field): ?Module
         {
             $inputfield = $this->wire()->modules->get('InputfieldFrontendComments');
             if (!$inputfield) return null;
@@ -957,7 +965,7 @@
          * @return mixed
          * @throws \ProcessWire\WireException
          */
-        static public function findComments($field, $selectorString)
+        static public function findComments($field, $selectorString): mixed
         {
             if (is_string($field)) $field = wire()->fields->get($field);
             if (!$field instanceof Field) throw new WireException('Arg 1 to findComments() must be a field');
@@ -1228,7 +1236,7 @@
             $formHead->notes = $this->_('If no heading is entered, "Leave a comment" will be displayed as the default heading.') . ' ' . $disableFormHead;
             $formFieldset->add($formHead);
 
-            // Set the tag for the headline of the comments form
+            // Set the tag for the headline of the comment form
             $formTagHead = $this->wire()->modules->get('InputfieldSelect');
             $formTagHead->label = $this->_('Headline type for the form heading');
             $formTagHead->description = $this->_('Select the type of the form heading (from h1 to h5).');
@@ -1459,7 +1467,7 @@
             $value = (is_null($field->input_fc_captcha)) ? $this->input_fc_captcha : $field->input_fc_captcha;
             $captcha->attr('value', $value);
             $captcha->required = 1;
-            $spamFieldset->add($captcha, $inputfields);
+            $spamFieldset->add($captcha);
 
             $inputfields->append($spamFieldset);
 
@@ -1469,7 +1477,7 @@
         }
 
         /**
-         * Method which runs on uninstall
+         * Method, which runs on uninstalling
          * @return void
          */
         public function ___uninstall(): void
