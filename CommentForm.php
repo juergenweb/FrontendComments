@@ -93,7 +93,7 @@
         protected InputText $author; // the author field object
         protected Textarea $comment; // the comment text field object
         protected Select $stars; // the number field for star rating
-        protected InputRadioMultiple $notify; // the notify me about new comments field object
+        protected InputRadioMultiple $notify; // "notify me about new comments" field object
         protected Privacy $privacy; // the accept privacy checkbox object
         protected PrivacyText $privacyText; // the accept privacy text object
         protected Button $button; // the submit button object
@@ -232,7 +232,7 @@
                     $tooltip = false;
                 }
                 // set tooltip option depending on the settings
-                $options[] = '&quot;tooltip&quot;:&quot;'.$tooltip.'&quot;';
+                $options[] = '&quot;tooltip&quot;:&quot;' . $tooltip . '&quot;';
                 // set clear-able to true
                 $options[] = '&quot;clearable&quot;:true';
 
@@ -246,8 +246,7 @@
                 if ($this->frontendCommentsConfig['input_fc_stars'] == 2) {
                     $this->stars->setRule('required');
                 }
-                // add the post value of the star rating to the star rating render function after form submission
-                $number = array_key_exists($this->field->name . '-stars', $_POST) ? $_POST[$this->field->name . '-stars'] : '0';
+
                 $this->add($this->stars);
             }
 
@@ -318,7 +317,7 @@
 
         /**
          * Add or remove a headline above the form
-         * @param string $headline
+         * @param string|null $headline
          * @return void
          */
         public function addHeadline(string|null $headline): void
@@ -394,7 +393,7 @@
                     $receiver = $this->frontendCommentsConfig['input_fc_defaultPWField_to'];
                     $mail->to($receiver);
                 } else {
-                    throw new Exception('Please go to the field settings of this comment field and add a Processwire field which contains the the receiver mail address.');
+                    throw new Exception($this->_('Please go to the field settings of this comment field and add a Processwire field which contains the receiver mail address.'));
                 }
             }
         }
@@ -445,7 +444,7 @@
                 // sanitize the code to be a string and has a length of 120 characters
                 $code = $this->wire('sanitizer')->string120($queryParams['code']);
 
-                // get the comments table
+                // get the "comments" table
                 $table = $this->database->escapeTable($this->field->table);
 
                 // check if the code exists inside the table
@@ -455,7 +454,7 @@
                     $notification = $comment->notification;
 
                     switch (true) {
-                        // Status change via remote link of an email
+                        // Status change via a remote link of an email
                         case (array_key_exists('status', $queryParams)):
 
                             // check if the value is only '1' (approved) or '2' (spam)
@@ -475,7 +474,7 @@
                                         $newStatus = 3;
                                     }
 
-                                    if($newStatus == '2'){
+                                    if ($newStatus == '2') {
                                         // add timestamp to the database
                                         $spamTS = time();
                                     } else {
@@ -514,18 +513,18 @@
                             }
                             break;
 
-                        // User do not want to get further mails about replies
+                        // User does not want to get further mails about replies
                         case (array_key_exists('notification', $queryParams)):
                             if ($notification == 0) {
                                 $this->wire('session')->set('notifystatuschange', '1');
                             } else {
-                                // 2) change status of mail notification to 0, which means to not send notification mails in the future
+                                // 2) change the status of mail notification to 0, which means to not send notification mails in the future
                                 $sql = "UPDATE $table SET notification=:notification WHERE code=:code";
                                 // save the data to the database
                                 try {
                                     $query = $this->database->prepare($sql);
                                     $query->bindValue(":notification", 0, PDO::PARAM_INT);
-                                    $query->bindValue(":code", $code, PDO::PARAM_STR);
+                                    $query->bindValue(":code", $code);
                                     // execute the query to save the comment in the database
                                     if ($query->execute()) {
                                         // set the status of the new comment to a session variable for later output of the success message
@@ -767,19 +766,21 @@
          * @return void
          * @throws \ProcessWire\WireException
          */
-        protected function writeEntryInQueueTable(Comment $newComment)
+        protected function writeEntryInQueueTable(Comment $newComment): void
         {
             if ((array_key_exists('input_fc_comment_notification', $this->frontendCommentsConfig)) && ($this->frontendCommentsConfig['input_fc_comment_notification'] > 0)) {
                 //check if this is a reply or a new comment
                 $reply = !$this->parent_id == 0; // true or false
 
                 $notificationEmails = [];
+                $last_comment_id = null;
 
                 if ($reply) {
 
                     // get the id of the current saved comment inside the comment field table
                     $table = $this->database->escapeTable($this->field->table);
                     $statement = "SELECT max(id) AS `lastid`FROM $table";
+
 
                     try {
                         $query = $this->database->prepare($statement);
