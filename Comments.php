@@ -86,7 +86,7 @@
 
         /**
          * Add or remove a headline above the comments
-         * @param string $headline
+         * @param string|null $headline
          * @return void
          */
         public function addHeadline(string|null $headline): void
@@ -119,7 +119,7 @@
          * @return string
          * @throws \ProcessWire\WireException
          */
-        function renderPagination(CommentArray $comments, $options = array())
+        function renderPagination(CommentArray $comments, $options = array()): string
         {
 
             if (!$comments->count) {
@@ -211,23 +211,19 @@
                     $levelStatus = false;
                 }
 
-                if ($level >= (int)$this->frontendCommentsConfig['input_fc_depth'] + 1) {
-                    $ulLevelStatus = true;
-                }
             }
 
-            if ($ulLevelStatus) {
 
-                if ($level == 0) {
-                    $out .= '<div class="fc-comments-wrapper">';
-                    // render the comments headline if present
-                    $out .= $this->getCommentsHeadline()->___render();
-                }
-
-
-                $levelClass = ($level == 0) ? ' fc-comments-list uk-comment-list' : ' fc-comments-list fc-reply-list'; // add additional class for sublevels
-                $out .= '<ul id="' . $this->comments->getField()->name . '-list-' . $parent_id . '" class="fc-list level-' . $level . $levelClass . '">';
+            if ($level == 0) {
+                $out .= '<div class="fc-comments-wrapper">';
+                // render the comments headline if present
+                $out .= $this->getCommentsHeadline()->___render();
             }
+
+
+            $levelClass = ($level == 0) ? ' fc-comments-list uk-comment-list' : ' fc-comments-list fc-reply-list'; // add additional class for sublevels
+            $out .= '<ul id="' . $this->comments->getField()->name . '-list-' . $parent_id . '" class="fc-list level-' . $level . $levelClass . '">';
+
 
             // change the sort order if set
             $comments = $this->comments;
@@ -255,13 +251,12 @@
                 }
             }
 
-            if ($ulLevelStatus) {
 
-                $out .= '</ul>';
-                if ($level == 0) {
-                    $out .= '</div>';
-                }
+            $out .= '</ul>';
+            if ($level == 0) {
+                $out .= '</div>';
             }
+
 
             return $out;
         }
