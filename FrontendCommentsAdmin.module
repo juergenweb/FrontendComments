@@ -46,12 +46,12 @@
             // get all FrontendComments fields site wide as a WireArray
             $this->commentFields = $this->getCommentFields();
 
-            if ($this->commentFields->count)  {
+            if ($this->commentFields->count) {
 
                 // Get all FrontendForms configuration values
                 $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
 
-                // As the default comment field on page load, take the first one inside the WireArray
+                // As the default comment field on a page load, take the first one inside the WireArray
                 $this->field = $this->commentFields->first();
 
             }
@@ -112,7 +112,7 @@
             parse_str($query, $res);
 
             // check if there are the 3 required querystrings present
-            if (!count(array_intersect_key(array_flip($requiredKeys), $res)) === count($requiredKeys)) {
+            if (!count(array_intersect_key(array_flip($requiredKeys), $res)) == count($requiredKeys)) {
                 return '<p>' . $this->_('Sorry, but something went wrong. Too less parameters will be sent via this request.') . '</p>';
             }
 
@@ -232,7 +232,7 @@
                             $spam_update = NULL;
 
                             // check if the status has been set to spam
-                            if ($input->post->detailstatus == '2')  {
+                            if ($input->post->detailstatus == '2') {
                                 $spam_update = time();
                             }
                             // check if comment has children at the moment - if yes set spam_update to null again
@@ -240,7 +240,6 @@
                                 $spam_update = NULL;
                                 $input->post->detailstatus = '3'; // set new status to 3 (SPAM, but has replies) to prevent deletion of the comment
                             }
-
 
 
                             $query->bindValue(':author', $input->post->detailname);
@@ -461,7 +460,7 @@
             $spam_update = NULL;
 
             // check if the status has been set to spam
-            if ($newStatus == '2')  {
+            if ($newStatus == '2') {
                 $spam_update = time();
             }
             // check if comment has children at the moment - if yes set spam_update to null again
@@ -527,7 +526,7 @@
 
                             if ($oldStatus != $newStatus) {
 
-                                if($this->saveComment($field, $comment, $newStatus)){
+                                if ($this->saveComment($field, $comment, $newStatus)) {
                                     // set new status to the comment
                                     $comment->status = $newStatus;
                                     $updates[] = $id;
@@ -766,8 +765,8 @@
             }
             $commentsField->defaultValue = $this->getCommentFields()->first()->id;
             $commentsField->value = wire('input')->post->fc_commentsfield;
-            $label = '<label class="fc-filterlabel">'.$this->_('Field name').'</label>';
-            $markup .= '<div class="fc-filterelement">'.$label.$commentsField->render().'</div>';
+            $label = '<label class="fc-filterlabel">' . $this->_('Field name') . '</label>';
+            $markup .= '<div class="fc-filterelement">' . $label . $commentsField->render() . '</div>';
 
             // Filters select for the number of comments displayed
             $numberField = $this->modules->get('InputfieldSelect');
@@ -787,8 +786,8 @@
             $numberField->addOptions($options);
             $numberField->value = wire('input')->post->filternumber;
             $numberField->defaultValue = $this->defaultNumber;
-            $label = '<label class="fc-filterlabel">'.$this->_('Number').'</label>';
-            $markup .= '<div class="fc-filterelement">'.$label.$numberField->render().'</div>';
+            $label = '<label class="fc-filterlabel">' . $this->_('Number') . '</label>';
+            $markup .= '<div class="fc-filterelement">' . $label . $numberField->render() . '</div>';
 
             // Filter select for the status of the comments
             $statusField = $this->modules->get('InputfieldSelect');
@@ -803,8 +802,8 @@
             ];
             $statusField->addOptions($options);
             $statusField->defaultValue = 3;
-            $label = '<label class="fc-filterlabel">'.$this->_('Status').'</label>';
-            $markup .= '<div class="fc-filterelement">'.$label.$statusField->render().'</div>';
+            $label = '<label class="fc-filterlabel">' . $this->_('Status') . '</label>';
+            $markup .= '<div class="fc-filterelement">' . $label . $statusField->render() . '</div>';
             bd($statusField->label);
             $filter = wire('modules')->get('InputfieldMarkup');
             $filter->markupText = $markup;
