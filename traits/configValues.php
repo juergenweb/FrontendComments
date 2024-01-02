@@ -13,7 +13,7 @@
      */
 
 
-    use ProcessWire\ProcessWire;
+    use ProcessWire\Field;
 
     trait configValues
     {
@@ -34,11 +34,12 @@
 
         /**
          * Get all configuration settings from the FrontendComments input field as an assoc. array
+         * @param \ProcessWire\Field $field
          * @return array
          * @throws \ProcessWire\WireException
          * @throws \ProcessWire\WirePermissionException
          */
-        function getFrontendCommentsInputfieldConfigValues(\ProcessWire\Field $field): array
+        function getFrontendCommentsInputfieldConfigValues(Field $field): array
         {
             $configValues = [];
             foreach ($this->wire('fields')->get($field->name) as $key => $value) {
@@ -48,12 +49,12 @@
         }
 
         /**
-         * Create a property of each item in the properties array if value is not null
+         * Create a property of each item in the properties' array if the value is not null
          * @param array $configArray
          * @param array $properties
          * @return void
          */
-        function createPropertiesOfArray(array $configArray, array $properties)
+        function createPropertiesOfArray(array $configArray, array $properties): void
         {
             // extract all properties from configArray
             $filteredArr = array_filter($configArray,
