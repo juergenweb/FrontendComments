@@ -24,6 +24,10 @@
      * @property protected array $frontendCommentsconfig: the configuration values as set in by this module
      * @property protected int|null|bool $input_fc_stars: show star rating or not
      * @property protected int|null|bool $input_fc_voting: show voting options or not
+     * @property protected int $upvotes: The number of upvotes
+     * @property protected int $downvotes: The number of downvotes
+     * @property protected int $user_id: The id of the commenter (user)
+     * @property protected int|float|null stars: The number of the stars of the star rating
      * @property protected PageImage $userImage: the image object of the user image
      * @property protected Textelements $replyFormHeadline: the headline of the reply form object
      *
@@ -72,6 +76,11 @@
         protected string $author = '';
         protected string $text = '';
         protected array $comment = [];
+        protected int $upvotes = 0;
+        protected int $downvotes = 0;
+        protected int $user_id = 41;
+        protected int|float|null $stars = null;
+
         protected bool $hasProfileImage = false;
         protected array $frontendFormsConfig = [];
         protected array $frontendCommentsConfig = [];
@@ -117,6 +126,8 @@
             // create properties of FrontendComments configuration values
             $properties = ['input_fc_stars', 'input_fc_voting'];
             $this->createPropertiesOfArray($this->frontendCommentsConfig, $properties);
+
+            bd($this->frontendCommentsConfig);
 
             // set all comment values provided via the constructor as property
 
