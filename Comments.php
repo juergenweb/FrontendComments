@@ -119,7 +119,7 @@
          * @return string
          * @throws \ProcessWire\WireException
          */
-        function renderPagination(CommentArray $comments, $options = array()): string
+        function renderPagination(CommentArray $comments, array $options = array()): string
         {
 
             if (!$comments->count) {
