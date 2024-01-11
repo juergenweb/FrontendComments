@@ -190,7 +190,7 @@ docReady(function () {
     // rating stars
     let ratingStars = [...document.getElementsByClassName("rating__star")];
 
-    if (ratingStars) {
+    if (ratingStars.length > 0) {
         configRating();
     }
     makeVote();
