@@ -72,7 +72,7 @@ $comments = $page->mycomments;
 ...
 echo $comments;
 ```
-### Indirect output, including the change of some parameter
+### Indirect output, including the change of some parameters
 This kind of output is necessary, if you want to change some global settings before the output. 
 
 By the way: The only scenario for changing paramters on the frontend will be the case, if you use the same comment field on different templates and you need to change some parameters on each template. In this case you need to change them inside the template and not in the backend configuration.
