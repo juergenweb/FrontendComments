@@ -35,4 +35,29 @@ $(document).ready(function () {
     });
 
 
+    function loadDetail(url, commentid) {
+        let wrapperId = 'fc-comment-' + commentid;
+        console.log(wrapperId);
+
+        const xhttp = new XMLHttpRequest();
+        xhttp.onload = function() {
+            console.log(this.responseText);
+            document.getElementById(wrapperId).innerHTML = this.responseText;
+        }
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+    let editButtons = document.getElementsByClassName('fc-load-detail');
+    for (var i = 0; i < editButtons.length; i++) {
+        editButtons[i].addEventListener('click', function (event) {
+            let commentId = this.dataset.commentid;
+            let fieldId = this.dataset.fieldid;
+            let pageId = this.dataset.pageid;
+            let url  = this.dataset.href;
+            let ajaxUrl = url + '?commentid=' + commentId + '&fieldid=' + fieldId + '&pageid=' + pageId;
+            loadDetail(ajaxUrl, commentId);
+
+        })
+    }
 });
