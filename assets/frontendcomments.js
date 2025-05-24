@@ -30,11 +30,19 @@ function docReady(fn) {
     }
 }
 
+/**
+ * Function to re-build the star rating again after form submission and errors
+ */
 function configRating() {
-    let starRatingControl = new StarRating('.star-rating', {
-        maxStars: 5
-    });
-    starRatingControl.rebuild();
+    // check first if star rating is enabled
+    let ratingElements = document.getElementsByClassName("star-rating");
+
+    if (ratingElements.length > 0) {
+        let starRatingControl = new StarRating('.star-rating', {
+            maxStars: 5
+        });
+        starRatingControl.rebuild();
+    }
 }
 
 /**
@@ -44,13 +52,21 @@ function loadReplyForm() {
     document.addEventListener('click', (e) => {
         // check if a parent element is a link with class fc-comment-reply
         let link = e.target;
+
         if (link.classList.contains('fc-comment-reply')) {
             e.preventDefault();
+
+            // first close all other open reply forms
+            let replyforms = document.getElementsByClassName('fc-reply-form');
+            for (let i = 0; i < replyforms.length; i++) {
+                replyforms[i].innerHTML = '';
+            }
 
             // grab some values from the element
             let commentId = link.dataset.id;
             let fieldName = link.dataset.field;
             let url = document.location.href;
+
 
             scrollSmoothTo('reply-comment-form-' + fieldName + '-reply-' + commentId);
 
@@ -60,34 +76,102 @@ function loadReplyForm() {
                 urlObj.hash = "";
                 url = urlObj.href
             }
-            url = url.split('?')[0] + '?commentid=' + commentId;
 
+            let separator = '?';
+            if (url.split('?').length > 1) {
+                separator = '&';
+            }
+            url = url + separator + 'commentid=' + commentId;
+            console.log(url);
             let target = document.getElementById('reply-comment-form-' + fieldName + '-reply-' + commentId);
 
             // make an Ajax call to load the form from the result div
             let xhr = new XMLHttpRequest();
 
-            xhr.onload = function () {
+            // show spinner during ajax call
+            let parentElement = target;
+
+            // create spinner wrapper
+            const fcspinnerwrapper = document.createElement("div");
+            fcspinnerwrapper.classList.add("fc-reply-form-loader-wrapper");
+
+            // create spinner span
+            const fcspinner = document.createElement("span");
+            fcspinner.classList.add("fc-reply-form-loader");
+            fcspinner.setAttribute('id', 'spinner-' + commentId);
+            fcspinnerwrapper.appendChild(fcspinner)
+
+            const alertDialogBody = document.createElement("div");
+            alertDialogBody.classList.add("fc-alert-body");
+
+            // create alert dialog element
+            const alertDialog = document.createElement("div");
+            alertDialog.classList.add("fc-alert-dialog");
+            alertDialogBody.appendChild(alertDialog);
+
+            const trianglered = document.createElement("div");
+            trianglered.classList.add("fc-triangle-up-red");
+            alertDialog.appendChild(trianglered);
+
+            const trianglewhite = document.createElement("div");
+            trianglewhite.classList.add("fc-triangle-up-white");
+            alertDialog.appendChild(trianglewhite);
+
+            const rectanglePath = document.createElement("div");
+            rectanglePath.classList.add("fc-rectangle-path");
+            trianglewhite.appendChild(rectanglePath);
+
+            const dotPath = document.createElement("div");
+            dotPath.classList.add("fc-dot-path");
+            trianglewhite.appendChild(dotPath);
+
+            const alertTextWrapper = document.createElement("div");
+            alertTextWrapper.classList.add("fc-alert-text");
+            alertDialog.appendChild(alertTextWrapper);
+
+            const alertText = document.createElement("p");
+            defaultText = "Somenthing went wrong!";
+            if (typeof loadingAlertText !== 'undefined') {
+                defaultText = loadingAlertText;
+            }
+            alertText.innerHTML = defaultText;
+            alertTextWrapper.appendChild(alertText);
+
+            xhr.onreadystatechange = function () {
+
+                if (xhr.readyState === 1) {
+                    parentElement.appendChild(fcspinnerwrapper);
+                }
 
                 let result = this.responseText;
-
-                const parser = new DOMParser();
-                let doc = parser.parseFromString(result, "text/html");
-                let content = doc.getElementById('reply-comment-form-' + fieldName + '-reply-' + commentId).innerHTML;
+                console.log(result);
 
                 if (xhr.readyState === 4) {
 
-                    // load the form inside the target div
-                    target.innerHTML = content;
+                    const parser = new DOMParser();
+                    let doc = parser.parseFromString(result, "text/html");
+                    let element = doc.getElementById('reply-comment-form-' + fieldName + '-reply-' + commentId);
 
-                    // add Ajax event listener function once more
-                    subAjax('reply-form-' + commentId);
-                    // activate the textarea counter
-                    maxCharsCounterReverse();
+                    console.log(element);
+                    if (element) {
+                        let content = element.innerHTML;
 
-                    let ratingStars = [...document.getElementsByClassName("star-rating")];
-                    if (ratingStars.length > 0) {
-                        configRating();
+                        // load the form inside the target div
+                        target.innerHTML = content;
+
+                        // add Ajax event listener function once more
+                        //subAjax('reply-form-' + commentId);
+
+                        let ratingStars = [...document.getElementsByClassName("star-rating")];
+                        if (ratingStars.length > 0) {
+                            configRating();
+                        }
+                    } else {
+                        // remove spinner element first
+                        parentElement.removeChild(fcspinnerwrapper);
+                        // add element not found instead
+                        parentElement.appendChild(alertDialogBody);
+                        console.log('element not found')
                     }
 
                 }
@@ -110,9 +194,8 @@ function loadReplyForm() {
  */
 function cancelReply() {
     document.addEventListener('click', (e) => {
-
         // check if a parent element is a link with class fc-alert-close
-        if (e.target.classList.contains('fc-cancel-link')) {
+        if (e.target.classList.contains('fc-cancel-button')) {
             e.preventDefault();
             document.getElementById('reply-comment-form-' + e.target.dataset.field + '-reply-' + e.target.dataset.id).innerHTML = '';
             scrollSmoothTo('comment-' + e.target.dataset.id);
@@ -120,6 +203,35 @@ function cancelReply() {
     });
 }
 
+
+/*
+ * Fade out the no vote alert and remove the content completely afterwards
+ */
+function fadeOutAlert(field, commentid) {
+
+    elementName = field + '-' + commentid + '-novote';
+    let fade = document.getElementById(elementName);
+
+    var intervalID = setInterval(function () {
+
+        if (!fade.style.opacity) {
+            fade.style.opacity = 1;
+        }
+
+        if (fade.style.opacity > 0) {
+            fade.style.opacity -= 0.1;
+        } else {
+            clearInterval(intervalID);
+            fade.innerHTML = '';
+            fade.style.opacity = 1;
+        }
+
+    }, 200);
+}
+
+/**
+ * Function for the up- and downvotes
+ */
 function makeVote() {
     document.addEventListener('click', (e) => {
         if (e.target.classList.contains('fc-vote-link')) {
@@ -165,6 +277,11 @@ function makeVote() {
                         if (target) {
                             // add the alert box to the div element
                             target.innerHTML = noVoteElement.innerHTML;
+                            // fade the alert out after a certain time
+                            setTimeout(function () {
+                                fadeOutAlert(field, commentid);
+                            }, 6000);
+
                         }
                     }
                 }
@@ -190,7 +307,7 @@ docReady(function () {
     // rating stars
     let ratingStars = [...document.getElementsByClassName("rating__star")];
 
-    if (ratingStars.length > 0) {
+    if (ratingStars) {
         configRating();
     }
     makeVote();
