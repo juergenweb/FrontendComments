@@ -15,14 +15,15 @@ This module is early Beta stage - so please use it with care!
 
 ## Highlights / Features
 * Easy integration: Only 1 line of code inside a template is necessary to render the comments + form on the frontend
-* Possibility to use one comment field with different parameters in multiple templates
-* Enable/disable star rating on per comment field base
-* Enable/disable rating of comments (like/dislike) on per comment field base
+* Possibility to use multiple comment fields on one template (if necessary)
+* Easy to overwrite global settings inside a template: Possibility to use one comment field with different configuration settings in multiple templates
+* Enable/disable star rating
+* Enable/disable rating of comments (like/dislike)
 * Offer commenters the receiving of notification emails if a new reply has been posted
 * Queuing the sending of notification emails instead of sending all at once (preventing performance issues by sending to many emails at once)
-* Reply forms will only be loaded via AJAX on demand (by clicking on the reply link)
+* Reply forms will only be loaded via AJAX on demand (by clicking on the reply link) -> faster loading time
 * Option to send HTML email templates (provided by FrontendForms)
-* Enable/disable the sending of notification emails to a commenter if status of a comment has been changed to "approved" or "SPAM"
+* Enable/disable the sending of notification emails to a commenter if status of a comment has been changed to "approved" or "SPAM" by a moderator
 * No dependencies (except FrontendForms)
 * Support for UiKit 3, Pico 2 and Bootstrap 5 CSS framework out of the box
 
@@ -59,7 +60,7 @@ I wanted to use all the advantages of my FrontendForms module on a comment compo
 8. To output the comment form and the comment list on the frontend you have to add fe. "echo $page->comments" to the frontend template. Take a look on the following output methods below.
 
 ### Simple direct output with "echo"
-If you do not want to change a parameter on the frontend, you can simply output the comments using the "echo" method and the name of the comments field. In this case, the comments field name is "mycomments". Please replace it with your comment field name.
+If you do not want to change a parameter on the frontend, you can simply output the comments using the global settings by using the "echo" method. In this case, the comments field name is "mycomments". Please replace it with your comment field name.
 
 ```php
 echo $page->mycomments->render();
@@ -71,18 +72,18 @@ If you do not want to output the comments directly via "echo" method, you can pu
 $comments = $page->mycomments;
 ...
 ...
-echo $comments;
+echo $comments->render();
 ```
 ### Indirect output, including the change of some parameters
 This kind of output is necessary, if you want to overwrite some global settings before you output the markup. 
 
 By the way: The only scenario for changing paramters on the frontend will be the case, if you use the same comment field on different templates and you need to change some parameters on each template. In this case you need to change them inside the template and not in the backend configuration.
 
-If you use an new comment field for every template, you can change all of the parameters inside the "Details tab" of the field in the backend configuration.
+If you use a new comment field for every template, you can change all of the parameters inside the "Details tab" of the field in the backend configuration.
 
 ```php
 $comments = $page->mycomments;
-$comments->setReplyDepth(0); // use another reply depth than in the field settings
+$comments->setReplyDepth(0); // use another reply depth than in the global field settings
 echo $comments->render();
 ```
 
