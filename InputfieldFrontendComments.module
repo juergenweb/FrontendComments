@@ -1,202 +1,104 @@
 <?php
-    declare(strict_types=1);
-
-    /*
-     * Input field for the comments
-     * This class collects the input data in the backend
-     *
-     * Created by Jürgen K.
-     * https://github.com/juergenweb
-     * File name: InputfieldComments.php
-     * Created: 24.06.2023
-     *
-     * @property Module $frontendForms: The FrontendForms module object
-     */
-
     namespace ProcessWire;
 
-    // include all necessary files
-    $dirname = dirname(__FILE__);
-    require_once($dirname . "/traits/configValues.php");
+/*
+ * Input field for the comments
+ * This class collects the input data in the backend
+ *
+ * Created by Jürgen K.
+ * https://github.com/juergenweb
+ * File name: InputfieldComments.php
+ * Created: 24.12.2024
+ *
+ */
 
-    use FrontendComments\configValues;
+    use ProcessWire\InputfieldFrontendComments;
 
-    class InputfieldFrontendComments extends Inputfield
+class InputfieldFrontendComments extends Inputfield
+{
+
+    protected array $frontendFormsConfig = [];
+
+
+    public function __construct()
     {
+        parent::__construct();
 
-        use configValues;
-
-        // Declare all properties
-        protected array $frontendFormsConfig = [];
+        // grab configuration values from the FrontendForms module
+        $this->frontendFormsConfig = FieldtypeFrontendComments::getFrontendFormsConfigValues();
 
 
-        /**
-         * @throws \ProcessWire\WireException
-         */
-        public function __construct()
-        {
-            parent::__construct();
 
-            // grab configuration values from the FrontendForms module
-            $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
+    }
 
-        }
+    /**
+     * Get the info data about this input field
+     * @return array
+     */
+    public static function getModuleInfo(): array
+    {
+        return array(
+            'title' => __('Inputfield FrontendComments', __FILE__),
+            'summary' => __('Inputfield for managing comments on a page.',
+                __FILE__),
+            'href' => 'https://github.com/juergenweb/FieldtypeFrontendComments',
+            'icon' => 'comment',
+            'permanent' => false,
+            'version' => '1.0.0',
+            'requires' => [
+                'FieldtypeFrontendComments',
+                'PHP>=8.0',
+                'ProcessWire>=3'
+            ],
+            'author' => 'Jürgen Kern'
+        );
+    }
 
-        /**
-         * Get the info data about this input field
-         * @return array
-         */
-        public static function getModuleInfo(): array
-        {
-            return array(
-                'title' => __('FrontendComments', __FILE__),
-                'summary' => __('Inputfield for managing comments on a page.',
-                    __FILE__),
-                'href' => 'https://github.com/juergenweb/FieldtypeFrontendComments',
-                'icon' => 'comment',
-                'permanent' => false,
-                'version' => '1.0.0',
-                'requires' => [
-                    'FieldtypeFrontendComments',
-                    'PHP>=8.0',
-                    'ProcessWire>=3'
-                ],
-                'author' => 'Jürgen Kern'
-            );
-        }
+    /**
+     * Array containing the texts for each status
+     * @return array
+     */
+    public static function statusTexts(): array
+    {
+        return [
+            __('pending approval'),
+            __('approved'),
+            __('SPAM'),
+            __('SPAM, but has replies')
+        ];
+    }
 
-        /**
-         * Array containing the texts for each status
-         * @return array
-         */
-        public static function statusTexts(): array
-        {
-            return [
-                __('pending approval'),
-                __('approved'),
-                __('SPAM'),
-                __('SPAM, but has replies')
-            ];
-        }
+    /**
+     * Render the comment list in the backend
+     * @return string
+     * @throws \ProcessWire\WireException
+     * @throws \ProcessWire\WirePermissionException
+     */
+    public function ___render(): string
+    {
+        $field = $this->wire('fields')->get($this->get('name'));
+        bd($field->input_fc_website);
 
-        /**
-         * Array containing the FontAwesome icons for each status
-         * @return string[]
-         */
-        public static function statusIcons(): array
-        {
-            return [
-                'fa-warning',
-                'fa-check-circle',
-                'fa-times-circle',
-                'fa-times-circle'
-            ];
-        }
+        $fieldset = $this->modules->get('InputfieldFieldset');
+        $fieldset->label = $this->_('Comments');
 
-        /**
-         * Get the array containing the status colors
-         * @return string[]
-         */
-        public static function statusColors(): array
-        {
-            return [
-                'warning',
-                'success',
-                'danger',
-                'danger'
-            ];
-        }
+        // Add text that there are no comments at the moment
+        if (count($this->value) === 0) {
+            $noComments = $this->modules->get('InputfieldMarkup');
+            $noComments->set('markupText', $this->_('There are no comments at the moment.'));
+            $fieldset->add($noComments);
+        } else {
 
-        /**
-         * init() is called when the system is ready for API usage
-         * @return void
-         */
-        public function init(): void
-        {
-            parent::init();
-            require_once(__DIR__ . '/FieldtypeFrontendComments.module');
-        }
-
-        /**
-         * Process the configuration form of the field
-         * @param \ProcessWire\WireInputData $input
-         * @return $this
-         */
-        public function ___processInput(WireInputData $input): InputfieldFrontendComments
-        {
-
-            $n = 1;
-
-            // names of the various form fields
-            $names = array(
-                'author',
-                'email',
-                'status',
-                'parent_id',
-                'text',
-                'sort'
-            );
-
-            // loop through each comment
-            foreach ($this->value as $comment) {
-
-                $comment->setTrackChanges();
-
-                // create the names of the input fields for each comment form
-                $data = array();
-                foreach ($names as $name) {
-                    $inputName = $this->name . "_" . $name . "_" . $comment->id;
-                    $value = isset($input[$inputName]) ? $input[$inputName] : '';
-                    $data[$name] = $value;
-                }
-
-                // loop through each input field of the comment
-                foreach ($data as $key => $value) {
-
-                    // check if input field value has been changed
-                    if (($value || $key == 'status') && $comment->$key != $value) {
-                        $comment->$key = $value; // set the new value
-                        $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
-                        $comment->trackChange($key);
-                        $this->value->trackChange('update'); // set a track change value for all comments
-
-                    }
-                }
-                $n++;
-            }
-            return $this;
-        }
-
-        /**
-         * Render the input field for a comment in the backend
-         * @return string
-         * @throws WirePermissionException|\ProcessWire\WireException
-         */
-        public function ___render(): string
-        {
-
-            // create fieldset
-            $fieldset = $this->modules->get('InputfieldFieldset');
-            $fieldset->label = $this->_('Comments');
-
-            // Add text that there are no comments at the moment
-            if (count($this->value) == 0) {
-                $noComments = $this->modules->get('InputfieldMarkup');
-                $noComments->markupText($this->_('No comments at the moment.'));
-                $fieldset->add($noComments);
-            }
             // list of comments
             $i = 1;
 
             foreach ($this->value as $comment) {
 
                 $commentfieldset = $this->modules->get('InputfieldFieldset');
-                $commentfieldset->entityEncodeText = false;
-                $commentfieldset->icon = self::statusIcons()[$comment->status];
-                $commentfieldset->themeColor = self::statusColors()[$comment->status];
-                $commentfieldset->label = strtoupper(self::statusTexts()[$comment->status]) . ': ' . $this->_('Comment') . ' #' . $i . ' ' .
-                    sprintf($this->_('Posted on: %s'), $this->wire('datetime')->date($this->frontendFormsConfig['input_dateformat'], $comment->created));
-                $commentfieldset->collapsed = true;
+                $commentfieldset->set('entityEncodeText', false);
+                $commentfieldset->set('label', strtoupper(self::statusTexts()[$comment->status]) . ': ' . $this->_('Comment') . ' #' . $i . ' ' .
+                    sprintf($this->_('Posted on: %s'), $this->wire('datetime')->date($this->frontendFormsConfig['input_dateformat'], $comment->created)));
+                $commentfieldset->set('collapsed', true);
 
                 // comment text
                 $text = $this->modules->get('InputfieldTextarea');
@@ -205,11 +107,13 @@
                 $text->attr('value', $comment->text);
                 $commentfieldset->add($text);
 
+                $colwidth = '25';
                 // email
                 $email = $this->modules->get('InputfieldEmail');
                 $email->label = $this->_('Email');
                 $email->attr('id|name', $this->name . '_email_' . $comment->id);
                 $email->attr('value', $comment->email);
+                $email->set('columnWidth', $colwidth);
                 $commentfieldset->add($email);
 
                 // author
@@ -217,6 +121,7 @@
                 $author->label = $this->_('Author');
                 $author->attr('id|name', $this->name . '_author_' . $comment->id);
                 $author->attr('value', $comment->author);
+                $author->set('columnWidth', $colwidth);
                 $commentfieldset->add($author);
 
                 // status
@@ -231,14 +136,84 @@
                 } else {
                     $status->addOption(FieldtypeFrontendComments::spam, $this->_('SPAM'));
                 }
-                $status->notes = $this->_('Status "Pending approval" cannot be selected.');
+                $status->addOption('delete', $this->_('Delete the comment'));
+                $status->set('notes', $this->_('Status "Pending approval" cannot be selected. If you want to delete the comment, select "Delete the comment" and save the page.'));
+                $status->set('columnWidth', $colwidth);
                 $commentfieldset->add($status);
+
+                // website
+                $website = $this->modules->get('InputfieldURL');
+                $website->label = $this->_('Homepage');
+                $website->attr('id|name', $this->name . '_website_' . $comment->id);
+                $website->attr('value', $comment->website);
+                $website->set('columnWidth', $colwidth);
+                $commentfieldset->add($website);
+
+                // moderation feedback textfield
+                $feedback = $this->modules->get('InputfieldCKEditor');
+                $feedback->set('label', $this->_('Moderation feedback'));
+                $feedback->attr('id|name', $this->name . '_moderation_feedback_' . $comment->id);
+                $feedback->attr('value', $comment->moderation_feedback);
+                $feedback->set('description', $this->_('Enter a feedback to a comment'));
+                $feedback->set('notes', $this->_('This text will be displayed directly below the comment.'));
+                $commentfieldset->add($feedback);
 
                 $fieldset->add($commentfieldset);
                 $i++;
             }
-
-            return $fieldset->render();
         }
 
+        return $fieldset->render();
     }
+
+    /**
+     * Process input for the comment inputs
+     * @param \ProcessWire\WireInputData $input
+     * @return \ProcessWire\InputfieldFrontendComments
+     */
+    public function ___processInput(WireInputData $input): InputfieldFrontendComments
+    {
+        $n = 1;
+
+        // names of the various form fields
+        $names = array(
+            'author',
+            'email',
+            'status',
+            'parent_id',
+            'text',
+            'moderation_feedback'
+        );
+
+        // loop through each comment
+        foreach ($this->value as $comment) {
+
+            $comment->setTrackChanges();
+
+            // create the names of the input fields for each comment form
+            $data = array();
+            foreach ($names as $name) {
+                $inputName = $this->name . "_" . $name . "_" . $comment->id;
+                $value = isset($input[$inputName]) ? $input[$inputName] : '';
+                $data[$name] = $value;
+            }
+
+            // loop through each input field of the comment
+            foreach ($data as $key => $value) {
+
+                // check if the input field value has been changed
+                if (($value || $key == 'status') && $comment->$key != $value) {
+                    $comment->$key = $value; // set the new value
+                    $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                    $comment->trackChange($key);
+                    $this->value->trackChange('update'); // set a track change value for all comments
+
+                }
+            }
+            $n++;
+        }
+        return $this;
+
+    }
+
+}
