@@ -1,8 +1,6 @@
 :root {
     --gl-star-color: #fdd835;
     --gl-star-color-inactive: #dcdce6;
-    --gl-star-empty: url('../img/star-empty.svg');
-    --gl-star-full: url('../img/star-full.svg');
     --gl-star-size: 24px;
     --gl-tooltip-border-radius: 4px;
     --gl-tooltip-font-size: 0.875rem;
@@ -65,6 +63,7 @@
     position: relative;
 }
 
+/*
 [data-star-rating] > select:focus + .gl-star-rating--stars span:first-child::before {
     box-shadow: 0 0 0 3px -moz-mac-focusring;
     box-shadow: 0 0 0 3px -webkit-focus-ring-color;
@@ -78,6 +77,8 @@
     width: 100%;
 }
 
+ */
+
 [data-star-rating] select[disabled] + .gl-star-rating--stars {
     cursor: default;
 }
@@ -90,6 +91,8 @@
     margin: 0;
     width: 24px;
     width: 24px;
+    font-size: 30px;
+    color: #dcdce6;
     width: var(--gl-star-size);
 }
 
@@ -169,52 +172,21 @@
     margin-right: var(--gl-tooltip-margin);
 }
 
-[data-star-rating] svg {
-    height: 100%;
-    width: 100%;
-}
-
-[data-star-rating] .gl-star-half {
-    fill: none;
-    stroke: none;
-}
-
-[data-star-rating] .gl-star-full {
-    fill: #dcdce6;
-    fill: #dcdce6;
-    fill: var(--gl-star-color-inactive);
-    stroke: #dcdce6;
-    stroke: #dcdce6;
-    stroke: var(--gl-star-color-inactive);
-    transition: fill 0.15s ease-in-out, stroke 0.15s ease-in-out;
-}
-
-[data-star-rating] .gl-active .gl-star-full {
-    fill: #fdd835;
-    fill: #fdd835;
-    fill: var(--gl-star-color);
-    stroke: #fdd835;
-    stroke: #fdd835;
-    stroke: var(--gl-star-color);
-}
-
 /* Compatibilty with v3 */
 
-.gl-star-rating--stars[class*=" s"] > span {
-    background-image: url('../img/star-empty.svg') !important;
-    background-image: url('../img/star-empty.svg') !important;
-    background-image: var(--gl-star-empty) !important;
+gl-star-rating--stars[class*=" s"] > span {
+    font-size: 22px;
+    width: 15px;
+    top: 0;
+    display: inline-block;
+
 }
 
-.gl-star-rating--stars[class*=" s"] > span {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 90%;
+.gl-star-rating--stars[class*=" s"] > span:before {
+    content: '\2605';
 }
 
 .gl-star-rating--stars[class*=" s"] > span.gl-active,
 .gl-star-rating--stars[class*=" s"] > span.gl-active.gl-selected {
-    background-image: url('../img/star-full.svg') !important;
-    background-image: url('../img/star-full.svg') !important;
-    background-image: var(--gl-star-full) !important;
+    color: #fdd835;
 }
