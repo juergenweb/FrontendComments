@@ -103,25 +103,35 @@ Here is an example on how you can use the public methods inside a template:
 $comments = $page->mycomments; // get your comment field inside a template
     
 // make your changes by using the public methods
-$comment->setReplyDepth(1)
-->setModeration(2)
-->setMailTemplate('template_4.html')
-->setMailSubject('Custom subject')
-->setMailTitle('Custom Title')
-->setSenderEmail('custom@comments.com')
-->setSenderName('Custom Name')
-->setModeratorEmails('moderatormail@comments.com')
-->setSortNewToOld(true)
-->showFormAfterComments(true)
-->showStarRating(true)
-->showTextareaCounter(false)
-->showVoting(true)
-->useCaptcha('DefaultImageCaptcha');
+$comments->setModeration(2);
+$comments->setLoginRequired(true);
+$comments->showWebsiteField(false);
+$comments->setEmailTemplate("template_4.html");
+$comments->setModerationEmail("email1@mydomain.com,email2@mydomain.com");
+$comments->setReplyNotification(2);
+$comments->setStatusChangeNotification(["1","2"]);
+$comments->setFormHeadlineTag("h1");
+$comments->showStarRating(2);
+$comments->disableTooltip(false);
+$comments->hideCharacterCounter(true);
+$comments->setPrivacyType(1);
+$comments->setListHeadlineTag("h1");
+$comments->setReplyDepth(1);
+$comments->sortNewestToOldest(true);
+$comments->showVoting(false);
+$comments->setDateFormat(0);
+$comments->setCaptchaType("none");
+$comments->setPaginationNumber(10);
+$comments->setPaginationAlignment("right");
+$comments->setSenderEmailAddress("myemailaddress@example.com");
+$comments->setSenderName("ProcessWire");
+$comments->setListHeadlineText("My comment list headline");
+$comments->setFormHeadlineText("My form headline");
+$comments->showFormAfterComments(false);
 
 // output the comments
-echo $comments;
+echo $comments->render();
 ```
-
 
 | Method name  | Use case | 
 | ------------- | ------------- |
