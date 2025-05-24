@@ -5,33 +5,34 @@
 
     /*
      * Class to create a simple comments manager to manage all comments in one place
-     * A new custom admin page will be created
+     * A new custom admin page will be created under "Setup"
      * This page includes a statistic area about all comment fields installed and
      * a filterable table containing all comments of a certain FrontendComments field
      * Modal window support for editing multiple values of a certain comment
      *
+     * @property protected int $defaultNumber: the number of comments to display in the table by default
+     * @property protected WireArray $commentFields: WireArray containing all fields of type FrontendComments
+     * @property protected WireArray $frontendFormsConfig: WireArray containing all configuration values of the FrontendForms module
+     * @property Field $field: Object of class "Field" of the current field loaded inside the table
      */
 
     use Exception;
-    use FrontendComments\CommentArray;
-    use FrontendComments\Comment;
-    use FrontendComments\configValues;
+    use FrontendComments\FrontendCommentArray;
+    use FrontendComments\FrontendComment;
     use FrontendComments\Notifications;
     use PDO;
 
-    // include all necessary files
+    // include configValues.php
     $dirname = dirname(__FILE__);
-    require_once($dirname . "/traits/configValues.php");
 
     class FrontendCommentsAdmin extends Process
     {
 
-        use configValues;
 
         // Declare all properties
         protected int $defaultNumber = 20; // The default number of comments to display in the table
         protected WireArray $commentFields; // Wire array containing all FrontendComments field objects
-        protected array $frontendFormsConfig = [];
+        protected array $frontendFormsConfig;
         protected Field $field; // A single FrontendComments field;
 
         /**
@@ -42,18 +43,15 @@
         {
 
             parent::__construct();
+            // Get all FrontendForms configuration values
+            $this->frontendFormsConfig = FieldtypeFrontendComments::getFrontendFormsConfigValues();
 
             // get all FrontendComments fields site wide as a WireArray
             $this->commentFields = $this->getCommentFields();
 
-            if ($this->commentFields->count) {
-
-                // Get all FrontendForms configuration values
-                $this->frontendFormsConfig = $this->getFrontendFormsConfigValues();
-
+            if ($this->commentFields->count()) {
                 // As the default comment field on a page load, take the first one inside the WireArray
                 $this->field = $this->commentFields->first();
-
             }
 
         }
@@ -77,6 +75,11 @@
                     'title' => __('FrontendComments manager', __FILE__),
                     'parent' => 'setup'
                 ],
+                'requires' => [
+                    'FrontendComments>=1.0.0',
+                    'PHP>=8.0',
+                    'ProcessWire>=3'
+                ],
             ];
         }
 
@@ -93,7 +96,7 @@
             $this->wire('config')->scripts->add($this->wire('config')->urls->{$this->className} . 'backend-assets/frontendcommentsadmin.js?v=' . $version . '&time=' . time());
 
             // activate modal windows for full comment edit
-            wire('modules')->get('JqueryUI')->use('modal');
+            //wire('modules')->get('JqueryUI')->use('modal');
         }
 
         /**
@@ -118,7 +121,6 @@
 
             $out = '';
 
-
             // Get different values
             $commentID = (int)$res['commentid'];
             $pageID = (int)$res['pageid'];
@@ -136,7 +138,7 @@
 
                 // create a new admin form to change comment values
                 $form = wire('modules')->get('InputfieldForm');
-                $form->action = wire('input')->url . '?commentid=' . $commentID . '&pageid=' . $pageID . '&fieldid=' . $fieldID;
+                $form->action = wire('input')->url . '?commentid=' . (int)$commentID . '&pageid=' . (int)$pageID . '&fieldid=' . (int)$fieldID;
                 $form->method = "post";
                 $form->attr("id+name", 'detail-comment-form');
 
@@ -144,15 +146,14 @@
                 $fieldAuthor = wire('modules')->get("InputfieldText");
                 $fieldAuthor->label = $this->_('Author');
                 $fieldAuthor->attr('id+name', 'detailname');
-                $fieldAuthor->value = $comment->getAuthor();
-                $fieldAuthor->required = 1;
+                $fieldAuthor->value = $comment->get('author');
                 $form->append($fieldAuthor); // append the field to the form
 
                 // create email field
                 $fieldEmail = wire('modules')->get("InputfieldEmail");
                 $fieldEmail->label = $this->_('Email');
                 $fieldEmail->attr('id+name', 'detailemail');
-                $fieldEmail->value = $comment->getEmail();
+                $fieldEmail->value = $comment->get('email');
                 $fieldEmail->required = 1;
                 $form->append($fieldEmail); // append the field
 
@@ -160,7 +161,7 @@
                 $fieldText = wire('modules')->get("InputfieldTextarea");
                 $fieldText->label = $this->_('Comment');
                 $fieldText->attr('id+name', 'detailtext');
-                $fieldText->value = $comment->getText();
+                $fieldText->value = $comment->get('text');
                 $fieldText->required = 1;
                 $form->append($fieldText); // append the field
 
@@ -175,7 +176,7 @@
                     FieldtypeFrontendComments::spamReplies => $this->_('SPAM, but has replies')
                 ];
                 $fieldStatus->addOptions($statusOptions);
-                $fieldStatus->attr('value', $comment->status);
+                $fieldStatus->attr('value', $comment->get('status'));
                 $fieldStatus->required = 1;
                 $form->append($fieldStatus); // append the field
 
@@ -188,7 +189,7 @@
                 $fieldRating->addOption(3, sprintf($this->_('%s stars'), '3'));
                 $fieldRating->addOption(4, sprintf($this->_('%s stars'), '4'));
                 $fieldRating->addOption(5, sprintf($this->_('%s stars'), '5'));
-                $fieldRating->attr('value', $comment->stars);
+                $fieldRating->attr('value', $comment->get('stars'));
                 $form->append($fieldRating); // append the field
 
                 // submit button!
@@ -199,7 +200,6 @@
 
                 // the form was submitted so we process the form
                 if (wire('input')->post->submitdetail) {
-
                     // set different values
                     $session = wire('session');
                     $input = wire('input');
@@ -222,7 +222,7 @@
                         $out .= $form->render();
                     } else {
 
-                        // try to save certain values form the edit form to the database
+                        // try to save certain values of the edit form to the database
                         try {
 
                             $sql = "UPDATE $table SET author=:author,email=:email,data=:data,status=:status,stars=:stars,spam_update=:update_spam WHERE id=$commentID";
@@ -241,7 +241,6 @@
                                 $input->post->detailstatus = '3'; // set new status to 3 (SPAM, but has replies) to prevent deletion of the comment
                             }
 
-
                             $query->bindValue(':author', $input->post->detailname);
                             $query->bindValue(':email', $input->post->detailemail);
                             $query->bindValue(':data', $input->post->detailtext);
@@ -258,7 +257,7 @@
                                         $notification = new Notifications($comments);
                                         // add new status to the comment
                                         $comment->status = $input->post->detailstatus;
-                                        $notification->sendStatusChangeEmail($comment, $this->field, $this->frontendFormsConfig);
+                                        $notification->sendStatusChangeEmail($comment, $this->field);
                                     }
                                 }
                                 $session->message($this->_('Your changes have been saved'));
@@ -308,15 +307,22 @@
             ]);
 
             foreach ($comments as $commentArray) {
-
+                $commentPage = $commentArray->getPage();
+                $commentField = $commentArray->getField();
                 // table body
                 foreach ($commentArray as $key => $comment) {
+
+                    $comment->set('page', $commentPage);
+                    $comment->set('field', $commentField);
+
+                    // set '-' as default value if no name is present
+                    if(!$comment->get('author')) $comment->set('author', '-');
 
                     // Create hidden field containing the ID of the comment
                     $commentId = wire('modules')->get('InputfieldHidden');
                     $commentIdName = 'id_' . $comment->id;
                     $commentId->attr('commentid+name', $commentIdName);
-                    $commentId->value = $comment->id;
+                    $commentId->value = $comment->get('id');
 
                     // Create the status select field
                     $selectStatus = wire('modules')->get('InputfieldSelect');
@@ -329,24 +335,25 @@
                         FieldtypeFrontendComments::spamReplies => $this->_('SPAM, but has replies'),
                     ];
                     $selectStatus->addOptions($statusOptions);
-                    $value = (wire('input')->post->$selectName) ?? $comment->status;
+                    $value = (wire('input')->post->$selectName) ?? $comment->get('status');
                     $selectStatus->attr('value', $value);
 
                     $button = wire('modules')->get('InputfieldButton');
                     $button->setSecondary();
-                    $button->attr('data-buttons', 'button#submitdetail');
-                    $button->attr('data-autoclose', '');
-                    $button->attr('data-href', wire('input')->url() . 'detail?commentid=' . $comment->id . '&pageid=' . $comment->getPage()->id . '&fieldid=' . $comment->getField()->id);
-                    $button->addClass('pw-modal');
-                    $button->text = $this->_('Edit full comment');
+                    $button->attr('data-pageid', $comment->page->id);
+                    $button->attr('data-fieldid', $comment->field->id);
+                    $button->attr('data-commentid', $comment->id);
+                    $button->attr('data-href', wire('input')->url() . 'detail');
+                    $button->addClass('fc-load-detail');
+                    $button->text = $this->_('Edit comment');
                     $button->icon = 'pencil';
-                    $button->value = $comment->id;
+                    $button->value = $comment->get('id');
 
                     $dataTable = '<table class="fc-data-table">
-                        <tr><td class="fc-table-label">' . $this->_('Created') . '</td><td>' . wire('datetime')->date($dateFormats[4], $comment['created']) . '</td></tr>
-                        <tr><td class="fc-table-label">' . $this->_('Page') . '</td><td><a href="' . $comment->getPage()->url . '" target="_blank">' . $comment->getPage()->title . '</a></td></tr>
-                        <tr><td class="fc-table-label">' . $this->_('Author') . '</td><td>' . $comment->author . '</td></tr>
-                        <tr><td class="fc-table-label">' . $this->_('Email') . '</td><td>' . $comment->email . '</td></tr>
+                        <tr><td class="fc-table-label">' . $this->_('Created') . '</td><td>' . wire('datetime')->date($dateFormats[4], $comment->get('created')) . '</td></tr>
+                        <tr><td class="fc-table-label">' . $this->_('Page') . '</td><td><a href="' . $comment->page->url . '" target="_blank">' . $comment->page->title . '</a></td></tr>
+                        <tr><td class="fc-table-label">' . $this->_('Author') . '</td><td>' . $comment->get('author') . '</td></tr>
+                        <tr><td class="fc-table-label">' . $this->_('Email') . '</td><td>' . $comment->get('email') . '</td></tr>
                     </table>
                     <div class="fc-edit-comment">' . $button->render() . '</div>';
 
@@ -359,7 +366,9 @@
                     ]);
                 }
             }
-            return $table->render();
+            $out = $table->render();
+            $out .= '<div id="fc-comment-'.$comment->id.'" class="fc-comment-detail"></div>';
+            return $out;
         }
 
         /** Helper function to group comments by field and page
@@ -408,7 +417,7 @@
             // sort all results by creation date ascending
             $query[] = "ORDER BY created";
 
-            // set the limit of comment saccording to the filter settings
+            // set the limit of the comments according to the filter settings
             if ($limit != 0) {
                 $query[] = "LIMIT $limit";
             }
@@ -420,17 +429,20 @@
 
                 $sql = wire('database')->prepare($queryString);
                 $sql->execute();
-                $commentsFound = $sql->fetchAll();
+                $commentsFound = $sql->fetchAll(PDO::FETCH_ASSOC);
 
                 // comments have been found
                 if ($commentsFound) {
+
                     $groupedComments = $this->groupBy($commentsFound, 'pages_id');
                     foreach ($groupedComments as $pageId => $data) {
-                        $pageComments = new CommentArray();
+                        $pageComments = new FrontendCommentArray();
                         $pageComments->setPage(wire('pages')->get($pageId));
                         $pageComments->setField($field);
+
                         foreach ($data as $c) {
-                            $pageComment = new Comment($c, $pageComments);
+
+                            $pageComment = new FrontendComment($pageComments, $c, $this->frontendFormsConfig);
                             // Add the comment to the CommentArray
                             $pageComments->add($pageComment);
                         }
@@ -441,6 +453,7 @@
             } catch (Exception $e) {
 
             }
+
             return $allComments; // return the WireArray containing all CommentArrays
         }
 
@@ -451,7 +464,7 @@
          * @return bool
          * @throws \ProcessWire\WireException
          */
-        protected function saveComment(Field $field, Comment $comment, int $newStatus): bool
+        protected function saveComment(Field $field, FrontendComment $comment, int $newStatus): bool
         {
             // status has been changed
             $table = $field->getTable();
@@ -476,7 +489,7 @@
                 $query = wire('database')->prepare($sql);
                 $query->bindValue(":status", $newStatus, PDO::PARAM_INT);
                 $query->bindValue(":spam_update", $spam_update, PDO::PARAM_INT); // remove time stamp if present
-                $query->bindValue(":id", $comment->id, PDO::PARAM_INT);
+                $query->bindValue(":id", $comment->get('id'), PDO::PARAM_INT);
                 return $query->execute();
             } catch (Exception $e) {
                 return false;
@@ -515,7 +528,7 @@
                         if ($comment) {
 
                             // create new CommentArray -> needed for sending notification email
-                            $commentArray = new CommentArray();
+                            $commentArray = new FrontendCommentArray();
                             $commentArray->setField($field);
                             $commentArray->setPage(wire('pages')->get($comment->pages_id));
                             $commentArray->add($comment);
@@ -533,10 +546,12 @@
 
                                     if (in_array($comment->status, [FieldtypeFrontendComments::approved, FieldtypeFrontendComments::spam])) {
 
-                                        $notification = new Notifications($commentArray);
+                                        $notification = new Notifications($commentArray, $field, $commentArray->getPage());
                                         // send email about the status change
-                                        $notification->sendStatusChangeEmail($comment, $field, $this->frontendFormsConfig);
+                                        $notification->sendStatusChangeEmail($comment, $field, $this->frontendFormsConfig, $comment->status);
                                     }
+                                    // Force redirect to show changes inside the statistic table
+                                    wire('session')->redirect($_SERVER['REQUEST_URI']);
                                 }
 
                                 /*
@@ -576,7 +591,7 @@
 
                                             $notification = new Notifications($commentArray);
                                             // add new status to the comment
-                                            $notification->sendStatusChangeEmail($comment, $field, $this->frontendFormsConfig);
+                                            $notification->sendStatusChangeEmail($comment, $field);
                                         }
                                     }
                                 } catch (Exception $e) {
@@ -611,7 +626,7 @@
         public function getCommentFields(): WireArray
         {
             $commentFields = new WireArray();
-            foreach (wire('fields')->findByType('FieldtypeFrontendComments') as $field) {
+            foreach(FieldtypeFrontendComments::getAllCommentFields() as $field) {
                 $commentFields->add($field);
             }
             return $commentFields;
@@ -685,7 +700,7 @@
          */
         public function ___execute(): string
         {
-
+            bd('execute');
             // No FrontendComments field exists
             if (!$this->commentFields->count)
                 return '';
@@ -718,13 +733,12 @@
                 '#',
                 $this->_('Field name'),
                 $this->_('Total number of comments'),
-                $this->_('Number of approved comments'),
-                $this->_('Number of comments waiting for approval'),
-                $this->_('Number of comments declared as SPAM'),
+                $this->_('approved'),
+                $this->_('waiting for approval'),
+                $this->_('SPAM'),
             ]);
 
             foreach ($this->commentFields as $key => $commentField) {
-
                 $datatable->row([
                     $key + 1,
                     $commentField->name,
@@ -755,12 +769,6 @@
             $commentsField->required = 1;
             foreach ($this->getCommentFields() as $field) {
                 $label = $field->name;
-                $unapproved = $this->getWaitingApproval($field);
-                if ($unapproved) {
-                    $text = $this->_n($this->_('comment is'),
-                        $this->_('comments are'), $unapproved);
-                    $label = $label . ' (' . $unapproved . ' ' . $text . ' ' . $this->_('waiting for approval') . ')';
-                }
                 $commentsField->addOption($field->id, $label);
             }
             $commentsField->defaultValue = $this->getCommentFields()->first()->id;
@@ -804,7 +812,6 @@
             $statusField->defaultValue = 3;
             $label = '<label class="fc-filterlabel">' . $this->_('Status') . '</label>';
             $markup .= '<div class="fc-filterelement">' . $label . $statusField->render() . '</div>';
-            bd($statusField->label);
             $filter = wire('modules')->get('InputfieldMarkup');
             $filter->markupText = $markup;
             $managingFieldset->add($filter);
@@ -835,7 +842,9 @@
 
                 // find all comments according to the filter settings
                 $comments = $this->findComments($this->field, $selectors, $number);
-
+                bd($comments);
+                $pagination = $comments->renderPager();
+                bd($pagination);
                 if ($comments->count) {
                     // create the new table containing the comments found
                     $tableMarkup = $this->___executeTable($comments, $form);
@@ -852,6 +861,7 @@
 
                 $tableout .= '<div id="ajax-comments-table" data-number="' . $this->getTotal($this->field) . '">' . $tableMarkup . '</div>';
             }
+
 
             $tableMarkup = $this->___executeTable($comments, $form);
 
