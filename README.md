@@ -32,6 +32,7 @@ Processwire Fieldtype/Inputfield to add and manage comments on your site based o
 * [Public methods to change field parameters in templates](#public-methods-to-change-field-parameters-in-templates)
 * [Queuing notification emails](#queuing-notification-emails)
 * [What happens if a comment, which has replies, will be declared as SPAM](#what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam)
+* [Hooking to change markup](#hooking-to-change-markup)
   
 
 ## Configurations
@@ -269,5 +270,18 @@ If a user tries to vote again within this interval, he will get a notice, that h
 
 The following image shows this scenario: Time range is set to 7 days and UIKit3 markup is selected for the output.
 
+## Hooking to change markup
 
-![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/vote-lock.png?raw=true)
+If you want to change the markup of some elements globally, you can use Hooks to add or remove for example classes of elements. To change the markup globally, you need to add the Hooks to your *site/init.php* file.
+
+Example to add a custom CSS class to the email inputfield of the form (add this code to the site/init.php file):
+
+```php
+$wire->addHookAfter('FrontendCommentForm::getEmailField', function(HookEvent $event) {
+        $emailField = $event->return;
+        $emailField->setAttribute('class', 'myclass');
+        $event->return = $emailField;
+    });
+```
+
+Take a look at the FrontendCommentForm.php class file to see which methods are hookable. In this case every element of the form has its own hookable function. Here are some examples of the hookable function you will find there: getAuthorField(), getWebsiteField(), getCommentField(),....
