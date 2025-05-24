@@ -1,198 +1,58 @@
-/*
-CSS file for default styling of the frontend comments
+/* FrontendComments field for default Markup (no CSS framework) */
 
-Created by Jürgen K.
-https://github.com/juergenweb
-File name: frontendcommentsnone.css
-Created: 20.07.2023
- */
-
-.privacy-text {
-    text-align: left;
-    padding: 10px 0;
-}
-
-.fc-comments-list {
-    margin: 30px 0 30px 0;
+.comments-list {
+    margin-top: 30px;
     position: relative;
-    padding-left: 15px;
 }
 
-.fc-comments-list li {
+.comments-list div div {
     margin-bottom: 15px;
     display: block;
     position: relative;
 }
 
-.fc-comments-list li:after {
-    content: '';
-    display: block;
-    clear: both;
-    height: 0;
-    width: 0;
-}
-
-.fc-reply-list {
-    margin-left: 10px;
-    padding-left: 20px;
+.reply-list {
+    padding-left: 88px;
     clear: both;
     margin-top: 15px;
-    position: relative;
 }
 
-/**
- * Avatar
- ---------------------------*/
-.fc-comment-avatar {
-    position: relative;
-    z-index: 99;
+.comments-list .comment-box .comment-avatar {
+    width: 50px;
+    height: 50px;
     float: left;
+    border: 3px solid #FFF;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    -moz-box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    background: #fff;
     overflow: hidden;
-    padding-right: 10px;
+    margin: 0 10px 0 0;
 }
 
-.fc-comment-avatar img {
+.comments-list .comment-avatar img {
     width: 100%;
     height: 100%;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
 }
 
-/* Rating */
-.star-rating-result {
-    clear: both;
-}
-
-/* Comments styling */
-
-.fc-comment-main-level:after {
-    content: '';
-    width: 0;
-    height: 0;
-    display: block;
-    clear: both;
-}
-
-.fc-comment-box {
-    width: 100%;
-    margin-top: 15px;
-    float: right;
-    position: relative;
-    -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
-    -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
-}
-
-.fc-comment-box:before, .fc-comment-box:after {
-    content: '';
-    height: 0;
-    width: 0;
-    position: absolute;
-    display: block;
-    border-width: 10px 12px 10px 0;
-    border-style: solid;
-    border-color: transparent #FCFCFC;
-    top: 8px;
-    left: -11px;
-}
-
-.fc-comment-box:before {
-    border-width: 11px 13px 11px 0;
-    border-color: transparent rgba(0, 0, 0, 0.05);
-    left: -12px;
-}
-
-.fc-comment-head {
-    background: #FCFCFC;
-    padding: 10px 20px;
-    border-bottom: 1px solid #E5E5E5;
-    overflow: hidden;
-    -webkit-border-radius: 4px 4px 0 0;
-    -moz-border-radius: 4px 4px 0 0;
-    border-radius: 4px 4px 0 0;
-}
-
-/* comment removed by moderator styling */
-.fc-comment-removed {
-    background: #eee;
-    padding: 5px;
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
-}
-
-/* Text styling */
-.fc-comment-content {
-    background: #FFF;
-    padding: 12px 20px;
-    font-size: 15px;
-    -webkit-border-radius: 0 0 4px 4px;
-    -moz-border-radius: 0 0 4px 4px;
-    border-radius: 0 0 4px 4px;
-}
-
-.fc-reply-form-headline {
-    margin-top: 20px;
-}
-
-.fc-cancel-link-wrapper {
-    padding-bottom: 20px;
-}
-
-.fc-reply-form-wrapper {
-    padding: 0 20px;
-    border-top: 1px solid #E5E5E5;
-}
-
-.alert-close-wrapper {
-    text-align: right;
-}
-
-.fc-comments-meta {
-    background: blue;
-    line-height: 18px;
-    font-size: 14px;
-}
-
-.fc-comments-meta-left {
-    float: left;
-}
-
-.fc-comments-meta-right {
-    float: right;
-    clear: right;
-}
-
-.icon-box {
-    display: inline-block;
-    margin-left: 5px;
-}
-
-/* Styling author */
-.fc-comment-name {
-    color: #283035;
-    font-size: 15px;
-    font-weight: 700;
-}
-
-.fc-comment-date {
-    color: #595959;
-    margin-bottom: .5rem;
-
-}
 
 /* vote badge */
-.fc-votebadge {
-    margin: 0 5px;
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    text-align: center;
+.comments-list .comment-box .fc-votebadge {
+    padding: 2px 6px;
+    font-size: 12px;
     line-height: 18px;
-    border-radius: 50%;
-    background: #1779ba;
+    height: 20px;
+    min-width: 20px;
+    font-weight: bold;
+    text-align:center;
     color: #fff;
+    border-radius: 3px;
+    margin-right:1em;
+    margin-left: .5em;
+    top: 6px;
 }
 
 .upvote {
@@ -203,15 +63,170 @@ Created: 20.07.2023
     background: #ef1c1c;
 }
 
-/** =====================
- * Responsive
- ========================*/
-@media only screen and (min-width: 481px) {
-
-    .fc-reply-list {
-        margin-left: 20px;
-    }
-
+.comments-list .comment-box {
+    width: 100%;
+    float: right;
+    position: relative;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.15);
+    -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.15);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.15);
 }
 
+.comment-box .comment-head {
+    background: #FCFCFC;
+    padding: 10px 12px;
+    border-bottom: 1px solid #E5E5E5;
+    overflow: hidden;
+    -webkit-border-radius: 4px 4px 0 0;
+    -moz-border-radius: 4px 4px 0 0;
+    border-radius: 4px 4px 0 0;
+    margin-bottom: 0;
+}
 
+.comment-box .comment-head a {
+    text-decoration: none;
+    border-bottom: 1px solid #333;
+}
+
+.comment-box .comment-head a:hover {
+    border-bottom: none;
+}
+
+.by-author {
+    position:relative;
+    top: 1px;
+}
+
+.comment-box .comment-name {
+    color: #283035;
+    font-size: 16px;
+    font-weight: 700;
+    float: left;
+    margin: 0 10px 0 0;
+}
+
+.comment-box .comment-head span, .comment-box .star-rating-result {
+    float: right;
+    color: #999;
+    font-size: 15px;
+    position: relative;
+    margin-left: 10px;
+    top: 1px;
+}
+
+.comment-box .star-rating-result span {
+    float:none;
+}
+
+.comment-box .comment-head span.comment-created {
+    float:left;
+}
+
+.comment-box .star-rating-result {
+    display:inline;
+    float:left;
+    top: 1px;
+}
+
+.comment-box .comment-content {
+    background: #FFF;
+    padding: 12px;
+    color: #595959;
+    -webkit-border-radius: 0 0 4px 4px;
+    -moz-border-radius: 0 0 4px 4px;
+    border-radius: 0 0 4px 4px;
+    margin-bottom: 0;
+}
+
+.comment-box .fc-website-link {
+    font-size: 12px;
+    text-align:right;
+    border-top: 1px solid #ddd;
+    margin-top: 10px;
+    padding: 12px;
+    margin-bottom: 0;
+}
+
+.comment-box .fc-website-link a:hover {
+    border-bottom:none;
+}
+
+.comment-box .fc-website-link a:hover {
+    text-decoration:none;
+}
+
+.comment-box .fc-reply-form {
+    padding: 0 12px;
+    border-top: 1px solid #E5E5E5;
+}
+
+.pagination {
+    list-style-type: none;
+    display: inline-block;
+    padding-left: 0;
+}
+
+.pagination-center {
+    text-align: center;
+}
+
+.pagination-right {
+    text-align: right;
+}
+
+.pagination li {
+    width: 30px;
+    height: 30px;
+    float: left;
+    margin: 0 5px 0 0;
+    border: 0;
+}
+.pagination li:last-child {
+    margin: 0;
+}
+.pagination li a {
+    width: 100%;
+    height: 30px;
+    float: left;
+    text-align: center;
+    line-height: 30px;
+    font-weight: 400;
+    font-size: 1em;
+    color: #2E2929;
+    cursor: pointer;
+    border-radius: 3px;
+    background: #ddd;
+    transition: background-color .25s ease-in-out;
+}
+.pagination li a:hover, .pagination li.currentpage a {
+    background-color: #FF1493;
+    color: #FFF;
+}
+
+.page-of-text {
+    font-size: 15px;
+    color: #999;
+}
+
+.comment-feedback {
+    padding: 12px;
+    border: 1px solid #ddd;
+    margin: 12px;
+    font-style: italic;
+    font-size: 90%;
+    background: #FCFCFC;
+}
+
+/** =====================
+* Responsive
+========================*/
+@media only screen and (max-width: 760px) {
+
+    .comment-box .star-rating-result {
+       display:block;
+       margin-left:0;
+       text-align:right;
+       width: 100%;
+   }
+
+}
