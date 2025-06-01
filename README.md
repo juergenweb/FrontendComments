@@ -126,117 +126,7 @@ $comments->showFormAfterComments(false);
 echo $comments->render();
 ```
 
-## Methods to overwrite global settings
-
-| Method name  | Use case | 
-| ------------- | ------------- |
-| [setReplyDepth()](#setreplydepth---change-the-reply-depth-of-the-comments)  | change the reply depth of the comments  |
-| [setModeration()](#setmoderation---change-the-moderation-status-of-comments)  | change the moderation status of comments  |
-| [setMailTemplate()](#setmailtemplate---change-the-mail-template-for-the-moderator-notification-mails)  | change the template of the mails  |
-| [setModeratorEmails())](#setmoderatoremails---set-the-email-addresses-for-the-moderator-notification-mails)  | set the email addresses for the moderator notification mails  |
-| [setSortNewToOld()](#setsortnewtoold---change-the-sort-order-of-the-comments)  | change the sort order of the comments depending on date created  |
-| [showFormAfterComments()](#showformaftercomments---whether-to-show-the-form-before-or-after-the-comments)  | whether to show the form before or after the comments  |
-| [showStarRating()](#showstarrating---whether-to-show-the-star-rating-or-not)  | whether to show the star rating or not  |
-| [showTextareaCounter()](#showtextareacounter---whether-to-show-a-character-counter-under-the-textarea-or-not)  | whether to show a character counter under the textarea or not  |
-| [showVoting()](#showvoting---whether-to-show-voting-option-on-a-comment-or-not)  | whether to show voting option on a comment or not  |
-| [useCaptcha()](#usecaptcha---whether-to-use-a-certain-type-of-captcha-or-no-captcha)  | whether to use a certain type of CAPTCHA or no CAPTCHA  |
-
-
-
-In the following method descriptions, the comment field is named "*mycomments*". Please replace this name to the name of your comment field.
-
-### setReplyDepth() - change the reply depth of the comments
-This method let you change the reply depth of the comment list. The value must be higher than 0. A value of 1 means a flat hierarchy with no children.
-
-```php
-$comments = $page->mycomments;
-$comments->setReplyDepth(1); // value must be higher than 0
-echo $comments;
-```
-
-### setModeration() - change the moderation status of comments
-This method let you change how new comments will be published and approved. Possible values are 0 (no moderation, each comment will be published immediately), 1 (only comments of new commenters need approvement by a moderator) and 2 (all comments must be approved by a moderator)
-
-```php
-$comments = $page->mycomments;
-$comments->setModeration(1); // 0, 1 or 2 
-echo $comments;
-```
-
-### setMailTemplate() - change the mail template for the moderator notification mails
-This method let you change another mail template. Please take a look at (the email template folder)[https://github.com/juergenweb/FrontendForms/tree/main/email_templates] to get the template files can be used.
-
-```php
-$comments = $page->mycomments;
-$comments->setMailTemplate('template_4.html); // enter a file name form the email templates folder inside the parenthesis 
-echo $comments;
-```
-
-### setModeratorEmails() - set the email addresses for the moderator notification mails
-This method let you set new moderator email addresses. The notification mails about new comments will be sent to these email addresses. You can add a single email address or multiple comma separated addresses as a string
-
-```php
-$comments = $page->mycomments;
-$comments->setModeratorEmails('email1@example.com, email2@example.com'); //enter one or multiple comma separated email addresses 
-echo $comments;
-```
-
-### setSortNewToOld() - change the sort order of the comments
-Comments can be displayed from newest to oldest or vice versa. With this method you can set the sort order. Setting it to true means that all comments will be displayed from the newest to the oldest. False sorts the comments the other way.
-
-```php
-$comments = $page->mycomments;
-$comments->setSortNewToOld(true); //true or false
-echo $comments;
-```
-
-### showFormAfterComments() - whether to show the form before or after the comments
-With this method you set the rendering order of the form and the comments. Setting it to true means that the form will be displayed after the comment list. False renders the form before the comment list.
-
-```php
-$comments = $page->mycomments;
-$comments->showFormAfterComments(true); //true or false
-echo $comments;
-```
-
-### showStarRating() - whether to show the star rating or not
-With this method can enable/disable star rating on the comments. Setting it to true means that the star rating will be displayed. False disable/hides the star rating.
-
-```php
-$comments = $page->mycomments;
-$comments->showStarRating(true); //true or false
-echo $comments;
-```
-
-### showTextareaCounter() - whether to show a character counter under the textarea or not
-With this method can enable/disable the display of a character counter under the comment textarea field. Setting it to true means that the counter will be displayed. False disable/hides the counter.
-
-```php
-$comments = $page->mycomments;
-$comments->showTextareaCounter(true); //true or false
-echo $comments;
-```
-
-### showVoting() - whether to show voting option on a comment or not
-With this method can enable/disable the display like/dislike buttons on a comment. Setting it to true means that the buttons will be displayed. False disable/hides them.
-
-```php
-$comments = $page->mycomments;
-$comments->showVoting(true); //true or false
-echo $comments;
-```
-
-### useCaptcha() - whether to use a certain type of CAPTCHA or no CAPTCHA
-With this method can enable/disable the display of a CAPTCHA in the form. As values you can set following:
-* none: no CAPTCHA will be used
-* inherit: the global value as set in the FrontendForms configuration will be used or
-* use one of the following CAPTCHA types: DefaultImageCaptcha, DefaultTextCaptcha, EvenCharacterTextCaptcha, ReverseTextCaptcha, SimpleMathTextCaptcha
-
-```php
-$comments = $page->mycomments;
-$comments->useCaptcha('DefaultImageCaptcha); // inherit, none or one of the CAPTCHA types 
-echo $comments;
-```
+Each of these above methods is explained alongside the corresponding global settings field in the module configuration, so I won't go much more into detail.
 
 ## Queuing notification emails
 This module offers commenters the option to be notified whenever a new reply to their comments or other comments has been posted. This can result in a very large number of notification emails every time a comment is posted, especially if your website has high comment activity.
@@ -245,34 +135,30 @@ Sending a lot of emails at once affects server performance. Since the sending pr
 
 To prevent such issues by sending a large amount of mails at once, all notification emails will be sent in smaller groups of 20 mails per batch. The LazyCron interval is set to 2 minutes. 20 mails every 2 Minutes should be a good ratio between batch size and time.
 
-Technically, this works by writing each notification email into a row inside a custom database table. Each time LazyCron will be triggered, 20 mails in this table will be sent out, and the rows will be deleted afterwards. On the next LazyCron run, the next 20 mails will be sent and so on until there is no mail left in this database table.
-
 Only to mention: This only happens to notification emails for commenters, not for moderators. Moderators will get the notification email about a new comment immediately, so they can react just in time (fe approve the comment or mark the comment as Spam).
 
 ## Special case: What happens if a comment, which has replies, will be declared as SPAM
-By default, all comments that are declared as SPAM are no longer visible on the frontend and will be deleted after a certain number of days if this has been set inside the moudule configuration. This is fine as long as the comment has no replies. 
+By default, all comments that are declared as SPAM are no longer visible in the frontend and will be deleted after a certain number of days if this has been set in the module configuration. That's fine, as long as the comment doesn't contain any answers.
 
-If a comment has replies and you declare it as SPAM, all children (replies) are also no longer visible. This is not really desirable as you are disabling many comments at once (even comments with content that does not violate the comment guidelines). This could lead to commenters being frustrated that their comment is no longer visible.
+If a comment contains replies and is declared as SPAM, then all subordinates (replies) would no longer be visible. This is not really desirable, as many comments would suddenly no longer be visible (even comments with content that does not violate the comment guidelines). This can cause commenters to feel frustrated because their comment is suddenly no longer visible.
 
-To prevent this behaviour, all comments with replies that are declared as "SPAM" will be declared as "SPAM with replies". This means that the comment will be visible, but the comment text will be replaced with the following text: "This comment has been removed by a moderator because it does not comply with our comment guidelines."
+To prevent this, comments marked as SPAM to which replies have already been written are declared as "SPAM with replies". This means that the comment will remain visible, but the comment text will be replaced with the following text: "This comment was removed by a moderator because it does not comply with our comment guidelines."
 
-In this case, the comment will not be deleted, like a normal SPAM comment, and all replies will still be visible in the frontend.
+In this case, the comment will not be deleted like a normal SPAM comment and all replies to this comment will still remain visible in the frontend.
 
-You don't have to worry about whether a comment has replies or not if you declare a comment as "SPAM" - it will be checked via a hook before saving. If replies are available, the status will be automatically changed to "SPAM with replies" by the hook function.
-
-In addition, the reply link symbol and the "Like" or "Dislike" buttons will be removed from this comment (Default output -> no CSS framework).
+You don't have to worry about whether a comment already has replies or not if you declare a comment as "SPAM" - this will be automatically checked before saving. If answers already exist, then the status "SPAM" will be automatically changed to "SPAM with replies"
 
 
 ![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-banned.png?raw=true)
 
 ## Locking visitors to vote (up-vote or down-vote) for a comment
-This module offers the possibility to enable up- and downvotes for comments. Inside the inputfield configuration, you can set the time range after which a user is allowed to vote again. 
+This module offers the possibility to activate upvotes and downvotes for comments. In the input field configuration, you can specify the period after which a user is allowed to vote again.
 
-The identification of a user is done by checking his IP and his browser fingerpring. It is not really a 100% safe method to identify a user, but it is ok for this case.
+The identification of a user is done by checking their IP and browser fingerprint. It's not really a 100% safe way to identify a user, but for this case, it's fine.
 
-If a user tries to vote again within this interval, he will get a notice, that he is not allowed to vote again. 
+If a user wishes to vote again within this period, he will receive a notification that he is no longer allowed to vote, because he has already voted.
 
-The following image shows this scenario: Time range is set to 7 days and UIKit3 markup is selected for the output.
+![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-banned.png?raw=true)
 
 ## Hooking to change markup
 
