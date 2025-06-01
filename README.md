@@ -10,20 +10,24 @@ This module is early Beta stage - so please use it with care!
 * PHP>=8.0.0
 * ProcessWire>=3.0.181
 * GD-Library installed for CAPTCHA image creation
-* FrontendForms>=2.2.29
+* FrontendForms>=2.2.34
 * LazyCron enabled for sending mails
 
 ## Highlights / Features
 * Easy integration: Only 1 line of code inside a template is necessary to render the comments + form on the frontend
-* Possibility to use multiple comment fields on one template (if necessary)
-* Easy to overwrite global settings inside a template: Possibility to use one comment field with different configuration settings in multiple templates
+* Possibility to use multiple comment fields in one template (if necessary)
+* Easy to overwrite global module settings inside the template (possibility to use one comment field with different configuration settings in multiple templates)
 * Enable/disable star rating
 * Enable/disable rating of comments (like/dislike)
+* Add additional website field to the comment form if needed
 * Offer commenters the receiving of notification emails if a new reply has been posted
 * Queuing the sending of notification emails instead of sending all at once (preventing performance issues by sending to many emails at once)
 * Reply forms will only be loaded via AJAX on demand (by clicking on the reply link) -> faster loading time
 * Option to send HTML email templates (provided by FrontendForms)
 * Enable/disable the sending of notification emails to a commenter if status of a comment has been changed to "approved" or "SPAM" by a moderator
+* Moderators can write a feedback directly to a comment (fe to react to positive or negative comments)
+* Adding a link to an internal or external page containing the community guidlines
+* Changing the status of a comment via remote link to "approved" or "spam"
 * No dependencies (except FrontendForms)
 * Support for UiKit 3, Pico 2 and Bootstrap 5 CSS framework out of the box
 
@@ -38,15 +42,12 @@ This module is early Beta stage - so please use it with care!
   
 
 ## Configurations
-After you have installed the module, you have to set a default email address where the mails should be sent to. This email address can be entered manually or you can choose a ProcessWire field, which contains the email address. All other configuration options are optional.
+After you have installed the module, you need to set at least 1 moderator email address to which the mails should be sent when a new comment is posted. You can enter this email address manually or you can select a user with editing rights. All other configuration options are optional.
 
-* **`Comment moderation`** Select if you want to moderate all comments or only new comments or no comments at all. Moderation means that comments must be reviewed by a moderator, before they will be published
+The information about the individual configuration settings can be found right next to the corresponding configuration field.
 
 ## Is this a copy of the Comments Fieldtype by Ryan?
-No, it is not. This module runs on its own code base and was not copied from Ryans module. I only have taken a look about the features he offers inside his module to get an idea, what could be useful or not. This module offers much more configuration settings and features than the original module, so it not a copy.
-
-## My intention for the re-creation of a Fieldtype that exists 
-I wanted to use all the advantages of my FrontendForms module on a comment component and I wanted that the forms of the comment component looks like the same as all other forms on my site, so that they integrate seamlessly. This is why I decided to develop my own version of a comment module.
+No, it's not. This module runs on its own codebase and has not been copied from Ryans module. I just looked at the features he offers in his module to get an idea of what might be useful or not. This module offers many more configuration settings and features than the original module, so it is not a copy.
 
 ## Installation and Quick-start guide
 1. First of all, you need to download and install the FrontendForms module from the [module directory](https://processwire.com/modules/frontend-forms/) if you have not installed it.
@@ -54,13 +55,13 @@ I wanted to use all the advantages of my FrontendForms module on a comment compo
 2. Login to your admin area and refresh all modules.
 3. Find this module and install it.
 4. Then you need to create your first comment field and name it fe "comments".
-5. Once you've created this comment field, you can change some configuration settings in the "Details" tab of the field, if necessary. The only value that needs to be entered is at least one email address for a moderator. This is mandatory.
+5. Once you've created this comment field, you can change some configuration settings in the "Details" tab of the field, if necessary. The only value that needs to be entered is the email address of at least one moderator. This is mandatory.
 6. As the next step add this field to a template.
 7. JavaScript and CSS file for the frontend will be added automatically - you don't have to take care about it.
-8. To output the comment form and the comment list on the frontend you have to add fe. "echo $page->comments" to the frontend template. Take a look on the following output methods below.
+8. To output the comment form and the comment list on the frontend you have to add fe. "*echo $page->comments->render()*" to the frontend template. Take a look on the following output methods below.
 
 ### Simple direct output with "echo"
-If you do not want to change a parameter on the frontend, you can simply output the comments using the global settings by using the "echo" method. In this case, the comments field name is "mycomments". Please replace it with your comment field name.
+If you want to use the global settings you only need to use the render() method. In this case, the comments field name is "mycomments". Please replace it with your comment field name.
 
 ```php
 echo $page->mycomments->render();
@@ -75,11 +76,11 @@ $comments = $page->mycomments;
 echo $comments->render();
 ```
 ### Indirect output, including the change of some parameters
-This kind of output is necessary, if you want to overwrite some global settings before you output the markup. 
 
-By the way: The only scenario for changing paramters on the frontend will be the case, if you use the same comment field on different templates and you need to change some parameters on each template. In this case you need to change them inside the template and not in the backend configuration.
+This type of output is necessary if you want to override some global settings before you output the markup.
 
-If you use a new comment field for every template, you can change all of the parameters inside the "Details tab" of the field in the backend configuration.
+This can be the case if you want to use a comment field in different templates with different settings
+
 
 ```php
 $comments = $page->mycomments;
@@ -87,17 +88,9 @@ $comments->setReplyDepth(0); // use another reply depth than in the global field
 echo $comments->render();
 ```
 
-## Public methods to change field parameters in templates
-There are a lot of configuration parameters that can be set as global values inside the details tab of the input field. 
-If you are using only on one template a comment field, the backend configuration is all you need. In this case the following public methods are not relevant.
-They are for the case if you want to use the same comment field on various templates, but with different settings.
-This could be fe the case if you want to use a comment field on a product page and there you want to enable star rating for the product.
-On another template, fe a blog page, you do not need the star rating. In this case you must overwrite the global setting for the star rating by using a public method (in this case the showStarRating() method.
-That is the reason, why the public methods are there.
+A lot of information on how to override settings can be found on the configuration page of a comment field. The example *setReplyDepth()* shown above is just one example of many.
 
-Of course, you can also create 2 comment fields (one for the product and one for the blog page) and make different settings on each field, but due to performance reasons, it would be better to create only one comment field and adapt the settings on each template to your needs.
-
-Here is an example on how you can use the public methods inside a template:
+Here is an example with a lot of overwritten configuration settings:
 
 ```php
 $comments = $page->mycomments; // get your comment field inside a template
@@ -133,6 +126,8 @@ $comments->showFormAfterComments(false);
 echo $comments->render();
 ```
 
+## Methods to overwrite global settings
+
 | Method name  | Use case | 
 | ------------- | ------------- |
 | [setReplyDepth()](#setreplydepth---change-the-reply-depth-of-the-comments)  | change the reply depth of the comments  |
@@ -148,7 +143,7 @@ echo $comments->render();
 
 
 
-In the following method descriptions, the comment field is named "mycomments". Please change this name to the name of your comment field.
+In the following method descriptions, the comment field is named "*mycomments*". Please replace this name to the name of your comment field.
 
 ### setReplyDepth() - change the reply depth of the comments
 This method let you change the reply depth of the comment list. The value must be higher than 0. A value of 1 means a flat hierarchy with no children.
@@ -244,9 +239,9 @@ echo $comments;
 ```
 
 ## Queuing notification emails
-This module offers commenters the possibility to get notified, if a new reply has been posted to their comment or to other comments. This could lead to a very large amount of notification emails each time a comment will be posted, especially if your site has a high comment activity.
+This module offers commenters the option to be notified whenever a new reply to their comments or other comments has been posted. This can result in a very large number of notification emails every time a comment is posted, especially if your website has high comment activity.
 
-Sending a lot of emails at once will have an impact on your site performance, because the sending of mails will be triggered via LazyCron on page load and this will have an impact on the loading process of the page during the Cron task runs.
+Sending a lot of emails at once affects server performance. Since the sending process is triggered when a page is loaded via LazyCron, this can increase the load time of a page.
 
 In other words, a user visits a page on your site and if LazyCron will be triggered at this moment, the module will send out fe 200 mails at once. This could take a lot of time until the last mail has been sent, and this blocks the loading process of the page. BTW if you are sending a lot of mails at once, you probably get marked as a spammer ;-)
 
@@ -256,7 +251,7 @@ Technically, this works by writing each notification email into a row inside a c
 
 Only to mention: This only happens to notification emails for commenters, not for moderators. Moderators will get the notification email about a new comment immediately, so they can react just in time (fe approve the comment or mark the comment as Spam).
 
-## What happens if a comment, which has replies, will be declared as SPAM
+## Special case: What happens if a comment, which has replies, will be declared as SPAM
 By default, all comments that are declared as SPAM are no longer visible on the frontend and will be deleted after a certain number of days if this has been set inside the moudule configuration. This is fine as long as the comment has no replies. 
 
 If a comment has replies and you declare it as SPAM, all children (replies) are also no longer visible. This is not really desirable as you are disabling many comments at once (even comments with content that does not violate the comment guidelines). This could lead to commenters being frustrated that their comment is no longer visible.
