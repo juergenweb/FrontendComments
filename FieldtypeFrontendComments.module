@@ -1083,8 +1083,8 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $userimage->attr('value', $this->getConfigValue($field, $userimage));
         $userimage->required = 1;
         $userimage->set('label', $this->_('Select the field for the user image'));
-        $userimage->set('description', $this->_('Select the field of the user template which contains the user image.'));
-        $userimage->set('notes', $this->_('Only user fields of type "FieldtypeImage" and the configuration setting for a single image (if any) are displayed.'));
+        $userimage->set('description', $this->_('Select a field from the user template that contains the user image.'));
+        $userimage->set('notes', $this->_('Only user fields of the type "FieldtypeImage" are displayed, which only allow the upload of a single image.'));
         $confFieldset->add($userimage);
 
         /** @var InputfieldCheckbox $showWebsite */
@@ -1095,7 +1095,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $showWebsite->attr('checked', $field->$name ? 'checked' : '');
         $showWebsite->set('columnWidth', 50);
         $showWebsite->set('label', $this->_('Add a website field to the comment form'));
-        $showWebsite->set('description', $this->_('A form field, where the commenter can enter a URL to a website will be displayed inside the form.'));
+        $showWebsite->set('description', $this->_('Here you can add an additional form field to the form, which allows the author to enter the URL to his website'));
         $showWebsite->set('notes', $this->_('The field will only be added to the form if the box is checked.'));
         $confFieldset->add($showWebsite);
 
@@ -1259,8 +1259,8 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $notification->addOption(FrontendComment::flagNotifyReply, $this->_('Users can receive email notifications of replies to their comment only'));
         $notification->addOption(FrontendComment::flagNotifyAll, $this->_('Users can receive email notifications for all new comments on the page'));
         $notification->attr('value', $this->getConfigValue($field, $notification));
-        $notification->set('label', $this->_('Commenter email notification'));
-        $notification->set('description', $this->_('Send users email notifications of new comments.'));
+        $notification->set('label', $this->_('Sending notification mails to the author of a comment'));
+        $notification->set('description', $this->_('Send comment authors email notifications of new comments.'));
         $emailFieldset->add($notification);
 
         /** @var InputfieldCheckboxes $statusnotification */
@@ -1270,9 +1270,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $statusnotification->addOption(FieldtypeFrontendComments::approved, sprintf($this->_('Send notification email if status has been changed to approved'), InputfieldFrontendComments::statusTexts()[FieldtypeFrontendComments::approved]));
         $statusnotification->addOption(FieldtypeFrontendComments::spam, sprintf($this->_('Send notification email if status has been changed to SPAM'), InputfieldFrontendComments::statusTexts()[FieldtypeFrontendComments::approved]));
         $statusnotification->attr('value', $this->getConfigValue($field, $statusnotification));
-        $statusnotification->set('label', $this->_('Send notification email to commenter on status change'));
-        $statusnotification->set('description', $this->_('If a moderator changes the status of a comment, select on which status change the commenter should be informed via email.'));
-        $statusnotification->set('notes', $this->_('If a box is checked, the commenter will receive an email if the comment status will be changed by a moderator in the backend or via email link. You can prevent this behavior by unchecking a box.'));
+        $statusnotification->set('label', $this->_('Send a notification email to the author of a comment on status change'));
+        $statusnotification->set('description', $this->_('If a moderator changes the status of a comment, select on which status change the author should be informed via email.'));
+        $statusnotification->set('notes', $this->_('If a box is checked, the commenter will receive an email if the comment status will be changed by a moderator in the backend or via email link. You can disable the sending of emails by unchecking a box.'));
         $emailFieldset->add($statusnotification);
 
         $inputfields->append($emailFieldset);
