@@ -141,7 +141,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     protected function sendQueuedEmails(): void
     {
 
-        bd('lazy runs');
         // do not send notification mails if a stopqueue session is present
         if ($this->wire('session')->get('stopqueue')) {
             $this->wire('session')->remove('stopqueue');
@@ -1082,8 +1081,13 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $userimage->addOptions($userimages);
         $userimage->attr('value', $this->getConfigValue($field, $userimage));
         $userimage->required = 1;
-        $userimage->set('label', $this->_('Select the field for the user image'));
-        $userimage->set('description', $this->_('Select a field from the user template that contains the user image.'));
+        $userimage->set('entityEncodeText', false);
+        $userimage->set('label', $this->_('Select a field for the user image'));
+        $text = $this->_('Select a field from the user template that contains the user image.');
+        if (count($userimages) < 2) {
+            $text .= '<br><div class="notes">'.$this->_('At the moment, no user image fields were found in the user template. If you want to use this option, you must first add an image field to the user template.').'</div>';
+        }
+        $userimage->set('description', $text);
         $userimage->set('notes', $this->_('Only user fields of the type "FieldtypeImage" are displayed, which only allow the upload of a single image.'));
         $confFieldset->add($userimage);
 
@@ -1110,7 +1114,12 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $website->set('showIf', 'input_fc_showWebsite=1');
         $website->set('columnWidth', '50');
         $website->set('label', $this->_('Select the field for the website URL'));
-        $website->set('description', $this->_('Select the field of the user template which contains the website URL to the users homepage. The website field will be pre-filled with the value of this field if the user is logged in.'));
+        $website->set('entityEncodeText', false);
+        $text = $this->_('Select the field of the user template which contains the website URL to the users homepage. The website field will be pre-filled with the value of this field if the user is logged in.');
+        if (count($websites) < 2) {
+            $text .= '<br><div class="notes">'.$this->_('At the moment, no fields were found in the user template that can be used as the website field. If you want to use this option, you must first add a new URL input field to the user template.').'</div>';
+        }
+        $website->set('description', $text);
         $website->set('notes', $this->_('Only user fields of type "FieldtypeURL" are displayed.'));
         $confFieldset->add($website);
 
@@ -1124,7 +1133,12 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $authorName->attr('value', $this->getConfigValue($field, $authorName));
         $authorName->set('required', true);
         $authorName->set('label', $this->_('Select the field for the author name'));
-        $authorName->set('description', $this->_('Select the field of the user template which contains the author name. The author name field will be pre-filled with the value of this field if the user is logged in.'));
+        $authorName->set('entityEncodeText', false);
+        $text = $this->_('Select the field of the user template which contains the author name. The author name field will be pre-filled with the value of this field if the user is logged in.');
+        if (count($authornames) < 2) {
+            $text .= '<br><div class="notes">'.$this->_('At the moment, no fields were found in the user template that can be used as a name field. If you want to use this option, you must first add a new text field to the user template. Otherwise the username will be used instead.').'</div>';
+        }
+        $authorName->set('description', $text);
         $authorName->set('notes', $this->_('Only user fields of type "FieldtypeText" are displayed.'));
         $confFieldset->add($authorName);
 
