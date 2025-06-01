@@ -77,7 +77,6 @@ class InputfieldFrontendComments extends Inputfield
     public function ___render(): string
     {
         $field = $this->wire('fields')->get($this->get('name'));
-        bd($field->input_fc_website);
 
         $fieldset = $this->modules->get('InputfieldFieldset');
         $fieldset->label = $this->_('Comments');
