@@ -158,7 +158,7 @@ The identification of a user is done by checking their IP and browser fingerprin
 
 If a user wishes to vote again within this period, he will receive a notification that he is no longer allowed to vote, because he has already voted.
 
-![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-banned.png?raw=true)
+![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/not-allowed-to-vote-again.png?raw=true)
 
 ## Hooking to change markup
 
