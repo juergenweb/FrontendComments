@@ -1823,9 +1823,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      */
     public function ___uninstall(): void
     {
-        // uninstall the FrontendCommentsAdmin module too if it is installed
-        if (wire('modules')->isInstalled('FrontendCommentsAdmin')) {
-            wire('modules')->uninstall('FrontendCommentsAdmin');
+       // uninstall the FrontendCommentsManager module too if it is installed
+        if (wire('modules')->isInstalled('FrontendCommentsManager')) {
+            wire('modules')->uninstall('FrontendCommentsManager');
         }
 
         // delete the queue table
