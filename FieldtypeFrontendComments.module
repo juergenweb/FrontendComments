@@ -83,7 +83,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
     /**
-     * Delete a comment if the option "Delete the comment" is selected inside the comments tab
+     * Delete a comment if the option "Delete the comment" is selected inside the comments' tab
      * @param \ProcessWire\HookEvent $event
      * @return void
      * @throws \ProcessWire\WireException
@@ -92,7 +92,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     protected function deleteComments(HookEvent $event): void
     {
 
-        $pages = $event->object;
         $page = $event->arguments(0);
         $deleted = false;
         $commentFields = self::getAllCommentFields();
@@ -133,6 +132,21 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
     /**
+     * Group an assoc. array by a certain key
+     * @param $array
+     * @param $key
+     * @return array
+     */
+    protected function groupBy($array, $key): array
+    {
+        $return = array();
+        foreach ($array as $val) {
+            $return[$val[$key]][] = $val;
+        }
+        return $return;
+    }
+
+    /**
      * Get all queued emails from the database and send the emails in batches of 20 mails at once
      * @return void
      * @throws \ProcessWire\WireException
@@ -140,93 +154,64 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      */
     protected function sendQueuedEmails(): void
     {
-
+       
         // do not send notification mails if a stopqueue session is present
         if ($this->wire('session')->get('stopqueue')) {
             $this->wire('session')->remove('stopqueue');
             return;
         }
 
-        // get all FrontendComments fields
-        $fields = $this->wire('fields')->findByType('FieldtypeFrontendComments');
+        // get the first 20 entries from the queue table
+        $select = "SELECT comment_id, email, field_id FROM fc_comments_queues ORDER BY id LIMIT :limit";
+        $query = $this->database->prepare($select);
+        $query->bindValue(":limit", $this->input_fc_queue_batch, PDO::PARAM_INT);
+        $query->execute();
 
-        foreach ($fields as $name => $value) {
+        $mailinglist = [];
+        while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $mailinglist[] = $row;
+        }
 
-            $field = $this->wire('fields')->get($name); // field object
-            $table = self::queueTable; // the queue table name
+        // group the entries by the field id
+        $list = $this->groupBy($mailinglist, 'field_id');
 
-            $sql = "SELECT * FROM $table ORDER BY id";
-            $query = $this->database->prepare($sql);
-            $query->execute();
-            $list = $query->fetchAll();
+        $statements = [];
+        foreach ($list as $field_id => $data) {
 
-            // shorten this list by the batch size divided by the number of fields
-            $list = array_slice($list, 0, $this->input_fc_queue_batch);
+            $field = $this->wire('fields')->get($field_id);
+            // get the table
+            $commentTable = $this->database->escapeTable($field->table);
+            $statements[] = "SELECT fc_comments_queues.email, fc_comments_queues.field_id, $commentTable.id, $commentTable.pages_id, $commentTable.author, $commentTable.data, $commentTable.created, $commentTable.code FROM fc_comments_queues INNER JOIN $commentTable ON $commentTable.id=fc_comments_queues.comment_id AND fc_comments_queues.page_id=$commentTable.pages_id";
 
-            // send mails to each row in the list
-            foreach ($list as $parameters) {
-                $parent_id = $parameters['parent_id'];
-                $email = $parameters['email'];
-                $comment_id = $parameters['comment_id'];
-                $page_id = $parameters['page_id'];
-                $field_id = $parameters['field_id'];
+        }
 
-                // get the code from the database
-                $commentTable = $this->database->escapeTable($field->table);
-                $statement = "SELECT code, email FROM $commentTable WHERE id=:parent_id";
-                $code = null;
+        $statement = implode(' UNION ', $statements);
 
+        $query = $this->database->prepare($statement);
+        $query->execute();
+
+        $comments = [];
+        while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $comments[] = $row;
+        }
+
+        foreach ($comments as $comment) {
+
+            $page = $this->wire('pages')->get($comment['pages_id']);
+            $field = $this->wire('fields')->get($comment['field_id']);
+
+            // create a notification object
+            $notifications = new Notifications($comments, $field, $page);
+            if ($notifications->sendNotificationAboutNewReply($comment, $page)) {
+
+                // get the appropriate queued list item and delete it from the table
+                $statement = "DELETE FROM fc_comments_queues WHERE id=:id ";
                 try {
                     $query = $this->database->prepare($statement);
-                    $query->bindValue(":parent_id", $parent_id, PDO::PARAM_INT);
+                    $query->bindValue(":id", $comment['comment_id'], PDO::PARAM_INT);
                     $query->execute();
-
-                    $result = $query->fetchAll();
-
-                    if ($result)
-                        $code = $result[0]['code'];
                 } catch (Exception) {
-
-                }
-
-                // get the page object
-                $page = $this->wire('pages')->get($page_id);
-
-                // get the field object
-                $field = $this->wire('fields')->get($field_id);
-                $fieldName = $field->name;
-
-                // get the comments' array containing all comments of the given field on the given page
-                $comments = $this->wire('pages')->get($page_id)->$fieldName;
-
-                if ($comments) {
-
-                    $comment = $comments->findOne('id=' . $comment_id);
-
-                    if ($comment) {
-
-                        // send the notification email and delete it from the queue table
-                        // set an array with table name and comment id to delete this queue entry after sending of the mail
-                        $deleteFieldTable = self::queueTable;
-                        $deleteRowID = $parameters['id'];
-
-                        // create a notification object
-                        $notifications = new Notifications($comments, $field, $page);
-
-                        if ($notifications->sendNotificationAboutNewReply($comment, $code, $email)) {
-
-                            // get the appropriate queued list item and delete it from the table
-                            $statement = "DELETE FROM $deleteFieldTable WHERE id=:id ";
-                            try {
-                                $query = $this->database->prepare($statement);
-                                $query->bindValue(":id", $deleteRowID, PDO::PARAM_INT);
-                                $query->execute();
-                            } catch (Exception) {
-                                // not used at the moment
-                            }
-                        }
-
-                    }
+                    // not used at the moment
                 }
             }
         }
@@ -287,7 +272,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             }
 
             if (str_contains($currentUrl, 'setup/field/edit')) {
-                // check if query string id is inside the ids array
+                // check if query string id is inside the ids' array
                 $editID = $this->wire('input')->get('id');
                 if (in_array($editID, $ids)) {
                     $configPage = true;
@@ -443,6 +428,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         }
 
     }
+
 
     /**
      * Change the queue table if the status of a comment has been changed
