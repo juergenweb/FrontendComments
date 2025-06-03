@@ -31,7 +31,7 @@
         protected Field $field; // the field of the FrontendComments Fieldtype
         protected Page $page; // the page where the form is embedded/displayed
         protected FrontendCommentForm $form;
-        protected array $moderationEmails = []; // array containing the email addresses of all moderators
+
         protected string $emailTemplate = ''; // the email template that should be used for sending
         protected string $senderEmail = ''; // the sender's email address
         protected string $senderName = ''; // the sender's name
@@ -50,7 +50,6 @@
             $this->frontendFormsConfig = FieldtypeFrontendComments::getFrontendFormsConfigValues();
 
             // set the mail values
-            $this->moderationEmails = $this->comments->getModerationEmail();
             $this->emailTemplate = $this->field->get('input_fc_emailTemplate');
             $this->senderEmail = $this->getSenderEmail();
             $this->senderName = $this->getSenderName();
@@ -200,8 +199,8 @@
         {
             $sent = null;
             // check if moderation emails addresses are set
-
-            if ($this->moderationEmails) {
+            $moderationEmails = $this->comments->getModerationEmail();
+            if ($moderationEmails) {
 
                 // Send a notification email to the moderator(s)
                 $mail = new WireMail();
@@ -221,7 +220,7 @@
                     if (is_null($values['stars'])) {
                         $values = $this->replaceValue($values, 'stars', $this->_('not rated'));
                     } else {
-                        $values = $this->replaceValue($values, 'stars', str_replace($values['stars'], $values['stars'].'/5',$values['stars']));
+                        $values = $this->replaceValue($values, 'stars', str_replace($values['stars'], $values['stars'].'/5 ('.FrontendCommentForm::$ratingValues[$values['stars']].')',$values['stars']));
                     }
                 }
 
@@ -232,7 +231,7 @@
                 unset($values['notification']);
 
                 // set all receivers
-                foreach ($this->moderationEmails as $email) {
+                foreach ($moderationEmails as $email) {
                     // render the body string for the mail
                     $body = $this->renderNotificationAboutNewCommentBody($values, $newComment, $form);
                     $mail->bodyHTML($body);
