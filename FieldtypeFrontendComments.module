@@ -73,7 +73,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         require_once(__DIR__ . '/FrontendCommentArray.php');
 
         $this->addHookAfter('Inputfield::render', $this, 'overwriteExamplesNotes');
-        $this->addHookAfter('LazyCron::everyMinute', $this, 'sendQueuedEmails');
+        $this->addHookAfter('LazyCron::every2Minutes', $this, 'sendQueuedEmails');
         $this->addHookAfter('ProcessField::fieldDeleted', $this, 'deleteVotesTable');
         $this->addHookBefore('Page::render', $this, 'noEmailWarning');
         $this->addHookAfter('Page::changed', $this, 'updateQueueTableOnStatusChangeOnBackend');
@@ -154,7 +154,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      */
     protected function sendQueuedEmails(): void
     {
-       
+      
         // do not send notification mails if a stopqueue session is present
         if ($this->wire('session')->get('stopqueue')) {
             $this->wire('session')->remove('stopqueue');
@@ -194,7 +194,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
             $comments[] = $row;
         }
-
+        $numberOfMails = count($comments);
         foreach ($comments as $comment) {
 
             $page = $this->wire('pages')->get($comment['pages_id']);
@@ -202,7 +202,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
             // create a notification object
             $notifications = new Notifications($comments, $field, $page);
-            if ($notifications->sendNotificationAboutNewReply($comment, $page)) {
+            if ($notifications->sendNotificationAboutNewReply($comment)) {
 
                 // get the appropriate queued list item and delete it from the table
                 $statement = "DELETE FROM fc_comments_queues WHERE id=:id ";
