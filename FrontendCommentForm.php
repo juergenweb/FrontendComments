@@ -58,6 +58,7 @@
         protected Link $guidelines; // The guideline link object for the comments
         protected Notifications $notifications;
         protected WireDatabasePDO $database; // the ProcessWire database object
+        public static array $ratingValues = [];
 
         /**
          * @throws \ProcessWire\WireException
@@ -72,6 +73,14 @@
             $this->page = $comments->getPage(); // the current page object, which contains the comment field
             $this->field = $comments->getField(); // Processwire comment field object
             $this->database = $this->wire('database'); // the database object
+
+            self::$ratingValues = [
+                1 => $this->_('Terrible'),
+                2 => $this->_('Poor'),
+                3 => $this->_('Average'),
+                4 => $this->_('Very Good'),
+                5 => $this->_('Excellent')
+            ];
 
             // set the comment field name as id of the form if id is not present
             if ($id === null) {
@@ -250,15 +259,16 @@
          */
         public function ___getStarRating(): Select
         {
+            
             $this->stars->useInputWrapper(false);
             $this->stars->useFieldWrapper(false);
             $this->stars->setLabel($this->_('Rating'));
             $this->stars->addOption($this->_('Select a rating'), '');
-            $this->stars->addOption($this->_('Excellent'), '5');
-            $this->stars->addOption($this->_('Very Good'), '4');
-            $this->stars->addOption($this->_('Average'), '3');
-            $this->stars->addOption($this->_('Poor'), '2');
-            $this->stars->addOption($this->_('Terrible'), '1');
+            $this->stars->addOption(self::$ratingValues[5], '5');
+            $this->stars->addOption(self::$ratingValues[4], '4');
+            $this->stars->addOption(self::$ratingValues[3], '3');
+            $this->stars->addOption(self::$ratingValues[2], '2');
+            $this->stars->addOption(self::$ratingValues[1], '1');
             $this->stars->setAttribute('class', 'star-rating');
 
             // create data-options string
