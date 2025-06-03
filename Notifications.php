@@ -368,12 +368,11 @@
 
         /**
          * Create and render the body text for the notification about a new reply email
-         * @param \FrontendComments\FrontendComment $comment
-         * @param \ProcessWire\Page $page
+         * @param array $comment
          * @param string $code
          * @return string
          */
-        protected function renderNotificationAboutNewReplyBody(FrontendComment $comment, Page $page): string
+        protected function renderNotificationAboutNewReplyBody(array $comment): string
         {
             // create the body for the email
             $body = $this->renderMailHeadline($this->_('A new reply has been submitted'));
@@ -386,7 +385,7 @@
 
             // create a link to the comment
             $commentLink = new Link();
-            $commentLink->setUrl($page->httpUrl);
+            $commentLink->setUrl($this->page->httpUrl);
             $commentLink->setQueryString('comment-redirect=' . $comment['id']);
             $commentLink->setAnchor($this->field->name . '-' . $this->page->id . '-redirect-alert');
             $commentLink->setLinkText($this->_('To the comment'));
@@ -395,7 +394,7 @@
             $body .= '<p>' . $this->_('If you do not want to receive further mails about new replies, please click the link below') . '</p>';
 
             // create a link for canceling the receiving of further notifications
-            $url = $page->httpUrl . '?code=' . $comment['code'] . '&notification=0#remote-change';
+            $url = $this->page->httpUrl . '?code=' . $comment['code'] . '&notification=0#remote-change';
             $body .= $this->renderButton($this->_('Stop sending me further notification mails about new comments'), '#ED2939', '#ffffff',
                 '#7BA428', $url);
             return $body;
@@ -408,7 +407,7 @@
          * @return int
          * @throws \ProcessWire\WireException
          */
-        public function sendNotificationAboutNewReply(array $comment, Page $page): int
+        public function sendNotificationAboutNewReply(array $comment): int
         {
 
             // create WireMail instance
@@ -420,7 +419,7 @@
             $mail->mailTemplate($this->emailTemplate);
 
             // create body content
-            $body = $this->renderNotificationAboutNewReplyBody($comment, $page);
+            $body = $this->renderNotificationAboutNewReplyBody($comment);
             $mail->bodyHTML($body);
 
             $mail->to($comment['email']);;
