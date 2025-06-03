@@ -73,7 +73,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         require_once(__DIR__ . '/FrontendCommentArray.php');
 
         $this->addHookAfter('Inputfield::render', $this, 'overwriteExamplesNotes');
-        $this->addHookAfter('LazyCron::every10Minutes', $this, 'sendQueuedEmails');
+        $this->addHookAfter('LazyCron::everyMinute', $this, 'sendQueuedEmails');
         $this->addHookAfter('ProcessField::fieldDeleted', $this, 'deleteVotesTable');
         $this->addHookBefore('Page::render', $this, 'noEmailWarning');
         $this->addHookAfter('Page::changed', $this, 'updateQueueTableOnStatusChangeOnBackend');
@@ -180,6 +180,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                     $query = $this->database->prepare($statement);
                     $query->bindValue(":parent_id", $parent_id, PDO::PARAM_INT);
                     $query->execute();
+
                     $result = $query->fetchAll();
 
                     if ($result)
@@ -387,66 +388,60 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     public static function writeEntryInQueueTable(FrontendComment $newComment, Page $page, Field $field): void
     {
 
-        // check if a new comment is not a root comment
-        if ($newComment->get('parent_id') != 0) {
+        $database = wire('database');
+        $commentsTable = $field->table; // set the comment table name
+        $notificationEmails = []; // array containing all email addresses for replies
 
-            $database = wire('database');
-            //$commentsTable = $newComment->field->table; // set the comment table name
-            $commentsTable = $field->table; // set the comment table name
-            $notificationEmails = []; // array containing all email addresses for replies
+        // 1) Get the mail addresses of all users that have chosen to get informed about all new comments and the mail address of the parent commenter if he has reply notification enabled
+        $statement = "SELECT email FROM $commentsTable WHERE (pages_id=:page_id AND notification=:notification) OR (id=:parent_id AND notification=:parent_notification)";
+        $query = wire('database')->prepare($statement);
+        $query->bindValue(":page_id", $page->id, PDO::PARAM_INT);
+        $query->bindValue(":notification", FrontendComment::flagNotifyAll, PDO::PARAM_INT);
+        $query->bindValue(":parent_id", $newComment->get('parent_id'), PDO::PARAM_INT);
+        $query->bindValue(":parent_notification", FrontendComment::flagNotifyReply, PDO::PARAM_INT);
 
-            // 1) Get the mail addresses of all users that have chosen to get informed about all new comments and the mail address of the parent commenter if he has reply notification enabled
-            $statement = "SELECT email FROM $commentsTable WHERE (pages_id=:page_id AND notification=:notification) OR (id=:parent_id AND notification=:parent_notification)";
+        try {
+            $query->execute();
+            $results = $query->fetchAll();
+            foreach ($results as $row) {
+                $notificationEmails[] = $row['email'];
+            }
+        } catch (Exception) {
+            // not used at the moment
+        }
 
-            $query = wire('database')->prepare($statement);
-            //$query->bindValue(":page_id", $newComment->page->id, PDO::PARAM_INT);
-            $query->bindValue(":page_id", $page->id, PDO::PARAM_INT);
-            $query->bindValue(":notification", FrontendComment::flagNotifyAll, PDO::PARAM_INT);
-            $query->bindValue(":parent_id", $newComment->get('parent_id'), PDO::PARAM_INT);
-            $query->bindValue(":parent_notification", FrontendComment::flagNotifyReply, PDO::PARAM_INT);
+        // 2) remove the email address of the current commenter from the array
+        $notificationEmails = array_diff($notificationEmails, [$newComment->get('email')]);
+
+        // 3) remove double entries if present
+        $notificationEmails = array_unique($notificationEmails);
+
+        // 4) write all mail addresses into the queue table
+
+        if ($notificationEmails) {
+
+            // write all receivers into the queue table for later sending of emails
+            $table = self::queueTable;
+            // create the value string for the data
+            $sendingData = [];
+            foreach ($notificationEmails as $email) {
+                //$sendingData[] = '(' . $newComment->get('parent_id') . ',' . $newComment->get('id') . ',\'' . $email . '\', ' . $newComment->field->id . ', ' . $newComment->page->id . ')';
+                $sendingData[] = '(' . $newComment->get('parent_id') . ',' . $newComment->get('id') . ',\'' . $email . '\', ' . $field->id . ', ' . $page->id . ')';
+            }
+            $valuesString = 'VALUES' . implode(',', $sendingData);
+
+            // create the SQL statement and save the entries to the database
+            $statement = "INSERT INTO $table (parent_id, comment_id, email, field_id, page_id) $valuesString";
+            $query = $database->prepare($statement);
 
             try {
                 $query->execute();
-                $results = $query->fetchAll();
-                foreach ($results as $row) {
-                    $notificationEmails[] = $row['email'];
-                }
             } catch (Exception) {
                 // not used at the moment
             }
 
-            // 2) remove the email address of the current commenter from the array
-            $notificationEmails = array_diff($notificationEmails, [$newComment->get('email')]);
-
-            // 3) remove double entries if present
-            $notificationEmails = array_unique($notificationEmails);
-
-            // 4) write all mail addresses into the queue table
-            if ($notificationEmails) {
-
-                // write all receivers into the queue table for later sending of emails
-                $table = self::queueTable;
-                // create the value string for the data
-                $sendingData = [];
-                foreach ($notificationEmails as $email) {
-                    //$sendingData[] = '(' . $newComment->get('parent_id') . ',' . $newComment->get('id') . ',\'' . $email . '\', ' . $newComment->field->id . ', ' . $newComment->page->id . ')';
-                    $sendingData[] = '(' . $newComment->get('parent_id') . ',' . $newComment->get('id') . ',\'' . $email . '\', ' . $field->id . ', ' . $page->id . ')';
-                }
-                $valuesString = 'VALUES' . implode(',', $sendingData);
-
-                // create the SQL statement and save the entries to the database
-                $statement = "INSERT INTO $table (parent_id, comment_id, email, field_id, page_id) $valuesString";
-                $query = $database->prepare($statement);
-
-                try {
-                    $query->execute();
-                } catch (Exception) {
-                    // not used at the moment
-                }
-
-            }
-
         }
+
     }
 
     /**
@@ -1085,7 +1080,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $userimage->set('label', $this->_('Select a field for the user image'));
         $text = $this->_('Select a field from the user template that contains the user image.');
         if (count($userimages) < 2) {
-            $text .= '<br><div class="notes">'.$this->_('At the moment, no user image fields were found in the user template. If you want to use this option, you must first add an image field to the user template.').'</div>';
+            $text .= '<br><div class="notes">' . $this->_('At the moment, no user image fields were found in the user template. If you want to use this option, you must first add an image field to the user template.') . '</div>';
         }
         $userimage->set('description', $text);
         $userimage->set('notes', $this->_('Only user fields of the type "FieldtypeImage" are displayed, which only allow the upload of a single image.'));
@@ -1117,7 +1112,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $website->set('entityEncodeText', false);
         $text = $this->_('Select the field of the user template which contains the website URL to the users homepage. The website field will be pre-filled with the value of this field if the user is logged in.');
         if (count($websites) < 2) {
-            $text .= '<br><div class="notes">'.$this->_('At the moment, no fields were found in the user template that can be used as the website field. If you want to use this option, you must first add a new URL input field to the user template.').'</div>';
+            $text .= '<br><div class="notes">' . $this->_('At the moment, no fields were found in the user template that can be used as the website field. If you want to use this option, you must first add a new URL input field to the user template.') . '</div>';
         }
         $website->set('description', $text);
         $website->set('notes', $this->_('Only user fields of type "FieldtypeURL" are displayed.'));
@@ -1136,7 +1131,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $authorName->set('entityEncodeText', false);
         $text = $this->_('Select the field of the user template which contains the author name. The author name field will be pre-filled with the value of this field if the user is logged in.');
         if (count($authornames) < 2) {
-            $text .= '<br><div class="notes">'.$this->_('At the moment, no fields were found in the user template that can be used as a name field. If you want to use this option, you must first add a new text field to the user template. Otherwise the username will be used instead.').'</div>';
+            $text .= '<br><div class="notes">' . $this->_('At the moment, no fields were found in the user template that can be used as a name field. If you want to use this option, you must first add a new text field to the user template. Otherwise the username will be used instead.') . '</div>';
         }
         $authorName->set('description', $text);
         $authorName->set('notes', $this->_('Only user fields of type "FieldtypeText" are displayed.'));
@@ -1742,7 +1737,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $text .= '<p>' . $this->_('In this case, the global settings are applied.') . '</p>';
         $text .= '<pre><code>echo $page->' . $field->name . '->render();</code></pre>';
         $text .= '<p>' . $this->_('Copy this line of code and add it to your template, where the comments should be displayed.') . '</p>';
-        $text .= '<>' . $this->_('Integration of comments with user-defined settings per field') . '</>';
+        $text .= '<h3>' . $this->_('Integration of comments with user-defined settings per field') . '</h3>';
         $text .= '<p>' . $this->_('If needed, almost every parameter of the global settings can be overwritten within the templates.') . '</p>';
         $text .= '<pre><code>';
         $text .= '$comments = $page->' . $field->name . ';<br>';
@@ -1823,7 +1818,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      */
     public function ___uninstall(): void
     {
-       // uninstall the FrontendCommentsManager module too if it is installed
+        // uninstall the FrontendCommentsManager module too if it is installed
         if (wire('modules')->isInstalled('FrontendCommentsManager')) {
             wire('modules')->uninstall('FrontendCommentsManager');
         }
