@@ -1742,7 +1742,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $text .= '<p>' . $this->_('In this case, the global settings are applied.') . '</p>';
         $text .= '<pre><code>echo $page->' . $field->name . '->render();</code></pre>';
         $text .= '<p>' . $this->_('Copy this line of code and add it to your template, where the comments should be displayed.') . '</p>';
-        $text .= '<h3>' . $this->_('Integration of comments with user-defined settings per field') . '</h3>';
+        $text .= '<>' . $this->_('Integration of comments with user-defined settings per field') . '</>';
         $text .= '<p>' . $this->_('If needed, almost every parameter of the global settings can be overwritten within the templates.') . '</p>';
         $text .= '<pre><code>';
         $text .= '$comments = $page->' . $field->name . ';<br>';
@@ -1861,7 +1861,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             'input_fc_showLinkGuidelines' => 0,
             'input_fc_outputorder' => 1,
             'input_fc_formheadline' => '',
-            'input_fc_form_tag_headline' => 'h3',
+            'input_fc_form_tag_headline' => 'h2',
             'input_fc_privacy_show' => 2,
             'input_fc_stars' => 0,
             'input_fc_counter' => 0,
