@@ -82,7 +82,7 @@ function loadReplyForm() {
                 separator = '&';
             }
             url = url + separator + 'commentid=' + commentId;
-            console.log(url);
+
             let target = document.getElementById('reply-comment-form-' + fieldName + '-reply-' + commentId);
 
             // make an Ajax call to load the form from the result div
@@ -144,7 +144,6 @@ function loadReplyForm() {
                 }
 
                 let result = this.responseText;
-                console.log(result);
 
                 if (xhr.readyState === 4) {
 
@@ -152,7 +151,6 @@ function loadReplyForm() {
                     let doc = parser.parseFromString(result, "text/html");
                     let element = doc.getElementById('reply-comment-form-' + fieldName + '-reply-' + commentId);
 
-                    console.log(element);
                     if (element) {
                         let content = element.innerHTML;
 
@@ -160,7 +158,7 @@ function loadReplyForm() {
                         target.innerHTML = content;
 
                         // add Ajax event listener function once more
-                        //subAjax('reply-form-' + commentId);
+                        subAjax('reply-form-' + commentId);
 
                         let ratingStars = [...document.getElementsByClassName("star-rating")];
                         if (ratingStars.length > 0) {
@@ -171,7 +169,6 @@ function loadReplyForm() {
                         parentElement.removeChild(fcspinnerwrapper);
                         // add element not found instead
                         parentElement.appendChild(alertDialogBody);
-                        console.log('element not found')
                     }
 
                 }
