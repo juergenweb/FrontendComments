@@ -401,10 +401,10 @@
          * @param \FrontendComments\FrontendComment $comment
          * @param string $code
          * @param string $email
-         * @return bool
+         * @return int
          * @throws \ProcessWire\WireException
          */
-        public function sendNotificationAboutNewReply(FrontendComment $comment, string $code, string $email): bool
+        public function sendNotificationAboutNewReply(FrontendComment $comment, string $code, string $email): int
         {
 
             $page = $this->page;
