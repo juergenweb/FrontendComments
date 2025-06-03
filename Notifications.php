@@ -1,5 +1,6 @@
 <?php
     declare(strict_types=1);
+
     namespace FrontendComments;
 
     /*
@@ -26,7 +27,7 @@
 
         // Declare all properties'
         protected array $frontendFormsConfig = []; // array containing the configuration values of the FrontendForms module
-        protected FrontendCommentArray $comments; // The FrontendCommentArray containing the comments
+        protected FrontendCommentArray|array $comments; // The FrontendCommentArray containing the comments
         protected Field $field; // the field of the FrontendComments Fieldtype
         protected Page $page; // the page where the form is embedded/displayed
         protected FrontendCommentForm $form;
@@ -35,7 +36,7 @@
         protected string $senderEmail = ''; // the sender's email address
         protected string $senderName = ''; // the sender's name
 
-        public function __construct(FrontendCommentArray $comments, Field $field, Page $page)
+        public function __construct(FrontendCommentArray|array $comments, Field $field, Page $page)
         {
 
             parent::__construct();
@@ -216,8 +217,13 @@
                 // overwrite some values
 
                 // 1) star rating
-                if (array_key_exists('stars', $values) && is_null($values['stars']))
-                    $values = $this->replaceValue($values, 'stars', $this->_('not rated'));
+                if (array_key_exists('stars', $values)) {
+                    if (is_null($values['stars'])) {
+                        $values = $this->replaceValue($values, 'stars', $this->_('not rated'));
+                    } else {
+                        $values = $this->replaceValue($values, 'stars', str_replace($values['stars'], $values['stars'].'/5',$values['stars']));
+                    }
+                }
 
                 // remove unnecessary form values, which should not be sent via the notification mail
                 unset($values['privacy']);
@@ -368,21 +374,21 @@
          * @param string $code
          * @return string
          */
-        protected function renderNotificationAboutNewReplyBody(FrontendComment $comment, Page $page, string $code): string
+        protected function renderNotificationAboutNewReplyBody(FrontendComment $comment, Page $page): string
         {
             // create the body for the email
             $body = $this->renderMailHeadline($this->_('A new reply has been submitted'));
             $body .= '<p>' . $this->_('You are receiving this email because you have agreed to be notified when a new reply has been posted.') . '</p>';
             $body .= '<h2>' . $this->_('New comment') . '</h2>';
-            if ($comment->get('author')) {
-                $body .= '<p>' . $this->_('Author') . ': ' . $comment->get('author') . '</p>';
+            if ($comment['author']) {
+                $body .= '<p>' . $this->_('Author') . ': ' . $comment['author'] . '</p>';
             }
-            $body .= $this->renderMailText($comment->get('text'));
+            $body .= $this->renderMailText($comment['data']);
 
             // create a link to the comment
             $commentLink = new Link();
             $commentLink->setUrl($page->httpUrl);
-            $commentLink->setQueryString('comment-redirect=' . $comment->get('id'));
+            $commentLink->setQueryString('comment-redirect=' . $comment['id']);
             $commentLink->setAnchor($this->field->name . '-' . $this->page->id . '-redirect-alert');
             $commentLink->setLinkText($this->_('To the comment'));
 
@@ -390,7 +396,7 @@
             $body .= '<p>' . $this->_('If you do not want to receive further mails about new replies, please click the link below') . '</p>';
 
             // create a link for canceling the receiving of further notifications
-            $url = $page->httpUrl . '?code=' . $code . '&notification=0#remote-change';
+            $url = $page->httpUrl . '?code=' . $comment['code'] . '&notification=0#remote-change';
             $body .= $this->renderButton($this->_('Stop sending me further notification mails about new comments'), '#ED2939', '#ffffff',
                 '#7BA428', $url);
             return $body;
@@ -399,15 +405,12 @@
         /**
          * Send notification mail to a commenter if a new reply to his comment has been posted
          * @param \FrontendComments\FrontendComment $comment
-         * @param string $code
-         * @param string $email
+         * @param Page $page
          * @return int
          * @throws \ProcessWire\WireException
          */
-        public function sendNotificationAboutNewReply(FrontendComment $comment, string $code, string $email): int
+        public function sendNotificationAboutNewReply(array $comment, Page $page): int
         {
-
-            $page = $this->page;
 
             // create WireMail instance
             $mail = new WireMail();
@@ -418,10 +421,10 @@
             $mail->mailTemplate($this->emailTemplate);
 
             // create body content
-            $body = $this->renderNotificationAboutNewReplyBody($comment, $page, $code);
+            $body = $this->renderNotificationAboutNewReplyBody($comment, $page);
             $mail->bodyHTML($body);
 
-            $mail->to($email);
+            $mail->to($comment['email']);;
             return $mail->send();
         }
 
