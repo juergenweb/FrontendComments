@@ -73,7 +73,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         require_once(__DIR__ . '/FrontendCommentArray.php');
 
         $this->addHookAfter('Inputfield::render', $this, 'overwriteExamplesNotes');
-        $this->addHookAfter('LazyCron::everyHour', $this, 'sendQueuedEmails');
+        $this->addHookAfter('LazyCron::every10Minutes', $this, 'sendQueuedEmails');
         $this->addHookAfter('ProcessField::fieldDeleted', $this, 'deleteVotesTable');
         $this->addHookBefore('Page::render', $this, 'noEmailWarning');
         $this->addHookAfter('Page::changed', $this, 'updateQueueTableOnStatusChangeOnBackend');
