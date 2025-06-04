@@ -636,6 +636,7 @@
          */
         public function ___getReplyForm(): Form
         {
+
             // Reply form
             $form = new FrontendCommentForm($this->comments, 'reply-form-' . $this->get('id'), $this->get('id'));
             $form->setAttribute('class', 'reply-form');
@@ -658,7 +659,7 @@
          */
         public function ___renderReplyForm(): string
         {
-            $out = '<div id="reply-comment-form-' . $this->field->name . '-reply-' . $this->get('id') . '" class="fc-reply-form-wrapper" data-id="' . $this->get('id') . '" >';
+            $out = '<div id="reply-comment-form-' . $this->field->name . '-reply-' . $this->get('id') . '" class="fc-reply-form-wrapper" data-id="' . $this->get('id') . '">';
 
             // load the reply form only if it is called via Ajax or submitted via POST
             if ($this->formIsAjaxLoaded($this->get('id')) || $this->formIsSubmitted()) {
