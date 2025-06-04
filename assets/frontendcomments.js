@@ -53,10 +53,11 @@ function loadReplyForm() {
         // check if a parent element is a link with class fc-comment-reply
         let link = e.target;
 
+        let defaultText;
         if (link.classList.contains('fc-comment-reply')) {
             e.preventDefault();
 
-            // first close all other open reply forms
+            // first, close all other open reply forms
             let replyforms = document.getElementsByClassName('fc-reply-form');
             for (let i = 0; i < replyforms.length; i++) {
                 replyforms[i].innerHTML = '';
@@ -156,8 +157,8 @@ function loadReplyForm() {
                         // check if Ajax submission is enabled
                         let ajaxSubmission = false;
                         let replyForms = element.getElementsByTagName("form");
-                      
-                        if(replyForms.length > 0){
+
+                        if (replyForms.length > 0) {
                             let replyForm = replyForms[0];
                             if (replyForm.hasAttribute("data-submitajax")) {
                                 // data attribute exist
@@ -165,13 +166,11 @@ function loadReplyForm() {
                             }
                         }
 
-                        let content = element.innerHTML;
-
                         // load the form inside the target div
-                        target.innerHTML = content;
+                        target.innerHTML = element.innerHTML;
 
                         // add Ajax event listener function once more if AJAX submission is enabled
-                        if(ajaxSubmission){
+                        if (ajaxSubmission) {
                             subAjax('reply-form-' + commentId);
                         }
 
@@ -182,7 +181,7 @@ function loadReplyForm() {
                     } else {
                         // remove spinner element first
                         parentElement.removeChild(fcspinnerwrapper);
-                        // add element not found instead
+                        // add text that the element was not found instead
                         parentElement.appendChild(alertDialogBody);
                     }
 
@@ -221,21 +220,21 @@ function cancelReply() {
  */
 function fadeOutAlert(field, commentid) {
 
-    elementName = field + '-' + commentid + '-novote';
+    let elementName = field + '-' + commentid + '-novote';
     let fade = document.getElementById(elementName);
 
-    var intervalID = setInterval(function () {
+    let intervalID = setInterval(function () {
 
         if (!fade.style.opacity) {
-            fade.style.opacity = 1;
+            fade.style.opacity = "1";
         }
 
         if (fade.style.opacity > 0) {
-            fade.style.opacity -= 0.1;
+            fade.style.opacity -= "0.1";
         } else {
             clearInterval(intervalID);
             fade.innerHTML = '';
-            fade.style.opacity = 1;
+            fade.style.opacity = "1";
         }
 
     }, 200);
@@ -245,66 +244,85 @@ function fadeOutAlert(field, commentid) {
  * Function for the up- and downvotes
  */
 function makeVote() {
-    document.addEventListener('click', (e) => {
-        if (e.target.classList.contains('fc-vote-link')) {
-            e.preventDefault();
 
-            let url = e.target.href;
-            let field = e.target.dataset.field;
-            let commentid = e.target.dataset.commentid;
+    let voteElements = document.getElementsByClassName("fc-votebadge");
+    if (voteElements.length > 0) {
 
-            // make an Ajax call to save the vote
-            let xhr = new XMLHttpRequest();
+        for (let i = 0; i < voteElements.length; i++) {
 
-            xhr.onload = function () {
+            let voteElement = voteElements[i];
 
-                let result = this.responseText;
-                let voteresult = '';
-                let votetype = '';
-                let elementName = '';
 
-                const parser = new DOMParser();
-                let doc = parser.parseFromString(result, "text/html");
+            voteElement.addEventListener('click', (e) => {
+                e.preventDefault();
 
-                let voteElement = doc.getElementById('fc-ajax-vote-result');
-                let noVoteElement = doc.getElementById('fc-ajax-noVote');
+                let voteLink = e.target.parentElement;
+                let url = voteLink.href;
+                let field = voteLink.dataset.field;
+                let commentid = voteLink.dataset.commentid;
 
-                if (voteElement) {
-                    voteresult = voteElement.innerText;
-                    votetype = voteElement.dataset.votetype;
-                }
+                // make an Ajax call to save the vote
+                let xhr = new XMLHttpRequest();
 
-                if (xhr.readyState === 4) {
+                xhr.onload = function () {
 
-                    if (voteresult) {
-                        // update the number beside the upvotes or downvotes
-                        elementName = field + '-' + commentid + '-votebadge-' + votetype;
-                        let target = document.getElementById(elementName);
-                        // set the new vote value inside the span element
-                        target.innerHTML = voteresult;
+                    let result = this.responseText;
+                    let voteresult = '';
+                    let votetype = '';
+                    let elementName = '';
+
+                    const parser = new DOMParser();
+                    let doc = parser.parseFromString(result, "text/html");
+
+                    let voteElement = doc.getElementById('fc-ajax-vote-result');
+                    let noVoteElement = doc.getElementById('fc-ajax-noVote');
+
+                    if (voteElement) {
+                        voteresult = voteElement.innerText;
+                        votetype = voteElement.dataset.votetype;
                     }
-                    if (noVoteElement) {
-                        elementName = field + '-' + commentid + '-novote';
-                        let target = document.getElementById(elementName);
-                        if (target) {
-                            // add the alert box to the div element
-                            target.innerHTML = noVoteElement.innerHTML;
-                            // fade the alert out after a certain time
-                            setTimeout(function () {
-                                fadeOutAlert(field, commentid);
-                            }, 6000);
 
+                    if (xhr.readyState === 4) {
+
+                        if (voteresult) {
+                            // update the number besides the upvotes or downvotes
+                            elementName = field + '-' + commentid + '-votebadge-' + votetype;
+                            let target = document.getElementById(elementName);
+
+                            // get the arrow type depending on the vote
+                            let arrow;
+                            if(votetype === "down"){
+                                arrow = "↓ ";
+                            } else {
+                                arrow = "↑ ";
+                            }
+                            // set the new vote value inside the span element
+                            target.innerHTML = arrow + voteresult;
+                        }
+                        if (noVoteElement) {
+                            elementName = field + '-' + commentid + '-novote';
+                            let target = document.getElementById(elementName);
+                            if (target) {
+                                // add the alert box to the div element
+                                target.innerHTML = noVoteElement.innerHTML;
+                                // fade the alert out after a certain time
+                                setTimeout(function () {
+                                    fadeOutAlert(field, commentid);
+                                }, 6000);
+
+                            }
                         }
                     }
+
                 }
 
-            }
+                xhr.open("GET", url);
+                xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                xhr.send();
 
-            xhr.open("GET", url);
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-            xhr.send();
+            });
         }
-    });
+    }
 }
 
 // run after the body has been loaded
