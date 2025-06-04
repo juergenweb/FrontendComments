@@ -43,13 +43,17 @@
 .comments-list .comment-box .fc-votebadge {
     padding: 4px 6px;
     font-size: 12px;
-    height: 20px;
-    min-width: 20px;
+    height: 24px;
+    line-height: 20px;
+    display:inline-block;
+    min-width: 30px;
     font-weight: bold;
     text-align:center;
     color: #fff;
     border-radius: 3px;
     margin-left: .8em;
+    position:relative;
+    top: 2px;
 
 }
 
@@ -76,6 +80,7 @@ a.fc-comment-reply {
 }
 .comment-box .comment-head a.fc-vote-link {
     border-bottom: 0;
+    display:inline-block;
     text-decoration:none;
     position:relative;
     top: -2px;
