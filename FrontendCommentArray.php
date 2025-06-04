@@ -850,7 +850,7 @@
                                     $text = $this->_('It looks like you have already rated this comment within the last day.');
                                 }
                                 $text .= ' '.$this->_('In this case you are not allowed to vote again.');
-                                $alert->setContent(sprintf($text);
+                                $alert->setContent($text);
                                 $alert->setCSSClass('alert_warningClass');
 
                                 echo '<div id="fc-ajax-noVote">' . $alert->___render() . '</div>';
