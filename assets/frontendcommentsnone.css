@@ -41,18 +41,22 @@
 
 /* vote badge */
 .comments-list .comment-box .fc-votebadge {
-    padding: 2px 6px;
+    padding: 4px 6px;
     font-size: 12px;
-    line-height: 18px;
     height: 20px;
     min-width: 20px;
     font-weight: bold;
     text-align:center;
     color: #fff;
     border-radius: 3px;
-    margin-right:1em;
-    margin-left: .5em;
-    top: 6px;
+    margin-left: .8em;
+
+}
+
+a.fc-comment-reply {
+    float:right;
+    font-size: 15px;
+    margin-left: 1em;
 }
 
 .upvote {
@@ -61,6 +65,20 @@
 
 .downvote {
     background: #ef1c1c;
+}
+
+.upvote:hover, .downvote:hover {
+    opacity: 60%;
+}
+
+.comment-box .votes {
+    float:right;
+}
+.comment-box .comment-head a.fc-vote-link {
+    border-bottom: 0;
+    text-decoration:none;
+    position:relative;
+    top: -2px;
 }
 
 .comments-list .comment-box {
@@ -84,13 +102,14 @@
 }
 
 .comment-box .comment-head a {
-    text-decoration: none;
-    border-bottom: 1px solid #333;
+    border-bottom: 0;
+    text-decoration: underline;
 }
 
 .comment-box .comment-head a:hover {
-    border-bottom: none;
+    text-decoration:none;
 }
+
 
 .by-author {
     position:relative;
@@ -106,11 +125,12 @@
 }
 
 .comment-box .comment-head span, .comment-box .star-rating-result {
-    float: right;
+
     color: #999;
     font-size: 15px;
     position: relative;
-    margin-left: 10px;
+    margin-right: 5px;
+    margin-bottom: 0;
     top: 1px;
 }
 
@@ -120,6 +140,7 @@
 
 .comment-box .comment-head span.comment-created {
     float:left;
+    margin-right: 10px;
 }
 
 .comment-box .star-rating-result {
@@ -222,11 +243,6 @@
 ========================*/
 @media only screen and (max-width: 760px) {
 
-    .comment-box .star-rating-result {
-       display:block;
-       margin-left:0;
-       text-align:right;
-       width: 100%;
-   }
+
 
 }
