@@ -35,13 +35,6 @@ This CSS file contains all general styles for all types of markups (frameworks a
     margin-top: 20px;
 }
 
-.fc-upvote:after {
-    content: '\2191';
-}
-
-.fc-downvote:after {
-    content: '\2193';
-}
 
 .comments-list .fc-reply-form-wrapper {
     margin-bottom: 0;
