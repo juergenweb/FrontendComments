@@ -159,7 +159,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $this->wire('session')->remove('stopqueue');
             return;
         }
-       
+
         // get the first 20 entries from the queue table
         $select = "SELECT comment_id, email, field_id FROM fc_comments_queues ORDER BY id LIMIT :limit";
         $query = $this->database->prepare($select);
@@ -202,8 +202,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
                 $page = $this->wire('pages')->get($comment['pages_id']);
                 $field = $this->wire('fields')->get($comment['field_id']);
-
+                
                 // create a notification object
+                require_once(__DIR__ . '/Notifications.php');
                 $notifications = new Notifications($comments, $field, $page);
                 if ($notifications->sendNotificationAboutNewReply($comment)) {
 
