@@ -625,6 +625,7 @@
             $code = $this->wire('input')->get('code');
             $status = $this->wire('input')->get('status');
 
+
             $table = $this->field->getTable();
 
             if (!is_null($code) && !is_null($status)) {
@@ -678,24 +679,17 @@
                         ];
 
                         $alertText = sprintf($this->_('The status of the comment has been updated to "%s".'), $statusCodes[$status]);
-
+                        $redirectLink = false;
                         $statusChangeNotification = $this->field->get('input_fc_status_change_notification');
                         // check if mail should be sent on status change to the commenter
                         switch ($status) {
                             case FieldtypeFrontendComments::approved:
                                 $send = in_array('1', $this->field->get('input_fc_status_change_notification'));
                                 // add information text that mail has been sent to the commenter to inform him about the status change
-                                if (in_array('1', $statusChangeNotification)) {
-                                    $alertText .= '<br>' . $this->_('In addition, an email was sent to the commenter to inform him of the status change.');
-                                }
-
-                                $alertText .= '<br>' . $this->getCommentRedirectPaginationLink($comment->id)->render();
+                                $redirectLink = true;
                                 break;
                             case FieldtypeFrontendComments::spam:
                             case FieldtypeFrontendComments::spamReplies:
-                                if (in_array('2', $statusChangeNotification)) {
-                                    $alertText .= '<br>' . $this->_('In addition, an email was sent to the commenter to inform him of the status change.');
-                                }
                                 $send = in_array('2', $this->field->get('input_fc_status_change_notification'));
                                 break;
                             default:
@@ -704,8 +698,14 @@
 
                         // send the notification mail
                         if ($send) {
+
                             $notification = new Notifications($this, $this->field, $this->page);
-                            $notification->sendStatusChangeEmail($comment, $this->field, $this->frontendFormsConfig, $status);
+                            if($notification->sendStatusChangeEmail($comment, $this->field, $this->frontendFormsConfig, $status)){
+                                $alertText .= '<br>' . $this->_('In addition, an email was sent to the commenter to inform him of the status change.');
+                            }
+                            if($redirectLink){
+                                $alertText .= '<br>' . $this->getCommentRedirectPaginationLink($comment->id)->render();
+                            }
                         }
 
                         $msg = ['alert_successClass' => $alertText];
