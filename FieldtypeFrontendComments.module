@@ -159,7 +159,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $this->wire('session')->remove('stopqueue');
             return;
         }
-
+       
         // get the first 20 entries from the queue table
         $select = "SELECT comment_id, email, field_id FROM fc_comments_queues ORDER BY id LIMIT :limit";
         $query = $this->database->prepare($select);
@@ -171,47 +171,51 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $mailinglist[] = $row;
         }
 
-        // group the entries by the field id
-        $list = $this->groupBy($mailinglist, 'field_id');
+        if ($mailinglist) {
 
-        $statements = [];
-        foreach ($list as $field_id => $data) {
+            // group the entries by the field id
+            $list = $this->groupBy($mailinglist, 'field_id');
 
-            $field = $this->wire('fields')->get($field_id);
-            // get the table
-            $commentTable = $this->database->escapeTable($field->table);
-            $statements[] = "SELECT fc_comments_queues.email, fc_comments_queues.field_id, $commentTable.id, $commentTable.pages_id, $commentTable.author, $commentTable.data, $commentTable.created, $commentTable.code FROM fc_comments_queues INNER JOIN $commentTable ON $commentTable.id=fc_comments_queues.comment_id AND fc_comments_queues.page_id=$commentTable.pages_id";
+            $statements = [];
+            foreach ($list as $field_id => $data) {
 
-        }
+                $field = $this->wire('fields')->get($field_id);
+                // get the table
+                $commentTable = $this->database->escapeTable($field->table);
+                $statements[] = "SELECT fc_comments_queues.email, fc_comments_queues.field_id, $commentTable.id, $commentTable.pages_id, $commentTable.author, $commentTable.data, $commentTable.created, $commentTable.code FROM fc_comments_queues INNER JOIN $commentTable ON $commentTable.id=fc_comments_queues.comment_id AND fc_comments_queues.page_id=$commentTable.pages_id";
 
-        $statement = implode(' UNION ', $statements);
+            }
 
-        $query = $this->database->prepare($statement);
-        $query->execute();
+            $statement = implode(' UNION ', $statements);
 
-        $comments = [];
-        while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
-            $comments[] = $row;
-        }
-       
-        $numberOfMails = count($comments);
-        foreach ($comments as $comment) {
 
-            $page = $this->wire('pages')->get($comment['pages_id']);
-            $field = $this->wire('fields')->get($comment['field_id']);
+            $query = $this->database->prepare($statement);
+            $query->execute();
 
-            // create a notification object
-            $notifications = new Notifications($comments, $field, $page);
-            if ($notifications->sendNotificationAboutNewReply($comment)) {
+            $comments = [];
+            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                $comments[] = $row;
+            }
 
-                // get the appropriate queued list item and delete it from the table
-                $statement = "DELETE FROM fc_comments_queues WHERE comment_id=:id ";
-                try {
-                    $query = $this->database->prepare($statement);
-                    $query->bindValue(":id", $comment['id'], PDO::PARAM_INT);
-                    $query->execute();
-                } catch (Exception) {
-                    // not used at the moment
+            $numberOfMails = count($comments);
+            foreach ($comments as $comment) {
+
+                $page = $this->wire('pages')->get($comment['pages_id']);
+                $field = $this->wire('fields')->get($comment['field_id']);
+
+                // create a notification object
+                $notifications = new Notifications($comments, $field, $page);
+                if ($notifications->sendNotificationAboutNewReply($comment)) {
+
+                    // get the appropriate queued list item and delete it from the table
+                    $statement = "DELETE FROM fc_comments_queues WHERE comment_id=:id ";
+                    try {
+                        $query = $this->database->prepare($statement);
+                        $query->bindValue(":id", $comment['id'], PDO::PARAM_INT);
+                        $query->execute();
+                    } catch (Exception) {
+                        // not used at the moment
+                    }
                 }
             }
         }
