@@ -842,8 +842,12 @@
                                 $alert = new Alert();
                                 // grab configuration values from the FrontendComments inputfield
                                 $dayslocked = $field->get('input_fc_voting_lock');
-                                $timePeriod = $dayslocked . ' ' . $this->_n($this->_('day'),
-                                        $this->_('days'), $dayslocked);
+                                if($dayslocked > 1) {
+                                    $timePeriod = $dayslocked . ' ' . $this->_('days');
+                                } else {
+                                    $timePeriod = $this->_('day');
+                                }
+                                $alert->setContent(sprintf($this->_('It looks like you have already rated this comment within the last %s. In this case you are not allowed to vote again.'), $dayslocked));
                                 $alert->setContent(sprintf($this->_('It looks like you have already rated this comment within the last %s. In this case you are not allowed to vote again.'), $timePeriod));
                                 $alert->setCSSClass('alert_warningClass');
 
