@@ -843,12 +843,14 @@
                                 // grab configuration values from the FrontendComments inputfield
                                 $dayslocked = $field->get('input_fc_voting_lock');
                                 if($dayslocked > 1) {
-                                    $timePeriod = $dayslocked . ' ' . $this->_('days');
+                                    //plural
+                                    $text = sprintf($this->_('It looks like you have already rated this comment within the last %s days.'), $dayslocked);
                                 } else {
-                                    $timePeriod = $this->_('day');
+                                    //singular
+                                    $text = $this->_('It looks like you have already rated this comment within the last day.');
                                 }
-                                $alert->setContent(sprintf($this->_('It looks like you have already rated this comment within the last %s. In this case you are not allowed to vote again.'), $dayslocked));
-                                $alert->setContent(sprintf($this->_('It looks like you have already rated this comment within the last %s. In this case you are not allowed to vote again.'), $timePeriod));
+                                $text .= ' '.$this->_('In this case you are not allowed to vote again.');
+                                $alert->setContent(sprintf($text);
                                 $alert->setCSSClass('alert_warningClass');
 
                                 echo '<div id="fc-ajax-noVote">' . $alert->___render() . '</div>';
