@@ -152,13 +152,28 @@ function loadReplyForm() {
                     let element = doc.getElementById('reply-comment-form-' + fieldName + '-reply-' + commentId);
 
                     if (element) {
+
+                        // check if Ajax submission is enabled
+                        let ajaxSubmission = false;
+                        let replyForms = element.getElementsByTagName("form");
+                      
+                        if(replyForms.length > 0){
+                            let replyForm = replyForms[0];
+                            if (replyForm.hasAttribute("data-submitajax")) {
+                                // data attribute exist
+                                ajaxSubmission = true;
+                            }
+                        }
+
                         let content = element.innerHTML;
 
                         // load the form inside the target div
                         target.innerHTML = content;
 
-                        // add Ajax event listener function once more
-                        subAjax('reply-form-' + commentId);
+                        // add Ajax event listener function once more if AJAX submission is enabled
+                        if(ajaxSubmission){
+                            subAjax('reply-form-' + commentId);
+                        }
 
                         let ratingStars = [...document.getElementsByClassName("star-rating")];
                         if (ratingStars.length > 0) {
