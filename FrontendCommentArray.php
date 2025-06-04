@@ -844,7 +844,7 @@
                                 $dayslocked = $field->get('input_fc_voting_lock');
                                 $timePeriod = $dayslocked . ' ' . $this->_n($this->_('day'),
                                         $this->_('days'), $dayslocked);
-                                $alert->setContent(sprintf($this->_('It looks like you have already rated this comment within the last %s days. In this case you are not allowed to vote again.'), $timePeriod));
+                                $alert->setContent(sprintf($this->_('It looks like you have already rated this comment within the last %s. In this case you are not allowed to vote again.'), $timePeriod));
                                 $alert->setCSSClass('alert_warningClass');
 
                                 echo '<div id="fc-ajax-noVote">' . $alert->___render() . '</div>';
