@@ -259,7 +259,7 @@
          */
         public function ___getStarRating(): Select
         {
-            
+
             $this->stars->useInputWrapper(false);
             $this->stars->useFieldWrapper(false);
             $this->stars->setLabel($this->_('Rating'));
@@ -549,6 +549,13 @@
          */
         public function render(): string
         {
+            // set jump anchor
+            if(!$this->getSubmitWithAjax()) {
+                if (!strstr($this->getID(), 'reply-form')) {
+                    $anchor = $this->getAttribute('action').'#'.$this->getID().'-form-wrapper';
+                    $this->setAttribute('action', $anchor);
+                }
+            }
 
             $this->setStarRatingField();
             $this->setPrivacyField();
