@@ -449,7 +449,7 @@
             if ($status === 1) {
                 $body .= '<p>' . $this->_('Your comment is now published and visible to everyone.') . '</p>';
                 $body .= '<p>' . $this->_('Link to your comment');
-                $commentPage = $this->wire('pages')->get($comment->pages_id);
+                $commentPage = $comment->get('page');
                 $body .= ':  <a href="' . $commentPage->httpUrl . '?comment-redirect=' . $comment->get('id') . '">' . $this->_('View the comment') . '</a></p>';
             } else {
                 $body .= '<p>' . $this->_('We are sorry, but your comment contains content that violates our policies.') . '<br>';
