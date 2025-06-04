@@ -148,9 +148,10 @@
             $this->upvote->setAttribute('title', $this->_('Like the comment'));
             $this->upvote->setAttribute('data-field', $this->field->name);
             $this->upvote->setAttribute('data-commentid', $this->get('id'));
-            $this->upvote->setLinkText($this->_('Like'));
-            $this->upvote->wrap()->setTag('span')->setAttribute('id', $this->field->name . '-' . $this->get('id') . '-votebadge-up-wrapper')->setAttribute('class', 'badge-upvote');
-            $this->upvote->append('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-up" class="fc-votebadge upvote">' . $this->get('upvotes') . '</span>');
+            //$this->upvote->setLinkText($this->_('Like'));
+            //$this->upvote->wrap()->setTag('span')->setAttribute('id', $this->field->name . '-' . $this->get('id') . '-votebadge-up-wrapper')->setAttribute('class', 'badge-upvote');
+            //$this->upvote->append('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-up" class="fc-votebadge upvote">' . $this->get('upvotes') . '</span>');
+            $this->upvote->setLinkText('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-up" class="fc-votebadge upvote">↑ ' . $this->get('upvotes') . '</span>');
             return $this->upvote;
         }
 
@@ -177,9 +178,10 @@
             $this->downvote->setAttribute('title', $this->_('Dislike the comment'));
             $this->downvote->setAttribute('data-field', $this->field->name);
             $this->downvote->setAttribute('data-commentid', $this->get('id'));
-            $this->downvote->setLinkText($this->_('Dislike'));
-            $this->downvote->wrap()->setTag('span')->setAttribute('id', $this->field->name . '-' . $this->get('id') . '-votebadge-down-wrapper')->setAttribute('class', 'badge-downvote');
-            $this->downvote->append('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-down" class="fc-votebadge downvote">' . $this->get('downvotes') . '</span>');
+            //$this->downvote->setLinkText($this->_('Dislike'));
+            //$this->downvote->wrap()->setTag('span')->setAttribute('id', $this->field->name . '-' . $this->get('id') . '-votebadge-down-wrapper')->setAttribute('class', 'badge-downvote');
+            //$this->downvote->append('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-down" class="fc-votebadge downvote">' . $this->get('downvotes') . '</span>');
+            $this->downvote->setLinkText('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-down" class="fc-votebadge downvote">↓ ' . $this->get('downvotes') . '</span>');
             return $this->downvote;
         }
 
@@ -501,7 +503,7 @@
             $this->replyLink->setAttribute('data-id', $this->get('id'));
             $this->replyLink->setAttribute('data-ajax', $this->submitAjax ?? '0');
             $this->replyLink->setLinkText($this->_('Reply'));
-            $this->replyLink->wrap()->setTag('span')->setAttribute('class', 'icon-box');
+            //$this->replyLink->wrap()->setTag('span')->setAttribute('class', 'icon-box');
             return $this->replyLink;
         }
 
@@ -759,7 +761,7 @@
             $out .= $this->renderCommentCreated();
             $out .= $this->renderRating();
             $out .= $this->renderReplyLink($level);
-            $out .= $this->renderVotes();
+            $out .= '<div class="votes">'.$this->renderVotes().'</div>';
             $out .= '</div>';
             $out .= $this->renderCommentText();
             $out .= $this->renderFeedbackText();
