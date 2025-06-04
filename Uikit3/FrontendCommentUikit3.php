@@ -42,13 +42,17 @@ class FrontendCommentUikit3 extends FrontendComment
         $this->commentCreated->removeAttribute('class');
 
         // Upvote link
-        $this->upvote->wrap()->setTag('li');
+        $this->upvote->setAttribute('class', 'uk-link-reset');
+        $this->upvote->wrap()->setTag('span')->setAttribute('class', 'uk-badge uk-margin-small-left uk-upvote');
+        $this->upvote->getWrap()->append('</li>');
 
         // Downvote link
-        $this->downvote->wrap()->setTag('li');
+        $this->downvote->setAttribute('class', 'uk-link-reset');
+        $this->downvote->wrap()->setTag('span')->setAttribute('class', 'uk-badge  uk-downvote');
+        $this->downvote->getWrap()->prepend('<li>');
 
         // Reply link
-        $this->replyLink->getWrap()->setTag('li')->removeAttribute('class');
+        $this->replyLink->wrap()->setTag('li')->removeAttribute('class');
 
         // Comment text
         $this->commentText->removeAttributeValue('class', 'fc-comment-text');
@@ -84,8 +88,8 @@ class FrontendCommentUikit3 extends FrontendComment
             $out .= '<ul class="uk-comment-meta uk-subnav uk-subnav-divider uk-margin-remove-top">';
             $out .= '<li class="comment-box">'.$this->renderRating().'</li>';
             $out .= $this->renderCommentCreated();
-            $out .= $this->renderReplyLink($level);
             $out .= $this->renderVotes();
+            $out .= $this->renderReplyLink($level);
             $out .= '</div>';
         $out .= '</div>';
         $out .= '</header>';
