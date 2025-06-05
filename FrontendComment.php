@@ -75,7 +75,9 @@
                 if ($name === 'author') {
                     $value = ($value == '') ? $this->_('Guest') : $value;
                 }
+
                 $this->set($name, $value);
+
             }
 
             // Create all comment objects
@@ -148,9 +150,6 @@
             $this->upvote->setAttribute('title', $this->_('Like the comment'));
             $this->upvote->setAttribute('data-field', $this->field->name);
             $this->upvote->setAttribute('data-commentid', $this->get('id'));
-            //$this->upvote->setLinkText($this->_('Like'));
-            //$this->upvote->wrap()->setTag('span')->setAttribute('id', $this->field->name . '-' . $this->get('id') . '-votebadge-up-wrapper')->setAttribute('class', 'badge-upvote');
-            //$this->upvote->append('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-up" class="fc-votebadge upvote">' . $this->get('upvotes') . '</span>');
             $this->upvote->setLinkText('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-up" class="fc-votebadge upvote">↑ ' . $this->get('upvotes') . '</span>');
             return $this->upvote;
         }
