@@ -412,8 +412,10 @@
             $out = '';
 
             if ($this->field->get('input_fc_vote')) {
+                $out .= '<div class="votes">';
                 $out .= $this->getDownVoteElement()->render();
                 $out .= $this->getUpVoteElement()->render();
+                $out .= '</div>';
             }
             return $out;
         }
@@ -761,7 +763,7 @@
             $out .= $this->renderCommentCreated();
             $out .= $this->renderRating();
             $out .= $this->renderReplyLink($level);
-            $out .= '<div class="votes">'.$this->renderVotes().'</div>';
+            $out .= $this->renderVotes();
             $out .= '</div>';
             $out .= $this->renderCommentText();
             $out .= $this->renderFeedbackText();
