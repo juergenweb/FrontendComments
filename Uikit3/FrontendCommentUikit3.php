@@ -41,17 +41,19 @@ class FrontendCommentUikit3 extends FrontendComment
         $this->commentCreated->setTag('li');
         $this->commentCreated->removeAttribute('class');
 
-        // Upvote link
-        $this->upvote->removeAppend();
-        $this->upvote->setAttribute('class', 'uk-link-reset');
-        $this->upvote->wrap()->setTag('span')->setAttribute('class', 'uk-badge uk-margin-small-left uk-upvote');
-        $this->upvote->getWrap()->append('</li>');
-
         // Downvote link
         $this->downvote->removePrepend();
         $this->downvote->setAttribute('class', 'uk-link-reset');
-        $this->downvote->wrap()->setTag('span')->setAttribute('class', 'uk-badge  uk-downvote');
-        $this->downvote->getWrap()->prepend('<li>');
+        $linktext = str_replace('class="', 'class="uk-badge uk-downvote ',$this->downvote->getLinkText());
+        $this->downvote->setLinkText($linktext);
+        $this->downvote->prepend('<li><div>');
+
+        // Upvote link
+        $this->upvote->removeAppend();
+        $this->upvote->setAttribute('class', 'uk-link-reset');
+        $linktext = str_replace('class="', 'class="uk-badge uk-upvote ',$this->upvote->getLinkText());
+        $this->upvote->setLinkText($linktext);
+        $this->upvote->append('</div></li>');
 
         // Reply link
         $this->replyLink->wrap()->setTag('li')->removeAttribute('class');
