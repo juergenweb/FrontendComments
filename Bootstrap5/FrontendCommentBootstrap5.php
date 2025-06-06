@@ -43,12 +43,18 @@ class FrontendCommentBootstrap5 extends FrontendComment
         $this->commentCreated->setAttribute('class', 'text-muted small mb-0');
 
         // Upvote link
-        $this->upvote->setLinkText('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-up" class="fc-votebadge badge bg-success">↑ ' . $this->get('upvotes') . '</span>');
+        $this->upvote->setAttribute('class', 'badge bg-success link-opacity-50');
+        $this->upvote->removeAttributeValue('class', 'fc-vote-link');
+        $this->upvote->removeAttributeValue('class', 'fc-upvote');
+        $this->upvote->setLinkText('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-up" class="fc-votebadge">↑ ' . $this->get('upvotes') . '</span>');
         $this->upvote->removeAppend();
         $this->upvote->wrap()->setAttribute('class', 'd-flex align-items-center me-3');
 
         // Downvote link
-        $this->downvote->setLinkText('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-down" class="fc-votebadge badge bg-danger">↓ ' . $this->get('downvotes') . '</span>');
+        $this->downvote->setAttribute('class', 'badge bg-danger link-opacity-50');
+        $this->downvote->removeAttributeValue('class', 'fc-vote-link');
+        $this->downvote->removeAttributeValue('class', 'fc-downvote');
+        $this->downvote->setLinkText('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-down" class="fc-votebadge">↓ ' . $this->get('downvotes') . '</span>');
         $this->downvote->removePrepend();
         $this->downvote->wrap()->setAttribute('class', 'd-flex align-items-center me-3');
 
