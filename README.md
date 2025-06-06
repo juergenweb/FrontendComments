@@ -35,7 +35,6 @@ This module is early Beta stage - so please use it with care!
 
 ## Table of contents
 * [Is this a copy of the Comments Fieldtype by Ryan?](#is-this-a-copy-of-the-comments-fieldtype-by-ryan)
-* [My intention for the re-creation of a Fieldtype that exists](#my-intention-for-the-re-creation-of-a-fieldtype-that-exists)
 * [Installation and Quick-start guide](#installation-and-quick-start-guide)
 * [Public methods to change field parameters in templates](#public-methods-to-change-field-parameters-in-templates)
 * [Queuing notification emails](#queuing-notification-emails)
