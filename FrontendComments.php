@@ -228,6 +228,10 @@ class FrontendComments extends Wire
         // render the headline for the comments
         $out .= $this->renderCommentsHeadline();
 
+        if($comments->count() == 0){
+            return $out .= '<p>'.$this->_('There are no comments at the moment. Be the first to write one.').'</p>';
+        }
+
         // set the max level of comments to display
         $maxLevel = $this->field->get('input_fc_reply_depth');
 
