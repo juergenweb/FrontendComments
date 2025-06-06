@@ -64,7 +64,7 @@ class FrontendCommentBootstrap5 extends FrontendComment
         $this->feedbackText->setAttribute('class', 'bg-light border rounded fs-6 text fst-italic p-2 mt-2');
 
         // Website link
-        $this->websiteLink->getWrap()->removeAttribute('class')->setAttribute('class', 'text-end fs-6 text-muted');
+        $this->websiteLink->getWrap()->removeAttribute('class')->setAttribute('class', 'small text-muted');
         $this->websiteLink->removeAttribute('class');
 
     }
