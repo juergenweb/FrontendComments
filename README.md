@@ -31,6 +31,7 @@ This module is early Beta stage - so please use it with care!
 * Adding a link to an internal or external page containing the community guidlines
 * Changing the status of a comment via remote link to "approved" or "spam"
 * No dependencies (except FrontendForms)
+* Supports pagination of comments on the frontend
 * Support for UiKit 3, Pico 2 and Bootstrap 5 CSS framework out of the box
 
 ## Table of contents
