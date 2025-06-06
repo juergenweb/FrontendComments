@@ -27,7 +27,7 @@
 
             // User image
             if (!is_null($this->avatar)) {
-                $this->avatar->removeWrap();
+                $this->avatar->wrap()->setAttribute('class', 'avatar');
                 $this->avatar->setAttribute('class', 'rounded-circle shadow-1-strong me-3');
                 $this->avatar->removeAttributeValue('class', 'avatar');
             }
@@ -43,13 +43,13 @@
             $this->commentCreated->setAttribute('class', 'creation-date');
 
             // Upvote link
-            $this->upvote->getWrap()->setAttribute('class', 'd-flex align-items-center me-3');
+            $this->upvote->setAttribute('class', 'd-flex align-items-center me-3');
 
             // Downvote link
-            $this->downvote->getWrap()->setAttribute('class', 'd-flex align-items-center me-3');
+            $this->downvote->setAttribute('class', 'd-flex align-items-center me-3');
 
             // Reply link
-            $this->replyLink->getWrap()->setAttribute('class', 'd-flex align-items-center me-3');
+            $this->replyLink->setAttribute('class', 'd-flex align-items-center me-3');
 
             // Comment text
             $this->commentText->removeAttribute('class')->removeWrap();
@@ -74,9 +74,7 @@
             $out = '<article class="pico-comment">'; //card start
 
             $out .= '<header>';//card body start
-            $out .= '<div class="avatar">';
             $out .= $this->renderCommentAvatar();// Avatar
-            $out .= '</div>';
             $out .= '<div class="meta">';
             $out .= $this->renderCommentAuthor();
             $out .= $this->renderCommentCreated();
