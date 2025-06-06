@@ -158,9 +158,9 @@ This module offers the possibility to activate upvotes and downvotes for comment
 
 The identification of a user is done by checking their IP and browser fingerprint. It's not really a 100% safe way to identify a user, but for this case, it's fine.
 
-If a user wishes to vote again within this period, he will receive a notification that he is no longer allowed to vote, because he has already voted.
+If a user wishes to vote again within this period, he will receive a notification that he is no longer allowed to vote, because he has already voted (take a look at the image below, where UiKit3 markup is used to render comments).
 
-![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/not-allowed-to-vote-again.png?raw=true)
+![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/vote-blocked.png?raw=true)
 
 ## Hooking to change markup
 
