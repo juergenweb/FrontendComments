@@ -37,7 +37,7 @@ This module is early Beta stage - so please use it with care!
 * [Is this a copy of the Comments Fieldtype by Ryan?](#is-this-a-copy-of-the-comments-fieldtype-by-ryan)
 * [Installation and Quick-start guide](#installation-and-quick-start-guide)
 * [Queuing notification emails](#queuing-notification-emails)
-* [What happens if a comment, which has replies, will be declared as SPAM](#what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam)
+* [What happens if a comment, which has replies, will be declared as SPAM later on?](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam)
 * [Hooking to change markup](#hooking-to-change-markup)
   
 
