@@ -43,13 +43,17 @@ class FrontendCommentBootstrap5 extends FrontendComment
         $this->commentCreated->setAttribute('class', 'text-muted small mb-0');
 
         // Upvote link
-        $this->upvote->getWrap()->setAttribute('class', 'd-flex align-items-center me-3');
+        $this->upvote->setLinkText('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-up" class="fc-votebadge badge bg-success">↑ ' . $this->get('upvotes') . '</span>');
+        $this->upvote->removeAppend();
+        $this->upvote->wrap()->setAttribute('class', 'd-flex align-items-center me-3');
 
         // Downvote link
-        $this->downvote->getWrap()->setAttribute('class', 'd-flex align-items-center me-3');
+        $this->downvote->setLinkText('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-down" class="fc-votebadge badge bg-danger">↓ ' . $this->get('downvotes') . '</span>');
+        $this->downvote->removePrepend();
+        $this->downvote->wrap()->setAttribute('class', 'd-flex align-items-center me-3');
 
         // Reply link
-        $this->replyLink->getWrap()->setAttribute('class', 'd-flex align-items-center me-3');
+        $this->replyLink->wrap()->setAttribute('class', 'd-flex align-items-center me-3');
 
         // Comment text
         $this->commentText->removeAttribute('class')->removeWrap();
