@@ -85,6 +85,10 @@ article.pico-comment .comment-feedback >* {
 
     /** Pagination */
 
+.page-of-text {
+    margin-bottom: 15px;
+}
+
 ul.pagination {
     list-style-type: none;
     display: inline-block;
