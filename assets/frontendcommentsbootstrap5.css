@@ -7,3 +7,12 @@ a.fc-vote-link {
 a.fc-vote-link:hover {
     opacity: 70%;
 }
+
+@media (max-width: 600px) {
+
+    .fc-comment-button, .fc-comment-resetbutton, .fc-cancel-button {
+        margin-bottom: 5px;
+        width: 100%;
+    }
+
+}
