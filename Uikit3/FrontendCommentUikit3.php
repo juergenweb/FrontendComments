@@ -64,7 +64,7 @@ class FrontendCommentUikit3 extends FrontendComment
         $this->feedbackText->setAttribute('class', 'uk-text-italic uk-background-default uk-padding-small uk-margin-top uk-border-rounded');
 
         // Website link
-        $this->websiteLink->getWrap()->removeAttribute('class')->setAttribute('class', 'uk-margin-small-top uk-text-right uk-text-small uk-text-muted');
+        $this->websiteLink->getWrap()->removeAttribute('class')->setAttribute('class', 'uk-margin-small-top uk-text-right@s uk-text-small uk-text-muted');
         $this->websiteLink->removeAttribute('class')->
         setAttribute('class', 'uk-link-text');
 
