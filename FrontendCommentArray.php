@@ -508,7 +508,15 @@
         public
         function getForm(): FrontendCommentForm
         {
-            $form = new FrontendCommentForm($this);
+
+           $form = new FrontendCommentForm($this);
+
+            $classname = FieldtypeFrontendComments::getFrameWork();
+
+            if($classname === 'Uikit3') {
+                    $form->getFormelementByName('submit')->setAttribute('class', 'uk-width-auto@s uk-margin-small-bottom');
+                    $form->getFormelementByName('reset')->setAttribute('class', 'uk-width-auto@s uk-margin-small-bottom');
+            }
 
             // enable or disable character counter depending on settings
             $form->getFormelementByName('text')->useCharacterCounter(!$this->field->get('input_fc_counter'));
