@@ -151,6 +151,7 @@
             $this->upvote->setAttribute('data-field', $this->field->name);
             $this->upvote->setAttribute('data-commentid', $this->get('id'));
             $this->upvote->setLinkText('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-up" class="fc-votebadge upvote">↑ ' . $this->get('upvotes') . '</span>');
+            $this->upvote->append('</div>');
             return $this->upvote;
         }
 
@@ -177,10 +178,8 @@
             $this->downvote->setAttribute('title', $this->_('Dislike the comment'));
             $this->downvote->setAttribute('data-field', $this->field->name);
             $this->downvote->setAttribute('data-commentid', $this->get('id'));
-            //$this->downvote->setLinkText($this->_('Dislike'));
-            //$this->downvote->wrap()->setTag('span')->setAttribute('id', $this->field->name . '-' . $this->get('id') . '-votebadge-down-wrapper')->setAttribute('class', 'badge-downvote');
-            //$this->downvote->append('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-down" class="fc-votebadge downvote">' . $this->get('downvotes') . '</span>');
             $this->downvote->setLinkText('<span id="' . $this->field->name . '-' . $this->get('id') . '-votebadge-down" class="fc-votebadge downvote">↓ ' . $this->get('downvotes') . '</span>');
+            $this->downvote->prepend('<div class="votes">');
             return $this->downvote;
         }
 
@@ -411,10 +410,8 @@
             $out = '';
 
             if ($this->field->get('input_fc_vote')) {
-                $out .= '<div class="votes">';
                 $out .= $this->getDownVoteElement()->render();
                 $out .= $this->getUpVoteElement()->render();
-                $out .= '</div>';
             }
             return $out;
         }
