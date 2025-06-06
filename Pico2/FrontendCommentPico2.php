@@ -27,13 +27,13 @@
 
             // User image
             if (!is_null($this->avatar)) {
-                $this->avatar->wrap()->setAttribute('class', 'avatar');
+                $this->avatar->wrap()->setAttribute('class', 'fcm-avatar');
                 $this->avatar->setAttribute('class', 'rounded-circle shadow-1-strong me-3');
                 $this->avatar->removeAttributeValue('class', 'avatar');
             }
 
             // Author name
-            $this->commentAuthor->setTag('h6');
+            $this->commentAuthor->setTag('p');
             $this->commentAuthor->removeAttribute('class');
             $this->commentAuthor->setAttribute('class', 'comment-author');
 
