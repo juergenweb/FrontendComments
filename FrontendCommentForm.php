@@ -193,7 +193,7 @@
                 $this->email->setDefaultValue($this->user->email);
                 $this->email->setAttribute('readonly');
             }
-            $this->email->setRule('lengthMax', 255)->setCustomFieldName('The email address'); // DB storage maximum length
+            $this->email->setRule('lengthMax', 255)->setCustomFieldName($this->_('The email address')); // DB storage maximum length
             return $this->email;
         }
 
@@ -223,7 +223,7 @@
             }
             $this->author->setRule('required');
             $this->author->setRule('firstAndLastname');
-            $this->author->setRule('lengthMax', 128)->setCustomFieldName('The name'); // DB storage maximum length
+            $this->author->setRule('lengthMax', 128)->setCustomFieldName($this->_('The name')); // DB storage maximum length
             return $this->author;
         }
 
@@ -234,7 +234,7 @@
         public function ___getWebsiteField(): InputUrl
         {
             $this->website->setLabel($this->_('Homepage'));
-            $this->website->setRule('lengthMax', 255); // DB storage maximum length
+            $this->website->setRule('lengthMax', 255)->setCustomFieldName($this->_('The Homepage URL')); // DB storage maximum length
             return $this->website;
         }
 
@@ -246,8 +246,8 @@
         public function ___getCommentField(): Textarea
         {
             $this->comment->setLabel($this->_('Comment'));
-            $this->comment->setRule('required');
-            $this->comment->setRule('lengthMax', 1024)->setCustomFieldName('The comment');
+            $this->comment->setRule('required')->setCustomFieldName($this->_('The comment'));
+            $this->comment->setRule('lengthMax', 1024);
             $this->comment->setSanitizer('maxLength'); // limit the length of the comment
             $this->comment->setNotes($this->_('HTML is not allowed.'));
             return $this->comment;
@@ -319,7 +319,7 @@
         public function ___getNotifyField(): InputRadioMultiple
         {
             $this->notify->setlabel($this->_('Notify me about new comments'));
-            $this->notify->setRule('required');
+            $this->notify->setRule('required')->setCustomFieldName($this->_('The email notification'));
             $this->notify->setRule('integer');
             $this->notify->setNotes($this->_('You can cancel the receiving of notification emails everytime by clicking the link inside the notification email.'));
             $this->notify->setDefaultValue('0');
@@ -386,7 +386,7 @@
                 $this->remove($this->stars);
             } else {
                 if ($this->field->get('input_fc_stars') == 2) {
-                    $this->stars->setRule('required');
+                    $this->stars->setRule('required')->setCustomFieldName($this->_('The Rating'));
                 }
             }
         }
