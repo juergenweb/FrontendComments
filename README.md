@@ -144,7 +144,7 @@ By default, all comments that are declared as SPAM are no longer visible in the 
 
 If a comment contains replies and is declared as SPAM, then all subordinates (replies) would no longer be visible. This is not really desirable, as many comments would suddenly no longer be visible (even comments with content that does not violate the comment guidelines). This can cause commenters to feel frustrated because their comment is suddenly no longer visible.
 
-To prevent this, comments marked as SPAM to which replies have already been written are declared as "SPAM with replies". This means that the comment will remain visible, but the comment text will be replaced with the following text: "This comment was removed by a moderator because it does not comply with our comment guidelines."
+To prevent this, comments marked as SPAM to which replies have already been written are declared as "SPAM with replies". This means that the comment will remain visible, but the comment text will be replaced with the following text: "Sorry, this post has been removed by moderators for violating community guidelines."
 
 In this case, the comment will not be deleted like a normal SPAM comment and all replies to this comment will still remain visible in the frontend.
 
