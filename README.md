@@ -2,6 +2,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![ProcessWire 3](https://img.shields.io/badge/ProcessWire-3.x-orange.svg)](https://github.com/processwire/processwire)
 
+![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/frameworks.jpg?raw=true)
+
 Processwire Fieldtype/Inputfield to add and manage comments on your site based on the FrontendForms module.
 
 This module is early Beta stage - so please use it with care!
