@@ -229,8 +229,8 @@ class FrontendComments extends Wire
         $out .= $this->renderCommentsHeadline();
 
         if($comments->count() == 0){
-            return $out .= '<p>'.$this->_('There are no comments at the moment. Be the first to write one.').'</p>';
-        }
+            $out .= '<p>'.$this->_('There are no comments at the moment. Be the first to write one.').'</p>';
+        } else {
 
         // set the max level of comments to display
         $maxLevel = $this->field->get('input_fc_reply_depth');
@@ -246,6 +246,7 @@ class FrontendComments extends Wire
             $out .= $comment->renderComment($comment->get('levelnumber'), $comment->get('level'));
             $out .= '</div>';
         }
+}
         $out .= '</div>';
 
         return $out;
