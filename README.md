@@ -151,7 +151,7 @@ In this case, the comment will not be deleted like a normal SPAM comment and all
 You don't have to worry about whether a comment already has replies or not if you declare a comment as "SPAM" - this will be automatically checked before saving. If answers already exist, then the status "SPAM" will be automatically changed to "SPAM with replies"
 
 
-![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-banned.png?raw=true)
+![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/violation.png?raw=true)
 
 ## Locking visitors to vote (up-vote or down-vote) for a comment
 This module offers the possibility to activate upvotes and downvotes for comments. In the input field configuration, you can specify the period after which a user is allowed to vote again.
