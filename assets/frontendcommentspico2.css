@@ -8,7 +8,7 @@ article.pico-comment header {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(1, 1fr);
-    gap: 0px;
+    gap: 0;
 
 }
 
@@ -28,6 +28,30 @@ article.pico-comment footer .fc-reply-form-wrapper, article.pico-comment footer 
     text-align: left;
 }
 
+a.fc-vote-link {
+    border-bottom: 0;
+    text-decoration: none;
+}
+
+.fcm-avatar {
+    text-align:center;
+}
+
+a.fc-comment-reply {
+    margin-left: 10px;
+}
+
+.comment-author {
+    font-weight: bold;
+}
+
+.website-link, .creation-date {
+    font-size: 70%;
+}
+
+div.votes {
+    display:inline-block;
+}
 
 article.pico-comment footer span {
     padding-left: 10px;
