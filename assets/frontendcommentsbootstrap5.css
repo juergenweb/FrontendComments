@@ -1,0 +1,9 @@
+/* FrontendComments field for Uikit 3 Markup */
+
+a.fc-vote-link {
+    border-bottom: 0;
+}
+
+a.fc-vote-link:hover {
+    opacity: 70%;
+}
