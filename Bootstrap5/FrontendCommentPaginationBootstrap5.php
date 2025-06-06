@@ -32,6 +32,8 @@
                 'right' => 'justify-content-end'
             ];
 
+
+
             $this->getPaginationList()->setAttribute('class', $alignClasses[$this->alignment]);
 
             // nav page list item
@@ -52,6 +54,8 @@
 
             // End page
             $this->getEndPageListitem()->removeAttribute('class');
+
+            $this->pageOfText->setAttribute('class', 'mb-3');
 
         }
 
