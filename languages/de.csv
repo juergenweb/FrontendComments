@@ -179,9 +179,7 @@ FrontendComments,=,,site/modules/FrontendComments/FieldtypeFrontendComments.modu
 en,de,description,file,hash
 Guest,Gast,,site/modules/FrontendComments/FrontendComment.php,adb831a7fdd83dd1e2a309ce7591dff8
 "Like the comment","Mir gefällt dieser Kommentar",,site/modules/FrontendComments/FrontendComment.php,32a1bab8a685376f9632903067d90a2e
-Like,"Gefällt mir",,site/modules/FrontendComments/FrontendComment.php,98b82c200a2e309b24cb481970f3fcc4
 "Dislike the comment","Mir gefällt dieser Kommentar nicht",,site/modules/FrontendComments/FrontendComment.php,fd395bf6e34455835034bcd2c3a06d22
-Dislike,"Gefällt mir nicht",,site/modules/FrontendComments/FrontendComment.php,ea04e7ef514a25e465197a31c71f52f0
 "Profile image of %s","Profilbild von %s",,site/modules/FrontendComments/FrontendComment.php,deab51021f2a885e9c4f50b992e18879
 "Sorry, this post has been removed by moderators for violating community guidelines.","Es tut uns leid, aber dieser Beitrag wurde von den Moderatoren entfernt, weil er gegen die Community-Richtlinien verstoßen hat.",,site/modules/FrontendComments/FrontendComment.php,2701441651c9c35f9b600a1158a5b7b7
 "Reply to this comment","Auf diesen Kommentar antworten",,site/modules/FrontendComments/FrontendComment.php,bc9e60a9d89ccff64f5282425aa1374e
@@ -247,6 +245,7 @@ en,de,description,file,hash
 "Page navigation",Seiten-Navigation,,site/modules/FrontendComments/Bootstrap5/FrontendCommentPaginationBootstrap5.php,4804dd8c75c328a1ea7a432fbab05be4
 en,de,description,file,hash
 Comments,Kommentare,,site/modules/FrontendComments/FrontendComments.php,8413c683b4b27cc3f4dbd4c90329d8ba
+"There are no comments at the moment. Be the first to write one.","Im Moment gibt es keine Kommentare. Seien Sie der Erste, der einen schreibt.",,site/modules/FrontendComments/FrontendComments.php,c9a30d1a0c3ea4cb3ddc25f4e685cbee
 en,de,description,file,hash
 Comments,Kommentare,,site/modules/FrontendComments/InputfieldFrontendComments.module,8413c683b4b27cc3f4dbd4c90329d8ba
 "There are no comments at the moment.","Es gibt momentan noch keine Kommentare.",,site/modules/FrontendComments/InputfieldFrontendComments.module,2670994d655a0011a1cb80d5aa3c614a
