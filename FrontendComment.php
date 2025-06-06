@@ -146,7 +146,7 @@
         {
             $this->upvote = $this->wire(new Link());
             $this->upvote->setUrl($this->page->url . '?vote=up&votecommentid=' . $this->get('id'));
-            $this->upvote->setAttribute('class', 'fc-vote-link fc-upvote');
+            $this->upvote->setAttribute('class', ['fc-vote-link', 'fc-upvote']);
             $this->upvote->setAttribute('title', $this->_('Like the comment'));
             $this->upvote->setAttribute('data-field', $this->field->name);
             $this->upvote->setAttribute('data-commentid', $this->get('id'));
@@ -174,7 +174,7 @@
             // Down-vote link
             $this->downvote = $this->wire(new Link());
             $this->downvote->setUrl($this->page->url . '?vote=down&votecommentid=' . $this->get('id'));
-            $this->downvote->setAttribute('class', 'fc-vote-link fc-downvote');
+            $this->downvote->setAttribute('class', ['fc-vote-link', 'fc-downvote']);
             $this->downvote->setAttribute('title', $this->_('Dislike the comment'));
             $this->downvote->setAttribute('data-field', $this->field->name);
             $this->downvote->setAttribute('data-commentid', $this->get('id'));
