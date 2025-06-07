@@ -232,7 +232,7 @@
             $this->commentAuthor = $this->wire(new TextElements());
             $this->commentAuthor->setTag('h6');
             $this->commentAuthor->setContent($this->get('author'));
-            $this->commentAuthor->setAttribute('class', 'comment-name by-author');
+            $this->commentAuthor->setAttribute('class', 'fcm-comment-name fcm-by-author');
             return $this->commentAuthor;
         }
 
@@ -312,7 +312,7 @@
         protected function createCommentCreated(): TextElements
         {
             $this->commentCreated = $this->wire(new TextElements());
-            $this->commentCreated->setTag('span')->setAttribute('class', 'comment-created');
+            $this->commentCreated->setTag('span')->setAttribute('class', 'fcm-comment-created');
 
             if (!$this->get('created'))
                 $this->set('created', time());
