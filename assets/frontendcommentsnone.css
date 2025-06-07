@@ -1,11 +1,11 @@
 /* FrontendComments field for default Markup (no CSS framework) */
 
-.comments-list {
+.fcm-comments-list {
     margin-top: 30px;
     position: relative;
 }
 
-.comments-list div div {
+.fcm-comments-list div div {
     margin-bottom: 15px;
     display: block;
     position: relative;
@@ -17,7 +17,7 @@
     margin-top: 15px;
 }
 
-.comments-list .fcm-comment-box .comment-avatar {
+.fcm-comments-list .fcm-comment-box .comment-avatar {
     width: 50px;
     height: 50px;
     float: left;
@@ -33,14 +33,14 @@
     margin: 0 10px 0 0;
 }
 
-.comments-list .comment-avatar img {
+.fcm-comments-list .comment-avatar img {
     width: 100%;
     height: 100%;
 }
 
 
 /* vote badge */
-.comments-list .fcm-comment-box .fc-votebadge {
+.fcm-comments-list .fcm-comment-box .fc-votebadge {
     padding: 4px 6px;
     font-size: 12px;
     height: 24px;
@@ -86,7 +86,7 @@ a.fc-comment-reply {
     top: -2px;
 }
 
-.comments-list .fcm-comment-box {
+.fcm-comments-list .fcm-comment-box {
     width: 100%;
     float: right;
     position: relative;
