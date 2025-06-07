@@ -424,9 +424,9 @@
         {
             $this->commentText = $this->wire(new TextElements());
             $this->commentText->setContent($this->get('text'));
-            $this->commentText->setAttribute('class', 'comment-content');
+            $this->commentText->setAttribute('class', 'fcm-comment-content');
             if ($this->get('status') === 3) {
-                $this->commentText->setContent('<div class="comment-spam">' . $this->_('Sorry, this post has been removed by moderators for violating community guidelines.') . '</div>');
+                $this->commentText->setContent('<div class="fcm-comment-spam">' . $this->_('Sorry, this post has been removed by moderators for violating community guidelines.') . '</div>');
             }
 
             return $this->commentText;
