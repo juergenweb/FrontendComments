@@ -17,7 +17,7 @@
     margin-top: 15px;
 }
 
-.comments-list .comment-box .comment-avatar {
+.comments-list .fcm-comment-box .comment-avatar {
     width: 50px;
     height: 50px;
     float: left;
@@ -40,7 +40,7 @@
 
 
 /* vote badge */
-.comments-list .comment-box .fc-votebadge {
+.comments-list .fcm-comment-box .fc-votebadge {
     padding: 4px 6px;
     font-size: 12px;
     height: 24px;
@@ -75,10 +75,10 @@ a.fc-comment-reply {
     opacity: 60%;
 }
 
-.comment-box .votes {
+.fcm-comment-box .votes {
     float:right;
 }
-.comment-box .comment-head a.fc-vote-link {
+.fcm-comment-box .fcm-comment-head a.fc-vote-link {
     border-bottom: 0;
     display:inline-block;
     text-decoration:none;
@@ -86,7 +86,7 @@ a.fc-comment-reply {
     top: -2px;
 }
 
-.comments-list .comment-box {
+.comments-list .fcm-comment-box {
     width: 100%;
     float: right;
     position: relative;
@@ -95,7 +95,7 @@ a.fc-comment-reply {
     box-shadow: 0 1px 1px rgba(0,0,0,0.15);
 }
 
-.comment-box .comment-head {
+.fcm-comment-box .fcm-comment-head {
     background: #FCFCFC;
     padding: 10px 12px;
     border-bottom: 1px solid #E5E5E5;
@@ -106,12 +106,12 @@ a.fc-comment-reply {
     margin-bottom: 0;
 }
 
-.comment-box .comment-head a {
+.fcm-comment-box .fcm-comment-head a {
     border-bottom: 0;
     text-decoration: underline;
 }
 
-.comment-box .comment-head a:hover {
+.fcm-comment-box .fcm-comment-head a:hover {
     text-decoration:none;
 }
 
@@ -121,7 +121,7 @@ a.fc-comment-reply {
     top: 1px;
 }
 
-.comment-box .comment-name {
+.fcm-comment-box .comment-name {
     color: #283035;
     font-size: 16px;
     font-weight: 700;
@@ -129,7 +129,7 @@ a.fc-comment-reply {
     margin: 0 10px 0 0;
 }
 
-.comment-box .comment-head span, .comment-box .star-rating-result {
+.fcm-comment-box .fcm-comment-head span, .fcm-comment-box .fcm-star-rating-result {
 
     color: #999;
     font-size: 15px;
@@ -139,22 +139,22 @@ a.fc-comment-reply {
     top: 1px;
 }
 
-.comment-box .star-rating-result span {
+.fcm-comment-box .fcm-star-rating-result span {
     float:none;
 }
 
-.comment-box .comment-head span.comment-created {
+.fcm-comment-box .fcm-comment-head span.comment-created {
     float:left;
     margin-right: 10px;
 }
 
-.comment-box .star-rating-result {
+.fcm-comment-box .fcm-star-rating-result {
     display:inline;
     float:left;
     top: 1px;
 }
 
-.comment-box .comment-content {
+.fcm-comment-box .comment-content {
     background: #FFF;
     padding: 12px;
     color: #595959;
@@ -164,7 +164,7 @@ a.fc-comment-reply {
     margin-bottom: 0;
 }
 
-.comment-box .fc-website-link {
+.fcm-comment-box .fc-website-link {
     font-size: 12px;
     text-align:right;
     border-top: 1px solid #ddd;
@@ -173,15 +173,15 @@ a.fc-comment-reply {
     margin-bottom: 0;
 }
 
-.comment-box .fc-website-link a:hover {
+.fcm-comment-box .fc-website-link a:hover {
     border-bottom:none;
 }
 
-.comment-box .fc-website-link a:hover {
+.fcm-comment-box .fc-website-link a:hover {
     text-decoration:none;
 }
 
-.comment-box .fc-reply-form {
+.fcm-comment-box .fc-reply-form {
     padding: 0 12px;
     border-top: 1px solid #E5E5E5;
 }
