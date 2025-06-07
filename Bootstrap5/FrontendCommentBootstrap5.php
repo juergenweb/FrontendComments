@@ -85,7 +85,7 @@ class FrontendCommentBootstrap5 extends FrontendComment
         $out .= '<div>';
         $out .= $this->renderCommentAuthor();
         $out .= $this->renderCommentCreated();
-        $out .= '<div class="comment-box">' . $this->renderRating() . '</div>';
+        $out .= '<div class="fcm-comment-box">' . $this->renderRating() . '</div>';
         $out .= $this->renderWebsiteLink();
         $out .= '</div>';
         $out .= '</div>';
