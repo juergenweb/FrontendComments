@@ -154,7 +154,7 @@ a.fc-comment-reply {
     top: 1px;
 }
 
-.fcm-comment-box .comment-content {
+.fcm-comment-box .fcm-comment-content {
     background: #FFF;
     padding: 12px;
     color: #595959;
