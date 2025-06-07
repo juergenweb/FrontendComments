@@ -728,7 +728,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                 ip varchar(15) NOT NULL default "",
                 user_id int unsigned NOT NULL default 0,
                 user_agent varchar(255) NOT NULL,
-                moderation_feedback text NOT NULL default "",
                 PRIMARY KEY (id),
                 INDEX created (created)
             )
