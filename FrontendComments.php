@@ -27,7 +27,7 @@
         protected Field|null $field = null; // the PW field containing the comments
         protected FrontendCommentArray|null $comments = null; // the WireArray containing the comments as objects
         protected int|string $num_comments_on_page = 10; // number of comments per page
-        protected string $ulClass = 'comments-list'; // default CSS class for the top level list element
+        protected string $ulClass = 'fcm-comments-list'; // default CSS class for the top level list element
         protected string $replyUlClass = 'reply-list'; // default CSS class for the sublevel list elements
         protected TextElements $commentsHeadline;
 
@@ -224,7 +224,7 @@
             $comments = $this->getCommentsForDisplay();
 
             // every comment list (independent of the first comment level) starts with a div and an unordered list
-            $out = '<div id="' . $this->field->name . '-comments-container" class="comments-list">';
+            $out = '<div id="' . $this->field->name . '-comments-container" class="fcm-comments-list">';
 
             // render the headline for the comments
             $out .= $this->renderCommentsHeadline();
