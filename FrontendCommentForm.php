@@ -269,7 +269,7 @@
             $this->stars->addOption(self::$ratingValues[3], '3');
             $this->stars->addOption(self::$ratingValues[2], '2');
             $this->stars->addOption(self::$ratingValues[1], '1');
-            $this->stars->setAttribute('class', 'star-rating');
+            $this->stars->setAttribute('class', 'fcm-star-rating');
 
             // create data-options string
             $options = [];
@@ -567,6 +567,8 @@
             $this->guidelines->setLinkText($this->_('community guidelines'));
             $this->guidelines->setAttribute('target', '_blank');
 
+
+
             // add the guideline link if set
             $guidelines_url = $this->getCommunityGuidelinesURL($this->guidelines);
             if ($guidelines_url) { // set the url of the guideline link
@@ -713,6 +715,7 @@
             // output the form
             $out = $this->renderHeadline();
             $out .= '<div id="' . $this->getID() . '-form-wrapper" class="fc-comment-form-wrapper">';
+            $this->getFormelementByName('notification')->getLabel()->removeAttribute('for');
             $out .= parent::render();
             $out .= '</div>';
 
