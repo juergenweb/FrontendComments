@@ -360,7 +360,7 @@
             if (!is_null($stars)) {
 
                 $stars = (float)$stars;
-                $out = '<div class="star-rating-result">';
+                $out = '<div class="fcm-star-rating-result">';
 
                 $fullStars = round($stars, 0, PHP_ROUND_HALF_DOWN);
 
@@ -369,15 +369,15 @@
                 // full stars
                 if ($fullStars) {
                     for ($x = 1; $x <= $fullStars; $x++) {
-                        $out .= '<span class="star on"></span>';
+                        $out .= '<span class="fcm-star on"></span>';
                     }
                 }
                 if ($halfStars) {
-                    $out .= '<span class="star half"></span>';
+                    $out .= '<span class="fcm-star half"></span>';
                 }
                 if ($emptyStars) {
                     for ($x = 1; $x <= $emptyStars; $x++) {
-                        $out .= '<span class="star"></span>';
+                        $out .= '<span class="fcm-star"></span>';
                     }
                 }
                 $out .= '</div>';
@@ -752,7 +752,7 @@
          */
         public function ___renderComment(string $levelnumber, int $level = 0): string
         {
-            $out = '<div class="comment-box"><div class="comment-head">';
+            $out = '<div class="fcm-comment-box"><div class="fcm-comment-head">';
             $out .= $this->renderNoVoteAlertbox();
             $out .= $this->renderCommentAvatar();
             $out .= $this->renderCommentAuthor();
