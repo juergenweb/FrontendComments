@@ -90,7 +90,7 @@ class FrontendCommentUikit3 extends FrontendComment
             $out .= '<div class="uk-width-expand">';
             $out .= $this->renderCommentAuthor();
             $out .= '<ul class="uk-comment-meta uk-subnav uk-subnav-divider uk-margin-remove-top">';
-            $out .= '<li class="comment-box">'.$this->renderRating().'</li>';
+            $out .= '<li class="fcm-comment-box">'.$this->renderRating().'</li>';
             $out .= $this->renderCommentCreated();
             $out .= $this->renderVotes();
             $out .= $this->renderReplyLink($level);
