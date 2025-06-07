@@ -18,3 +18,7 @@ span.uk-downvote:hover, span.uk-upvote:hover {
     opacity: 70%;
 }
 
+header.uk-comment-header {
+    background: none;
+}
+
