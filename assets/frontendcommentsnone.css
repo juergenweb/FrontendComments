@@ -116,12 +116,12 @@ a.fc-comment-reply {
 }
 
 
-.by-author {
+.fcm-by-author {
     position:relative;
     top: 1px;
 }
 
-.fcm-comment-box .comment-name {
+.fcm-comment-box .fcm-comment-name {
     color: #283035;
     font-size: 16px;
     font-weight: 700;
