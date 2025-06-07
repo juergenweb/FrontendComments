@@ -2,7 +2,7 @@
 This CSS file contains all general styles for all types of markups (frameworks and no frame work)
  */
 
-.fc-comment-form-wrapper, .comments-list {
+.fc-comment-form-wrapper, .fcm-comments-list {
     margin-bottom: 20px;
 }
 
@@ -36,7 +36,7 @@ This CSS file contains all general styles for all types of markups (frameworks a
 }
 
 
-.comments-list .fc-reply-form-wrapper {
+.fcm-comments-list .fc-reply-form-wrapper {
     margin-bottom: 0;
 }
 
@@ -72,14 +72,14 @@ This CSS file contains all general styles for all types of markups (frameworks a
 }
 
 /* Alert dialog if reply form could not be loaded */
-.comments-list .fc-alert-body {
+.fcm-comments-list .fc-alert-body {
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Lato', sans-serif;
 }
 
-.comments-list .fc-alert-dialog {
+.fcm-comments-list .fc-alert-dialog {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -88,7 +88,7 @@ This CSS file contains all general styles for all types of markups (frameworks a
     border-radius: 6px;
 }
 
-.comments-list .fc-alert-text {
+.fcm-comments-list .fc-alert-text {
     margin-top: -95px;
     display: flex;
     flex-direction: column;
@@ -105,7 +105,7 @@ This CSS file contains all general styles for all types of markups (frameworks a
     }
 }
 
-.comments-list .fc-triangle-up-red {
+.fcm-comments-list .fc-triangle-up-red {
     position: relative;
     top: 0;
     width: 0;
@@ -115,7 +115,7 @@ This CSS file contains all general styles for all types of markups (frameworks a
     border-bottom: 109px solid #ef8b8b!important;
 }
 
-.comments-list .fc-triangle-up-white {
+.fcm-comments-list .fc-triangle-up-white {
     position: relative;
     top: -114px;
     width: 0;
@@ -125,7 +125,7 @@ This CSS file contains all general styles for all types of markups (frameworks a
     border-bottom: 94px solid white;
 }
 
-.comments-list .fc-rectangle-path {
+.fcm-comments-list .fc-rectangle-path {
     position: relative;
     top: 24px;
     left: -2.1px;
@@ -134,7 +134,7 @@ This CSS file contains all general styles for all types of markups (frameworks a
     background-color: #ef8b8b;
 }
 
-.comments-list .fc-dot-path {
+.fcm-comments-list .fc-dot-path {
     position: relative;
     top: 20px;
     left: -5px;
