@@ -149,11 +149,11 @@ This CSS file contains all general styles for all types of markups (frameworks a
     background: #eee;
 }
 
-.comment-box .fc-novote {
+.fcm-comment-box .fc-novote {
     margin-bottom: 0;
 }
 
-.comment-box .star-rating-result .star {
+.fcm-comment-box .fcm-star-rating-result .fcm-star {
     font-size: 22px;
     width: 15px;
     top: 0;
@@ -161,19 +161,19 @@ This CSS file contains all general styles for all types of markups (frameworks a
     color: #666;
 }
 
-.comment-box .star-rating-result .star:last-child {
+.fcm-comment-box .fcm-star-rating-result .fcm-star:last-child {
     margin-right: 0;
 }
 
-.comment-box .star-rating-result .star:before {
+.fcm-comment-box .fcm-star-rating-result .fcm-star:before {
     content: '\2605';
 }
 
-.comment-box .star-rating-result .star.on {
+.fcm-comment-box .fcm-star-rating-result .fcm-star.on {
     color: #fdd835;
 }
 
-.comment-box .star-rating-result .star.half:after {
+.fcm-comment-box .fcm-star-rating-result .fcm-star.half:after {
     content: '\2605';
     color: #fdd835;
     position: absolute;
