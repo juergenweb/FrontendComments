@@ -35,10 +35,10 @@ function docReady(fn) {
  */
 function configRating() {
     // check first if star rating is enabled
-    let ratingElements = document.getElementsByClassName("star-rating");
+    let ratingElements = document.getElementsByClassName("fcm-star-rating");
 
     if (ratingElements.length > 0) {
-        let starRatingControl = new StarRating('.star-rating', {
+        let starRatingControl = new StarRating('.fcm-star-rating', {
             maxStars: 5
         });
         starRatingControl.rebuild();
@@ -174,7 +174,7 @@ function loadReplyForm() {
                             subAjax('reply-form-' + commentId);
                         }
 
-                        let ratingStars = [...document.getElementsByClassName("star-rating")];
+                        let ratingStars = [...document.getElementsByClassName("fcm-star-rating")];
                         if (ratingStars.length > 0) {
                             configRating();
                         }
