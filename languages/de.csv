@@ -264,7 +264,6 @@ Status,=,,site/modules/FrontendComments/InputfieldFrontendComments.module,ec53a8
 Approved,Bestätigt,,site/modules/FrontendComments/InputfieldFrontendComments.module,6f8063417ab31f38d864c28302f3de2f
 SPAM,=,,site/modules/FrontendComments/InputfieldFrontendComments.module,c72beebe6ecbdddff71b846c4858ebcb
 "Delete the comment","Kommentar löschen",,site/modules/FrontendComments/InputfieldFrontendComments.module,851777bf0529c4d9d9d0bad0f792cd25
-"Status ""Pending approval"" cannot be selected. If you want to delete the comment, select ""Delete the comment"" and save the page.","Der Status ""Wartet auf Bestätigung"" kann nicht ausgewählt werden. Wenn Sie den Kommentar löschen möchten, wählen Sie ""Kommentar löschen"" und speichern Sie danach die Seite.",,site/modules/FrontendComments/InputfieldFrontendComments.module,df44d6274ade9ae6664e5d8266b1a5a5
 Homepage,=,,site/modules/FrontendComments/InputfieldFrontendComments.module,339f7a2e087a159e6a31501649027a77
 "Moderation feedback","Anwort des Moderators auf den Kommentar",,site/modules/FrontendComments/InputfieldFrontendComments.module,67e9e3043ec6e316533afb14cd12c416
 "Enter a feedback to a comment","Schreiben Sie ein Feedback zu einem Kommentar",,site/modules/FrontendComments/InputfieldFrontendComments.module,5d9e79d8b579d9d8eee90015b2000c6d
