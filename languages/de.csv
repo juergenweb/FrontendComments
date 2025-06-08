@@ -269,7 +269,15 @@ Homepage,=,,site/modules/FrontendComments/InputfieldFrontendComments.module,339f
 "Moderation feedback","Anwort des Moderators auf den Kommentar",,site/modules/FrontendComments/InputfieldFrontendComments.module,67e9e3043ec6e316533afb14cd12c416
 "Enter a feedback to a comment","Schreiben Sie ein Feedback zu einem Kommentar",,site/modules/FrontendComments/InputfieldFrontendComments.module,5d9e79d8b579d9d8eee90015b2000c6d
 "This text will be displayed directly below the comment.","Dieser Text wird direkt unter dem Kommentar angezeigt.",,site/modules/FrontendComments/InputfieldFrontendComments.module,ff3fc5302540ebcb78034d59f84be69e
+"The comment text on comment #%d may only be changed, but not deleted.","Der Kommentartext zum Kommentar #%d darf nur geändert, aber nicht gelöscht werden.",,site/modules/FrontendComments/InputfieldFrontendComments.module,e7938df917f210c96c4cb63cdf109934
 "Updated %s for comment #%d","Update %s für Kommentar #%d",,site/modules/FrontendComments/InputfieldFrontendComments.module,58b6f822b062991647cf2e70b0140352
+"The mail address on comment #%d may only be changed, but not deleted.","Die E-Mail Adresse zum Kommentar #%d darf nur geändert, aber nicht gelöscht werden.",,site/modules/FrontendComments/InputfieldFrontendComments.module,80aee52c43398637f7685f009add0b96
+"Mail address on comment #%s is not in the correct format.","Die E-Mail-Adresse im Kommentar #%s hat nicht das richtige Format.",,site/modules/FrontendComments/InputfieldFrontendComments.module,bbb98b0320e540ca03c4912422da2364
+"The email address is not valid.","Die E-Mail-Adresse ist ungültig.",,site/modules/FrontendComments/InputfieldFrontendComments.module,716da7dc957e36f4347363cf82b68637
+"The name of the author on comment #%d may only be changed, but not deleted.","Der Name des Autors des Kommentars #%d darf nur geändert, aber nicht gelöscht werden.",,site/modules/FrontendComments/InputfieldFrontendComments.module,7c324f0a1d6d2a8231407a5ddd84467a
+"The URL of the homepage of the author on comment #%s is not a valid URL.","Die URL der Homepage des Autors von Kommentar #%s ist keine gültige URL.",,site/modules/FrontendComments/InputfieldFrontendComments.module,075354b947277fa05b1b47b883081b75
+"This is not a valid URL","Dies ist keine gültige URL",,site/modules/FrontendComments/InputfieldFrontendComments.module,c9945a03d85d04b3fe7a1091ad8425a2
+"Status value on comment #%s is not valid.","Der Statuswert für Kommentar #%s ist ungültig.",,site/modules/FrontendComments/InputfieldFrontendComments.module,79c04c74c1987dee20f384815e7347d1
 "Inputfield FrontendComments",=,,site/modules/FrontendComments/InputfieldFrontendComments.module,b77e1cde3409464c7ca450dfe273200c
 "Inputfield for managing comments on a page.","Eingabefeld zur Verwaltung von Kommentaren auf einer Seite.",,site/modules/FrontendComments/InputfieldFrontendComments.module,b28e4f256b1d9cf092c2d20c9f3a2072
 "pending approval","Wartet auf Bestätigung",,site/modules/FrontendComments/InputfieldFrontendComments.module,e2702e8b9c1efdd2e4662873c3114be2
