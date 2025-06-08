@@ -1,218 +1,371 @@
 <?php
+
     namespace ProcessWire;
 
-/*
- * Input field for the comments
- * This class collects the input data in the backend
- *
- * Created by Jürgen K.
- * https://github.com/juergenweb
- * File name: InputfieldComments.php
- * Created: 24.12.2024
- *
- */
-
-    use ProcessWire\InputfieldFrontendComments;
-
-class InputfieldFrontendComments extends Inputfield
-{
-
-    protected array $frontendFormsConfig = [];
-
-
-    public function __construct()
-    {
-        parent::__construct();
-
-        // grab configuration values from the FrontendForms module
-        $this->frontendFormsConfig = FieldtypeFrontendComments::getFrontendFormsConfigValues();
-
-
-
-    }
-
-    /**
-     * Get the info data about this input field
-     * @return array
+    /*
+     * Input field for the comments
+     * This class collects the input data in the backend
+     *
+     * Created by Jürgen K.
+     * https://github.com/juergenweb
+     * File name: InputfieldFrontendComments.php
+     * Created: 24.12.2024
+     *
      */
-    public static function getModuleInfo(): array
+
+
+    class InputfieldFrontendComments extends Inputfield
     {
-        return array(
-            'title' => __('Inputfield FrontendComments', __FILE__),
-            'summary' => __('Inputfield for managing comments on a page.',
-                __FILE__),
-            'href' => 'https://github.com/juergenweb/FieldtypeFrontendComments',
-            'icon' => 'comment',
-            'permanent' => false,
-            'version' => '1.0.0',
-            'requires' => [
-                'FieldtypeFrontendComments',
-                'PHP>=8.0',
-                'ProcessWire>=3'
-            ],
-            'author' => 'Jürgen Kern'
-        );
-    }
 
-    /**
-     * Array containing the texts for each status
-     * @return array
-     */
-    public static function statusTexts(): array
-    {
-        return [
-            __('pending approval'),
-            __('approved'),
-            __('SPAM'),
-            __('SPAM, but has replies')
-        ];
-    }
+        protected array $frontendFormsConfig = [];
 
-    /**
-     * Render the comment list in the backend
-     * @return string
-     * @throws \ProcessWire\WireException
-     * @throws \ProcessWire\WirePermissionException
-     */
-    public function ___render(): string
-    {
-        $field = $this->wire('fields')->get($this->get('name'));
 
-        $fieldset = $this->modules->get('InputfieldFieldset');
-        $fieldset->label = $this->_('Comments');
+        public function __construct()
+        {
+            parent::__construct();
 
-        // Add text that there are no comments at the moment
-        if (count($this->value) === 0) {
-            $noComments = $this->modules->get('InputfieldMarkup');
-            $noComments->set('markupText', $this->_('There are no comments at the moment.'));
-            $fieldset->add($noComments);
-        } else {
+            // grab configuration values from the FrontendForms module
+            $this->frontendFormsConfig = FieldtypeFrontendComments::getFrontendFormsConfigValues();
 
-            // list of comments
-            $i = 1;
+        }
 
+        /**
+         * Get the info data about this input field
+         * @return array
+         */
+        public static function getModuleInfo(): array
+        {
+            return array(
+                'title' => __('Inputfield FrontendComments', __FILE__),
+                'summary' => __('Inputfield for managing comments on a page.',
+                    __FILE__),
+                'href' => 'https://github.com/juergenweb/FieldtypeFrontendComments',
+                'icon' => 'comment',
+                'permanent' => false,
+                'version' => '1.0.0',
+                'requires' => [
+                    'FieldtypeFrontendComments',
+                    'PHP>=8.0',
+                    'ProcessWire>=3'
+                ],
+                'author' => 'Jürgen Kern'
+            );
+        }
+
+        /**
+         * Array containing the texts for each status
+         * @return array
+         */
+        public static function statusTexts(): array
+        {
+            return [
+                __('pending approval'),
+                __('approved'),
+                __('SPAM'),
+                __('SPAM, but has replies')
+            ];
+        }
+
+        /**
+         * Render the comment list in the backend
+         * @return string
+         * @throws \ProcessWire\WireException
+         * @throws \ProcessWire\WirePermissionException
+         */
+        public function ___render(): string
+        {
+            $field = $this->wire('fields')->get($this->get('name'));
+
+
+            $fieldset = $this->modules->get('InputfieldFieldset');
+            $fieldset->label = $this->_('Comments');
+
+            // Add text that there are no comments at the moment
+            if (count($this->value) === 0) {
+                $noComments = $this->modules->get('InputfieldMarkup');
+                $noComments->set('markupText', $this->_('There are no comments at the moment.'));
+                $fieldset->add($noComments);
+            } else {
+
+                // list of comments
+                $i = 1;
+
+                $ids = [];
+                if($this->wire('session')->get('failed')){
+                    $ids = $this->wire('session')->get('failed');
+                    $this->wire('session')->remove('failed');
+                }
+
+
+                foreach ($this->value as $comment) {
+
+                    $commentfieldset = $this->modules->get('InputfieldFieldset');
+                    $commentfieldset->set('entityEncodeText', false);
+                    $commentfieldset->set('label', strtoupper(self::statusTexts()[$comment->status]) . ': ' . $this->_('Comment') . ' #' . $i . ' ' .
+                        sprintf($this->_('Posted on: %s'), $this->wire('datetime')->date($this->frontendFormsConfig['input_dateformat'], $comment->created)));
+                    if($ids){
+                        if(in_array($comment->id, $ids)){
+                           $collapsed = false;
+                        } else {
+                            $collapsed = true;
+                        }
+                    } else {
+                        $collapsed = true;
+                    }
+                    $commentfieldset->set('collapsed', $collapsed);
+
+                    // comment text
+                    $text = $this->modules->get('InputfieldTextarea');
+                    $text->label = $this->_('Comment');
+                    $text->attr('id|name', $this->name . '_text_' . $comment->id);
+                    $text->attr('value', $comment->text);
+                    $text->set('required', true);
+                    $text->collapsed(Inputfield::collapsedNever);
+                    $commentfieldset->add($text);
+
+                    $colwidth = '25';
+
+                    // email
+                    $email = $this->modules->get('InputfieldText');
+                    $email->label = $this->_('Email');
+                    $email->attr('id|name', $this->name . '_email_' . $comment->id);
+                    $email->attr('value', $comment->email);
+                    $email->set('columnWidth', $colwidth);
+                    $email->set('required', true);
+                    $email->collapsed(Inputfield::collapsedNever);
+                    if ($this->wire('session')->get('email')) {
+                        $email->error($this->wire('session')->get('email'));
+                        $this->wire('session')->remove('email');
+                    }
+                    $commentfieldset->add($email);
+
+                    // author
+                    $author = $this->modules->get('InputfieldText');
+                    $author->label = $this->_('Author');
+                    $author->attr('id|name', $this->name . '_author_' . $comment->id);
+                    $author->attr('value', $comment->author);
+                    $author->set('columnWidth', $colwidth);
+                    $author->set('required', true);
+                    $author->collapsed(Inputfield::collapsedNever);
+                    $commentfieldset->add($author);
+
+                    // status
+                    $status = $this->modules->get('InputfieldSelect');
+                    $status->label = $this->_('Status');
+                    $status->attr('id|name', $this->name . '_status_' . $comment->id);
+                    $status->attr('value', $comment->status);
+                    $status->collapsed(Inputfield::collapsedNever);
+                    $status->addOption(FieldtypeFrontendComments::pendingApproval, $this->_('Pending approval'), ['disabled' => 'disabled']);
+                    $status->addOption(FieldtypeFrontendComments::approved, $this->_('Approved'));
+                    if ($comment->getReplies()->count) {
+                        $status->addOption(FieldtypeFrontendComments::spamReplies, $this->_('SPAM'));
+                    } else {
+                        $status->addOption(FieldtypeFrontendComments::spam, $this->_('SPAM'));
+                    }
+                    $status->addOption('delete', $this->_('Delete the comment'));
+                    $status->set('notes', $this->_('Status "Pending approval" cannot be selected. If you want to delete the comment, select "Delete the comment" and save the page.'));
+                    $status->set('columnWidth', $colwidth);
+                    $status->set('required', true);
+                    $commentfieldset->add($status);
+
+                    // website
+                    $website = $this->modules->get('InputfieldURL');
+                    $website->label = $this->_('Homepage');
+                    $website->attr('id|name', $this->name . '_website_' . $comment->id);
+                    $website->attr('value', $comment->website);
+                    $website->collapsed(Inputfield::collapsedNever);
+                    $website->set('columnWidth', $colwidth);
+                    if ($this->wire('session')->get('website')) {
+                        $website->error($this->wire('session')->get('website'));
+                        $this->wire('session')->remove('website');
+                    }
+                    $commentfieldset->add($website);
+
+                    // moderation feedback textfield
+                    $feedback = $this->modules->get('InputfieldCKEditor');
+                    $feedback->set('label', $this->_('Moderation feedback'));
+                    $feedback->attr('id|name', $this->name . '_moderation_feedback_' . $comment->id);
+                    $feedback->attr('value', $comment->moderation_feedback);
+                    $feedback->set('description', $this->_('Enter a feedback to a comment'));
+                    $feedback->set('notes', $this->_('This text will be displayed directly below the comment.'));
+                    $feedback->collapsed(Inputfield::collapsedBlank);
+                    $commentfieldset->add($feedback);
+
+                    $fieldset->add($commentfieldset);
+                    $i++;
+                }
+            }
+
+            return $fieldset->render();
+        }
+
+        /**
+         * Process input for the comment inputs
+         * Values will be sanitized and validated before saving it again to the database
+         * @param \ProcessWire\WireInputData $input
+         * @return \ProcessWire\InputfieldFrontendComments
+         */
+        public function ___processInput(WireInputData $input): InputfieldFrontendComments
+        {
+
+            $n = 1;
+            $sanitizer = $this->wire('sanitizer');
+
+            // array containing all possible status for a comment
+            $statusArray = [
+                FieldtypeFrontendComments::approved,
+                FieldtypeFrontendComments::spam,
+                FieldtypeFrontendComments::spamReplies,
+                FieldtypeFrontendComments::pendingApproval
+            ];
+
+            // names of the various form fields
+            $names = array(
+                'text',
+                'email',
+                'author',
+                'status',
+                'website',
+                'moderation_feedback'
+            );
+
+            // loop through each comment
             foreach ($this->value as $comment) {
 
-                $commentfieldset = $this->modules->get('InputfieldFieldset');
-                $commentfieldset->set('entityEncodeText', false);
-                $commentfieldset->set('label', strtoupper(self::statusTexts()[$comment->status]) . ': ' . $this->_('Comment') . ' #' . $i . ' ' .
-                    sprintf($this->_('Posted on: %s'), $this->wire('datetime')->date($this->frontendFormsConfig['input_dateformat'], $comment->created)));
-                $commentfieldset->set('collapsed', true);
+                $comment->setTrackChanges();
 
-                // comment text
-                $text = $this->modules->get('InputfieldTextarea');
-                $text->label = $this->_('Comment');
-                $text->attr('id|name', $this->name . '_text_' . $comment->id);
-                $text->attr('value', $comment->text);
-                $commentfieldset->add($text);
+                $errors = [];
+                // loop through each input field of the comment -> sanitize and validate it
+                foreach ($names as $key) {
 
-                $colwidth = '25';
-                // email
-                $email = $this->modules->get('InputfieldEmail');
-                $email->label = $this->_('Email');
-                $email->attr('id|name', $this->name . '_email_' . $comment->id);
-                $email->attr('value', $comment->email);
-                $email->set('columnWidth', $colwidth);
-                $commentfieldset->add($email);
+                    // get the value of each comment field
+                    $inputName = $this->name . "_" . $key . "_" . $comment->id;
+                    $value = isset($input[$inputName]) ? $input[$inputName] : '';
 
-                // author
-                $author = $this->modules->get('InputfieldText');
-                $author->label = $this->_('Author');
-                $author->attr('id|name', $this->name . '_author_' . $comment->id);
-                $author->attr('value', $comment->author);
-                $author->set('columnWidth', $colwidth);
-                $commentfieldset->add($author);
+                    // run validation and sanitization only on changes
+                    //if ($comment->$key != $value) {
 
-                // status
-                $status = $this->modules->get('InputfieldSelect');
-                $status->label = $this->_('Status');
-                $status->attr('id|name', $this->name . '_status_' . $comment->id);
-                $status->attr('value', $comment->status);
-                $status->addOption(FieldtypeFrontendComments::pendingApproval, $this->_('Pending approval'), ['disabled' => 'disabled']);
-                $status->addOption(FieldtypeFrontendComments::approved, $this->_('Approved'));
-                if ($comment->getReplies()->count) {
-                    $status->addOption(FieldtypeFrontendComments::spamReplies, $this->_('SPAM'));
-                } else {
-                    $status->addOption(FieldtypeFrontendComments::spam, $this->_('SPAM'));
-                }
-                $status->addOption('delete', $this->_('Delete the comment'));
-                $status->set('notes', $this->_('Status "Pending approval" cannot be selected. If you want to delete the comment, select "Delete the comment" and save the page.'));
-                $status->set('columnWidth', $colwidth);
-                $commentfieldset->add($status);
+                        $this->value->trackChange('update');
 
-                // website
-                $website = $this->modules->get('InputfieldURL');
-                $website->label = $this->_('Homepage');
-                $website->attr('id|name', $this->name . '_website_' . $comment->id);
-                $website->attr('value', $comment->website);
-                $website->set('columnWidth', $colwidth);
-                $commentfieldset->add($website);
+                        switch ($key) {
+                            case 'text':
 
-                // moderation feedback textfield
-                $feedback = $this->modules->get('InputfieldCKEditor');
-                $feedback->set('label', $this->_('Moderation feedback'));
-                $feedback->attr('id|name', $this->name . '_moderation_feedback_' . $comment->id);
-                $feedback->attr('value', $comment->moderation_feedback);
-                $feedback->set('description', $this->_('Enter a feedback to a comment'));
-                $feedback->set('notes', $this->_('This text will be displayed directly below the comment.'));
-                $commentfieldset->add($feedback);
+                                if (!$value) { // required
+                                    $this->warning(sprintf($this->_('The comment text on comment #%d may only be changed, but not deleted.'), $n));
+                                } else {
+                                    if ($comment->$key != $value){
+                                        $value = $sanitizer->textarea($value);
+                                        $comment->$key = $value;
+                                        $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                    }
+                                }
 
-                $fieldset->add($commentfieldset);
-                $i++;
-            }
-        }
+                                break;
+                            case 'email':
 
-        return $fieldset->render();
-    }
+                                if (!$value) { // required
+                                    $this->warning(sprintf($this->_('The mail address on comment #%d may only be changed, but not deleted.'), $n));
+                                } else {
+                                    if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                                        $this->error(sprintf($this->_('Mail address on comment #%s is not in the correct format.'), $n));
+                                        $this->wire('session')->set('email', $this->_('The email address is not valid.'));
+                                        $comment->$key = $value;
+                                        $errors[] = 'email';
+                                    } else {
+                                        if ($comment->$key != $value) {
+                                            $value = $sanitizer->email($value);
+                                            $comment->$key = $value;
+                                            $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                        }
+                                    }
+                                }
 
-    /**
-     * Process input for the comment inputs
-     * @param \ProcessWire\WireInputData $input
-     * @return \ProcessWire\InputfieldFrontendComments
-     */
-    public function ___processInput(WireInputData $input): InputfieldFrontendComments
-    {
-        $n = 1;
+                                break;
+                            case 'author':
 
-        // names of the various form fields
-        $names = array(
-            'author',
-            'email',
-            'status',
-            'parent_id',
-            'text',
-            'moderation_feedback'
-        );
+                                if (!$value) {
+                                    $this->warning(sprintf($this->_('The name of the author on comment #%d may only be changed, but not deleted.'), $n));
+                                } else {
+                                    if ($comment->$key != $value) {
+                                        $value = $sanitizer->text($value);
+                                        $comment->$key = $value;
+                                        $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                    }
+                                }
 
-        // loop through each comment
-        foreach ($this->value as $comment) {
+                                break;
+                            case 'website':
 
-            $comment->setTrackChanges();
+                                if ($value) {
+                                    $pattern = '%^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z0-9\x{00a1}-\x{ffff}][a-z0-9\x{00a1}-\x{ffff}_-]{0,62})?[a-z0-9\x{00a1}-\x{ffff}]\.)+(?:[a-z\x{00a1}-\x{ffff}]{2,}\.?))(?::\d{2,5})?(?:[/?#]\S*)?$%iuS';
+                                    
+                                    if (!preg_match($pattern, $value)) {
+                                        $this->error(sprintf($this->_('The URL of the homepage of the author on comment #%s is not a valid URL.'), $n));
+                                        $this->wire('session')->set('website', $this->_('This is not a valid URL'));
+                                        $comment->$key = $value;
+                                        $errors[] = 'website';
+                                    } else {
 
-            // create the names of the input fields for each comment form
-            $data = array();
-            foreach ($names as $name) {
-                $inputName = $this->name . "_" . $name . "_" . $comment->id;
-                $value = isset($input[$inputName]) ? $input[$inputName] : '';
-                $data[$name] = $value;
-            }
+                                        if ($comment->$key != $value) {
+                                            $value = $sanitizer->httpUrl($value);
+                                            $comment->$key = $value;
+                                            $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                        }
+                                    }
+                                } else {
 
-            // loop through each input field of the comment
-            foreach ($data as $key => $value) {
+                                    if ($comment->$key != $value) {
+                                        $comment->$key = $value;
+                                        $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                    }
+                                }
+                                break;
+                            case 'status':
+                                $value = $sanitizer->int($value);
+                                if (!in_array($value, $statusArray)) {
+                                    $this->error(sprintf($this->_('Status value on comment #%s is not valid.'), $n));
+                                } else {
+                                    if ($comment->$key != $value) {
+                                        $comment->$key = $value;
+                                        $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                    }
+                                }
+                                break;
+                            case 'moderation_feedback':
 
-                // check if the input field value has been changed
-                if (($value || $key == 'status') && $comment->$key != $value) {
-                    $comment->$key = $value; // set the new value
-                    $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
-                    $comment->trackChange($key);
-                    $this->value->trackChange('update'); // set a track change value for all comments
+                                if ($comment->$key != $value) {
+                                    $value = $sanitizer->textarea($value);
+                                    $comment->$key = $value;
+                                    $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                }
+                                break;
+                        }
+
+                    //}
 
                 }
+                $n++;
+                if($errors){
+                    $failedComments = $this->wire('session')->get('failed');
+                    if($failedComments){
+                        $failedComments[] = $comment->id;
+                        $this->wire('session')->set('failed', $failedComments);
+                    } else {
+                        $this->wire('session')->set('failed', [$comment->id]);
+                    }
+                }
+                
             }
-            $n++;
+
+            // notify the parent of the change so the comment field will be saved again
+            if ($comment->getChanges()) {
+                $parent = $this->getParent();
+                if ($parent) $parent->trackChange($this->name);
+            }
+
+
+            return $this;
+
         }
-        return $this;
 
     }
-
-}
