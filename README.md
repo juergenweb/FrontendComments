@@ -176,3 +176,7 @@ $wire->addHookAfter('FrontendCommentForm::getEmailField', function(HookEvent $ev
 ```
 
 Take a look at the FrontendCommentForm.php class file to see which methods are hookable. In this case every element of the form has its own hookable function. Here are some examples of the hookable function you will find there: getAuthorField(), getWebsiteField(), getCommentField(),....
+
+## Adding CSS and JS files manually to the website
+
+By default the CSS and JS files will be added automatically to the template file. The CSS files before the closing head tag and the JS files before the closing body tag. This is fine for most cases. But if you want to overwrite for example some CSS values of the module file, it will not be possible.
