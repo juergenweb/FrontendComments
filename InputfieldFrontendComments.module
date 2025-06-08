@@ -8,17 +8,15 @@
      *
      * Created by Jürgen K.
      * https://github.com/juergenweb
-     * File name: InputfieldFrontendComments.php
-     * Created: 24.12.2024
+     * File name: InputfieldFrontendComments.module
+     * Created: 24.05.2025
      *
      */
-
 
     class InputfieldFrontendComments extends Inputfield
     {
 
         protected array $frontendFormsConfig = [];
-
 
         public function __construct()
         {
@@ -76,6 +74,12 @@
         {
             $field = $this->wire('fields')->get($this->get('name'));
 
+            $icons = [
+                FieldtypeFrontendComments::approved => 'fa-check-circle',
+                FieldtypeFrontendComments::spam => 'fa-times',
+                FieldtypeFrontendComments::spamReplies => 'fa-times',
+                FieldtypeFrontendComments::pendingApproval => 'fa-commenting-o'
+            ];
 
             $fieldset = $this->modules->get('InputfieldFieldset');
             $fieldset->label = $this->_('Comments');
@@ -91,21 +95,21 @@
                 $i = 1;
 
                 $ids = [];
-                if($this->wire('session')->get('failed')){
+                if ($this->wire('session')->get('failed')) {
                     $ids = $this->wire('session')->get('failed');
                     $this->wire('session')->remove('failed');
                 }
-
 
                 foreach ($this->value as $comment) {
 
                     $commentfieldset = $this->modules->get('InputfieldFieldset');
                     $commentfieldset->set('entityEncodeText', false);
+                    $commentfieldset->set('icon', $icons[$comment->status]);
                     $commentfieldset->set('label', strtoupper(self::statusTexts()[$comment->status]) . ': ' . $this->_('Comment') . ' #' . $i . ' ' .
                         sprintf($this->_('Posted on: %s'), $this->wire('datetime')->date($this->frontendFormsConfig['input_dateformat'], $comment->created)));
-                    if($ids){
-                        if(in_array($comment->id, $ids)){
-                           $collapsed = false;
+                    if ($ids) {
+                        if (in_array($comment->id, $ids)) {
+                            $collapsed = false;
                         } else {
                             $collapsed = true;
                         }
@@ -155,7 +159,7 @@
                     $status->attr('id|name', $this->name . '_status_' . $comment->id);
                     $status->attr('value', $comment->status);
                     $status->collapsed(Inputfield::collapsedNever);
-                    $status->addOption(FieldtypeFrontendComments::pendingApproval, $this->_('Pending approval'), ['disabled' => 'disabled']);
+                    $status->addOption(FieldtypeFrontendComments::pendingApproval, $this->_('Pending approval'));
                     $status->addOption(FieldtypeFrontendComments::approved, $this->_('Approved'));
                     if ($comment->getReplies()->count) {
                         $status->addOption(FieldtypeFrontendComments::spamReplies, $this->_('SPAM'));
@@ -163,7 +167,6 @@
                         $status->addOption(FieldtypeFrontendComments::spam, $this->_('SPAM'));
                     }
                     $status->addOption('delete', $this->_('Delete the comment'));
-                    $status->set('notes', $this->_('Status "Pending approval" cannot be selected. If you want to delete the comment, select "Delete the comment" and save the page.'));
                     $status->set('columnWidth', $colwidth);
                     $status->set('required', true);
                     $commentfieldset->add($status);
@@ -242,119 +245,114 @@
                     $inputName = $this->name . "_" . $key . "_" . $comment->id;
                     $value = isset($input[$inputName]) ? $input[$inputName] : '';
 
-                    // run validation and sanitization only on changes
-                    //if ($comment->$key != $value) {
+                    $this->value->trackChange('update');
 
-                        $this->value->trackChange('update');
+                    switch ($key) {
+                        case 'text':
 
-                        switch ($key) {
-                            case 'text':
-
-                                if (!$value) { // required
-                                    $this->warning(sprintf($this->_('The comment text on comment #%d may only be changed, but not deleted.'), $n));
-                                } else {
-                                    if ($comment->$key != $value){
-                                        $value = $sanitizer->textarea($value);
-                                        $comment->$key = $value;
-                                        $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
-                                    }
-                                }
-
-                                break;
-                            case 'email':
-
-                                if (!$value) { // required
-                                    $this->warning(sprintf($this->_('The mail address on comment #%d may only be changed, but not deleted.'), $n));
-                                } else {
-                                    if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                                        $this->error(sprintf($this->_('Mail address on comment #%s is not in the correct format.'), $n));
-                                        $this->wire('session')->set('email', $this->_('The email address is not valid.'));
-                                        $comment->$key = $value;
-                                        $errors[] = 'email';
-                                    } else {
-                                        if ($comment->$key != $value) {
-                                            $value = $sanitizer->email($value);
-                                            $comment->$key = $value;
-                                            $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
-                                        }
-                                    }
-                                }
-
-                                break;
-                            case 'author':
-
-                                if (!$value) {
-                                    $this->warning(sprintf($this->_('The name of the author on comment #%d may only be changed, but not deleted.'), $n));
-                                } else {
-                                    if ($comment->$key != $value) {
-                                        $value = $sanitizer->text($value);
-                                        $comment->$key = $value;
-                                        $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
-                                    }
-                                }
-
-                                break;
-                            case 'website':
-
-                                if ($value) {
-                                    $pattern = '%^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z0-9\x{00a1}-\x{ffff}][a-z0-9\x{00a1}-\x{ffff}_-]{0,62})?[a-z0-9\x{00a1}-\x{ffff}]\.)+(?:[a-z\x{00a1}-\x{ffff}]{2,}\.?))(?::\d{2,5})?(?:[/?#]\S*)?$%iuS';
-                                    
-                                    if (!preg_match($pattern, $value)) {
-                                        $this->error(sprintf($this->_('The URL of the homepage of the author on comment #%s is not a valid URL.'), $n));
-                                        $this->wire('session')->set('website', $this->_('This is not a valid URL'));
-                                        $comment->$key = $value;
-                                        $errors[] = 'website';
-                                    } else {
-
-                                        if ($comment->$key != $value) {
-                                            $value = $sanitizer->httpUrl($value);
-                                            $comment->$key = $value;
-                                            $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
-                                        }
-                                    }
-                                } else {
-
-                                    if ($comment->$key != $value) {
-                                        $comment->$key = $value;
-                                        $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
-                                    }
-                                }
-                                break;
-                            case 'status':
-                                $value = $sanitizer->int($value);
-                                if (!in_array($value, $statusArray)) {
-                                    $this->error(sprintf($this->_('Status value on comment #%s is not valid.'), $n));
-                                } else {
-                                    if ($comment->$key != $value) {
-                                        $comment->$key = $value;
-                                        $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
-                                    }
-                                }
-                                break;
-                            case 'moderation_feedback':
-
+                            if (!$value) { // required
+                                $this->warning(sprintf($this->_('The comment text on comment #%d may only be changed, but not deleted.'), $n));
+                            } else {
                                 if ($comment->$key != $value) {
                                     $value = $sanitizer->textarea($value);
                                     $comment->$key = $value;
                                     $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
                                 }
-                                break;
-                        }
+                            }
 
-                    //}
+                            break;
+                        case 'email':
 
+                            if (!$value) { // required
+                                $this->warning(sprintf($this->_('The mail address on comment #%d may only be changed, but not deleted.'), $n));
+                            } else {
+                                if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                                    $this->error(sprintf($this->_('Mail address on comment #%s is not in the correct format.'), $n));
+                                    $this->wire('session')->set('email', $this->_('The email address is not valid.'));
+                                    $comment->$key = $value;
+                                    $errors[] = 'email';
+                                } else {
+                                    if ($comment->$key != $value) {
+                                        $value = $sanitizer->email($value);
+                                        $comment->$key = $value;
+                                        $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                    }
+                                }
+                            }
+
+                            break;
+                        case 'author':
+
+                            if (!$value) {
+                                $this->warning(sprintf($this->_('The name of the author on comment #%d may only be changed, but not deleted.'), $n));
+                            } else {
+                                if ($comment->$key != $value) {
+                                    $value = $sanitizer->text($value);
+                                    $comment->$key = $value;
+                                    $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                }
+                            }
+
+                            break;
+                        case 'website':
+
+                            if ($value) {
+                                $pattern = '%^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z0-9\x{00a1}-\x{ffff}][a-z0-9\x{00a1}-\x{ffff}_-]{0,62})?[a-z0-9\x{00a1}-\x{ffff}]\.)+(?:[a-z\x{00a1}-\x{ffff}]{2,}\.?))(?::\d{2,5})?(?:[/?#]\S*)?$%iuS';
+
+                                if (!preg_match($pattern, $value)) {
+                                    $this->error(sprintf($this->_('The URL of the homepage of the author on comment #%s is not a valid URL.'), $n));
+                                    $this->wire('session')->set('website', $this->_('This is not a valid URL'));
+                                    $comment->$key = $value;
+                                    $errors[] = 'website';
+                                } else {
+
+                                    if ($comment->$key != $value) {
+                                        $value = $sanitizer->httpUrl($value);
+                                        $comment->$key = $value;
+                                        $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                    }
+                                }
+                            } else {
+
+                                if ($comment->$key != $value) {
+                                    $comment->$key = $value;
+                                    $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                }
+                            }
+                            break;
+                        case 'status':
+                            $value = $sanitizer->int($value);
+                            if (!in_array($value, $statusArray)) {
+                                $this->error(sprintf($this->_('Status value on comment #%s is not valid.'), $n));
+                            } else {
+                                if ($comment->$key != $value) {
+                                    $comment->$key = $value;
+                                    $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                                }
+                            }
+                            break;
+                        case 'moderation_feedback':
+
+                            if ($comment->$key != $value) {
+                                $value = $sanitizer->textarea($value);
+                                $comment->$key = $value;
+                                $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
+                            }
+                            break;
+                    }
                 }
+
                 $n++;
-                if($errors){
+                if ($errors) {
                     $failedComments = $this->wire('session')->get('failed');
-                    if($failedComments){
+                    if ($failedComments) {
                         $failedComments[] = $comment->id;
                         $this->wire('session')->set('failed', $failedComments);
                     } else {
                         $this->wire('session')->set('failed', [$comment->id]);
                     }
                 }
-                
+
             }
 
             // notify the parent of the change so the comment field will be saved again
@@ -362,7 +360,6 @@
                 $parent = $this->getParent();
                 if ($parent) $parent->trackChange($this->name);
             }
-
 
             return $this;
 
