@@ -40,6 +40,7 @@ This module is early Beta stage - so please use it with care!
 * [Queuing notification emails](#queuing-notification-emails)
 * [What happens if a comment, which has replies, will be declared as SPAM later on?](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam)
 * [Hooking to change markup](#hooking-to-change-markup)
+* [Adding CSS and JS files manually to the template](#adding-css-and-js-files-manually-to-the-website)
   
 
 ## Configurations
@@ -176,6 +177,17 @@ $wire->addHookAfter('FrontendCommentForm::getEmailField', function(HookEvent $ev
 ```
 
 Take a look at the FrontendCommentForm.php class file to see which methods are hookable. In this case every element of the form has its own hookable function. Here are some examples of the hookable function you will find there: getAuthorField(), getWebsiteField(), getCommentField(),....
+
+## Overwriting CSS styles with your custom values
+
+Sometimes you need to style some comment elements with your own styles (e.g. change the color of an element).
+
+By default, all CSS files for comments are inserted directly before the closing head tag. In this case, it's not possible to add another CSS file with your custom values ​​in the head section afterwards.
+
+To owerwrite the values of the embedded files afterwards you have 2 possiblities:
+
+1. Disable automatic embedding of CSS files and add them manually to the template. In this case, you can select the position of the files in the header area and then add additional CSS files. This makes it possible to overwrite previously set values. Check out the explanation for *Adding CSS and JS files manually to the website*.
+2. Add your custom CSS file to the body section
 
 ## Adding CSS and JS files manually to the website
 
