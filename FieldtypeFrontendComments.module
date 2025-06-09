@@ -7,7 +7,7 @@
  * Created by Jürgen K.
  * https://github.com/juergenweb
  * File name: FieldtypeFrontendComments.module
- * Created: 23.12.2024
+ * Created: 23.04.2025
  */
 
 use Exception;
@@ -144,6 +144,70 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $return[$val[$key]][] = $val;
         }
         return $return;
+    }
+
+    /**
+     * Render all necessary CSS links
+     * @param bool $useStarRating
+     * @return string
+     */
+    public static function renderCSSFiles(bool $useStarRating = true): string
+    {
+
+        // url to FrontendComments asset folder
+        $url = wire('config')->urls->get('FieldtypeFrontendComments') . 'assets/';
+
+        // path to the assets folder
+        $pathToCSSFile = wire('config')->paths->siteModules.'FrontendComments/assets/';
+
+        // get module version
+        $moduleVersion = wire('modules')->getModuleInfo('FieldtypeFrontendComments')['version'];
+
+        // get the framework
+        $frameworkFile = FieldtypeFrontendComments::getFrontendFormsConfigValues()['input_framework'];
+        $frameworkName = pathinfo($frameworkFile, PATHINFO_FILENAME);
+
+
+        $out = '<link rel="stylesheet" type="text/css" href="' . $url . 'frontendcommentsmain.css?v=' . $moduleVersion. '">' . PHP_EOL;
+
+        // check if CSS file exists for the given framework setting
+        if(file_exists($pathToCSSFile.'frontendcomments'.$frameworkName . '.css')){
+            // add CSS file
+            $out .= '<link rel="stylesheet" type="text/css" href="' . $url.'frontendcomments'.$frameworkName . '.css?v=' . $moduleVersion.'">' . PHP_EOL;
+        }
+
+        // add star-rating if enabled
+        if($useStarRating)
+            $out .= '<link rel="stylesheet" type="text/css" href="' . $url . 'star-rating.css?v=' . $moduleVersion . '">' . PHP_EOL;
+
+        return $out;
+    }
+
+    /**
+     * Render all necessary JS links
+     * @param bool $useStarRating
+     * @return string
+     */
+    public static function renderJSFiles(bool $useStarRating = true): string
+    {
+
+        // url to FrontendComments asset folder
+        $url = wire('config')->urls->get('FieldtypeFrontendComments') . 'assets/';
+
+        // path to the assets folder
+        $pathToCSSFile = wire('config')->paths->siteModules.'FrontendComments/assets/';
+
+        // get module version
+        $moduleVersion = wire('modules')->getModuleInfo('FieldtypeFrontendComments')['version'];
+
+        $out = '<script src="' . $url . 'frontendcomments.js?v=' . $moduleVersion.'"></script>' . PHP_EOL;
+
+        // add star rating JS to the frontend if enabled
+        if ($useStarRating) {
+            $out .= '<script src="' . $url . 'star-rating.min.js?v=' . $moduleVersion . ' "></script>' . PHP_EOL;
+            $out .= "<script>var stars = new StarRating('.fcm-star-rating');</script>" . PHP_EOL;
+        }
+        return $out;
     }
 
     /**
@@ -352,10 +416,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
         $query = wire('database')->prepare($statement);
         $query->bindValue(":id", $comment->get('id'), PDO::PARAM_INT);
-        /*
-        $query->bindValue(":field_id", $comment->field->get('id'), PDO::PARAM_INT);
-        $query->bindValue(":page_id", $comment->page->get('id'), PDO::PARAM_INT);
-        */
         $query->bindValue(":field_id", $field->get('id'), PDO::PARAM_INT);
         $query->bindValue(":page_id", $page->get('id'), PDO::PARAM_INT);
 
@@ -433,7 +493,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         }
 
     }
-
 
     /**
      * Change the queue table if the status of a comment has been changed
@@ -584,7 +643,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             'permanent' => false,
             'version' => '1.0.0',
             'requires' => [
-                'FrontendForms>=2.2.29',
+                'FrontendForms>=2.2.35',
                 'PHP>=8.0',
                 'ProcessWire>=3',
                 'LazyCron'
