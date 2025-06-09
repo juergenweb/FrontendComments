@@ -12,7 +12,7 @@ This module is early Beta stage - so please use it with care!
 * PHP>=8.0.0
 * ProcessWire>=3.0.181
 * GD-Library installed for CAPTCHA image creation
-* FrontendForms>=2.2.34
+* FrontendForms>=2.2.35
 * LazyCron enabled for sending mails
 
 ## Highlights / Features
