@@ -187,7 +187,7 @@ By default, all CSS files for comments are inserted directly before the closing 
 To owerwrite the values of the embedded files afterwards you have 2 possiblities:
 
 1. Disable automatic embedding of CSS files and add them manually to the template. In this case, you can select the position of the files in the header area and then add additional CSS files. This makes it possible to overwrite previously set values. Check out the explanation for *Adding CSS and JS files manually to the website*.
-2. Add your custom CSS file to the body section
+2. Add your custom CSS file to the body section instead of the head section
 
 ## Adding CSS and JS files manually to the website
 
