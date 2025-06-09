@@ -141,6 +141,10 @@ After you have added a FrontendComments field to a template, you will find a new
 
 There you can change for example the status of a comment or write a feedback.
 
+![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/open-comment.png?raw=true)
+
+I have only included some of the fields that I think makes sense to be able to edit afterwards.
+
 ## Queuing notification emails
 This module offers commenters the option to be notified whenever a new reply to their comments or other comments has been posted. This can result in a very large number of notification emails every time a comment is posted, especially if your website has high comment activity.
 
