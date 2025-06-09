@@ -133,6 +133,13 @@ echo $comments->render();
 
 Each of these above methods is explained alongside the corresponding global settings field in the module configuration, so I won't go much more into detail.
 
+## Elements of a comment
+
+Each comment consists of different parts. Some of them are permanent an some can be enabled/disabled. Take a look at the image afterwards.
+
+![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-parts.png?raw=true)
+
+
 ## Editing comments in the backend
 
 After you have added a FrontendComments field to a template, you will find a new tab called "*Comments*" on each edit page which contains this field.
