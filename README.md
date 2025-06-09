@@ -132,6 +132,14 @@ echo $comments->render();
 
 Each of these above methods is explained alongside the corresponding global settings field in the module configuration, so I won't go much more into detail.
 
+## Editing comments in the backend
+
+After you have added a FrontendComments field to a template, you will find a new tab called "*Comments*" on each edit page which contains this field.
+
+![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/backend-comments-tab.png?raw=true)
+
+There you can change for example the status of a comment or write a feedback.
+
 ## Queuing notification emails
 This module offers commenters the option to be notified whenever a new reply to their comments or other comments has been posted. This can result in a very large number of notification emails every time a comment is posted, especially if your website has high comment activity.
 
