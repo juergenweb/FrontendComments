@@ -157,7 +157,7 @@ Only to mention: This only happens to notification emails for commenters, not fo
 ## Special case: What happens if a comment, which has replies, will be declared as SPAM
 By default, all comments that are declared as SPAM are no longer visible in the frontend and will be deleted after a certain number of days if this has been set in the module configuration. That's fine, as long as the comment doesn't contain any answers.
 
-If a comment contains replies and is declared as SPAM later on, then all subordinates (replies) would no longer be visible. This is not really desirable, as many comments would suddenly no longer be visible (even comments with content that does not violate the comment guidelines). This can cause commenters to feel frustrated because their comment has disappeared from the page.
+If a comment contains replies and is declared as SPAM later on, then all replies to this comment would no longer be visible. This is not really desirable, as many comments would suddenly no longer be visible (even comments with content that does not violate the comment guidelines). This can cause commenters to feel frustrated because their comment has disappeared from the page.
 
 To prevent this sceanario, comments marked as SPAM to which replies have already been written are declared as "SPAM with replies". This means that the comment will remain visible, but the comment text will be replaced with the following text: "Sorry, this post has been removed by moderators for violating community guidelines."
 
