@@ -33,6 +33,7 @@ This module is early Beta stage - so please use it with care!
 * No dependencies (except FrontendForms)
 * Supports pagination of comments on the frontend
 * Support for UiKit 3, Pico 2 and Bootstrap 5 CSS framework out of the box
+* Support for RockLanguage
 
 ## Table of contents
 * [Is this a copy of the Comments Fieldtype by Ryan?](#is-this-a-copy-of-the-comments-fieldtype-by-ryan)
