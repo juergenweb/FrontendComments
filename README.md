@@ -40,6 +40,7 @@ This module is early Beta stage - so please use it with care!
 * [Queuing notification emails](#queuing-notification-emails)
 * [What happens if a comment, which has replies, will be declared as SPAM later on?](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam)
 * [Hooking to change markup](#hooking-to-change-markup)
+* [Overwriting CSS styles with your custom values](#overwriting-css-styles-with-your-custom-values)
 * [Adding CSS and JS files manually to the template](#adding-css-and-js-files-manually-to-the-website)
   
 
