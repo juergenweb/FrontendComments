@@ -217,3 +217,6 @@ echo FieldtypeFrontendComments::renderJSFiles(); // render all JS files
 echo FieldtypeFrontendComments::renderJSFiles(false); // exclude the JS files for the star rating
 ```
 
+ToDo:
+* Doing more testing
+* Creating a module manager for managing comments in one place
