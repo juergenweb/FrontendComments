@@ -179,14 +179,16 @@ Take a look at the FrontendCommentForm.php class file to see which methods are h
 
 ## Adding CSS and JS files manually to the website
 
-By default the CSS and JS files will be added automatically to the template file. The CSS files before the closing head tag and the JS files before the closing body tag. This is fine for most cases. But if you want to change the location of the files inside the head or body section, you will need to disable the embedding of these files first in the field configuration or the dirctly inside the template using the *removeJS()* and or *removeCSS()* method (Take a look at the module configuration next to the configuration settings where you can disable the embedding of these files).
+By default, CSS and JS files are automatically added to the template file. CSS files are added before the closing head tag, and JS files are added before the closing body tag. This is fine in most cases.
 
-If you have disabled the automatic embedding of these files you can add them manually to your template by using the following lines of code:
+If you want to change the location of the files in the header or body section, you must first disable embedding these files in the field configuration or directly in the template using the *removeJS()* and/or *removeCSS()* methods. Take a look at the module configuration next to the configuration settings fields for disabling embedding these files.
+
+If you have disabled automatic embedding of these files, you can manually add them to your template using the following lines of code:
 
 ```php
 echo FieldtypeFrontendComments::renderCSSFiles();
 ```
-In this case all CSS files will be embedded, but you have the possibility to prevente the embedding of the star-rating CSS files if you do not use star rating by simply adding *false* as parameter to the method:
+In this case, all CSS files will be embedded, but you have the option to prevent the CSS files for the star ratings from being embedded if you do not use a star rating by simply adding *false* as a parameter to the method:
 
 ```php
 echo FieldtypeFrontendComments::renderCSSFiles(false); // false prevents the embedding of the star rating CSS file
@@ -201,3 +203,4 @@ echo FieldtypeFrontendComments::renderJSFiles(); // render all JS files
 ```php
 echo FieldtypeFrontendComments::renderJSFiles(false); // exclude the JS files for the star rating
 ```
+
