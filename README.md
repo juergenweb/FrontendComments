@@ -139,7 +139,7 @@ After you have added a FrontendComments field to a template, you will find a new
 
 ![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/backend-comments-tab.png?raw=true)
 
-There you can change for example the status of a comment or write a feedback.
+After clicking on a comment, the edit form opens and you can, for example, change the status of a comment or write a feedback.
 
 ![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/open-comment.png?raw=true)
 
