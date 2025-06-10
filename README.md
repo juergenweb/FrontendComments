@@ -35,6 +35,8 @@ This module is early Beta stage - so please use it with care!
 * Support for UiKit 3, Pico 2 and Bootstrap 5 CSS framework out of the box
 * Support for RockLanguage
 
+Live example: [http://www.schulfreund.at](https://www.schulfreund.at/nachhilfekurse/chemie-nachhilfe/)
+
 ## Table of contents
 * [Is this a copy of the Comments Fieldtype by Ryan?](#is-this-a-copy-of-the-comments-fieldtype-by-ryan)
 * [Installation and Quick-start guide](#installation-and-quick-start-guide)
