@@ -60,7 +60,8 @@
                 __('pending approval'),
                 __('approved'),
                 __('SPAM'),
-                __('SPAM, but has replies')
+                __('SPAM, but has replies'),
+                __('featured')
             ];
         }
 
@@ -78,7 +79,8 @@
                 FieldtypeFrontendComments::approved => 'fa-check-circle',
                 FieldtypeFrontendComments::spam => 'fa-times',
                 FieldtypeFrontendComments::spamReplies => 'fa-times',
-                FieldtypeFrontendComments::pendingApproval => 'fa-commenting-o'
+                FieldtypeFrontendComments::pendingApproval => 'fa-commenting-o',
+                FieldtypeFrontendComments::featured => 'fa-star'
             ];
 
             $fieldset = $this->modules->get('InputfieldFieldset');
@@ -161,6 +163,7 @@
                     $status->collapsed(Inputfield::collapsedNever);
                     $status->addOption(FieldtypeFrontendComments::pendingApproval, $this->_('Pending approval'));
                     $status->addOption(FieldtypeFrontendComments::approved, $this->_('Approved'));
+                    $status->addOption(FieldtypeFrontendComments::featured, $this->_('Featured'));
                     if ($comment->getReplies()->count) {
                         $status->addOption(FieldtypeFrontendComments::spamReplies, $this->_('SPAM'));
                     } else {
@@ -217,6 +220,7 @@
             // array containing all possible status for a comment
             $statusArray = [
                 FieldtypeFrontendComments::approved,
+                FieldtypeFrontendComments::featured,
                 FieldtypeFrontendComments::spam,
                 FieldtypeFrontendComments::spamReplies,
                 FieldtypeFrontendComments::pendingApproval
