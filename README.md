@@ -70,7 +70,7 @@ No, it's not. This module runs on its own codebase and has not been copied from 
 5. Once you've created this comment field, you can change some configuration settings in the "Details" tab of the field, if necessary. The only value that needs to be entered is the email address of at least one moderator. This is mandatory.
 6. As the next step add this field to a template.
 7. JavaScript and CSS file for the frontend will be added automatically - you don't have to take care about it.
-8. To output the comment form and the comment list on the frontend you have to add fe. "*echo $page->comments->render()*" to the frontend template (comments is the name of your comment field in this case). Take a look at the following output methods below.
+8. To output the comment form and the comment list on the frontend you have to add fe. "*echo $page->comments->render()*" to the frontend template ("comments" is the name of your comment field in this case). Take a look at the following output methods below.
 
 ### Simple direct output with "echo"
 If you want to use the global settings you only need to use the render() method. In this case, the comments field name is "mycomments". Please replace it with your comment field name.
