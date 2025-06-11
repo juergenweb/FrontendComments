@@ -34,6 +34,7 @@ This module is early Alpha stage - so please use it with care!
 * No dependencies (except FrontendForms)
 * Supports pagination of comments on the frontend
 * Support for UiKit 3, Pico 2 and Bootstrap 5 CSS framework out of the box
+* Changing markup via Hook
 * Support for RockLanguage
 
 Live example: [http://www.schulfreund.at](https://www.schulfreund.at/nachhilfekurse/chemie-nachhilfe/)
