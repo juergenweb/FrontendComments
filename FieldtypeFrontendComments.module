@@ -27,6 +27,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     const approved = 1; // status approved
     const spam = 2; // status SPAM
     const spamReplies = 3; // status SPAM but comment has replies and therefore is not allowed to delete
+    const featured = 4; // approved, but special marked as important
     const queueTable = 'fc_comments_queues';
     protected FrontendForms $frontendForms;
     protected array $frontendFormsConfig = [];
