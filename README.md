@@ -6,7 +6,7 @@
 
 Processwire Fieldtype/Inputfield to add and manage comments on your site based on the FrontendForms module.
 
-This module is early Beta stage - so please use it with care!
+This module is early Alpha stage - so please use it with care!
 
 ## Requirements
 * PHP>=8.0.0
