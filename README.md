@@ -18,7 +18,7 @@ This module is early Alpha stage - so please use it with care!
 ## Highlights / Features
 * Easy integration: Only 1 line of code inside a template is necessary to render the comments + form on the frontend
 * Possibility to use multiple comment fields in one template (if necessary)
-* Easy to overwrite global module settings inside the template (possibility to use one comment field with different configuration settings in multiple templates)
+* Easy to overwrite global module settings inside the template (possibility to use one comment field with different configuration settings in different templates)
 * Enable/disable star rating
 * Enable/disable rating of comments (like/dislike)
 * Add additional website field to the comment form if needed
