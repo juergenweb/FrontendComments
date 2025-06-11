@@ -19,6 +19,7 @@
     use FrontendForms\Link;
     use FrontendForms\Image;
     use PDO;
+    use ProcessWire\FieldtypeFrontendComments;
     use ProcessWire\Page;
     use ProcessWire\Field;
     use ProcessWire\WireArray;
@@ -752,7 +753,14 @@
          */
         public function ___renderComment(string $levelnumber, int $level = 0): string
         {
-            $out = '<div class="fcm-comment-box"><div class="fcm-comment-head">';
+
+            $statusClasses = [
+                FieldtypeFrontendComments::spamReplies => 'fcm-spam-replies',
+                FieldtypeFrontendComments::featured => 'fcm-featured',
+                FieldtypeFrontendComments::approved => 'fcm-approved',
+            ];
+
+            $out = '<div class="fcm-comment-box '.$statusClasses[$this->get('status')].'"><div class="fcm-comment-head">';
             $out .= $this->renderNoVoteAlertbox();
             $out .= $this->renderCommentAvatar();
             $out .= $this->renderCommentAuthor();
