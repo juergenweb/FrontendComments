@@ -42,6 +42,7 @@ Live example: [http://www.schulfreund.at](https://www.schulfreund.at/nachhilfeku
 * [Installation and Quick-start guide](#installation-and-quick-start-guide)
 * [Elements of a comment](#elements-of-a-comment)
 * [Editing comments in the backend](#editing-comments-in-the-backend)
+* [Different status of a comment](#different-status-of-a-comment)
 * [Queuing notification emails](#queuing-notification-emails)
 * [What happens if a comment, which has replies, will be declared as SPAM later on?](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam)
 * [Hooking to change markup](#hooking-to-change-markup)
