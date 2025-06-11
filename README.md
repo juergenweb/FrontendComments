@@ -91,7 +91,7 @@ echo $comments->render();
 
 This type of output is necessary if you want to override some global settings before you output the markup.
 
-This can be the case if you want to use a comment field in different templates with different settings
+This can be the case if you want to use a comment field in different templates with different settings.
 
 
 ```php
