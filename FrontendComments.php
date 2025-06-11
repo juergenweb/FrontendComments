@@ -87,7 +87,7 @@
                 $commentArray = wire(new FrontendCommentArray());
 
             // find the comments
-            $parentComments = $comments->find('parent_id=' . $parentid . ',status=' . FieldtypeFrontendComments::approved . '|' . FieldtypeFrontendComments::spamReplies . ',sort=sort');
+            $parentComments = $comments->find('parent_id=' . $parentid . ',status=' . FieldtypeFrontendComments::approved . '|' . FieldtypeFrontendComments::spamReplies. '|' . FieldtypeFrontendComments::featured . ',sort=sort');
 
             if ($parentComments) {
 
@@ -170,7 +170,7 @@
         {
 
             // first, remove all comments which are not approved or spam (status 0 or 4)
-            $this->comments->filter("status=1|3");
+            $this->comments->filter('status='.FieldtypeFrontendComments::approved.'|'.FieldtypeFrontendComments::featured.'|'.FieldtypeFrontendComments::spamReplies);
 
             // overwrite the pagination number if set inside the template
             $this->num_comments_on_page = $this->field->get('input_fc_pagnumber');
