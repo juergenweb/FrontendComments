@@ -167,7 +167,7 @@ You can choose between 4 different status for a comment:
 3. spam: comment will not be displayed on the frontend and will be deleted after specific time automatically (if set); status value is 2
 4. featured: same as approved, but is declared as very important. Could be used to generate a list containing only specific comments (eg. a "Our customers say..." list); status value is 4
 
-There is a 5th status, but this status cannot be selected: spam but has replies; status value is 3  
+There is a 5th status, but this status cannot be selected manually: spam but has replies; status value is 3  
 
 In this case a comment is defined as SPAM and should be deleted, but has children, so it could not be deleted as normal spam. This status will be added automatically if a spam comment has children and this status cannot be selected manually. Please take a look [here](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam) for more details. 
 
