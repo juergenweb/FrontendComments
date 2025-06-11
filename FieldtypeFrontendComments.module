@@ -212,6 +212,40 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
     /**
+     * Return all featured comments as a WireArray sitewide
+     * @param int $limit
+     * @return void
+     */
+    public static function getAllFeaturedComments(int $limit = 0): WireArray
+    {
+
+        $selects = [];
+        foreach (self::getAllCommentFields() as $field) {
+            $selects[] = "SELECT * FROM $field->table WHERE status=4";
+        }
+
+        $statement = implode(' UNION ', $selects);
+        $statement .= ' ORDER BY created DESC';
+        if($limit > 0){
+            $statement .= ' LIMIT ' . $limit;
+        }
+
+        $query = wire()->database->prepare($statement);
+        $query->execute();
+
+        $comments = [];
+        while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+            $comments[] = $row;
+        }
+
+        $featured_comments = New WireArray();
+        foreach ($comments as $comment) {
+            $featured_comments[] = $comment;
+        }
+        return $featured_comments;
+    }
+
+    /**
      * Get all queued emails from the database and send the emails in batches of 20 mails at once
      * @return void
      * @throws \ProcessWire\WireException
