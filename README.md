@@ -193,7 +193,7 @@ If you want to limit the number of the comments, you can add the number as param
 echo FieldtypeFrontendComments::getAllFeaturedComments(5); // limits the output to 5 comments
 ```
 
-Just to mention: This method is only necessary, if you are using FrontendComments on more than 1 page, because it takes all featured comments from all pages. If you are using it only on 1 page, you can use the find method in combination with the "status" selector.
+Just to mention: This method is only necessary, if you are using FrontendComments on more than 1 page, because it takes all featured comments from all pages and all fields. If you are using only one field on 1 page, you can use the find method in combination with the "status" selector.
 
 ```php
 echo $pages->get(11)->comments->find('status=4'); // in this case "11" is the id of the page and "comments" is the name of the comment field; "4" is for featured comments
