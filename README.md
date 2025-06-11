@@ -169,6 +169,28 @@ There is a 5th status, but this status cannot be selected: spam but has replies
 
 In this a comment is defined as SPAM and should be deleted, but has children, so it could not be deleted as normal spam. This status will be added automatically if a spam comment has children and this status cannot be selected manually. Please take a look [here](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam) for more details. 
 
+## Various methods
+
+
+| Method  | Description | 
+| ------------- | ------------- |
+| getAllFeaturedComments()  | Get all featured comments of all comment fields sitewide  |
+
+### getAllFeaturedComments()
+
+This static method can be used to output all featured comments sitewide as a WireArray.
+
+You can use it to create for example a "Our customers say..." list.
+
+```php
+echo FieldtypeFrontendComments::getAllFeaturedComments();
+```
+If you want to limit the number of the comments, you can add the number as parameter inside the parenthesis.
+
+```php
+echo FieldtypeFrontendComments::getAllFeaturedComments(5); // limits the output to 5 comments
+```
+
 ## Queuing notification emails
 This module offers commenters the option to be notified whenever a new reply to their comments or other comments has been posted. This can result in a very large number of notification emails every time a comment is posted, especially if your website has high comment activity.
 
