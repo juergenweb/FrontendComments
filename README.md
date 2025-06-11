@@ -146,7 +146,6 @@ Each comment consists of different parts. Some of them are permanent an some can
 
 ![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-parts.png?raw=true)
 
-
 ## Editing comments in the backend
 
 After you have added a FrontendComments field to a template, you will find a new tab called "*Comments*" on each edit page which contains this field.
