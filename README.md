@@ -30,6 +30,7 @@ This module is early Alpha stage - so please use it with care!
 * Moderators can write a feedback directly to a comment (fe to react to positive or negative comments)
 * Adding a link to an internal or external page containing the community guidlines
 * Changing the status of a comment via remote link inside an email to "approved" or "spam"
+* Mapping of fields of the user template to form values (eg name, user image, homepage URL, email address)
 * No dependencies (except FrontendForms)
 * Supports pagination of comments on the frontend
 * Support for UiKit 3, Pico 2 and Bootstrap 5 CSS framework out of the box
