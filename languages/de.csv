@@ -262,6 +262,7 @@ Author,Autor,,site/modules/FrontendComments/InputfieldFrontendComments.module,a5
 Status,=,,site/modules/FrontendComments/InputfieldFrontendComments.module,ec53a8c4f07baed5d8825072c89799be
 "Pending approval","Wartet auf Bestätigung",,site/modules/FrontendComments/InputfieldFrontendComments.module,b8e2c23a15e49a10d6f0562a3dce2538
 Approved,Bestätigt,,site/modules/FrontendComments/InputfieldFrontendComments.module,6f8063417ab31f38d864c28302f3de2f
+Featured,"Hervor gehoben",,site/modules/FrontendComments/InputfieldFrontendComments.module,15422d54ec0d47000dc86a9820a5237e
 SPAM,=,,site/modules/FrontendComments/InputfieldFrontendComments.module,c72beebe6ecbdddff71b846c4858ebcb
 "Delete the comment","Kommentar löschen",,site/modules/FrontendComments/InputfieldFrontendComments.module,851777bf0529c4d9d9d0bad0f792cd25
 Homepage,=,,site/modules/FrontendComments/InputfieldFrontendComments.module,339f7a2e087a159e6a31501649027a77
@@ -282,3 +283,4 @@ Homepage,=,,site/modules/FrontendComments/InputfieldFrontendComments.module,339f
 "pending approval","Wartet auf Bestätigung",,site/modules/FrontendComments/InputfieldFrontendComments.module,e2702e8b9c1efdd2e4662873c3114be2
 approved,Bestätigt,,site/modules/FrontendComments/InputfieldFrontendComments.module,787d5f05953ec39b108869dfdd7733e6
 "SPAM, but has replies","SPAM, hat aber Antworten",,site/modules/FrontendComments/InputfieldFrontendComments.module,792094a5f7cc15d8c58c81343c8bf83d
+featured,"Hervor gehoben",,site/modules/FrontendComments/InputfieldFrontendComments.module,dd0d24a48197b2785e34fa674d5da2e3
