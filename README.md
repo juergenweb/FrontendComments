@@ -29,7 +29,7 @@ This module is early Alpha stage - so please use it with care!
 * Enable/disable the sending of notification emails to a commenter if status of a comment has been changed to "approved" or "SPAM" by a moderator
 * Moderators can write a feedback directly to a comment (fe to react to positive or negative comments)
 * Adding a link to an internal or external page containing the community guidlines
-* Changing the status of a comment via remote link to "approved" or "spam"
+* Changing the status of a comment via remote link inside an email to "approved" or "spam"
 * No dependencies (except FrontendForms)
 * Supports pagination of comments on the frontend
 * Support for UiKit 3, Pico 2 and Bootstrap 5 CSS framework out of the box
