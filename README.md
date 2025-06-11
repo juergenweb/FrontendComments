@@ -166,7 +166,7 @@ You can choose between 5 different status for a comment:
 
 There is a 5th status, but this status cannot be selected: spam but has replies  
 
-In this a comment is defined as SPAM and should be deleted, but has children, so it could not be deleted as normal spam. Please take a look [here](#) for more details. 
+In this a comment is defined as SPAM and should be deleted, but has children, so it could not be deleted as normal spam. Please take a look [here](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam) for more details. 
 
 ## Queuing notification emails
 This module offers commenters the option to be notified whenever a new reply to their comments or other comments has been posted. This can result in a very large number of notification emails every time a comment is posted, especially if your website has high comment activity.
