@@ -43,6 +43,7 @@ Live example: [http://www.schulfreund.at](https://www.schulfreund.at/nachhilfeku
 * [Elements of a comment](#elements-of-a-comment)
 * [Editing comments in the backend](#editing-comments-in-the-backend)
 * [Different status of a comment](#different-status-of-a-comment)
+* [Various methods that can be used]()
 * [Queuing notification emails](#queuing-notification-emails)
 * [What happens if a comment, which has replies, will be declared as SPAM later on?](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam)
 * [Hooking to change markup](#hooking-to-change-markup)
@@ -174,7 +175,7 @@ In this a comment is defined as SPAM and should be deleted, but has children, so
 
 | Method  | Description | 
 | ------------- | ------------- |
-| getAllFeaturedComments()  | Get all featured comments of all comment fields sitewide  |
+| [getAllFeaturedComments()](#getallfeaturedcomments)  | Get all featured comments of all comment fields sitewide  |
 
 ### getAllFeaturedComments()
 
