@@ -155,6 +155,19 @@ After clicking on a comment, the edit form opens and you can, for example, chang
 
 I have only included some of the fields that I think makes sense to be able to edit afterwards.
 
+## Different status of a comment
+
+You can choose between 5 different status for a comment:
+
+1. approved: comment will be displayed on the frontend
+2. spam: comment will not be displayed on the frontend and will be deleted after specific time automatically (if set)
+3. waiting for approval: comment will not be displayed on the frontend and must be changed to "approved" by a moderator
+4. featured: same as approved, but is declared as very important. Could be used to generate a list containing only specific comments (eg. a "Our customers say..." list)
+
+There is a 5th status, but this status cannot be selected: spam but has replies  
+
+In this a comment is defined as SPAM and should be deleted, but has children, so it could not be deleted as normal spam. Please take a look [here](#) for more details. 
+
 ## Queuing notification emails
 This module offers commenters the option to be notified whenever a new reply to their comments or other comments has been posted. This can result in a very large number of notification emails every time a comment is posted, especially if your website has high comment activity.
 
