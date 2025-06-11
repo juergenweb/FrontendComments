@@ -161,14 +161,14 @@ I have only included some of the fields that I think makes sense to be able to e
 
 You can choose between 4 different status for a comment:
 
-1. approved: comment will be displayed on the frontend
-2. spam: comment will not be displayed on the frontend and will be deleted after specific time automatically (if set)
-3. waiting for approval: comment will not be displayed on the frontend and must be changed to "approved" by a moderator
-4. featured: same as approved, but is declared as very important. Could be used to generate a list containing only specific comments (eg. a "Our customers say..." list)
+1. waiting for approval: comment will not be displayed on the frontend and must be changed to "approved" by a moderator; status value is 0
+2. approved: comment will be displayed on the frontend; status value is 1
+3. spam: comment will not be displayed on the frontend and will be deleted after specific time automatically (if set); status value is 2
+4. featured: same as approved, but is declared as very important. Could be used to generate a list containing only specific comments (eg. a "Our customers say..." list); status value is 4
 
-There is a 5th status, but this status cannot be selected: spam but has replies  
+There is a 5th status, but this status cannot be selected: spam but has replies; status value is 3  
 
-In this a comment is defined as SPAM and should be deleted, but has children, so it could not be deleted as normal spam. This status will be added automatically if a spam comment has children and this status cannot be selected manually. Please take a look [here](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam) for more details. 
+In this case a comment is defined as SPAM and should be deleted, but has children, so it could not be deleted as normal spam. This status will be added automatically if a spam comment has children and this status cannot be selected manually. Please take a look [here](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam) for more details. 
 
 ## Various methods
 
@@ -192,6 +192,11 @@ If you want to limit the number of the comments, you can add the number as param
 echo FieldtypeFrontendComments::getAllFeaturedComments(5); // limits the output to 5 comments
 ```
 
+Just to mention: This method is only necessary, if you are using FrontendComments on more than 1 page, because it takes all featured comments from all pages. If you are using it only on 1 page, you can use the find method in combination with the "status" selector.
+
+```php
+echo $pages->get(11)->comments->find('status=4'); // in this case "11" is the id of the page and "comments" is the name of the comment field; "4" is for featured comments
+```
 ## Queuing notification emails
 This module offers commenters the option to be notified whenever a new reply to their comments or other comments has been posted. This can result in a very large number of notification emails every time a comment is posted, especially if your website has high comment activity.
 
