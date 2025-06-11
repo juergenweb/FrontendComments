@@ -24,7 +24,7 @@ This module is early Alpha stage - so please use it with care!
 * Add additional website field to the comment form if needed
 * Offer commenters the receiving of notification emails if a new reply has been posted
 * Queuing the sending of notification emails instead of sending all at once (preventing performance issues by sending to many emails at once)
-* Reply forms will only be loaded via AJAX on demand (by clicking on the reply link) -> faster loading time
+* Reply forms will only be loaded via AJAX on demand (by clicking on the reply link) -> faster loading time of the page
 * Option to use HTML email templates for sending mails (provided by FrontendForms)
 * Enable/disable the sending of notification emails to a commenter if status of a comment has been changed to "approved" or "SPAM" by a moderator
 * Moderators can write a feedback directly to a comment (fe to react to positive or negative comments)
