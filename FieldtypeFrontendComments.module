@@ -81,9 +81,11 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $this->addHookAfter('LazyCron::everyDay', $this, 'deleteSpam');
         $this->addHookBefore('InputfieldTextarea::processInput', $this, 'validateEmailAddresses');
         $this->addHookAfter('Pages::saved', $this, 'deleteComments');
+
     }
 
-    /**
+
+        /**
      * Delete a comment if the option "Delete the comment" is selected inside the comments' tab
      * @param \ProcessWire\HookEvent $event
      * @return void
@@ -862,6 +864,52 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $commentArray->setField($field);
         $commentArray->setTrackChanges(); // enable tracking of changes
         return $commentArray;
+    }
+
+
+    public function getCommentByID(Page $page, Field $field, int $id) {
+        $pages = $this->wire()->pages;
+        if(empty($id)) return null;
+        if($page && !is_object($page)) {
+            $page = $pages->get((int) $page);
+            if(!$page->id) return null;
+        }
+        if(!is_object($field) && $field) {
+            $field = $this->wire()->fields->get($this->wire()->sanitizer->fieldName($field));
+        }
+        if(!$field || !$field->type instanceof FieldtypeFrontendComments) return null;
+        $table = $field->getTable();
+        $sql = "SELECT * FROM `$table` WHERE id=:id ";
+        if($page) $sql .= "AND pages_id=:pageID";
+        $query = $this->wire()->database->prepare($sql);
+        $query->bindValue(':id', (int) $id, \PDO::PARAM_INT);
+        if($page) $query->bindValue(':pageID', $page->id, \PDO::PARAM_INT);
+        if(!$query->execute()) return null;
+        if(!$query->rowCount()) return null;
+        $data = $query->fetch(\PDO::FETCH_ASSOC);
+        if(!$page) {
+            $page = $pages->get((int) $data['pages_id']);
+        }
+        return $this->makeComment($page, $field, $data);
+    }
+
+    protected function makeComment($page, $field, array $data) {
+
+        $comments = $this->getBlankValue($page, $field);
+        /** @var Comment $comment */
+        $comment = $this->wire(new FrontendComment($comments, $data, $this->frontendFormsConfig));
+        $comment->page = $page;
+        $comment->field = $field;
+
+        foreach($data as $key => $val) {
+            if($key === 'data') {
+                $key = 'text';
+            }
+            $comment->set($key, $val);
+        }
+
+        $comment->resetTrackChanges(true);
+        return $comment;
     }
 
     /**
