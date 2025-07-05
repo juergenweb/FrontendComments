@@ -102,6 +102,8 @@
                     $this->wire('session')->remove('failed');
                 }
 
+
+
                 foreach ($this->value as $comment) {
 
                     $commentfieldset = $this->modules->get('InputfieldFieldset');
@@ -189,6 +191,8 @@
 
                     // moderation feedback textfield
                     $feedback = $this->modules->get('InputfieldCKEditor');
+                    $feedback->set('removePlugins', 'pwimage, sourcedialog');
+                    $feedback->set('toolbar', 'Format, Bold, Italic, NumberedList, BulletedList, SpecialChar, PWLink');
                     $feedback->set('label', $this->_('Moderation feedback'));
                     $feedback->attr('id|name', $this->name . '_moderation_feedback_' . $comment->id);
                     $feedback->attr('value', $comment->moderation_feedback);
@@ -338,7 +342,6 @@
                         case 'moderation_feedback':
 
                             if ($comment->$key != $value) {
-                                $value = $sanitizer->textarea($value);
                                 $comment->$key = $value;
                                 $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
                             }
