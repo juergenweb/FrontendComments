@@ -192,7 +192,7 @@
                     // moderation feedback textfield
                     $feedback = $this->modules->get('InputfieldCKEditor');
                     $feedback->set('removePlugins', 'pwimage, sourcedialog');
-                    $feedback->set('toolbar', 'Format, Bold, Italic, NumberedList, BulletedList, SpecialChar, PWLink');
+                    $feedback->set('toolbar', 'Format, Bold, Italic, Underline, Blockquote, NumberedList, BulletedList, SpecialChar, PWLink');
                     $feedback->set('label', $this->_('Moderation feedback'));
                     $feedback->attr('id|name', $this->name . '_moderation_feedback_' . $comment->id);
                     $feedback->attr('value', $comment->moderation_feedback);
