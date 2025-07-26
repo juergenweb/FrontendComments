@@ -340,7 +340,7 @@
             } else {
                 $color = '#FD953A';
             }
-            $body .= '<tr style="padding: 10px 0;"><td style="font-weight:bold;white-space: nowrap">' . $this->_('Comment status') . ':&nbsp;</td><td><span style="padding:3px;display:inline-block;background:' . $color . ';color:#fff;">&nbsp;' . InputfieldFrontendComments::statusTexts()[$newComment->get('status')] . '&nbsp;</span></td></tr>';
+            $body .= '<tr style="padding: 10px 0;"><td style="font-weight:bold;white-space: nowrap">' . $this->_('Comment status') . ':&nbsp;</td><td><span style="padding:3px;display:inline-block;background:' . $color . ';color:#fff;">&nbsp;' . FieldtypeFrontendComments::statusTexts()[$newComment->get('status')] . '&nbsp;</span></td></tr>';
             $body .= '<tr><td colspan="2"><hr style="margin:0;height:0;border-top: 1px solid #f6f6f6;"/></td></tr><tr>';
             $body .= '<tr style="padding: 10px 0;"><td style="font-weight:bold;">[[CURRENTURLLABEL]]:&nbsp;</td><td>[[CURRENTURLVALUE]]</td></tr>';
             $body .= '<tr><td colspan="2"><hr style="margin:0;height:0;border-top: 1px solid #f6f6f6"/></td></tr><tr>';
@@ -444,7 +444,7 @@
             $body .= $this->renderMailText($comment->get('text'));
             $body .= '<p>' . $this->_('The status of the comment has been changed to:') . '</p>';
             $statusColor = $status === FieldtypeFrontendComments::approved ? '#7BA428' : '#ED2939';
-            $body .= '<table style="width:100%;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;text-align:center;background-color:' . $statusColor . ';"><p style="margin:12px;color:#ffffff;"><strong>' . InputfieldFrontendComments::statusTexts()[$status] . '</strong></p></td></tr></table></td></tr></table>';
+            $body .= '<table style="width:100%;"><tr style="width:100%;"><td style="width:100%;"><table style="width:100%;"><tr style="width:100%;"><td style="width:100%;text-align:center;background-color:' . $statusColor . ';"><p style="margin:12px;color:#ffffff;"><strong>' . FieldtypeFrontendComments::statusTexts()[$status] . '</strong></p></td></tr></table></td></tr></table>';
 
             if ($status === 1) {
                 $body .= '<p>' . $this->_('Your comment is now published and visible to everyone.') . '</p>';
@@ -489,7 +489,7 @@
             }
 
             $mail->subject($this->_('Comment status has been changed'));
-            $mail->title(sprintf($this->_('Your comment status has been changed to %s'), InputfieldFrontendComments::statusTexts()[$status]));
+            $mail->title(sprintf($this->_('Your comment status has been changed to %s'), FieldtypeFrontendComments::statusTexts()[$status]));
 
             // set email template depending on config settings
             $template = $field->get('input_fc_emailTemplate') === 'inherit' ? $frontendFormsConfig['input_emailTemplate'] : $field->get('input_fc_emailTemplate');
