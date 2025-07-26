@@ -768,7 +768,8 @@ class FrontendComment extends WireData
             // create the value string for the data
             $sendingData = [];
             foreach ($notificationEmails as $email) {
-                $sendingData[] = '(' . $this->get('parent_id') . ',' . $this->get('id') . ',\'' . $email . '\', ' . $field->get('id') . ', ' . $page->get('id') . ')';
+                $commentID = $this->get('id') ?? $this->comments->getLastID($this);
+                $sendingData[] = '(' . $this->get('parent_id') . ',' . $commentID . ',\'' . $email . '\', ' . $field->get('id') . ', ' . $page->get('id') . ')';
             }
             $valuesString = 'VALUES' . implode(',', $sendingData);
 
