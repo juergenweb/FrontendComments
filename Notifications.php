@@ -177,7 +177,7 @@
             if (array_key_exists('notification', $arr)) {
                 switch ($arr['notification']) {
                     case 1:
-                        $value = $this->_('Notification only on replies');
+                        $value = $this->_('Notification only on replies to this comment');
                         break;
                     case 2:
                         $value = $this->_('Notification on all replies');
