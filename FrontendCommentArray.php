@@ -759,7 +759,7 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
 
                     $warningText = $this->wire('session')->get('statuswarningtext-' . $comment->get('id'));
                     if($warningText){
-                        $warningText .= '<br>'.$this->_('Please log in to the backend and remove the text from this comment manually instead of setting the status to "SPAM"!') ;
+                        $warningText .= '<br>'.$this->_('Please log in to the backend and manually remove the text from this comment instead of setting the status to "SPAM"!') ;
                         $msg = ['alert_warningClass' => $warningText];
                         $this->wire('session')->remove('statuswarningtext-' . $comment->get('id'));
                     } else {
