@@ -1,0 +1,558 @@
+{
+    "file": "site\/modules\/FrontendComments\/FieldtypeFrontendComments.module",
+    "textdomain": "site--modules--frontendcomments--fieldtypefrontendcomments-module",
+    "translations": {
+        "f5be514ce4f52a5af602713c3eb291de": {
+            "text": "Das Eingabefeld \"%s\" ben\u00f6tigt eine E-Mail-Adresse, um Benachrichtigungsmails an mindestens einen Moderator senden zu k\u00f6nnen."
+        },
+        "6c2fcbdad35b35c771843446cec115a9": {
+            "text": "Bitte gehen Sie zum %s dieses Feldes und geben Sie eine g\u00fcltige E-Mail-Adresse ein oder w\u00e4hlen Sie ein PW-Feld aus, das eine g\u00fcltige E-Mail-Adresse auf der Registerkarte %s enth\u00e4lt."
+        },
+        "4236ebe862288b9c613b14da2a9361c8": {
+            "text": "Zur Konfigurationsseite dieses Feldes"
+        },
+        "cae2784c4978878bc8cf4befde96e904": {
+            "text": "%s ist keine g\u00fcltige E-Mail-Adresse und wurde daher gel\u00f6scht."
+        },
+        "7854b07e92875d69a642a4aa497d3543": {
+            "text": "Dies kann mit dieser Methode in jedem Kommentarfeld \u00fcberschrieben werden"
+        },
+        "13e61b877a211e6831394f67fd6f3a1a": {
+            "text": "Dies kann in jedem Kommentarfeld mit den folgenden Methoden \u00fcberschrieben werden"
+        },
+        "334c4a4c42fdb79d7ebc3e73b517e6f8": {
+            "text": "keine"
+        },
+        "00fd39176b23537f6b3660be8c197f5a": {
+            "text": "keine Auswahl"
+        },
+        "de62775a71fc2bf7a13d7530ae24a7ed": {
+            "text": "Allgemeine Einstellungen"
+        },
+        "0c6e8a761530efc7ecfe773a5b5a6f7e": {
+            "text": "Keine - Kommentare werden sofort ver\u00f6ffentlicht"
+        },
+        "4f214f3246f03a94773427de4f2e7699": {
+            "text": "Alle - Alle Kommentare m\u00fcssen von einem Benutzer mit Seitenbearbeitungszugriff genehmigt werden"
+        },
+        "d3a76eec189143c6945282d37bd81bb5": {
+            "text": "Nur Neue - Nur Kommentare von Benutzern ohne zuvor genehmigte Kommentare m\u00fcssen genehmigt werden"
+        },
+        "c98106d2a3b2a0a14016f73894f59d10": {
+            "text": "Kommentar-Moderation"
+        },
+        "18800239150e923984ade45f5e961fbd": {
+            "text": "Dadurch wird festgelegt, unter welchen Voraussetzungen ein neuer Kommentar auf Ihrer Website angezeigt wird."
+        },
+        "e90234905413e689d67361b8f618b63f": {
+            "text": "Stilles speichern?"
+        },
+        "d2c1e7bd67d4253ff76376ed718cf94f": {
+            "text": "Wenn diese Option aktiviert ist, werden die \u00c4nderungszeit und der Benutzer der Seite nicht aktualisiert, wenn ein Kommentar hinzugef\u00fcgt wird."
+        },
+        "83842776ea6aa2dd2a596aaee32d33eb": {
+            "text": "Nur angemeldete Benutzer k\u00f6nnen Kommentare abgeben"
+        },
+        "8039d1558f3bd5536f81eb3ae9fcdca2": {
+            "text": "Wenn diese Option aktiviert ist, k\u00f6nnen nur angemeldete Benutzer Kommentare abgeben."
+        },
+        "46eebcd5bda5056febf22791ef9dd06c": {
+            "text": "Standardm\u00e4\u00dfig k\u00f6nnen alle Benutzer Kommentare posten."
+        },
+        "7efb7dbdb199c40215ee92697e332adb": {
+            "text": "Konfiguration der Formularfelder"
+        },
+        "e035935c6073da107b99bcb77698ddc3": {
+            "text": "W\u00e4hlen Sie ein Eingabefeld aus, welches das Nutzerbild enth\u00e4lt"
+        },
+        "c399463561c3bee9784c538caf135273": {
+            "text": "W\u00e4hlen Sie ein Feld aus der Benutzervorlage aus, welches das Benutzerbild enth\u00e4lt."
+        },
+        "fd732bd04067bf9bd26c5f7e207f1bff": {
+            "text": "Im Moment wurden keine Felder in der Benutzervorlage gefunden, welche f\u00fcr das Nutzerbild verwendet werden k\u00f6nnen. Wenn Sie diese Option verwenden m\u00f6chten, m\u00fcssen Sie der Benutzervorlage zun\u00e4chst ein geeignetes Feld hinzuf\u00fcgen."
+        },
+        "3dc1d6a81c31dc531099dbc096fbf6cd": {
+            "text": "Es werden nur Benutzerfelder vom Typ \"FieldtypeImage\" angezeigt, die nur das Hochladen eines einzelnen Bildes erlauben."
+        },
+        "e0aadefb77e9a67cca3b49df6c8a2dd0": {
+            "text": "Ein Webseite-Feld zum Formular hinzuf\u00fcgen"
+        },
+        "e092bd70cc1ca9bc24577e49c5b55bfc": {
+            "text": "Hier k\u00f6nnen Sie dem Formular ein zus\u00e4tzliches Formularfeld hinzuf\u00fcgen, das es dem Autor erm\u00f6glicht, die URL zu seiner Website einzugeben"
+        },
+        "5fb92fdff0c6d552ca9d24bbe11d131e": {
+            "text": "Das Feld wird nur dann zum Formular hinzugef\u00fcgt, wenn das Kontrollk\u00e4stchen aktiviert ist."
+        },
+        "37ae992e502ae798dcb978bc53a781ea": {
+            "text": "W\u00e4hlen Sie das Feld f\u00fcr die Website-URL aus"
+        },
+        "d85240d646dc1d3da84f17ac52ee3b35": {
+            "text": "W\u00e4hlen Sie das Feld der Benutzervorlage aus, welche die Website-URL zur Startseite des Benutzers enth\u00e4lt. Das Website-Feld wird mit dem Wert dieses Feldes vorausgef\u00fcllt, wenn der Benutzer angemeldet ist."
+        },
+        "c6a1154308fcd727420c915050dac1eb": {
+            "text": "Im Moment wurden in der Benutzervorlage keine Felder gefunden, die als Webseiten-Feld verwendet werden k\u00f6nnen. Wenn Sie diese Option verwenden m\u00f6chten, m\u00fcssen Sie zun\u00e4chst ein neues URL-Eingabefeld zur Benutzervorlage hinzuf\u00fcgen."
+        },
+        "0640e188313e2a668739e59ff0ac8b81": {
+            "text": "Es werden nur Benutzerfelder vom Typ \"FieldtypeURL\" angezeigt."
+        },
+        "2603516af0ba01fab00ece839b819258": {
+            "text": "W\u00e4hlen Sie das Feld f\u00fcr den Namen des Autors aus"
+        },
+        "4f02086c2f72092fc712a2fb261fe2af": {
+            "text": "W\u00e4hlen Sie das Feld der Benutzervorlage aus, welches den Namen des Autors enth\u00e4lt. Das Feld f\u00fcr den Namen des Autors wird mit dem Wert dieses Feldes vorausgef\u00fcllt, wenn der Benutzer angemeldet ist."
+        },
+        "32246e7cf76a269e6bba67e4d8c5e9bb": {
+            "text": "Im Moment wurden in der Benutzervorlage keine Felder gefunden, die als Namensfeld verwendet werden k\u00f6nnen. Wenn Sie diese Option verwenden m\u00f6chten, m\u00fcssen Sie zun\u00e4chst ein neues Textfeld zur Benutzervorlage hinzuf\u00fcgen. Andernfalls wird stattdessen der Benutzername verwendet."
+        },
+        "2b357e36de6f0968ac0bac704b7764ba": {
+            "text": "Es werden nur Benutzerfelder vom Typ \"FeldtypText\" angezeigt."
+        },
+        "7507729fd86157f8c6c06b36b11c9b92": {
+            "text": "Standard-E-Mail-Konfiguration"
+        },
+        "391b1c0e2e6a571d16ee13451bfe5740": {
+            "text": "W\u00e4hlen Sie eine E-Mail-Vorlage aus"
+        },
+        "b030d134af6397b6ed92850a4e90fff5": {
+            "text": "W\u00e4hlen Sie aus, ob Sie eine HTML-Vorlage f\u00fcr die Benachrichtigungs-E-Mails verwenden m\u00f6chten oder nicht."
+        },
+        "0a6eca4828ea7f3fa67e27f3e5920330": {
+            "text": "Von FrontendForms erben \u00fcbernimmt die Einstellung aus diesem Modul."
+        },
+        "b21811f7d308b36ebaabcce5733c84c4": {
+            "text": "E-Mail-Adresse(n) manuell eingeben"
+        },
+        "11d5afc2d606e7dcba69ea6a02fbf55c": {
+            "text": "Benutzer als Empf\u00e4nger ausw\u00e4hlen"
+        },
+        "3e8111530d73ea308ec70d126e363f09": {
+            "text": "E-Mail-Adresse(n) f\u00fcr die Benachrichtigungs-E-Mail"
+        },
+        "345dd661feed7d2c4551cc86aa884f55": {
+            "text": "W\u00e4hlen Sie aus, ob Sie die Empf\u00e4nger-E-Mail-Adresse(n) f\u00fcr die Benachrichtigungs-Mails manuell eingeben oder Benutzer als Empf\u00e4nger ausw\u00e4hlen m\u00f6chten."
+        },
+        "6c2c3ce201b61bb0f292ddd39547182e": {
+            "text": "Standard-E-Mail-Adresse(n) als Text"
+        },
+        "5d3a3dd183432d96252f3c3ed189b33b": {
+            "text": "Geben Sie eine oder mehrere E-Mails (jeweils in einer neuen Zeile) ein, an die die Benachrichtigungs-E-Mails gesendet werden sollen."
+        },
+        "4144e1473aafd1b9619861b552b12c4c": {
+            "text": "Z.B. email1@mydomain.com"
+        },
+        "b4e60aaff24bc873a9cabdbe476dee92": {
+            "text": "Empf\u00e4nger f\u00fcr die Benachrichtigungs-E-Mail"
+        },
+        "b07e22cf86d72200d151fce81d19095a": {
+            "text": "W\u00e4hlen Sie einen oder mehrere Benutzer aus, die eine Benachrichtigung \u00fcber neue Kommentare erhalten sollen."
+        },
+        "6020d016d5ea7168df60089a9b6b4853": {
+            "text": "Es werden nur Benutzer mit der Berechtigung zum Bearbeiten von Seiten angezeigt."
+        },
+        "6f6da7aec649851c977b6bf4e083977d": {
+            "text": "Absender Adresse"
+        },
+        "e1ca26eb2ee8afa47a146779d2cfbfe9": {
+            "text": "Diese E-Mail-Adresse wird als Absender-E-Mail-Adresse der von diesem Modul gesendeten E-Mails angezeigt."
+        },
+        "fbba3d8e1cdcf39fd8ed54db75bf6014": {
+            "text": "Wenn keine E-Mail-Adresse eingegeben wird, wird stattdessen %s als Absenderadresse angezeigt."
+        },
+        "8eea8281628fde6ba6c3589554795bd2": {
+            "text": "Z.B. Meine Firma"
+        },
+        "c3a7ea0c38bac179a545dbfaf4ebb013": {
+            "text": "Absender Name"
+        },
+        "90069328ca4958e8adefa1ea08141195": {
+            "text": "Dieser Name wird als Absendername der von diesem Modul gesendeten E-Mails angezeigt."
+        },
+        "ddd87293a8b5d9914919b1a4f1b8f7a1": {
+            "text": "Wenn kein Absendername eingegeben wird, wird die E-Mail-Adresse des Absenders als Absendername verwendet."
+        },
+        "b9f5c797ebbf55adccdd8539a65a0241": {
+            "text": "Deaktiviert"
+        },
+        "0ad051f48ed2ca988a4b60689eb13ad5": {
+            "text": "Benutzer k\u00f6nnen nur E-Mail-Benachrichtigungen \u00fcber Antworten auf ihren eigenen Kommentar erhalten"
+        },
+        "4795eaf7300ae848d67ca8c64cfa357f": {
+            "text": "Nutzer k\u00f6nnen Benachrichtigungen zu allen neuen Kommentaren auf der Seite erhalten"
+        },
+        "c0a65fdac2657ab50a8b8efc86465ea8": {
+            "text": "Senden von Benachrichtigungs-Mails an den Autor eines Kommentars"
+        },
+        "4c3857bd8c4100d37215b5a2564e9fcb": {
+            "text": "E-Mail-Benachrichtigungen \u00fcber neue Kommentare an die Autoren senden."
+        },
+        "508ef57ce2a481bc139c0efdb58e36d3": {
+            "text": "Eine Benachrichtigungs-E-Mail senden, wenn der Status auf \"Genehmigt\" ge\u00e4ndert wurde"
+        },
+        "60825941739c69b3f3eb76f22351e176": {
+            "text": "Eine Benachrichtigungs-E-Mail senden, wenn der Status in SPAM ge\u00e4ndert wurde"
+        },
+        "9d00d4a3a50dcdfeee4ab6bbd7015b1f": {
+            "text": "Eine Benachrichtigungs-E-Mail an den Autor eines Kommentars bei \u00c4nderung des Status senden"
+        },
+        "f52773e1b52ed78824098227ad8c1836": {
+            "text": "Hier k\u00f6nnen Sie ausw\u00e4hlen, \u00fcber welche Status\u00e4nderung der Autor per E-Mail informiert werden soll, wenn ein Moderator den Status eines Kommentars \u00e4ndert."
+        },
+        "eeac7b4aba7e7ff5cd7e85ac6e5cb6df": {
+            "text": "Ist ein H\u00e4kchen gesetzt, erh\u00e4lt der Kommentator eine E-Mail, wenn der Kommentarstatus von einem Moderator im Backend oder per E-Mail-Link ge\u00e4ndert wird. Sie k\u00f6nnen das Versenden von E-Mails deaktivieren, indem Sie ein Kontrollk\u00e4stchen deaktivieren."
+        },
+        "e22428c686e2484d13fe958b6dd96ded": {
+            "text": "Rendern der Ausgabe"
+        },
+        "2833803a0c429530b9493f78a4e01308": {
+            "text": "\u00c4ndern Sie einige Parameter, um die bevorzugte Ausgabe zu erhalten."
+        },
+        "e6b8e78a67e641ac0c2159b6a3865315": {
+            "text": "Allgemeine Ausgabeeinstellungen"
+        },
+        "735ab173723a6556cf4e84d74ba8c245": {
+            "text": "Reihenfolge der Ausgabe"
+        },
+        "c6fd6e97fb9371b474b799f957b66081": {
+            "text": "Formular nach den Kommentaren anzeigen"
+        },
+        "2029d9efba9bc9ece9f4474617731b94": {
+            "text": "Die Reihenfolge der Ausgabe des Kommentarformulars und der Kommentare umkehren."
+        },
+        "0121405a4ff4c5da94414ce147b7130e": {
+            "text": "Standardm\u00e4\u00dfig wird das Formular vor den Kommentaren angezeigt. Um dieses Verhalten r\u00fcckg\u00e4ngig zu machen, aktivieren Sie dieses Kontrollk\u00e4stchen."
+        },
+        "96d606ff5296a70b10591abf34cec9fb": {
+            "text": "Einstellungen f\u00fcr das Kommentarformular"
+        },
+        "a047a17dc9aa1ca2c23e2a519e4c1858": {
+            "text": "Um die Anzeige der Standard\u00fcberschrift zu deaktivieren, geben Sie \"none\" in das Eingabefeld ein."
+        },
+        "f213f06d1c3edb31b65dfd68aae4c239": {
+            "text": "Um die Anzeige der Standard\u00fcberschrift zu deaktivieren, geben Sie \"none\" in das Eingabefeld der Standardsprache ein."
+        },
+        "88da20c0f0154fa2951b3e3cc52a38f7": {
+            "text": "Diese \u00dcberschrift wird oberhalb des Kommentarformulars angezeigt."
+        },
+        "c7ecf545f5f6de587ac6ec06d13f5ffd": {
+            "text": "Formular \u00dcberschrift"
+        },
+        "95e2f94b6dc388eef22bf9f1414330d3": {
+            "text": "Wenn keine \u00dcberschrift eingegeben wird, dann wird \"Einen Kommentar schreiben\" als Standard\u00fcberschrift angezeigt."
+        },
+        "97c112fb954c6d49941285b0a10f2159": {
+            "text": "\u00dcberschrift 1"
+        },
+        "122f44489828e6beb295ad2217765c0b": {
+            "text": "\u00dcberschrift 2"
+        },
+        "a582b115656aa341666ea36dff388f04": {
+            "text": "\u00dcberschrift 3"
+        },
+        "8071e7b053449b15dc1d1ced6543ca12": {
+            "text": "\u00dcberschrift 4"
+        },
+        "4519b4f0c69d0bfff7de56da4315107a": {
+            "text": "\u00dcberschrift 5"
+        },
+        "1a78854d05cfcf0cebcf11e9ce24d464": {
+            "text": "\u00dcberschriftentyp f\u00fcr die Formular\u00fcberschrift"
+        },
+        "6bee235ae45a97c74b79322dea6d3ce2": {
+            "text": "W\u00e4hlen Sie den Typ der Formular\u00fcberschrift aus (von h1 bis h5)."
+        },
+        "359310b90581d6b9baa3cdccc10607b2": {
+            "text": "Ja (Bewertung optional)"
+        },
+        "806e88271605e15a20e9d6d47673f42e": {
+            "text": "Ja (Bewertung erforderlich)"
+        },
+        "ba157aa98e6e03109702ab42bd4bbf58": {
+            "text": "Bewertung aktivieren"
+        },
+        "df7b50c9723d92052eaeffab7bb35f51": {
+            "text": "Bitte w\u00e4hlen Sie aus, ob Sie eine Bewertungsm\u00f6glichkeit (Sternen-Bewertung) anbieten m\u00f6chten."
+        },
+        "4f92b1f6a672e400f1aca8f604eed171": {
+            "text": "Deaktivieren des Tooltips neben der Sternebewertung"
+        },
+        "54baab221960e2064bdbf55b28e5f0a2": {
+            "text": "Deaktivieren Sie die Anzeige des Tooltips neben der Sternebewertung"
+        },
+        "242745c9a54b42645d33f00895da5a6d": {
+            "text": "Standardm\u00e4\u00dfig wird neben der Sternebewertung ein Tooltip angezeigt, der die aktuelle Bewertung beim Bewegen des Mauszeigers anzeigt. Aktivieren Sie das Kontrollk\u00e4stchen, um den Tooltip auszublenden."
+        },
+        "a193c5db4e9caf13d07c5cfb137f4ba5": {
+            "text": "Zeichenz\u00e4hler unter dem Textfeldfeld ein-\/ausblenden"
+        },
+        "834dc45731b9a10799aedacd7c09d997": {
+            "text": "Zeichenz\u00e4hler ausblenden"
+        },
+        "dc4caf692f42ac6c96a7aec170e14463": {
+            "text": "Standardm\u00e4\u00dfig wird unter dem Kommentartextfeld ein Zeichenz\u00e4hler angezeigt, der den Benutzer dar\u00fcber informiert, wie viele Zeichen noch \u00fcbrig sind, bis das maximale Limit von 1024 Zeichen erreicht ist."
+        },
+        "89ca52172700db318a89a30e1b677ddc": {
+            "text": "Nichts anzeigen"
+        },
+        "0e99c9e8c94dc2a1c42561e4862923ae": {
+            "text": "Kontrollk\u00e4stchen (Checkbox) anzeigen"
+        },
+        "823dbdeca8e8e353dde97aa7708ff251": {
+            "text": "Text anzeigen"
+        },
+        "52b7eac43569326f5fd14232ef8c8994": {
+            "text": "Hinzuf\u00fcgen von Datenschutztext oder einer Datenschutz-Checkbox zum Formular"
+        },
+        "071fa16b3254ba9ac934930697390c0e": {
+            "text": "W\u00e4hlen Sie aus, ob Sie einen Datenschutztext oder ein Kontrollk\u00e4stchen \u00fcber der Schaltfl\u00e4che \"Senden\" anzeigen m\u00f6chten oder keines von beiden."
+        },
+        "57e0942ea0dc40513cfa36f66cf8a29c": {
+            "text": "Sie k\u00f6nnen die Anzeige des Datenschutztextes\/der Checkbox deaktivieren, sollten sich jedoch dar\u00fcber im Klaren sein, dass dies zu rechtlichen Konsequenzen f\u00fchren kann, wenn in Ihrem Land eine Datenschutzerkl\u00e4rung erforderlich ist."
+        },
+        "6adf97f83acf6453d4a6a4b1070f3754": {
+            "text": "keines"
+        },
+        "053804bfe44674f730a89cf2dd764298": {
+            "text": "Interne Seite"
+        },
+        "fbf193bef032f6c2442411789d4f7397": {
+            "text": "Externe Seite"
+        },
+        "de77856dd44c775827f7c42db84397d4": {
+            "text": "Einen Link zu den Kommentar-Richtlinien anzeigen"
+        },
+        "28930ed32faa8e3d194e1895c4ac0114": {
+            "text": "W\u00e4hlen Sie aus, ob ein Link zu den Kommentar-Richtlinien angezeigt werden soll oder nicht. Sie k\u00f6nnen eine interne oder eine externe Seite ausw\u00e4hlen."
+        },
+        "e1592a318546882848f1e0ed28e87e73": {
+            "text": "Seite, welche die Kommentar-Richtlinien enth\u00e4lt"
+        },
+        "b6d645c6ba9d4b5c08b243219381ca37": {
+            "text": "W\u00e4hlen Sie die Seite aus, die die Kommentar-Richtlinien enth\u00e4lt, indem Sie einen Suchbegriff f\u00fcr den Titel dieser Seite eingeben (z. B. Kommentar-Richtlinien)."
+        },
+        "e38e2b185371380954c6316926668963": {
+            "text": "Der Link zu dieser Seite wird unter dem Eingabefeld f\u00fcr den Kommentartext angezeigt."
+        },
+        "d89e22ce5a02bbacc2e2f8420d6404ed": {
+            "text": "Externe URL f\u00fcr die Kommentar-Richtlinien"
+        },
+        "ec1956ae45a3e9d52292ddfb95bf9df6": {
+            "text": "Geben Sie die URL zu einer externen Seite ein, welche die Kommentar-Richtlinien enth\u00e4lt."
+        },
+        "b70effa6245be35d488a946483a4f09d": {
+            "text": "Einstellungen f\u00fcr die Kommentarliste"
+        },
+        "6108785bf0c89fb74a43a586484263a4": {
+            "text": "Um die Anzeige der \u00dcberschrift zu deaktivieren, geben Sie \"none\" in das Eingabefeld ein."
+        },
+        "adac381451006d24739fffac2ccb01b3": {
+            "text": "Um die Anzeige der \u00dcberschrift zu deaktivieren, geben Sie \"none\" in das Eingabefeld der Standardsprache ein."
+        },
+        "ce8737484e016d6e05953f8f3ceefa39": {
+            "text": "\u00dcberschrift der Kommentarliste"
+        },
+        "98078e88590430c293bbed827d48c1d3": {
+            "text": "Diese \u00dcberschrift wird oberhalb der Kommentarliste angezeigt."
+        },
+        "4879128bcd4ad0739d728b7ab7678248": {
+            "text": "Wenn keine \u00dcberschrift eingegeben wird, dann wird \"Kommentare\" als Standard\u00fcberschrift angezeigt."
+        },
+        "8be79f89a1e70811885864262663b22c": {
+            "text": "\u00dcberschriftentyp f\u00fcr die Kommentarlisten\u00fcberschrift"
+        },
+        "525d41ed41a046cce9b966d2d72db275": {
+            "text": "W\u00e4hlen Sie den Typ der Kommentar\u00fcberschrift aus (von h1 bis h5)."
+        },
+        "9e6530a34353d7610fd5455767b28df4": {
+            "text": "Antworttiefe"
+        },
+        "3021b5265415ae4e5874039fb0ec09dc": {
+            "text": "W\u00e4hlen Sie die Anzahltiefe f\u00fcr die Antwort-Kommentare aus."
+        },
+        "6e97fb6e5fbbe1d65533fa0677586336": {
+            "text": "Geben Sie 0 f\u00fcr herk\u00f6mmliche, flache, chronologische Kommentare an. Geben Sie f\u00fcr Antwort-Kommentare (Antworten werden unterhalb des Kommentars angezeigt, auf den geantwortet wird) die maximal zul\u00e4ssige Tiefe f\u00fcr Antworten an (0 bis 3 empfohlen)."
+        },
+        "06f1ac65b0a6a548339a38b348e64d79": {
+            "text": "Sortierungsreihenfolge"
+        },
+        "3a9e45e8efa2abf76ef63223e22daa36": {
+            "text": "Vom neuesten zum \u00e4ltesten"
+        },
+        "f9dddc270248ced9bb35b296fc3c6b61": {
+            "text": "Geben Sie die Sortierungsreihenfolge f\u00fcr die Kommentare an."
+        },
+        "dd56ad901343f6e8245a49774f88175e": {
+            "text": "Standardm\u00e4\u00dfig werden Kommentare chronologisch sortiert (\u00e4lteste bis neueste). Um dieses Verhalten umzukehren, aktivieren Sie dieses Kontrollk\u00e4stchen. Nur zur Erinnerung: Dies betrifft nur die Hauptkommentare, nicht aber die Antworten auf die Kommentare."
+        },
+        "7cacb7f44d31e07288195d7491114a52": {
+            "text": "Abstimmung von Kommentaren ein-\/ausblenden"
+        },
+        "9a799cddb654e7ff5c480b745d4ebf8a": {
+            "text": "Abstimmung von Kommentaren aktivieren"
+        },
+        "637d15266d2ef7f39160da733e288f6b": {
+            "text": "Durch das Aktivieren bieten Sie Besuchern die M\u00f6glichkeit an, Kommentare mit gef\u00e4llt mir\/gef\u00e4llt mir nicht zu bewerten."
+        },
+        "ad60a64d03fa5db8f3de8f54dc4b40ab": {
+            "text": "Anzahl der Tage, bevor erneut abgestimmt werden kann"
+        },
+        "0a068b72a2ebbd95f672f7207f80d38e": {
+            "text": "Um zu verhindern, dass ein und derselbe Benutzer mehrere Bewertungen abgibt, pr\u00fcft dieses Modul, ob der Benutzer bereits abgestimmt hat. Bitte geben Sie einen Zeitraum in Tagen ein, in dem eine weitere Bewertung nicht zul\u00e4ssig ist."
+        },
+        "7232c1e17dae3634adbc9196eee40351": {
+            "text": "Die Identifizierung des Nutzers erfolgt anhand der Daten seines Internet-Fingerabdrucks. Das bedeutet, dass die IP-Adresse, das Browsersystem und die Benutzerkennung mit Eintr\u00e4gen in der Datenbank abgeglichen werden. Wenn ein Eintrag mit den gleichen Daten gefunden wird, dann ist die Bewertung nicht erlaubt. Eintr\u00e4ge in der Datenbank, die \u00e4lter als der oben ausgew\u00e4hlte Zeitraum sind, werden automatisch gel\u00f6scht und der Benutzer darf erneut bewerten."
+        },
+        "4a8f50856ac0810b9b83fde90449edcf": {
+            "text": "Komplettes Datum"
+        },
+        "99c483e1d11b1a279a2a1a3960528487": {
+            "text": "Relative Datumsangabe"
+        },
+        "bfaf2f2e5431a236eb6bb536db04f9c0": {
+            "text": "Datums-\/Uhrzeitformat f\u00fcr Kommentare"
+        },
+        "d3721897c8cc5c256af7d5275329c762": {
+            "text": "W\u00e4hlen Sie aus, ob Sie das Datum\/die Uhrzeit eines Kommentars als vollst\u00e4ndiges oder relatives Datum anzeigen m\u00f6chten."
+        },
+        "761748058bd227a341891f6a3c578db6": {
+            "text": "Das Format eines vollst\u00e4ndigen Datums kann in der Konfiguration des FrontendForms-Moduls definiert werden."
+        },
+        "d8e4d251281d05f85acf5cc936fa7f4d": {
+            "text": "Einstellungen f\u00fcr Stylesheets und Skripte"
+        },
+        "c454d41006c3a47ef050056608a6b7d9": {
+            "text": "Javascript-Einstellung"
+        },
+        "3645d108b1e3009bf9aac0c3a9aaed11": {
+            "text": "Alle Javascript-Dateien f\u00fcr die Kommentare aus dem Frontend entfernen"
+        },
+        "a786e88a6a6d6d63d547206949a3de91": {
+            "text": "Alle JavaScript-Dateien, die f\u00fcr einige Funktionen der Kommentare ben\u00f6tigt werden, werden standardm\u00e4\u00dfig vor dem schlie\u00dfenden body-Tag im Frontend hinzugef\u00fcgt. Sie k\u00f6nnen das Einbetten der JS-Dateien verhindern, indem Sie das Kontrollk\u00e4stchen aktivieren."
+        },
+        "6bfa90ae9f841ec2adedb46975347afd": {
+            "text": "CSS-Einstellung"
+        },
+        "b25d8e2b35baee5ba2d65449612612e8": {
+            "text": "Entfernen Sie alle CSS-Dateien f\u00fcr die Kommentare aus dem Frontend"
+        },
+        "7303aadaa12065e79fbde6a63159ca00": {
+            "text": "Alle CSS-Dateien f\u00fcr die Kommentare werden standardm\u00e4\u00dfig zum Head-Bereich hinzugef\u00fcgt. Sie k\u00f6nnen das Einbetten der CSS-Dateien verhindern, indem Sie das H\u00e4kchen setzen."
+        },
+        "2932b465b48cf0d7c9caaf511d0c0e61": {
+            "text": "Spam-Schutz"
+        },
+        "bf31492fe5d4821b483bc7cb8cfe07a3": {
+            "text": "Anzahl der Tage, nach denen Spam-Kommentare gel\u00f6scht werden sollen"
+        },
+        "3c87bbed4a0e03d19c4677dbbe64ffc8": {
+            "text": "Nach Ablauf der angegebenen Anzahl von Tagen werden Kommentare, die als Spam markiert wurden, automatisch gel\u00f6scht."
+        },
+        "f00bcb850acb30b9097adf556916cacc": {
+            "text": "Wenn Sie die automatische Spam-L\u00f6schung deaktivieren m\u00f6chten, w\u00e4hlen Sie bitte 0 aus."
+        },
+        "5bfe6a369b802afdb9bb4909ac726c2d": {
+            "text": "Von FrontendForms \u00fcbernehmen"
+        },
+        "b23bb4764e36673626f332b94178c5ec": {
+            "text": "Kein CAPTCHA"
+        },
+        "291d6945a9da1c9a56be64a04e003112": {
+            "text": "="
+        },
+        "03a342a1eb34897b1a2571498eaefe9e": {
+            "text": "W\u00e4hlen Sie aus, ob Sie ein CAPTCHA f\u00fcr das Kommentarformular verwenden m\u00f6chten."
+        },
+        "ebb7b1091b44d7c661da133022fe59e0": {
+            "text": "Wenn Sie viele Spam-Kommentare erhalten, k\u00f6nnen Sie ein CAPTCHA aktivieren, um zu verhindern, dass Spam-Bots das Formular ausf\u00fcllen."
+        },
+        "cbb81506a7fe3ef03f7a89c76c52131a": {
+            "text": "Paginierung"
+        },
+        "d5410401334f3c215c57ddb12c921f08": {
+            "text": "Legen Sie die Anzahl der Kommentare pro Seite fest"
+        },
+        "9b78984d701b25137be086c09e05c691": {
+            "text": "Geben Sie ein, wie viele Kommentare pro Seite angezeigt werden sollen."
+        },
+        "7d0e620ac5c535a43fa46f00b48f8dc8": {
+            "text": "Ein Wert von 0 deaktiviert die Paginierung und zeigt alle Kommentare auf einer Seite an."
+        },
+        "811882fecd5c7618d7099ebbd39ea254": {
+            "text": "links"
+        },
+        "adb115059e28d960fa8badfac5516667": {
+            "text": "zentriert"
+        },
+        "7c4f29407893c334a6cb7a87bf045c0d": {
+            "text": "rechts"
+        },
+        "8ae4c829fd76b1798988bf6929d41222": {
+            "text": "Festlegen der Ausrichtung der Paginierung"
+        },
+        "e2d5ba56996335a4efc50568a606dde8": {
+            "text": "W\u00e4hlen Sie aus, ob die Paginierung links, zentriert oder rechts angezeigt werden soll."
+        },
+        "8152e92924892023d55b62a942636981": {
+            "text": "Kurze Anleitung"
+        },
+        "3b64646327344fc5cd94ff958dd0f822": {
+            "text": "Hier erfahren Sie, wie Sie die Kommentare auf einer Seite implementieren k\u00f6nnen."
+        },
+        "f0e6470a59ba296234e70d2791152c7f": {
+            "text": "Zuerst m\u00fcssen Sie dieses Feld zu einer Vorlage hinzuf\u00fcgen, in der Sie Kommentare anzeigen m\u00f6chten."
+        },
+        "823872c325ceb2febc23b4824f57ce9f": {
+            "text": "Platzieren Sie diesen Code anschlie\u00dfend an einer Stelle innerhalb dieser Vorlage, an der das Formular und die Kommentarliste angezeigt werden sollen."
+        },
+        "55205f0b6fb5909723c7af3dbf56b843": {
+            "text": "Der einfachste Weg, Kommentare zu integrieren"
+        },
+        "411c2c10cb3226bd64bf6a461ec0e427": {
+            "text": "In diesem Fall werden die globalen Einstellungen \u00fcbernommen."
+        },
+        "d6646838e03ddc8a8c3fd7e256328689": {
+            "text": "Kopieren Sie diese Codezeile, und f\u00fcgen Sie sie Ihrer Vorlage hinzu, in der die Kommentare angezeigt werden sollen."
+        },
+        "82b9cd91f95fab5673564752dbea51c5": {
+            "text": "Integration von Kommentaren mit benutzerdefinierten Einstellungen pro Feld"
+        },
+        "e48639fe753f3453b346b6339e314dc0": {
+            "text": "Bei Bedarf kann fast jeder Parameter der globalen Einstellungen innerhalb der Vorlagen \u00fcberschrieben werden."
+        },
+        "e3e2a9bfd88566b05001b02a3f51d286": {
+            "text": "Docs"
+        },
+        "6054f050e1c57def485e7c3fec6973cd": {
+            "text": "Viele weitere Informationen zu diesem Modul finden Sie in den %s."
+        },
+        "6b8c682577d63258030293d8bac4919b": {
+            "text": "="
+        },
+        "bbe8f47078082191d89866cabaad534d": {
+            "text": "Eingabefeld, welches auf Basis des FrontendForms-Modul Kommentare auf einer Seite anzeigen kann"
+        },
+        "c0d8e3a0d07970818a6a2e3bdf06a446": {
+            "text": "Der Kommentar #%s kann nicht auf den Status \"%s\" gesetzt werden, da bereits Antworten vorhanden sind. Daher bleibt der Status bei \"%s\"."
+        },
+        "ff48b88ed6d41226c4b673070c4e9d51": {
+            "text": "Kommentar #%s kann nicht gel\u00f6scht werden, da es bereits Antworten auf diesen Kommentar gibt. Daher bleibt der Status bei \"%s\"."
+        },
+        "cb487bd3a925abfee5e6547913762c70": {
+            "text": "Sie m\u00fcssen zuerst alle Antworten l\u00f6schen, bevor Sie diesen Kommentar l\u00f6schen k\u00f6nnen."
+        },
+        "bca7a54fd8d1a225879aa80d4911e78f": {
+            "text": "Sie m\u00fcssen zuerst alle Antworten l\u00f6schen, bevor Sie diesen Kommentar als SPAM markieren k\u00f6nnen."
+        },
+        "e2702e8b9c1efdd2e4662873c3114be2": {
+            "text": "Genehmigung ausstehend"
+        },
+        "787d5f05953ec39b108869dfdd7733e6": {
+            "text": "Genehmigt"
+        },
+        "c72beebe6ecbdddff71b846c4858ebcb": {
+            "text": "="
+        },
+        "dd0d24a48197b2785e34fa674d5da2e3": {
+            "text": "Hervorgehoben"
+        }
+    }
+}

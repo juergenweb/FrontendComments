@@ -1,0 +1,24 @@
+{
+    "file": "site\/modules\/FrontendComments\/FrontendCommentPagination.php",
+    "textdomain": "site--modules--frontendcomments--frontendcommentpagination-php",
+    "translations": {
+        "d0ff15bc3ce00b8142300413b9ac74f0": {
+            "text": "Kommentar Paginierung"
+        },
+        "d3288bd361911540199bc0fd51ba1d79": {
+            "text": "Zur ersten Seite"
+        },
+        "91656ffa27922286519776a426945b96": {
+            "text": "Zur letzten Seite"
+        },
+        "ec2e9a76f283943d0ccde5352785731c": {
+            "text": "Seit %s"
+        },
+        "2a27102f3df4dcb2bc84030e0d557b22": {
+            "text": "Zur Seite %s"
+        },
+        "d3962027a77ab633ef4d35b7218b07ff": {
+            "text": "Es werden %s bis %s von insgesamt %s Kommentaren angezeigt"
+        }
+    }
+}

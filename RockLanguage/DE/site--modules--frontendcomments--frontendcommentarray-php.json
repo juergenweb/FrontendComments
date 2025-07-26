@@ -1,0 +1,63 @@
+{
+    "file": "site\/modules\/FrontendComments\/FrontendCommentArray.php",
+    "textdomain": "site--modules--frontendcomments--frontendcommentarray-php",
+    "translations": {
+        "3cd6e6d75ce5d7a458bc41e60e8b1505": {
+            "text": "Sie haben bereits den Empfang von Antwortbenachrichtigungen zu diesem Kommentar deaktiviert."
+        },
+        "46ddfb6e2a6fb175c91bd81e62276cd2": {
+            "text": "Sie haben den Erhalt von Benachrichtigungs-Emails zu Anworten auf Kommentare erfolgreich deaktiviert."
+        },
+        "4b09de74c9d21f989f680f65fc33200d": {
+            "text": "Leider wurde zu diesem Code kein passender Kommentar gefunden."
+        },
+        "50fa6a080936b165819c911a03fc71aa": {
+            "text": "Kommentar anzeigen"
+        },
+        "98f08734a957c975c70d8fb27529f3be": {
+            "text": "Leider wurde der Status dieses Kommentars bereits per Remote-Link ge\u00e4ndert."
+        },
+        "fe057de6fb874e1c1518ada871ca530e": {
+            "text": "Aus Sicherheitsgr\u00fcnden kann der Status eines Kommentars nur einmal per Remote-Link ge\u00e4ndert werden. Sie m\u00fcssen sich im Backend anmelden, um den Status dieses Kommentars abermals zu \u00e4ndern."
+        },
+        "f90b90878625ff2d53483512de91d4c4": {
+            "text": "Auf Best\u00e4tigung waren"
+        },
+        "787d5f05953ec39b108869dfdd7733e6": {
+            "text": "Best\u00e4tigt"
+        },
+        "e09f6a7593f8ae3994ea57e1117f67ec": {
+            "text": "Spam"
+        },
+        "1a73fc6effc1b0a4dc8842b7f9353f01": {
+            "text": "Der Status des Kommentars auf \"%s\" ge\u00e4ndert."
+        },
+        "d9a4fd2cdaaf3515539c8dd2eff0ecff": {
+            "text": "Zus\u00e4tzlich wurde eine E-Mail an den Kommentator gesendet, um ihn \u00fcber die Status\u00e4nderung zu informieren."
+        },
+        "57d563f11d78936043f9900c32205580": {
+            "text": "Leider ist w\u00e4hrend des Update-Prozesses des Status ein Fehler aufgetreten."
+        },
+        "01e4673bc90d92d03c35a86ef82ccc63": {
+            "text": "Es sieht so aus als ob Sie diesen Kommentar bereits innerhalb der letzten %s Tage bewertet haben."
+        },
+        "77dcd195d263dd3dec28f8d716ad886e": {
+            "text": "Es sieht so aus als ob Sie diesen Kommentar bereits innerhalb des letzten Tages bewertet haben."
+        },
+        "619bccb1d2e85cb472bb415a0f682641": {
+            "text": "In diesem Fall d\u00fcrfen Sie keine Bewertung mehr abgeben."
+        },
+        "3c077e0b71b62f9479f04f9d34490158": {
+            "text": "Es tut uns leid, aber dieser Kommentar wurde nicht gefunden. Es ist m\u00f6glich, dass dieser Kommentar bereits gel\u00f6scht oder noch nicht ver\u00f6ffentlicht wurde."
+        },
+        "a782fa9928c118655815f79dec25bd84": {
+            "text": "Bitte legen Sie f\u00fcr dieses Kommentarfeld mindestens eine Moderations-E-Mail-Adresse fest (gehen Sie zur Backend-Konfiguration oder legen Sie diese \u00fcber die API fest). Andernfalls werden die Kommentare nicht angezeigt."
+        },
+        "cfc5f738c1561a355c69686f616206bb": {
+            "text": "Bitte loggen Sie sich ein, um einen Kommentar abzugeben."
+        },
+        "57ede60cbc6b2bdd54f90e8f6016fc51": {
+            "text": "Bitte melden Sie sich im Backend an und entfernen Sie den Text manuell aus diesem Kommentar, anstatt den Status auf \"SPAM\" zu setzen!"
+        }
+    }
+}

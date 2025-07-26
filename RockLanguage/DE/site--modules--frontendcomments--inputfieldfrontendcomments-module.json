@@ -1,0 +1,96 @@
+{
+    "file": "site\/modules\/FrontendComments\/InputfieldFrontendComments.module",
+    "textdomain": "site--modules--frontendcomments--inputfieldfrontendcomments-module",
+    "translations": {
+        "8413c683b4b27cc3f4dbd4c90329d8ba": {
+            "text": "Kommentare"
+        },
+        "2670994d655a0011a1cb80d5aa3c614a": {
+            "text": "Es gibt momentan noch keine Kommentare."
+        },
+        "0be8406951cdfda82f00f79328cf4efc": {
+            "text": "Kommentar"
+        },
+        "42d8cbb191daf2f2a757954b812a86be": {
+            "text": "Gepostet am: %s"
+        },
+        "ce8ae9da5b7cd6c3df2929543a9af92d": {
+            "text": "E-Mail"
+        },
+        "a517747c3d12f99244ae598910d979c5": {
+            "text": "Autor"
+        },
+        "ec53a8c4f07baed5d8825072c89799be": {
+            "text": "="
+        },
+        "b8e2c23a15e49a10d6f0562a3dce2538": {
+            "text": "Wartet auf Best\u00e4tigung"
+        },
+        "6f8063417ab31f38d864c28302f3de2f": {
+            "text": "Best\u00e4tigt"
+        },
+        "15422d54ec0d47000dc86a9820a5237e": {
+            "text": "Hervor gehoben"
+        },
+        "c72beebe6ecbdddff71b846c4858ebcb": {
+            "text": "="
+        },
+        "851777bf0529c4d9d9d0bad0f792cd25": {
+            "text": "Kommentar l\u00f6schen"
+        },
+        "339f7a2e087a159e6a31501649027a77": {
+            "text": "="
+        },
+        "67e9e3043ec6e316533afb14cd12c416": {
+            "text": "Anwort des Moderators auf den Kommentar"
+        },
+        "5d9e79d8b579d9d8eee90015b2000c6d": {
+            "text": "Schreiben Sie ein Feedback zu einem Kommentar"
+        },
+        "ff3fc5302540ebcb78034d59f84be69e": {
+            "text": "Dieser Text wird direkt unter dem Kommentar angezeigt."
+        },
+        "e7938df917f210c96c4cb63cdf109934": {
+            "text": "Der Kommentartext zum Kommentar #%d darf nur ge\u00e4ndert, aber nicht gel\u00f6scht werden."
+        },
+        "58b6f822b062991647cf2e70b0140352": {
+            "text": "Update %s f\u00fcr Kommentar #%d"
+        },
+        "80aee52c43398637f7685f009add0b96": {
+            "text": "Die E-Mail Adresse zum Kommentar #%d darf nur ge\u00e4ndert, aber nicht gel\u00f6scht werden."
+        },
+        "bbb98b0320e540ca03c4912422da2364": {
+            "text": "Die E-Mail-Adresse im Kommentar #%s hat nicht das richtige Format."
+        },
+        "716da7dc957e36f4347363cf82b68637": {
+            "text": "Die E-Mail-Adresse ist ung\u00fcltig."
+        },
+        "7c324f0a1d6d2a8231407a5ddd84467a": {
+            "text": "Der Name des Autors des Kommentars #%d darf nur ge\u00e4ndert, aber nicht gel\u00f6scht werden."
+        },
+        "075354b947277fa05b1b47b883081b75": {
+            "text": "Die URL der Homepage des Autors von Kommentar #%s ist keine g\u00fcltige URL."
+        },
+        "c9945a03d85d04b3fe7a1091ad8425a2": {
+            "text": "Dies ist keine g\u00fcltige URL"
+        },
+        "79c04c74c1987dee20f384815e7347d1": {
+            "text": "Der Statuswert f\u00fcr Kommentar #%s ist ung\u00fcltig."
+        },
+        "b77e1cde3409464c7ca450dfe273200c": {
+            "text": "="
+        },
+        "b28e4f256b1d9cf092c2d20c9f3a2072": {
+            "text": "Eingabefeld zur Verwaltung von Kommentaren auf einer Seite."
+        },
+        "04e1f22895b279ec005be084d10f9e73": {
+            "text": "Kommentar Manager"
+        },
+        "d434a943a70986bca2b1ff9b2248e55b": {
+            "text": "Bitte verwenden Sie den %s, um die Kommentare zu bearbeiten."
+        },
+        "111c88cb616ce6794097be71155cf20b": {
+            "text": "IDs der Antwortkommentare"
+        }
+    }
+}

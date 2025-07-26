@@ -1,0 +1,102 @@
+{
+    "file": "site\/modules\/FrontendComments\/Notifications.php",
+    "textdomain": "site--modules--frontendcomments--notifications-php",
+    "translations": {
+        "cb4e3114336d9bafb764a393cde7fcda": {
+            "text": "kommentar-benachrichtigung"
+        },
+        "e64cbfaa522a2c58dffcc4644da8381c": {
+            "text": "Benachrichtigung nur bei Antworten auf diesen Kommentar"
+        },
+        "337580202adb97f0ea79d943ea1cebaa": {
+            "text": "Benachrichtigung bei allen Antworten"
+        },
+        "950a293c0f698a24a895844f06f2f308": {
+            "text": "Ein neuer Kommentar wurde verfasst"
+        },
+        "76f54deb9573cc91e1d22b317feef46d": {
+            "text": "Bitte \u00fcberpr\u00fcfen Sie den neuen Kommentar"
+        },
+        "3d5ab7118b660b06699a72629f08a49d": {
+            "text": "nicht bewertet"
+        },
+        "b8bfb1838004df66c035d63b9da9ffe9": {
+            "text": "Ein neuer Kommentar wurde eingereicht"
+        },
+        "693e14c3c0dd3757d95b4ee5cf0d7bb3": {
+            "text": "Status des Kommentars"
+        },
+        "6b6304f063e87c3dee21decab212a84b": {
+            "text": "Den Kommentar ver\u00f6ffentliche"
+        },
+        "29eaf723511eeb59761c47306b96da22": {
+            "text": "Diesen Kommentar als SPAM markieren"
+        },
+        "1d833f9fc1cdde2141e734b011366ede": {
+            "text": "Eine neue Antwort wurde eingereicht"
+        },
+        "ed5bf3f989f7bcb0cb50f883ef6e7e44": {
+            "text": "Sie erhalten diese E-Mail, weil Sie zugestimmt haben, benachrichtigt zu werden, wenn eine neue Antwort ver\u00f6ffentlicht wurde."
+        },
+        "186c30cab59f6b64a453778330d4bbf0": {
+            "text": "Neuer Kommentar"
+        },
+        "a517747c3d12f99244ae598910d979c5": {
+            "text": "Verfasser"
+        },
+        "4da927258b51836bf868124df5d1cc4a": {
+            "text": "Zum Kommentar"
+        },
+        "769fdf2762cff06a9670f0e9ae653229": {
+            "text": "Link zum Kommentar"
+        },
+        "18598d7ecd6e1628453abf0380022ddf": {
+            "text": "Wenn Sie keine weiteren E-Mails \u00fcber neue Antworten erhalten m\u00f6chten, klicken Sie bitte auf den nachfolgenden Link"
+        },
+        "d4ca2f5e9339a7dd75747d396760f67f": {
+            "text": "Ich m\u00f6chte keine weiteren Benachrichtigungsmails \u00fcber neue Kommentare erhalten"
+        },
+        "b424841ebd158f5a05338850f5a3e60e": {
+            "text": "Neue Antwort auf einen Kommentar"
+        },
+        "f705e618788426fa888d4f61524b670c": {
+            "text": "Eine neue Antwort wurde gepostet"
+        },
+        "8128b8bae3e78a77db90f8d948926c72": {
+            "text": "Der Status Ihres Kommentars wurde von einem Moderator ge\u00e4ndert"
+        },
+        "74c51c5063f0dd96a2dcf4a6408b5fbe": {
+            "text": "Wir m\u00f6chten Sie dar\u00fcber informieren, dass der folgende Kommentar, den Sie verfasst haben, nun von einem Moderator \u00fcberpr\u00fcft wurde:"
+        },
+        "89d59b6a2e328a01b01f0dec2cd23275": {
+            "text": "Der Status des Kommentars wurde ge\u00e4ndert in:"
+        },
+        "e12b1b10835626a446c0c9133d9ce5a3": {
+            "text": "Ihr Kommentar ist nun ver\u00f6ffentlicht und f\u00fcr alle sichtbar."
+        },
+        "b8eb70ffa3f1e2401992a60aa9963d35": {
+            "text": "Link zu Ihrem Kommentar"
+        },
+        "50fa6a080936b165819c911a03fc71aa": {
+            "text": "Kommentar anzeigen"
+        },
+        "c1d26065a72f79bdd7e46e20c4f74302": {
+            "text": "Es tut uns leid, aber Ihr Kommentar enth\u00e4lt Inhalte, die gegen unsere Richtlinien versto\u00dfen."
+        },
+        "3c0b5b3e6fca0750bdaf1c0d15785330": {
+            "text": "Aus diesem Grund kann Ihr Kommentar nicht ver\u00f6ffentlicht werden."
+        },
+        "5910c00d0badf40f227631c103161029": {
+            "text": "Community-Richtlinien"
+        },
+        "0a8be9316eec891e0dc42cceb34dffb2": {
+            "text": "Unsere Community-Richtlinien f\u00fcr das Posten von Kommentaren findest du hier: %s"
+        },
+        "1351a9eb61a28d8c8c5ba8bdd56fc97b": {
+            "text": "Der Status des Kommentars wurde ge\u00e4ndert"
+        },
+        "40994b502d147cb982c49808562ae426": {
+            "text": "Der Status Ihres Kommentars wurde in %s ge\u00e4ndert."
+        }
+    }
+}
