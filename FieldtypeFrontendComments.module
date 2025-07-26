@@ -109,8 +109,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         // run only on FieldtypeFrontendComments
         if ($event->object instanceof FieldtypeFrontendComments) {
 
-            bd('correctStatusValues runs');
-
             $page = $event->arguments(0);
             $field = $event->arguments(1);
             $fieldName = $field->name;
@@ -131,18 +129,18 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                         switch ($newStatus) {
                             case (FieldtypeFrontendComments::pendingApproval):
                                 if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
-                                    $text = sprintf($this->_('Comment #%s cannot be set to status "%s", because it has published replies. Therefore the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::pendingApproval], self::statusTexts()[$oldStatus]);
+                                    $text = sprintf($this->_('The comment #%s cannot be set to the status "%s" because answers already exist. Therefore, the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::pendingApproval], self::statusTexts()[$oldStatus]);
                                 }
                                 break;
                             case ('delete'):
                                 if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
-                                    $text = sprintf($this->_('Comment #%s cannot be deleted, because replies exist to this comment. Therefore the status remains at "%s".'), $n, self::statusTexts()[$oldStatus]);
-                                    $text .= ' ' . $this->_('You have to delete the replies first before you can delete this comment.');
+                                    $text = sprintf($this->_('Comment #%s cannot be deleted because there are already replies to this comment. Therefore, the status remains at "%s".'), $n, self::statusTexts()[$oldStatus]);
+                                    $text .= ' ' . $this->_('You must first delete all replies before you can delete this comment.');
                                 }
                                 break;
                             case(FieldtypeFrontendComments::spam):
-                                $text = sprintf($this->_('Comment #%s cannot be set to status "%s", because replies exist to this comment. Therefore the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::spam], self::statusTexts()[$oldStatus]);
-                                $text .= ' ' . $this->_('You have to delete the replies first before you can mark this comment as SPAM.');
+                                $text = sprintf($this->_('The comment #%s cannot be set to the status "%s" because answers already exist. Therefore, the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::spam], self::statusTexts()[$oldStatus]);
+                                $text .= ' ' . $this->_('You must first delete all replies before you can mark this comment as SPAM.');
                                 break;
                         }
                         if (!is_null($text)) {
@@ -181,7 +179,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         // run only on FieldtypeFrontendComments
         if ($event->object instanceof FieldtypeFrontendComments) {
 
-            bd('updateTables runs');
             // run only on admin pages
             //if( $page->template != 'admin' ) return;
 
