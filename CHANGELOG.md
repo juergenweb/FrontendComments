@@ -11,4 +11,8 @@ All notable changes to this project will be documented in this file.
 * CKEditor features have been reduced: A lot of buttons like PWImage, Word, Scat and so on have been removed to reduce the CKEditor features to a minimum
 * Sanitizer "textarea" has been removed from the feedback CKEditor field: This sanitizer was responsible that HTML tags were not saved, so it was removed now.
 
+## [1.0.3] - 2025-07-26
+
+* Complete code re-written
+
 
