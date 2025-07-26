@@ -1,0 +1,231 @@
+/*
+This CSS file contains all general styles for all types of markups (frameworks and no frame work)
+ */
+
+.fc-comment-form-wrapper, .fcm-comments-list {
+    margin-bottom: 20px;
+}
+
+
+.level-1 {
+    padding-left: 20px;
+}
+
+.level-2 {
+    padding-left: 40px;
+}
+
+.level-3 {
+    padding-left: 60px;
+}
+
+.level-4 {
+    padding-left: 80px;
+}
+
+.level-5 {
+    padding-left: 100px;
+}
+
+.level-6 {
+    padding-left: 120px;
+}
+
+.fc-listitem {
+    margin-top: 20px;
+}
+
+
+.fcm-comments-list .fc-reply-form-wrapper {
+    margin-bottom: 0;
+}
+
+.gl-star-rating {
+    padding-bottom: 20px;
+}
+
+/* Spinner, which will be displayed during reply form will be loaded */
+
+.fc-reply-form-loader-wrapper {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.fc-reply-form-loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #ddd;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Alert dialog if reply form could not be loaded */
+.fcm-comments-list .fc-alert-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lato', sans-serif;
+}
+
+.fcm-comments-list .fc-alert-dialog {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border-radius: 6px;
+}
+
+.fcm-comments-list .fc-alert-text {
+    margin-top: -95px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    h1 {
+        font-size: 36px;
+        color: #36424a;
+        margin: 0;
+    }
+    p {
+        margin: 0;
+        margin-top: 14px;
+    }
+}
+
+.fcm-comments-list .fc-triangle-up-red {
+    position: relative;
+    top: 0;
+    width: 0;
+    height: 0;
+    border-left: 62px solid transparent;
+    border-right: 62px solid transparent;
+    border-bottom: 109px solid #ef8b8b!important;
+}
+
+.fcm-comments-list .fc-triangle-up-white {
+    position: relative;
+    top: -114px;
+    width: 0;
+    height: 0;
+    border-left: 53px solid transparent;
+    border-right: 53px solid transparent;
+    border-bottom: 94px solid white;
+}
+
+.fcm-comments-list .fc-rectangle-path {
+    position: relative;
+    top: 24px;
+    left: -2.1px;
+    width: 5px;
+    height: 34px;
+    background-color: #ef8b8b;
+}
+
+.fcm-comments-list .fc-dot-path {
+    position: relative;
+    top: 20px;
+    left: -5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ef8b8b;
+}
+
+.fcm-comment-spam {
+    padding: 5px;
+    background: #eee;
+}
+
+.fcm-comment-box .fc-novote {
+    margin-bottom: 0;
+}
+
+.fcm-comment-box .fcm-star-rating-result .fcm-star {
+    font-size: 22px;
+    width: 15px;
+    top: 0;
+    display: inline-block;
+    color: #666;
+}
+
+.fcm-comment-box .fcm-star-rating-result .fcm-star:last-child {
+    margin-right: 0;
+}
+
+.fcm-comment-box .fcm-star-rating-result .fcm-star:before {
+    content: '\2605';
+}
+
+.fcm-comment-box .fcm-star-rating-result .fcm-star.on {
+    color: #fdd835;
+}
+
+.fcm-comment-box .fcm-star-rating-result .fcm-star.half:after {
+    content: '\2605';
+    color: #fdd835;
+    position: absolute;
+    margin-left: -19px;
+    width: 10px;
+    overflow: hidden;
+}
+
+
+.half-star {
+    background-image: url('../img/star-half.svg');
+}
+
+.fc-cancel-link-wrapper {
+    padding-bottom: 20px;
+}
+
+form.reply-form {
+    padding: 20px 0;
+}
+
+/* new */
+
+.fc-comments-wrapper:after, .fc-listitem:after {
+    content: '';
+    display: block;
+    clear: both;
+    height: 0;
+    width: 0;
+}
+
+.fc-listitem {
+    margin-bottom: 30px;
+}
+
+/* Levels (Thread depth) */
+.fc-commentlist .level-1 {
+    padding-left: 20px;
+}
+
+.fc-commentlist .level-2 {
+    padding-left: 40px;
+}
+
+.fc-commentlist .level-3 {
+    padding-left: 60px;
+}
+
+.fc-commentlist .level-4 {
+    padding-left: 80px;
+}
+
+.fc-commentlist .level-5 {
+    padding-left: 100px;
+}

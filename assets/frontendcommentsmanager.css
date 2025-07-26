@@ -1,0 +1,80 @@
+
+
+#fcm-filter-form > div {margin-bottom: 10px}
+.fcm-link-nav {list-style-type: none; padding-left: 0;margin-top: 35px;}
+.fcm-link-nav li {display:inline;}
+.fcm-link-nav li span::after {content: "|"; padding-right: 10px;}
+.fcm-link-nav li:last-child span::after {content: none;}
+.fcm-link-nav a {margin-right: 12px;}
+.comment-changed {
+    position: absolute;
+    top:0;
+    padding: 5px 0;
+}
+.fcm-comment .fa, .fcm-link-nav .fa {margin-right: 5px;}
+.fcm-comment td {vertical-align: middle;}
+.fcm-comment-content {padding: 10px 0;}
+.fcm-comment-feedback {margin-top: 30px; }
+.fcm-comment-feedback-text {background:#fff;}
+.fcm-comment-wrapper {padding-bottom: 20px; border-bottom: 1px dashed #000;}
+.fcm-comment-wrapper:last-child {border-bottom: none;}
+#fcmm-comment-list pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: justify;
+}
+#fcm-filter-tags {list-style-type: none; padding-left: 0}
+#fcm-filter-tags li {display:inline-block;
+    margin: 0 10px 5px 0;
+    border: 1px solid #dee2e5;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 6px 15px;
+    color: #a9b1b5;
+    transition: all 300ms ease-in-out;
+}
+
+.comment-changed {
+    padding: 2px 5px;
+    display:inline-block;
+    background: #F26D20;
+    color: #fff;
+    margin: 5px 0;
+    border-radius: 5px;
+}
+
+#fcm-filter-tags li::after {
+    content: 'X';
+    display:inline-block;
+    text-align:center;
+    background: red;
+    color: #fff;
+    margin-left: 5px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+}
+
+#fcm-filter-tags li:hover{
+    color: #fff;
+    cursor:pointer;
+    background-color: #63d3e1;
+}
+
+
+
+
+/** =====================
+* Responsive
+========================*/
+@media only screen and (min-width: 760px) {
+
+    #fcm-filter-form {display:flex; gap: 30px;}
+
+    #fcm-filter-form > div {flex: 1 1 0;}
+
+
+
+
+}
