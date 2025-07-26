@@ -63,22 +63,6 @@
     position: relative;
 }
 
-/*
-[data-star-rating] > select:focus + .gl-star-rating--stars span:first-child::before {
-    box-shadow: 0 0 0 3px -moz-mac-focusring;
-    box-shadow: 0 0 0 3px -webkit-focus-ring-color;
-    box-shadow: 0 0 0 3px Highlight;
-    content: '';
-    display: block;
-    height: 100%;
-    outline: 1px solid transparent;
-    pointer-events: none;
-    position: absolute;
-    width: 100%;
-}
-
- */
-
 [data-star-rating] select[disabled] + .gl-star-rating--stars {
     cursor: default;
 }
