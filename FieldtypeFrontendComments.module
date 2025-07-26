@@ -113,13 +113,19 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $field = $event->arguments(1);
             $fieldName = $field->name;
             $comments = $page->$fieldName;
-            $input = $this->wire()->input;
 
             $n = 1;
             foreach ($comments as $comment) {
                 $text = null;
 
                 if ($comment->isChanged('status')) {
+
+                    // add remote flag 2 if status has been changed for the first time in backend and no remote flag is present
+                    if($this->wire('page')->rootParent->get('id') === 2) {
+                        if(!$comment->remote_flag){
+                            $comment->remote_flag = 2;
+                        }
+                    }
 
                     $newStatus = $comment->get('status');
                     $oldStatus = $comment->getChanges(true)['status'][0];

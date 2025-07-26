@@ -740,8 +740,14 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
 
                 // check if the comment status has been changed in the past via a remote link
                 if ($comment->remote_flag) {
-                    $text = $this->_('Unfortunately, the status of this comment has already been changed via remote link.');
-                    $text .= '<br>' . $this->_('For security reasons, the status of a comment can only be changed once via remote link. You will need to log in to the backend to change the status of this comment again.');
+                    if($comment->remote_flag === 1) {
+                        $text = $this->_('Unfortunately, the status of this comment has already been changed via remote link.');
+                        $text .= '<br>' . $this->_('For security reasons, the status of a comment can only be changed once via remote link. You will need to log in to the backend to change the status of this comment again.');
+                    } else {
+                        $text = $this->_('The status of this comment has already been changed in the backend. For this reason, it is not possible to change the status via remote link again.');
+                        $text .= '<br>' . $this->_('If you want to change the status again, please log in to the backend and change the status there.');
+                    }
+
                     return ['alert_warningClass' => $text];
                 }
 
