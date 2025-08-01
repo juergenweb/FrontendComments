@@ -719,6 +719,37 @@ class FrontendComment extends WireData
     }
 
     /**
+     * Get the id of a comment based on the code
+     * This method is used for newly added comments, where the id is not present inside the WireArray
+     * @return int|null
+     * @throws WireException
+     */
+    public function getCommentIDFromDatabase(): int|null
+    {
+        $page = $this->get('page');
+        $field = $this->get('field');
+        $database = $this->wire('database');
+        $table = $field->table; // set the comment table name
+
+        $statement = "SELECT id FROM $table WHERE code=:code";
+        $query = $database->prepare($statement);
+        $query->bindValue(":code", $this->get('code'), PDO::PARAM_STR);
+
+        try {
+            $query->execute();
+            $results = $query->fetchAll();
+            if($results){
+                return $results[0]['id'];
+            } else {
+                return null;
+            }
+        } catch (Exception $e) {
+            $this->log('Message: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Add a comment to the fc_comments_queues table if it has a published status
      * @return bool|null -> bool if comment has been tried to add to the database, null if comment does not fullfill requirements
      * @throws WireException
@@ -733,8 +764,8 @@ class FrontendComment extends WireData
         $commentsTable = $field->table; // set the comment table name
         $notificationEmails = []; // array containing all email addresses for replies
 
-        // 1) Get the mail addresses of all users that have chosen to get informed about all new comments and the mail address of the parent commenter if he has reply notification enabled
-        $statement = "SELECT email FROM $commentsTable WHERE (pages_id=:page_id AND notification=:notification) OR (id=:parent_id AND notification=:parent_notification)";
+        // 1) Get the mail addresses of all users that have chosen to get informed about new comments
+        $statement = "SELECT email FROM $commentsTable WHERE (pages_id=:page_id AND notification=:notification) OR (pages_id=:page_id AND id=:parent_id AND notification=:parent_notification)";
         $query = $database->prepare($statement);
         $query->bindValue(":page_id", $page->get('id'), PDO::PARAM_INT);
         $query->bindValue(":notification", self::flagNotifyAll, PDO::PARAM_INT);
@@ -745,13 +776,17 @@ class FrontendComment extends WireData
             $query->execute();
             $results = $query->fetchAll();
 
-            foreach ($results as $row) {
-                $notificationEmails[] = $row['email'];
+            if($results){
+                foreach ($results as $row) {
+                    $notificationEmails[] = $row['email'];
+                }
             }
+
         } catch (Exception $e) {
             $this->log('Message: ' . $e->getMessage());
             return false;
         }
+
 
         // 2) remove the email address of the current commenter from the array
         $notificationEmails = array_diff($notificationEmails, [$this->get('email')]);
@@ -768,13 +803,16 @@ class FrontendComment extends WireData
             // create the value string for the data
             $sendingData = [];
             foreach ($notificationEmails as $email) {
-                $commentID = $this->get('id') ?? $this->comments->getLastID($this);
+
+                //$commentID = $this->get('id') ?? $this->comments->getLastID($this);
+                $commentID = $this->get('id') ?? $this->getCommentIDFromDatabase();
                 $sendingData[] = '(' . $this->get('parent_id') . ',' . $commentID . ',\'' . $email . '\', ' . $field->get('id') . ', ' . $page->get('id') . ')';
             }
             $valuesString = 'VALUES' . implode(',', $sendingData);
 
-            // first check if this comment is in the database
+            // check first if this comment is in the fc_comments_queue table
             $statement = "SELECT id FROM $table WHERE parent_id=:parent_id AND comment_id=:comment_id AND email=:email AND page_id=:page_id AND field_id=:field_id";
+
             $query = $database->prepare($statement);
             $query->bindValue(":parent_id", $this->get('parent_id'), PDO::PARAM_INT);
             $query->bindValue(":comment_id", $this->get('id'), PDO::PARAM_INT);
@@ -797,6 +835,7 @@ class FrontendComment extends WireData
                 $statement = "INSERT INTO $table (parent_id, comment_id, email, field_id, page_id) $valuesString";
 
                 $query = $database->prepare($statement);
+                bd('new comment(s) have/has been added to the queue table');
 
                 try {
 
@@ -810,6 +849,7 @@ class FrontendComment extends WireData
             }
             return null;
         }
+
         return null;
     }
 

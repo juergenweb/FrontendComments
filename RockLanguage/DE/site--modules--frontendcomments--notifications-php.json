@@ -50,9 +50,6 @@
         "769fdf2762cff06a9670f0e9ae653229": {
             "text": "Link zum Kommentar"
         },
-        "18598d7ecd6e1628453abf0380022ddf": {
-            "text": "Wenn Sie keine weiteren E-Mails \u00fcber neue Antworten erhalten m\u00f6chten, klicken Sie bitte auf den nachfolgenden Link"
-        },
         "d4ca2f5e9339a7dd75747d396760f67f": {
             "text": "Ich m\u00f6chte keine weiteren Benachrichtigungsmails \u00fcber neue Kommentare erhalten"
         },
@@ -97,6 +94,9 @@
         },
         "40994b502d147cb982c49808562ae426": {
             "text": "Der Status Ihres Kommentars wurde in %s ge\u00e4ndert."
+        },
+        "b78bfc5bef9c917ed75e46a535922c8d": {
+            "text": "Wenn Sie keine weiteren Mails mehr \u00fcber neue Kommentare erhalten m\u00f6chten, klicken Sie bitte auf den nachfolgenden Link."
         }
     }
 }

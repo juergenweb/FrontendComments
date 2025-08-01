@@ -248,6 +248,7 @@ class InputfieldFrontendComments extends Inputfield
     public function ___processInput(WireInputData $input): InputfieldFrontendComments
     {
 
+        // run only if Comments Manager is not used
         if ((!array_key_exists('useManager', $this->frontendCommentsManagerConfig)) || $this->frontendCommentsManagerConfig['useManager'] == 0) {
 
             $n = 1;
@@ -271,21 +272,22 @@ class InputfieldFrontendComments extends Inputfield
                 'moderation_feedback'
             );
 
-            // loop through each comment
+            // loop through each comment ($this->value == FrontendCommentArray)
+            $updatedComments = [];
+
             foreach ($this->value as $comment) {
 
-                $comment->setTrackChanges(true);
+                // enable track changing for each comment
+                $comment->setTrackChanges(Wire::trackChangesValues);
 
                 $errors = [];
+
                 // loop through each input field of the comment -> sanitize and validate it
                 foreach ($names as $key) {
 
                     // get the value of each comment field
                     $inputName = $this->name . "_" . $key . "_" . $comment->id;
                     $value = isset($input[$inputName]) ? $input[$inputName] : '';
-
-                    // important, otherwise all changes will not be saved
-                    $this->value->trackChange('update');
 
                     switch ($key) {
                         case 'text':
@@ -296,6 +298,7 @@ class InputfieldFrontendComments extends Inputfield
                                 if ($comment->$key != $value) {
                                     $value = $sanitizer->textarea($value);
                                     $comment->$key = $value;
+                                    $comment->trackChange('text', $value);
                                     $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
                                 }
                             }
@@ -315,6 +318,7 @@ class InputfieldFrontendComments extends Inputfield
                                     if ($comment->$key != $value) {
                                         $value = $sanitizer->email($value);
                                         $comment->$key = $value;
+                                        $comment->trackChange('email', $value);
                                         $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
                                     }
                                 }
@@ -329,6 +333,7 @@ class InputfieldFrontendComments extends Inputfield
                                 if ($comment->$key != $value) {
                                     $value = $sanitizer->text($value);
                                     $comment->$key = $value;
+                                    $comment->trackChange('author', $value);
                                     $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
                                 }
                             }
@@ -350,35 +355,43 @@ class InputfieldFrontendComments extends Inputfield
                                     if ($comment->$key != $value) {
                                         $value = $sanitizer->httpUrl($value);
                                         $comment->$key = $value;
+                                        $comment->trackChange('website', $value);
                                         $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
                                     }
                                 }
                             } else {
-
                                 if ($comment->$key != $value) {
                                     $comment->$key = $value;
+                                    $comment->trackChange('website', $value);
                                     $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
                                 }
                             }
                             break;
                         case 'status':
+
                             if ($value !== 'delete'){
                                 $value = $sanitizer->int($value);
                             } else {
                                 $this->value->trackChange('deleteComment-'.$comment->id);
+                                $this->value->trackChange('remove');
                             }
 
                             if (is_int($value) && !in_array($value, $statusArray)) {
                                 $this->error(sprintf($this->_('Status value on comment #%s is not valid.'), $n));
                             } else {
-
-                                $comment->$key = $value;
+                                if ($comment->$key != $value) {
+                                    $comment->trackChange('status', $value);
+                                    $updatedComments[] = $comment;
+                                    $this->value->trackChange('update');
+                                    $comment->$key = $value;
+                                }
                             }
                             break;
                         case 'moderation_feedback':
 
                             if ($comment->$key != $value) {
                                 $comment->$key = $value;
+                                $comment->trackChange('moderation_feedback');
                                 $this->message(sprintf($this->_('Updated %s for comment #%d'), $key, $n));
                             }
                             break;
@@ -396,12 +409,14 @@ class InputfieldFrontendComments extends Inputfield
                     }
                 }
 
-                // notify the parent of the change so the comment field will be saved again
+                // notify the parent of the change so that the comment field will be saved again
                 if ($comment->getChanges()) {
                     $parent = $this->getParent();
                     if ($parent) $parent->trackChange($this->name);
                 }
             }
+            // add all comments with updated status to the statuschange property
+            $this->value->trackChange('statuschange', $updatedComments);
         }
         return $this;
 

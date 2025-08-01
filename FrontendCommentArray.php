@@ -565,6 +565,114 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
     }
 
     /**
+     * Save a new status for a comment via a remote link from the email
+     * Send mail about the status change to the comment author if set
+     *
+     * @return array|string[]
+     * @throws WireException
+     * @throws WirePermissionException
+     */
+    protected function saveStatusRemote(): array
+    {
+        $msg = [];
+
+        // Get the parameters
+        $code = $this->wire('input')->get('code');
+        $status = $this->wire('input')->get('status');
+
+        if (!is_null($code) && !is_null($status)) {
+
+            // sanitize the code and status
+            $code = $this->wire('sanitizer')->string120($code);
+            $status = $this->wire('sanitizer')->int($status);
+
+            // check if a comment with this code exists inside the database table
+            $comment = $this->get('code=' . $code);
+
+            if ($comment) {
+
+                // check if the comment status has been changed in the past via a remote link
+                if ($comment->remote_flag) {
+                    if ($comment->remote_flag === 1) {
+                        $text = $this->_('The status of this comment has already been changed via remote link.');
+                        $text .= '<br>' . $this->_('For security reasons, the status of a comment can only be changed once via remote link. You will need to log in to the backend to change the status of this comment again.');
+                    } else {
+                        $text = $this->_('The status of this comment has already been changed in the backend. For this reason, it is not possible to change the status via remote link again.');
+                        $text .= '<br>' . $this->_('If you want to change the status again, please log in to the backend and change the status there.');
+                    }
+
+                    return ['alert_warningClass' => $text];
+                }
+
+                // update some values of this comment
+                $comment->set('status', $status);
+                $spamTS = ($status === 2) ? time() : null;
+                $comment->set('spam_update', $spamTS);// add timestamp to the database
+                $comment->set('remote_flag', 1);
+
+                // add a track change to change the queue and votes table too
+                $this->trackChange('statuschange', [$comment]);
+
+                if ($this->saveComment($comment)) {
+
+                    $warningText = $this->wire('session')->get('statuswarningtext-' . $comment->get('id'));
+                    if ($warningText) {
+                        $warningText .= '<br>' . $this->_('Please log in to the backend and manually remove the text from this comment instead of setting the status to "SPAM"!');
+                        $msg = ['alert_warningClass' => $warningText];
+                        $this->wire('session')->remove('statuswarningtext-' . $comment->get('id'));
+                    } else {
+
+                        // output a message that status has been changed
+                        $statusCodes = [
+                            FieldtypeFrontendComments::pendingApproval => $this->_('waiting for approval'),
+                            FieldtypeFrontendComments::approved => $this->_('approved'),
+                            FieldtypeFrontendComments::spam => $this->_('spam')
+                        ];
+
+                        $alertText = sprintf($this->_('The status of the comment has been updated to "%s".'), $statusCodes[$status]);
+                        $redirectLink = false;
+                        $statusChangeNotification = $this->field->get('input_fc_status_change_notification');
+
+                        // check if mail should be sent on status change to the commenter
+                        switch ($status) {
+                            case FieldtypeFrontendComments::approved:
+                                $send = in_array('1', $this->field->get('input_fc_status_change_notification'));
+                                // add information text that mail has been sent to the commenter to inform him about the status change
+                                $redirectLink = true;
+                                break;
+                            case FieldtypeFrontendComments::spam:
+                            default:
+                                $send = false;
+                        }
+
+                        // send the notification mail
+                        if ($send) {
+
+                            $notification = new Notifications($this, $this->field, $this->page);
+                            if ($notification->sendStatusChangeEmail($comment, $this->field, $this->frontendFormsConfig, $status)) {
+                                $alertText .= '<br>' . $this->_('In addition, an email was sent to the commenter to inform him of the status change.');
+                            }
+                            if ($redirectLink) {
+                                $alertText .= '<br>' . $this->getCommentRedirectPaginationLink($comment->id)->render();
+                            }
+                        }
+
+                        $msg = ['alert_successClass' => $alertText];
+                    }
+
+                } else {
+                    $msg = ['alert_errorClass' => $this->_('Unfortunately an error occurred during the update process of the status.')];
+                }
+
+            } else {
+                // output a message that comment with this code was not found
+                $msg = ['alert_warningClass' => $this->_('Unfortunately, no matching comment was found for this code.')];
+            }
+        }
+        return $msg;
+    }
+
+    /**
      * Cancel the receiving of notification mails on new comments by clicking the remote link inside the email
      * @return array
      * @throws WireException
@@ -572,32 +680,50 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
      */
     protected function saveReplyNotificationRemote(): array
     {
-        // Get and sanitize get parameters
-        $code = $this->wire('input')->get('code', 'string');
-        $notification = $this->wire('input')->get('notification', 'string');
-
         $msg = [];
-        'field_' . $this->field->name;
 
-        if ((!is_null($code)) && ($notification === '0')) {
+        // Get the get parameters
+        $email = $this->wire('input')->get('email');
+        $pageid = $this->wire('input')->get('page');
+        $notification = $this->wire('input')->get('notification');
 
-            // check if a comment with this code exists inside the table
-            $comment = $this->get('code=' . $code);
+        if (!is_null($email) && !is_null($pageid) && !is_null($notification)) {
 
-            if ($comment) {
+            // sanitize the code and status value
+            $email = $this->wire('sanitizer')->string($email);
+            $pageid = $this->wire('sanitizer')->int($pageid);
+            $notification = $this->wire('sanitizer')->int($notification);
 
-                if ($comment->get('notification') === 0) {
-                    $msg = ['alert_warningClass' => $this->_('You have already canceled the receiving of reply notification mails for this comment.')];
-                } else {
-                    if ($comment->updateComment(['notification' => ['value' => $notification, 'type' => PDO::PARAM_INT, 'sanitizer' => 'int']])) {
-                        $msg = ['alert_successClass' => $this->_('You have successfully canceled the receiving of reply notification mails.')];
+            if ($notification === 0) {
+
+                // check if comment with this email and page id  exists inside the table
+                $comments = $this->find('email='.$email.', pages_id='.$pageid);
+
+                if ($comments) {
+                    foreach ($comments as $comment) {
+
+                        // enable track changing
+                        $comment->setTrackChanges(true);
+
+                        if ($comment->get('notification') === 0) {
+                            $msg = ['alert_warningClass' => $this->_('You have already canceled the receiving of reply notification mails for this comment.')];
+                        } else {
+                            $comment->set('notification', $notification); // set the new value
+                            $comment->trackChange('notification', $notification); // add the value to the comment track change
+                            $this->trackChange('notificationchange', [$comment]); // important to save the comment changes
+
+                            if ($this->saveComment($comment)) {
+                                $msg = ['alert_successClass' => $this->_('You have successfully canceled the receiving notification mails for new comments.')];
+                            }
+                        }
+
                     }
+
+                } else {
+                    // output a message that comment with this code was not found
+                    $msg = ['alert_warningClass' => $this->_('Unfortunately, no comments with the given email address were found.')];
+
                 }
-
-            } else {
-                // output a message that comment with this code was not found
-                $msg = ['alert_warningClass' => $this->_('Unfortunately, no matching comment was found for this code.')];
-
             }
 
         }
@@ -661,20 +787,14 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
     {
         $page = $comment->get('page');
         $field = $comment->get('field');
-
         $fieldtypeMulti = $this->wire('fieldtypes')->get('FrontendComments');
 
         // check if it is a new or an updated comment
-        if(!$comment->get('id')){
+        if (!$comment->get('id')) {
             $this->add($comment); // new comment
         }
 
-        if ($fieldtypeMulti->savePageField($page, $field)) {
-            return true;
-        }
-
-        return false;
-
+        return $fieldtypeMulti->savePageField($page, $field);
     }
 
 
@@ -708,116 +828,6 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
 
     }
 
-    /**
-     * Save a new status for a comment via a remote link from the email
-     * Send mail about the status change to the comment author if set
-     *
-     * @return array|string[]
-     * @throws WireException
-     * @throws WirePermissionException
-     */
-    protected function saveStatusRemote(): array
-    {
-        $msg = [];
-
-        // Get the parameters
-        $code = $this->wire('input')->get('code');
-        $status = $this->wire('input')->get('status');
-
-        if (!is_null($code) && !is_null($status)) {
-
-            // sanitize the code and status
-            $code = $this->wire('sanitizer')->string120($code);
-            $status = $this->wire('sanitizer')->int($status);
-
-            // check if a comment with this code exists inside the database table
-            $comment = $this->get('code=' . $code);
-
-            if ($comment) {
-                $oldStatus = $comment->get('status');
-                // enable track changing
-                $comment->setTrackChanges(true);
-
-                // check if the comment status has been changed in the past via a remote link
-                if ($comment->remote_flag) {
-                    if($comment->remote_flag === 1) {
-                        $text = $this->_('The status of this comment has already been changed via remote link.');
-                        $text .= '<br>' . $this->_('For security reasons, the status of a comment can only be changed once via remote link. You will need to log in to the backend to change the status of this comment again.');
-                    } else {
-                        $text = $this->_('The status of this comment has already been changed in the backend. For this reason, it is not possible to change the status via remote link again.');
-                        $text .= '<br>' . $this->_('If you want to change the status again, please log in to the backend and change the status there.');
-                    }
-
-                    return ['alert_warningClass' => $text];
-                }
-
-                // update some values of this comment
-                $comment->set('status', $status);
-                $comment->trackChange('status', $status);
-                // add timestamp to the database
-                $spamTS = ($status === 2) ? time() : null;
-                $comment->set('spam_update', $spamTS);
-                $comment->set('remote_flag', 1);
-
-                $this->trackChange('status', $status); // important to save the comment changes
-
-                if ($this->saveComment($comment)) {
-
-                    $warningText = $this->wire('session')->get('statuswarningtext-' . $comment->get('id'));
-                    if($warningText){
-                        $warningText .= '<br>'.$this->_('Please log in to the backend and manually remove the text from this comment instead of setting the status to "SPAM"!') ;
-                        $msg = ['alert_warningClass' => $warningText];
-                        $this->wire('session')->remove('statuswarningtext-' . $comment->get('id'));
-                    } else {
-
-                    // output a message that status has been changed
-                    $statusCodes = [
-                        FieldtypeFrontendComments::pendingApproval => $this->_('waiting for approval'),
-                        FieldtypeFrontendComments::approved => $this->_('approved'),
-                        FieldtypeFrontendComments::spam => $this->_('spam')
-                    ];
-
-                    $alertText = sprintf($this->_('The status of the comment has been updated to "%s".'), $statusCodes[$status]);
-                    $redirectLink = false;
-                    $statusChangeNotification = $this->field->get('input_fc_status_change_notification');
-                    // check if mail should be sent on status change to the commenter
-                    switch ($status) {
-                        case FieldtypeFrontendComments::approved:
-                            $send = in_array('1', $this->field->get('input_fc_status_change_notification'));
-                            // add information text that mail has been sent to the commenter to inform him about the status change
-                            $redirectLink = true;
-                            break;
-                        case FieldtypeFrontendComments::spam:
-                        default:
-                            $send = false;
-                    }
-
-                    // send the notification mail
-                    if ($send) {
-
-                        $notification = new Notifications($this, $this->field, $this->page);
-                        if ($notification->sendStatusChangeEmail($comment, $this->field, $this->frontendFormsConfig, $status)) {
-                            $alertText .= '<br>' . $this->_('In addition, an email was sent to the commenter to inform him of the status change.');
-                        }
-                        if ($redirectLink) {
-                            $alertText .= '<br>' . $this->getCommentRedirectPaginationLink($comment->id)->render();
-                        }
-                    }
-
-                    $msg = ['alert_successClass' => $alertText];
-                    }
-
-                } else {
-                    $msg = ['alert_errorClass' => $this->_('Unfortunately an error occurred during the update process of the status.')];
-                }
-
-            } else {
-                // output a message that comment with this code was not found
-                $msg = ['alert_warningClass' => $this->_('Unfortunately, no matching comment was found for this code.')];
-            }
-        }
-        return $msg;
-    }
 
     /**
      * Save votes via Ajax call to the votes' table
@@ -1078,6 +1088,7 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
 
         // change comment notification per remote link
         $notificationMsg = $this->saveReplyNotificationRemote();
+
         if ($notificationMsg) {
             $this->alert->setContent($notificationMsg[key($notificationMsg)]);
             $this->alert->setCSSClass(key($notificationMsg));
@@ -1085,6 +1096,7 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
 
         // change comment status per remote link
         $statusChangeMsg = $this->saveStatusRemote();
+
         if ($statusChangeMsg) {
             $this->alert->setContent($statusChangeMsg[key($statusChangeMsg)]);
             $this->alert->setCSSClass(key($statusChangeMsg));

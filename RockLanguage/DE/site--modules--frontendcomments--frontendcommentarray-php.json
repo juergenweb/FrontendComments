@@ -5,17 +5,11 @@
         "3cd6e6d75ce5d7a458bc41e60e8b1505": {
             "text": "Sie haben bereits den Empfang von Antwortbenachrichtigungen zu diesem Kommentar deaktiviert."
         },
-        "46ddfb6e2a6fb175c91bd81e62276cd2": {
-            "text": "Sie haben den Erhalt von Benachrichtigungs-Emails zu Anworten auf Kommentare erfolgreich deaktiviert."
-        },
         "4b09de74c9d21f989f680f65fc33200d": {
             "text": "Leider wurde zu diesem Code kein passender Kommentar gefunden."
         },
         "50fa6a080936b165819c911a03fc71aa": {
             "text": "Kommentar anzeigen"
-        },
-        "98f08734a957c975c70d8fb27529f3be": {
-            "text": "Leider wurde der Status dieses Kommentars bereits per Remote-Link ge\u00e4ndert."
         },
         "fe057de6fb874e1c1518ada871ca530e": {
             "text": "Aus Sicherheitsgr\u00fcnden kann der Status eines Kommentars nur einmal per Remote-Link ge\u00e4ndert werden. Sie m\u00fcssen sich im Backend anmelden, um den Status dieses Kommentars abermals zu \u00e4ndern."
@@ -58,6 +52,21 @@
         },
         "57ede60cbc6b2bdd54f90e8f6016fc51": {
             "text": "Bitte melden Sie sich im Backend an und entfernen Sie den Text manuell aus diesem Kommentar, anstatt den Status auf \"SPAM\" zu setzen!"
+        },
+        "88a6cb7838ab087d67820fdfc0628cb6": {
+            "text": "Der Status dieses Kommentars wurde bereits per Remote-Link ge\u00e4ndert."
+        },
+        "463640c99e5acf495bd10241a5755de7": {
+            "text": "Der Status dieses Kommentars wurde bereits im Backend ge\u00e4ndert. Aus diesem Grund ist es nicht m\u00f6glich, den Status per Remote-Link noch einmal zu \u00e4ndern."
+        },
+        "0bdea26619a3fbfcc5acd41844f970df": {
+            "text": "Wenn Sie den Status wieder \u00e4ndern m\u00f6chten, loggen Sie sich bitte im Backend ein und \u00e4ndern Sie den Status dort."
+        },
+        "b9e9ff2f37f81f86498b8bd8aa201cf5": {
+            "text": "Sie haben den Empfang von Benachrichtigungsmails f\u00fcr neue Kommentare erfolgreich beendet."
+        },
+        "d6ff9a5ffc7ee0f510916fe97be590c6": {
+            "text": "Leider wurden keine Kommentare mit der angegebenen E-Mail-Adresse gefunden."
         }
     }
 }

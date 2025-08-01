@@ -121,8 +121,8 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                 if ($comment->isChanged('status')) {
 
                     // add remote flag 2 if status has been changed for the first time in backend and no remote flag is present
-                    if($this->wire('page')->rootParent->get('id') === 2) {
-                        if(!$comment->remote_flag){
+                    if ($this->wire('page')->rootParent->get('id') === 2) {
+                        if (!$comment->remote_flag) {
                             $comment->remote_flag = 2;
                         }
                     }
@@ -185,42 +185,78 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         // run only on FieldtypeFrontendComments
         if ($event->object instanceof FieldtypeFrontendComments) {
 
-            // run only on admin pages
-            //if( $page->template != 'admin' ) return;
-
             $page = $event->arguments(0);
             $field = $event->arguments(1);
             $comments = $page->get($field->name);
 
-            // delete entries of deleted comments inside the queue and votes table
-            $deletedComments = $comments->getItemsRemoved();
+            $changes = $comments->getChanges(true);
 
-            if ($deletedComments) {
-                // delete the comment ids from the queue and votes table
-                foreach ($deletedComments as $comment) {
-                    $comment->deleteEntriesInQueueTable();
-                    $comment->deleteEntriesInVotesTable();
-                }
+            if ($changes) {
 
-            } else {
+                foreach ($changes as $key => $i) {
+                    switch ($key) {
+                        case('add'):
 
-                if ($comments->getChanges()) {
+                            $addedComments = $comments->getItemsAdded();
 
-                    foreach ($comments as $comment) {
+                            // its a new comment
+                            foreach ($addedComments as $comment) {
 
-                        if ($comment->getChanges()) {
+                                // get the id property of the newly added comment from the database
+                                $id = $comment->getCommentIDFromDatabase();
 
-                            if (in_array('status', $comment->getChanges())) {
-                                if ($comment->isPublished()) {
-                                    $comment->addCommentToQueueTable();
+                                if (is_int($id)) {
+
+                                    $comment->set('id', $id);
+                                    if ($comment->isPublished()) {
+                                        bd('comment added to queue table');
+                                        $comment->addCommentToQueueTable();
+                                    }
                                 } else {
+                                    // an error occured
+                                }
+
+                            }
+                            break;
+                        case('remove'):
+                            // delete entries of deleted comments inside the queue and votes table
+                            bd('a comment has been removed');
+                            // delete entries of deleted comments inside the queue and votes table
+                            $deletedComments = $comments->getItemsRemoved();
+
+                            if ($deletedComments) {
+                                // delete the comment ids from the queue and votes table
+                                foreach ($deletedComments as $comment) {
                                     $comment->deleteEntriesInQueueTable();
+                                    $comment->deleteEntriesInVotesTable();
                                 }
                             }
-                        }
+                            break;
+                        case('statuschange'):
+
+                            // get all comments with status change
+                            $updatedComments = $changes['statuschange'][0];
+
+                            foreach ($updatedComments as $comment) {
+
+                                if ($comment->isPublished()) {
+                                    $comment->addCommentToQueueTable();
+                                    bd('a comment has been added to the queue table');
+                                } else {
+                                    $comment->deleteEntriesInQueueTable();
+                                    bd('a comment was removed from the queue table');
+                                }
+                            }
+                            break;
+                        case('notificationchange'):
+                            // get all comments with notification change
+                            $notificationComments = $changes['notificationchange'][0];
+                            break;
                     }
                 }
             }
+
+
         }
 
     }
@@ -344,6 +380,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      */
     protected function sendQueuedEmails(): void
     {
+        bd('send queued emails');
         // do not send notification mails if a stopqueue session is present
         if ($this->wire('session')->get('stopqueue')) {
             $this->wire('session')->remove('stopqueue');
@@ -392,11 +429,14 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                 $page = $this->wire('pages')->get($comment['pages_id']);
                 $field = $this->wire('fields')->get($comment['field_id']);
 
+                // create a FrontendComment object out of the array
+                $comment = $this->makeComment($page, $field, $comment);
+
                 // create a notification object
                 require_once(__DIR__ . '/Notifications.php');
                 $notifications = new Notifications($comments, $field, $page);
                 if ($notifications->sendNotificationAboutNewReply($comment)) {
-
+                    bd('queued sent!!');
                     // get the appropriate queued list item and delete it from the table
                     $statement = "DELETE FROM fc_comments_queues WHERE comment_id=:id ";
                     try {
@@ -600,30 +640,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $event->arguments(0, $value);
         }
     }
-
-    /**
-     * Add or remove entries from the queue table if the status of a comment has been changed
-     * If a comment status has been changed to approve, then all email addresses will be added to the queue table
-     * Otherwise, all entries for this comment will be deleted from the queue table
-     * @param FrontendComment $comment
-     * @param int|string $status
-     * @param Page $page
-     * @param Field $field
-     * @return void
-     */
-    /*
-    public static function updateQueueTableOnStatusChange(FrontendComment $comment, int|string $status, Page $page, Field $field): void
-    {
-        if (!is_string($status)) {
-            if ($status !== FieldtypeFrontendComments::approved) {
-                $comment->deleteEntriesInQueueTable();
-            } else {
-                // add the entries to the queue table
-                $comment->writeEntryInQueueTable();
-            }
-        }
-    }
-    */
 
     /**
      * Get the info data about this module
@@ -975,6 +991,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
             $comment = $this->wire(new $comment_class($commentArray, $item, $frontendFormsConfig));
             $comment->setTrackChanges(Wire::trackChangesValues); // track all values of this comment
+            $comment->set('pages_id', $page->id);
             // add every comment independent of the status to the commentArray
             $commentArray->add($comment);
 

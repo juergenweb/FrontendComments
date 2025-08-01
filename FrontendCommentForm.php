@@ -77,6 +77,7 @@ class FrontendCommentForm extends Form
         $this->field = $comments->getField(); // Processwire comment field object
         $this->database = $this->wire('database'); // the database object
 
+
         self::$ratingValues = [
             1 => $this->_('Terrible'),
             2 => $this->_('Poor'),
@@ -648,7 +649,8 @@ class FrontendCommentForm extends Form
                         break;
                     case 1:
                         $reloadLink = new Link();
-                        $commentID = $this->comments->getLastID($newComment);
+                        //$commentID = $this->comments->getLastID($newComment);
+                        $commentID = $newComment->getCommentIDFromDatabase();
                         $reloadLink->setUrl($this->wire('input')->url);
                         $reloadLink->setQueryString('comment-redirect=' . $commentID);
                         $reloadLink->setAnchor($this->field->name . '-' . $this->page->id . '-redirect-alert');
@@ -661,6 +663,9 @@ class FrontendCommentForm extends Form
                 }
                 // set the message text to the alert
                 $this->getAlert()->setContent($successMsg);
+
+                // overwrite the default label for the visited page
+                $this->setMailPlaceholder('CURRENTURLLABEL', $this->_('Comment page'));
 
                 //Send notification mail to all moderators if a new comment has been posted
                 $this->notifications->sendModerationNotificationMail($values, $newComment, $this);
@@ -686,7 +691,6 @@ class FrontendCommentForm extends Form
                 }
                 */
 
-
                 // update the "pages" table (modified_users_id, modified) if "quiet save" is not enabled
                 if (!$this->field->get('input_fc_quiet_save')) {
 
@@ -702,7 +706,8 @@ class FrontendCommentForm extends Form
                     }
 
                 }
-                $this->wire('session')->set('stopqueue', '1'); // this is to prevent long execution times (sending mails and writing in the database at the same time)
+                // this is to prevent long execution times (sending mails and writing new comment in the database at the same time)
+                $this->wire('session')->set('stopqueue', '1');
 
             }
 

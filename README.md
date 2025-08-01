@@ -6,51 +6,40 @@
 
 Processwire Fieldtype/Inputfield to add and manage comments on your site based on the FrontendForms module.
 
-This module is early Alpha stage - so please use it with care!
+This module is early Beta stage - so please use it with care!
 
 ## Requirements
 * PHP>=8.0.0
 * ProcessWire>=3.0.181
 * GD-Library installed for CAPTCHA image creation
-* FrontendForms>=2.2.35
+* FrontendForms>=2.2.34
 * LazyCron enabled for sending mails
 
 ## Highlights / Features
 * Easy integration: Only 1 line of code inside a template is necessary to render the comments + form on the frontend
 * Possibility to use multiple comment fields in one template (if necessary)
-* Easy to overwrite global module settings inside the template (possibility to use one comment field with different configuration settings in different templates)
+* Easy to overwrite global module settings inside the template (possibility to use one comment field with different configuration settings in multiple templates)
 * Enable/disable star rating
 * Enable/disable rating of comments (like/dislike)
 * Add additional website field to the comment form if needed
 * Offer commenters the receiving of notification emails if a new reply has been posted
 * Queuing the sending of notification emails instead of sending all at once (preventing performance issues by sending to many emails at once)
-* Reply forms will only be loaded via AJAX on demand (by clicking on the reply link) -> faster loading time of the page
-* Option to use HTML email templates for sending mails (provided by FrontendForms)
+* Reply forms will only be loaded via AJAX on demand (by clicking on the reply link) -> faster loading time
+* Option to send HTML email templates (provided by FrontendForms)
 * Enable/disable the sending of notification emails to a commenter if status of a comment has been changed to "approved" or "SPAM" by a moderator
 * Moderators can write a feedback directly to a comment (fe to react to positive or negative comments)
 * Adding a link to an internal or external page containing the community guidlines
-* Changing the status of a comment via remote link inside an email to "approved" or "spam"
-* Mapping of fields of the user template to form values (eg name, user image, homepage URL, email address)
+* Changing the status of a comment via remote link to "approved" or "spam"
 * No dependencies (except FrontendForms)
 * Supports pagination of comments on the frontend
 * Support for UiKit 3, Pico 2 and Bootstrap 5 CSS framework out of the box
-* Changing markup via Hook
-* Support for RockLanguage
-
-Live example: [http://www.schulfreund.at](https://www.schulfreund.at/nachhilfekurse/chemie-nachhilfe/)
 
 ## Table of contents
 * [Is this a copy of the Comments Fieldtype by Ryan?](#is-this-a-copy-of-the-comments-fieldtype-by-ryan)
 * [Installation and Quick-start guide](#installation-and-quick-start-guide)
-* [Elements of a comment](#elements-of-a-comment)
-* [Editing comments in the backend](#editing-comments-in-the-backend)
-* [Different status of a comment](#different-status-of-a-comment)
-* [Various methods that can be used](#various-methods)
 * [Queuing notification emails](#queuing-notification-emails)
 * [What happens if a comment, which has replies, will be declared as SPAM later on?](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam)
 * [Hooking to change markup](#hooking-to-change-markup)
-* [Overwriting CSS styles with your custom values](#overwriting-css-styles-with-your-custom-values)
-* [Adding CSS and JS files manually to the template](#adding-css-and-js-files-manually-to-the-website)
   
 
 ## Configurations
@@ -70,7 +59,7 @@ No, it's not. This module runs on its own codebase and has not been copied from 
 5. Once you've created this comment field, you can change some configuration settings in the "Details" tab of the field, if necessary. The only value that needs to be entered is the email address of at least one moderator. This is mandatory.
 6. As the next step add this field to a template.
 7. JavaScript and CSS file for the frontend will be added automatically - you don't have to take care about it.
-8. To output the comment form and the comment list on the frontend you have to add fe. "*echo $page->comments->render()*" to the frontend template ("comments" is the name of your comment field in this case). Take a look at the following output methods below.
+8. To output the comment form and the comment list on the frontend you have to add fe. "*echo $page->comments->render()*" to the frontend template. Take a look on the following output methods below.
 
 ### Simple direct output with "echo"
 If you want to use the global settings you only need to use the render() method. In this case, the comments field name is "mycomments". Please replace it with your comment field name.
@@ -91,7 +80,7 @@ echo $comments->render();
 
 This type of output is necessary if you want to override some global settings before you output the markup.
 
-This can be the case if you want to use a comment field in different templates with different settings.
+This can be the case if you want to use a comment field in different templates with different settings
 
 
 ```php
@@ -140,61 +129,6 @@ echo $comments->render();
 
 Each of these above methods is explained alongside the corresponding global settings field in the module configuration, so I won't go much more into detail.
 
-## Elements of a comment
-
-Each comment consists of different parts. Some of them are permanent an some can be enabled/disabled. Take a look at the image afterwards.
-
-![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-parts.png?raw=true)
-
-## Editing comments in the backend
-
-After you have added a FrontendComments field to a template, you will find a new tab called "*Comments*" on each edit page which contains this field.
-
-![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/backend-comments-tab.png?raw=true)
-
-After clicking on a comment, the edit form opens and you can, for example, change the status of a comment or write a feedback.
-
-![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/open-comment.png?raw=true)
-
-I have only included some of the fields that I think makes sense to be able to edit afterwards.
-
-## Different status of a comment
-
-You can choose between 4 different status for a comment:
-
-1. waiting for approval: comment will not be displayed on the frontend and must be changed to "approved" by a moderator; status value is 0
-2. approved: comment will be displayed on the frontend; status value is 1
-3. spam: comment will not be displayed on the frontend and will be deleted after specific time automatically (if set); status value is 2
-4. featured: same as approved, but is declared as very important. Could be used to generate a list containing only specific comments (eg. a "Our customers say..." list); status value is 4
-
-
-## Various methods
-
-
-| Method  | Description | 
-| ------------- | ------------- |
-| [getAllFeaturedComments()](#getallfeaturedcomments)  | Get all featured comments of all comment fields sitewide  |
-
-### getAllFeaturedComments()
-
-This static method can be used to output all featured comments sitewide as a WireArray.
-
-You can use it to create for example a "Our customers say..." list.
-
-```php
-echo FieldtypeFrontendComments::getAllFeaturedComments();
-```
-If you want to limit the number of the comments, you can add the number as parameter inside the parenthesis.
-
-```php
-echo FieldtypeFrontendComments::getAllFeaturedComments(5); // limits the output to 5 comments
-```
-
-Just to mention: This method is only necessary, if you are using FrontendComments on more than 1 page, because it takes all featured comments from all pages and all fields. If you are using only 1 field on 1 page, you can use the find method in combination with the "status" selector.
-
-```php
-echo $pages->get(11)->comments->find('status=4'); // in this case "11" is the id of the page and "comments" is the name of the comment field; "4" is for featured comments
-```
 ## Queuing notification emails
 This module offers commenters the option to be notified whenever a new reply to their comments or other comments has been posted. This can result in a very large number of notification emails every time a comment is posted, especially if your website has high comment activity.
 
@@ -207,7 +141,7 @@ Only to mention: This only happens to notification emails for commenters, not fo
 ## Special case: What happens if a comment, which has replies, will be declared as SPAM
 By default, all comments that are declared as SPAM are no longer visible in the frontend and will be deleted after a certain number of days if this has been set in the module configuration. That's fine, as long as the comment doesn't contain any answers.
 
-If a comment contains replies and is declared as SPAM later on, then all replies to this comment would be deleted too. This is not really desirable, as many comments would suddenly no longer be visible (even comments with content that does not violate the comment guidelines). This can cause commenters to feel frustrated because their comment has disappeared from the page.
+If a comment contains replies and is declared as SPAM later on, then all subordinates (replies) would no longer be visible. This is not really desirable, as many comments would suddenly no longer be visible (even comments with content that does not violate the comment guidelines). This can cause commenters to feel frustrated because their comment has disappeared from the page.
 
 To prevent this sceanario, comments marked as SPAM to which replies have already been written are declared as "SPAM with replies". This means that the comment will remain visible, but the comment text will be replaced with the following text: "Sorry, this post has been removed by moderators for violating community guidelines."
 
@@ -242,45 +176,3 @@ $wire->addHookAfter('FrontendCommentForm::getEmailField', function(HookEvent $ev
 ```
 
 Take a look at the FrontendCommentForm.php class file to see which methods are hookable. In this case every element of the form has its own hookable function. Here are some examples of the hookable function you will find there: getAuthorField(), getWebsiteField(), getCommentField(),....
-
-## Overwriting CSS styles with your custom values
-
-Sometimes you need to style some comment elements with your own styles (e.g. change the color of an element).
-
-By default, all CSS files for comments are inserted directly before the closing head tag. In this case, it's not possible to add another CSS file with your custom values ​​in the head section afterwards.
-
-To owerwrite the values of the embedded files afterwards you have 2 possiblities:
-
-1. Disable automatic embedding of CSS files and add them manually to the template. In this case, you can select the position of the files in the header area and then add additional CSS files. This makes it possible to overwrite previously set values. Check out the explanation for *Adding CSS and JS files manually to the website*.
-2. Add your custom CSS file to the body section instead of the head section
-
-## Adding CSS and JS files manually to the website
-
-By default, CSS and JS files are automatically added to the template file. CSS files are added before the closing head tag, and JS files are added before the closing body tag. This is fine in most cases.
-
-If you want to change the location of the files in the header or body section, you must first disable embedding these files in the field configuration or directly in the template using the *removeJS()* and/or *removeCSS()* methods. Take a look at the module configuration next to the configuration settings fields for disabling embedding these files.
-
-If you have disabled automatic embedding of these files, you can manually add them to your template using the following lines of code:
-
-```php
-echo FieldtypeFrontendComments::renderCSSFiles();
-```
-In this case, all CSS files will be embedded, but you have the option to prevent the CSS files for the star ratings from being embedded if you do not use a star rating by simply adding *false* as a parameter to the method:
-
-```php
-echo FieldtypeFrontendComments::renderCSSFiles(false); // false prevents the embedding of the star rating CSS file
-```
-
-You can do the same with the JavaScript files:
-
-```php
-echo FieldtypeFrontendComments::renderJSFiles(); // render all JS files
-```
-
-```php
-echo FieldtypeFrontendComments::renderJSFiles(false); // exclude the JS files for the star rating
-```
-
-ToDo:
-* Doing more testing
-* Creating a module manager for managing comments in one place
