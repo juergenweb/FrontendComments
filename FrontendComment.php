@@ -15,16 +15,16 @@ namespace FrontendComments;
 use Exception;
 use FrontendForms\Button;
 use FrontendForms\Form;
-use FrontendForms\InputHidden;
-use FrontendForms\TextElements;
-use FrontendForms\Link;
 use FrontendForms\Image;
+use FrontendForms\InputHidden;
+use FrontendForms\Link;
+use FrontendForms\TextElements;
 use PDO;
+use ProcessWire\Field;
 use ProcessWire\FieldtypeFrontendComments;
 use ProcessWire\Page;
-use ProcessWire\Field;
-use ProcessWire\WireData;
 use ProcessWire\PageImage;
+use ProcessWire\WireData;
 use ProcessWire\WireException;
 use ProcessWire\WirePermissionException;
 use function ProcessWire\wire;
@@ -738,7 +738,7 @@ class FrontendComment extends WireData
         try {
             $query->execute();
             $results = $query->fetchAll();
-            if($results){
+            if ($results) {
                 return $results[0]['id'];
             } else {
                 return null;
@@ -776,7 +776,7 @@ class FrontendComment extends WireData
             $query->execute();
             $results = $query->fetchAll();
 
-            if($results){
+            if ($results) {
                 foreach ($results as $row) {
                     $notificationEmails[] = $row['email'];
                 }
@@ -835,7 +835,6 @@ class FrontendComment extends WireData
                 $statement = "INSERT INTO $table (parent_id, comment_id, email, field_id, page_id) $valuesString";
 
                 $query = $database->prepare($statement);
-                bd('new comment(s) have/has been added to the queue table');
 
                 try {
 
@@ -872,6 +871,31 @@ class FrontendComment extends WireData
 
         try {
             $query->execute();
+        } catch (Exception $e) {
+            $this->log('Message: ' . $e->getMessage());
+        }
+
+    }
+
+    /**
+     * Remove all entries inside the queue table with the given email address
+     * This prevents sending further emails if notification has been stopped
+     * @return void
+     * @throws WireException
+     */
+    public function deleteEmailsInQueueTable(): void
+    {
+        $table = FieldtypeFrontendComments::queueTable;
+
+        // delete the entry from the queue table with the give email address
+        $statement = "DELETE FROM $table WHERE email=:email";
+
+        $query = $this->wire('database')->prepare($statement);
+        $query->bindValue(":email", $this->get('email'), PDO::PARAM_STR);
+
+        try {
+            $query->execute();
+            bd('email removed from queue table');
         } catch (Exception $e) {
             $this->log('Message: ' . $e->getMessage());
         }

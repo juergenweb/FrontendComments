@@ -16,15 +16,14 @@ namespace FrontendComments;
 use Exception;
 use FrontendForms\Alert;
 use FrontendForms\Link;
+use PDO;
 use ProcessWire\Field;
+use ProcessWire\FieldtypeFrontendComments;
 use ProcessWire\Page;
 use ProcessWire\PaginatedArray;
 use ProcessWire\WireException;
 use ProcessWire\WirePaginatable;
-use ProcessWire\FieldtypeFrontendComments;
-use PDO;
 use ProcessWire\WirePermissionException;
-use ProcessWire\Wire;
 
 class FrontendCommentArray extends PaginatedArray implements WirePaginatable
 {
@@ -605,13 +604,15 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
                 }
 
                 // update some values of this comment
+                //$comment->setTrackChanges(true);
                 $comment->set('status', $status);
                 $spamTS = ($status === 2) ? time() : null;
                 $comment->set('spam_update', $spamTS);// add timestamp to the database
                 $comment->set('remote_flag', 1);
 
                 // add a track change to change the queue and votes table too
-                $this->trackChange('statuschange', [$comment]);
+                $this->trackChange('statuschange'); // add trackChange to comments array
+                $comment->trackChange('statuschange'); // add trackChange to the comments itseöf
 
                 if ($this->saveComment($comment)) {
 
@@ -697,20 +698,20 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
             if ($notification === 0) {
 
                 // check if comment with this email and page id  exists inside the table
-                $comments = $this->find('email='.$email.', pages_id='.$pageid);
+                $comments = $this->find('email=' . $email . ', pages_id=' . $pageid);
 
                 if ($comments) {
                     foreach ($comments as $comment) {
-
-                        // enable track changing
-                        $comment->setTrackChanges(true);
 
                         if ($comment->get('notification') === 0) {
                             $msg = ['alert_warningClass' => $this->_('You have already canceled the receiving of reply notification mails for this comment.')];
                         } else {
                             $comment->set('notification', $notification); // set the new value
-                            $comment->trackChange('notification', $notification); // add the value to the comment track change
-                            $this->trackChange('notificationchange', [$comment]); // important to save the comment changes
+                            $comment->set('notificationStop', 1); // add new property
+
+                            // add a track change to change the queue and votes table too
+                            $comment->trackChange('notification');
+                            $this->trackChange('notificationchange');
 
                             if ($this->saveComment($comment)) {
                                 $msg = ['alert_successClass' => $this->_('You have successfully canceled the receiving notification mails for new comments.')];

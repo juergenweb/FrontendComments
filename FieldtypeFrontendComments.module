@@ -12,8 +12,8 @@
 
 use Exception;
 use FrontendComments\FrontendComment;
-use FrontendComments\FrontendComments;
 use FrontendComments\FrontendCommentArray;
+use FrontendComments\FrontendComments;
 use FrontendComments\Notifications;
 use PDO;
 
@@ -97,7 +97,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
     /**
-     * Check and change the status value before saving the comments
+     * Check and change the status value before saving the comments again
      * This method runs before the savePageField method and validates the status value
      * @param HookEvent $event
      * @return void
@@ -114,56 +114,69 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $fieldName = $field->name;
             $comments = $page->$fieldName;
 
-            $n = 1;
-            foreach ($comments as $comment) {
-                $text = null;
+            // run only if there is at least 1 status change of a comment inside the comments
+            if ($comments->isChanged('statuschange')) {
 
-                if ($comment->isChanged('status')) {
+                $n = 1;
 
-                    // add remote flag 2 if status has been changed for the first time in backend and no remote flag is present
-                    if ($this->wire('page')->rootParent->get('id') === 2) {
-                        if (!$comment->remote_flag) {
-                            $comment->remote_flag = 2;
+                foreach ($comments as $comment) {
+                    $text = null;
+
+                    // run only if the status of this comment has been changed
+                    if ($comment->isChanged('status')) {
+
+                        // add remote flag 2 if status has been changed for the first time in backend and no remote flag is present
+                        if ($this->wire('page')->rootParent->get('id') === 2) {
+                            if (!$comment->remote_flag) {
+                                $comment->remote_flag = 2;
+                            }
                         }
+
+                        $oldStatus = $comment->get('old_status');
+                        $newStatus = $comment->get('status');
+
+                        // run only if comment has children (replies)
+                        if ($comment->hasReplies()) {
+
+                            switch ($newStatus) {
+                                case (FieldtypeFrontendComments::pendingApproval):
+                                    if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
+                                        $text = sprintf($this->_('The comment #%s cannot be set to the status "%s" because answers already exist. Therefore, the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::pendingApproval], self::statusTexts()[$oldStatus]);
+                                    }
+                                    break;
+                                case ('delete'):
+                                    if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
+                                        $text = sprintf($this->_('Comment #%s cannot be deleted because there are already replies to this comment. Therefore, the status remains at "%s".'), $n, self::statusTexts()[$oldStatus]);
+                                        $text .= ' ' . $this->_('You must first delete all replies before you can delete this comment.');
+                                    }
+                                    break;
+                                case(FieldtypeFrontendComments::spam):
+                                    $text = sprintf($this->_('The comment #%s cannot be set to the status "%s" because answers already exist. Therefore, the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::spam], self::statusTexts()[$oldStatus]);
+                                    $text .= ' ' . $this->_('You must first delete all replies before you can mark this comment as SPAM.');
+                                    break;
+                            }
+                            if (!is_null($text)) {
+                                $comment->set('status', $oldStatus);
+                                $this->warning($text);
+                                $this->wire('session')->set('statuswarning-' . $comment->get('id'), $comment->get('id'));
+                                $this->wire('session')->set('statuswarningtext-' . $comment->get('id'), $text);
+                            }
+
+                        } else {
+                            if ($newStatus === 'delete') {
+                                $comments->remove($comment);
+                            } else {
+                                // add the status as property to the object
+                                $comment->set('statusChange', $newStatus);
+                                $comment->set('updateQueue', 1);
+                            }
+
+                        }
+
                     }
-
-                    $newStatus = $comment->get('status');
-                    $oldStatus = $comment->getChanges(true)['status'][0];
-
-                    if ($comment->hasReplies()) {
-
-                        switch ($newStatus) {
-                            case (FieldtypeFrontendComments::pendingApproval):
-                                if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
-                                    $text = sprintf($this->_('The comment #%s cannot be set to the status "%s" because answers already exist. Therefore, the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::pendingApproval], self::statusTexts()[$oldStatus]);
-                                }
-                                break;
-                            case ('delete'):
-                                if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
-                                    $text = sprintf($this->_('Comment #%s cannot be deleted because there are already replies to this comment. Therefore, the status remains at "%s".'), $n, self::statusTexts()[$oldStatus]);
-                                    $text .= ' ' . $this->_('You must first delete all replies before you can delete this comment.');
-                                }
-                                break;
-                            case(FieldtypeFrontendComments::spam):
-                                $text = sprintf($this->_('The comment #%s cannot be set to the status "%s" because answers already exist. Therefore, the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::spam], self::statusTexts()[$oldStatus]);
-                                $text .= ' ' . $this->_('You must first delete all replies before you can mark this comment as SPAM.');
-                                break;
-                        }
-                        if (!is_null($text)) {
-                            $comment->set('status', $oldStatus);
-                            $this->warning($text);
-                            $this->wire('session')->set('statuswarning-' . $comment->get('id'), $comment->get('id'));
-                            $this->wire('session')->set('statuswarningtext-' . $comment->get('id'), $text);
-                        }
-
-                    } else {
-                        if ($newStatus === 'delete') {
-                            $comments->remove($comment);
-                        }
-                    }
-
+                    $n++;
                 }
-                $n++;
+
             }
 
             //add the changed comment array to the page object
@@ -189,76 +202,47 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $field = $event->arguments(1);
             $comments = $page->get($field->name);
 
-            $changes = $comments->getChanges(true);
-
-            if ($changes) {
-
-                foreach ($changes as $key => $i) {
-                    switch ($key) {
-                        case('add'):
-
-                            $addedComments = $comments->getItemsAdded();
-
-                            // its a new comment
-                            foreach ($addedComments as $comment) {
-
-                                // get the id property of the newly added comment from the database
-                                $id = $comment->getCommentIDFromDatabase();
-
-                                if (is_int($id)) {
-
-                                    $comment->set('id', $id);
-                                    if ($comment->isPublished()) {
-                                        bd('comment added to queue table');
-                                        $comment->addCommentToQueueTable();
-                                    }
-                                } else {
-                                    // an error occured
-                                }
-
-                            }
-                            break;
-                        case('remove'):
-                            // delete entries of deleted comments inside the queue and votes table
-                            bd('a comment has been removed');
-                            // delete entries of deleted comments inside the queue and votes table
-                            $deletedComments = $comments->getItemsRemoved();
-
-                            if ($deletedComments) {
-                                // delete the comment ids from the queue and votes table
-                                foreach ($deletedComments as $comment) {
-                                    $comment->deleteEntriesInQueueTable();
-                                    $comment->deleteEntriesInVotesTable();
-                                }
-                            }
-                            break;
-                        case('statuschange'):
-
-                            // get all comments with status change
-                            $updatedComments = $changes['statuschange'][0];
-
-                            foreach ($updatedComments as $comment) {
-
-                                if ($comment->isPublished()) {
-                                    $comment->addCommentToQueueTable();
-                                    bd('a comment has been added to the queue table');
-                                } else {
-                                    $comment->deleteEntriesInQueueTable();
-                                    bd('a comment was removed from the queue table');
-                                }
-                            }
-                            break;
-                        case('notificationchange'):
-                            // get all comments with notification change
-                            $notificationComments = $changes['notificationchange'][0];
-                            break;
-                    }
+            // get all comments where the status have been updated
+            foreach ($comments->find('updateQueue=1') as $comment) {
+                $status = $comment->get('status');
+                if ($status === self::approved || $status === self::featured) {
+                    // add comment to the queue table
+                    $comment->addCommentToQueueTable();
+                } else {
+                    // remove comment from the queue and votes table
+                    $comment->deleteEntriesInQueueTable();
+                    $comment->deleteEntriesInVotesTable();
                 }
             }
 
+            // add all new comments to the queue table if status is published
+            foreach ($comments->getItemsAdded() as $comment) {
+
+                // get the id property of the newly added comment from the database
+                $id = $comment->getCommentIDFromDatabase();
+
+                if (is_int($id)) {
+
+                    $comment->set('id', $id);
+                    if ($comment->isPublished()) {
+                        $comment->addCommentToQueueTable();
+                    }
+                }
+
+            }
+
+            // remove all deleted comments from the queue table
+            foreach ($comments->getItemsRemoved() as $comment) {
+                $comment->deleteEntriesInQueueTable();
+                $comment->deleteEntriesInVotesTable();
+            }
+
+            // get all comments where the status have been updated
+            foreach ($comments->find('notificationStop=1') as $comment) {
+                $comment->deleteEmailsInQueueTable();
+            }
 
         }
-
     }
 
     /**
@@ -380,7 +364,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      */
     protected function sendQueuedEmails(): void
     {
-        bd('send queued emails');
+
         // do not send notification mails if a stopqueue session is present
         if ($this->wire('session')->get('stopqueue')) {
             $this->wire('session')->remove('stopqueue');
@@ -436,9 +420,10 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                 require_once(__DIR__ . '/Notifications.php');
                 $notifications = new Notifications($comments, $field, $page);
                 if ($notifications->sendNotificationAboutNewReply($comment)) {
-                    bd('queued sent!!');
+
                     // get the appropriate queued list item and delete it from the table
                     $statement = "DELETE FROM fc_comments_queues WHERE comment_id=:id ";
+
                     try {
                         $query = $this->database->prepare($statement);
                         $query->bindValue(":id", $comment['id'], PDO::PARAM_INT);
@@ -900,7 +885,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $comment->set($key, $val);
         }
 
-        $comment->resetTrackChanges();
+        $comment->resetTrackChanges(true);
         return $comment;
     }
 
@@ -987,16 +972,18 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         // create new comment objects from each item in the array
         foreach ($value as $item) {
 
+
             if (!is_array($item)) continue;
 
             $comment = $this->wire(new $comment_class($commentArray, $item, $frontendFormsConfig));
-            $comment->setTrackChanges(Wire::trackChangesValues); // track all values of this comment
+            $comment->setTrackChanges(true);
+            $comment->set('old_status', $comment->status);
             $comment->set('pages_id', $page->id);
             // add every comment independent of the status to the commentArray
             $commentArray->add($comment);
 
         }
-
+        $commentArray->setTrackChanges(true); // track changes of this comment array
         return $commentArray;
     }
 
