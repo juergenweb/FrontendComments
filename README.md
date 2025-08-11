@@ -17,7 +17,7 @@ This module is early Alpha stage - so please use it with care!
 
 ## Highlights / Features
 * Easy integration: Only 1 line of code inside a template is necessary to render the comments + form on the frontend
-* Possibility to use multiple comment fields in one template (if necessary)
+* Possibility to use multiple comment fields in one template
 * Easy to overwrite global module settings inside the template (possibility to use one comment field with different configuration settings in different templates)
 * Enable/disable star rating
 * Enable/disable rating of comments (like/dislike)
@@ -142,7 +142,7 @@ Each of these above methods is explained alongside the corresponding global sett
 
 ## Elements of a comment
 
-Each comment consists of different parts. Some of them are permanent an some can be enabled/disabled. Take a look at the image afterwards.
+Each comment consists of different parts. Some of them are permanent and some of them can be enabled/disabled. Take a look at following.
 
 ![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/comment-parts.png?raw=true)
 
@@ -156,7 +156,7 @@ After clicking on a comment, the edit form opens and you can, for example, chang
 
 ![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/open-comment.png?raw=true)
 
-I have only included some of the fields that I think makes sense to be able to edit afterwards.
+I have only integrated some of the fields (not all) that I think are useful for editing later.
 
 ## Different status of a comment
 
@@ -166,10 +166,6 @@ You can choose between 4 different status for a comment:
 2. approved: comment will be displayed on the frontend; status value is 1
 3. spam: comment will not be displayed on the frontend and will be deleted after specific time automatically (if set); status value is 2
 4. featured: same as approved, but is declared as very important. Could be used to generate a list containing only specific comments (eg. a "Our customers say..." list); status value is 4
-
-There is a 5th status, but this status cannot be selected manually: spam but has replies; status value is 3  
-
-In this case a comment is defined as SPAM and should be deleted, but has children, so it could not be deleted as normal spam. This status will be added automatically if a spam comment has children and this status cannot be selected manually. Please take a look [here](#special-case-what-happens-if-a-comment-which-has-replies-will-be-declared-as-spam) for more details. 
 
 ## Various methods
 
@@ -212,11 +208,9 @@ By default, all comments that are declared as SPAM are no longer visible in the 
 
 If a comment contains replies and is declared as SPAM later on, then all replies to this comment would be deleted too. This is not really desirable, as many comments would suddenly no longer be visible (even comments with content that does not violate the comment guidelines). This can cause commenters to feel frustrated because their comment has disappeared from the page.
 
-To prevent this sceanario, comments marked as SPAM to which replies have already been written are declared as "SPAM with replies". This means that the comment will remain visible, but the comment text will be replaced with the following text: "Sorry, this post has been removed by moderators for violating community guidelines."
-
-In this case, the comment will not be deleted like a normal SPAM comment and all replies to this comment will still remain visible in the frontend.
-
-You don't have to worry about whether a comment already has replies or not if you declare a comment as "SPAM" - this will be automatically checked before saving. If answers already exist, then the status "SPAM" will be automatically changed to "SPAM with replies"
+To prevent this scenario, comments which have children cannot be marked as SPAM. 
+You don't have to worry about whether a comment already has replies or not if you declare a comment as "SPAM" - this will be automatically checked before saving. If answers already exist, you will get a warning message, that this comment has children and cannot be set to SPAM until you delete all children manually first. 
+If you are not satisfied with the text of this comment, you can change it to something else in the backend.
 
 
 ![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/violation.png?raw=true)
