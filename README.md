@@ -212,9 +212,6 @@ To prevent this scenario, comments which have children cannot be marked as SPAM.
 You don't have to worry about whether a comment already has replies or not if you declare a comment as "SPAM" - this will be automatically checked before saving. If answers already exist, you will get a warning message, that this comment has children and cannot be set to SPAM until you delete all children manually first. 
 If you are not satisfied with the text of this comment, you can change it to something else in the backend.
 
-
-![alt text](https://github.com/juergenweb/FrontendComments/blob/main/images/violation.png?raw=true)
-
 ## Locking visitors to vote (up-vote or down-vote) for a comment
 This module offers the possibility to activate upvotes and downvotes for comments. In the input field configuration, you can specify the period after which a user is allowed to vote again.
 
