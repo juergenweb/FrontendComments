@@ -29,6 +29,9 @@
         "6f8063417ab31f38d864c28302f3de2f": {
             "text": "Best\u00e4tigt"
         },
+        "15422d54ec0d47000dc86a9820a5237e": {
+            "text": "Hervor gehoben"
+        },
         "c72beebe6ecbdddff71b846c4858ebcb": {
             "text": "="
         },
@@ -47,26 +50,11 @@
         "ff3fc5302540ebcb78034d59f84be69e": {
             "text": "Dieser Text wird direkt unter dem Kommentar angezeigt."
         },
-        "58b6f822b062991647cf2e70b0140352": {
-            "text": "Update %s f\u00fcr Kommentar #%d"
-        },
-        "b77e1cde3409464c7ca450dfe273200c": {
-            "text": "="
-        },
-        "b28e4f256b1d9cf092c2d20c9f3a2072": {
-            "text": "Eingabefeld zur Verwaltung von Kommentaren auf einer Seite."
-        },
-        "e2702e8b9c1efdd2e4662873c3114be2": {
-            "text": "Wartet auf Best\u00e4tigung"
-        },
-        "787d5f05953ec39b108869dfdd7733e6": {
-            "text": "Best\u00e4tigt"
-        },
-        "792094a5f7cc15d8c58c81343c8bf83d": {
-            "text": "SPAM, hat aber Antworten"
-        },
         "e7938df917f210c96c4cb63cdf109934": {
             "text": "Der Kommentartext zum Kommentar #%d darf nur ge\u00e4ndert, aber nicht gel\u00f6scht werden."
+        },
+        "58b6f822b062991647cf2e70b0140352": {
+            "text": "Update %s f\u00fcr Kommentar #%d"
         },
         "80aee52c43398637f7685f009add0b96": {
             "text": "Die E-Mail Adresse zum Kommentar #%d darf nur ge\u00e4ndert, aber nicht gel\u00f6scht werden."
@@ -89,11 +77,20 @@
         "79c04c74c1987dee20f384815e7347d1": {
             "text": "Der Statuswert f\u00fcr Kommentar #%s ist ung\u00fcltig."
         },
-        "15422d54ec0d47000dc86a9820a5237e": {
-            "text": "Hervor gehoben"
+        "b77e1cde3409464c7ca450dfe273200c": {
+            "text": "="
         },
-        "dd0d24a48197b2785e34fa674d5da2e3": {
-            "text": "Hervor gehoben"
+        "b28e4f256b1d9cf092c2d20c9f3a2072": {
+            "text": "Eingabefeld zur Verwaltung von Kommentaren auf einer Seite."
+        },
+        "04e1f22895b279ec005be084d10f9e73": {
+            "text": "Kommentar Manager"
+        },
+        "d434a943a70986bca2b1ff9b2248e55b": {
+            "text": "Bitte verwenden Sie den %s, um die Kommentare zu bearbeiten."
+        },
+        "111c88cb616ce6794097be71155cf20b": {
+            "text": "IDs der Antwortkommentare"
         }
     }
 }

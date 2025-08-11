@@ -2,17 +2,44 @@
     "file": "site\/modules\/FrontendComments\/FrontendCommentForm.php",
     "textdomain": "site--modules--frontendcomments--frontendcommentform-php",
     "translations": {
+        "33cf5ec0ada0b91b96379f7a2e7dd558": {
+            "text": "\u00c4u\u00dferst schlecht"
+        },
+        "0e94d01753f69bda9b5060a18994540d": {
+            "text": "Schlecht"
+        },
+        "b1897515d548a960afe49ecf66a29021": {
+            "text": "Befriedigend"
+        },
+        "c0e54054d2efa466c477ca3e478549a3": {
+            "text": "Sehr gut"
+        },
+        "fcc2d28a33d2df558f18766e067569c6": {
+            "text": "Ausgezeichnet"
+        },
         "4d475654cf26db0264212bc50e9cf6d2": {
             "text": "Schreiben Sie einen Kommentar"
+        },
+        "d70ba39b6f26f0f82451d5164951cb93": {
+            "text": "Die E-Mail Adresse"
         },
         "49ee3087348e8d44e1feda1917443987": {
             "text": "="
         },
+        "5c222983beebb4dab9c6dfd509a5922c": {
+            "text": "Der Name"
+        },
         "339f7a2e087a159e6a31501649027a77": {
             "text": "="
         },
+        "d7cf76b7bb504a2d32a52ae210b87164": {
+            "text": "Die Homepage URL"
+        },
         "0be8406951cdfda82f00f79328cf4efc": {
             "text": "Kommentar"
+        },
+        "425a36ae0f1f9c87fc533576b4fb215c": {
+            "text": "Der Kommentar"
         },
         "458a8bd4c7dd305769961f96822e1e05": {
             "text": "HTML ist nicht erlaubt."
@@ -23,23 +50,11 @@
         "e44ea373da30c4843546072fb74e8b27": {
             "text": "Geben Sie Ihre Bewertung ab"
         },
-        "fcc2d28a33d2df558f18766e067569c6": {
-            "text": "Ausgezeichnet"
-        },
-        "c0e54054d2efa466c477ca3e478549a3": {
-            "text": "Sehr gut"
-        },
-        "b1897515d548a960afe49ecf66a29021": {
-            "text": "Befriedigend"
-        },
-        "0e94d01753f69bda9b5060a18994540d": {
-            "text": "Schlecht"
-        },
-        "33cf5ec0ada0b91b96379f7a2e7dd558": {
-            "text": "\u00c4u\u00dferst schlecht"
-        },
         "b9a53ec83ceece66b9634c09ced8b50c": {
             "text": "Ich m\u00f6chte \u00fcber neue Kommentare informiert werden"
+        },
+        "2dd6cfffcfb65559762cc850d35cc01d": {
+            "text": "Die E-Mail Benachrichtigung"
         },
         "82e10f630644cddf1214fff13c065901": {
             "text": "Sie k\u00f6nnen den Erhalt von Benachrichtigungs-E-Mails jederzeit beenden, indem Sie auf den entsprechenden Link in der Benachrichtigungs-E-Mail klicken."
@@ -52,6 +67,9 @@
         },
         "38bbf3cad7e6177bd635d24e2e66eb34": {
             "text": "Ich m\u00f6chte \u00fcber jeden neuen Kommentar benachrichtigt werden"
+        },
+        "df2619f4e734424d368a473c12f7a28c": {
+            "text": "Die Bewertung"
         },
         "da64780df4ce4b1349b13d33d8e3e1d0": {
             "text": "Ich m\u00f6chte \u00fcber Antworten auf diesen Kommentar informiert werden"
@@ -77,23 +95,8 @@
         "0538e2b76e114b10905985e68f528aaf": {
             "text": "Um Ihren Kommentar sehen zu k\u00f6nnen, m\u00fcssen Sie die Seite zuerst neu laden, indem Sie auf den folgenden Link klicken:"
         },
-        "d70ba39b6f26f0f82451d5164951cb93": {
-            "text": "Die E-Mail Adresse"
-        },
-        "5c222983beebb4dab9c6dfd509a5922c": {
-            "text": "Der Name"
-        },
-        "d7cf76b7bb504a2d32a52ae210b87164": {
-            "text": "Die Homepage URL"
-        },
-        "425a36ae0f1f9c87fc533576b4fb215c": {
-            "text": "Der Kommentar"
-        },
-        "2dd6cfffcfb65559762cc850d35cc01d": {
-            "text": "Die E-Mail Benachrichtigung"
-        },
-        "df2619f4e734424d368a473c12f7a28c": {
-            "text": "Die Bewertung"
+        "e7663040950627ad4d49f433acbec336": {
+            "text": "Kommentarseite"
         }
     }
 }

@@ -2,9 +2,6 @@
     "file": "site\/modules\/FrontendComments\/FieldtypeFrontendComments.module",
     "textdomain": "site--modules--frontendcomments--fieldtypefrontendcomments-module",
     "translations": {
-        "9d18332019d789a047598ebf2bc253cc": {
-            "text": "Die Kommentare, die Sie zum L\u00f6schen ausgew\u00e4hlt haben, wurden gel\u00f6scht"
-        },
         "f5be514ce4f52a5af602713c3eb291de": {
             "text": "Das Eingabefeld \"%s\" ben\u00f6tigt eine E-Mail-Adresse, um Benachrichtigungsmails an mindestens einen Moderator senden zu k\u00f6nnen."
         },
@@ -532,6 +529,30 @@
         },
         "bbe8f47078082191d89866cabaad534d": {
             "text": "Eingabefeld, welches auf Basis des FrontendForms-Modul Kommentare auf einer Seite anzeigen kann"
+        },
+        "c0d8e3a0d07970818a6a2e3bdf06a446": {
+            "text": "Der Kommentar #%s kann nicht auf den Status \"%s\" gesetzt werden, da bereits Antworten vorhanden sind. Daher bleibt der Status bei \"%s\"."
+        },
+        "ff48b88ed6d41226c4b673070c4e9d51": {
+            "text": "Kommentar #%s kann nicht gel\u00f6scht werden, da es bereits Antworten auf diesen Kommentar gibt. Daher bleibt der Status bei \"%s\"."
+        },
+        "cb487bd3a925abfee5e6547913762c70": {
+            "text": "Sie m\u00fcssen zuerst alle Antworten l\u00f6schen, bevor Sie diesen Kommentar l\u00f6schen k\u00f6nnen."
+        },
+        "bca7a54fd8d1a225879aa80d4911e78f": {
+            "text": "Sie m\u00fcssen zuerst alle Antworten l\u00f6schen, bevor Sie diesen Kommentar als SPAM markieren k\u00f6nnen."
+        },
+        "e2702e8b9c1efdd2e4662873c3114be2": {
+            "text": "Genehmigung ausstehend"
+        },
+        "787d5f05953ec39b108869dfdd7733e6": {
+            "text": "Genehmigt"
+        },
+        "c72beebe6ecbdddff71b846c4858ebcb": {
+            "text": "="
+        },
+        "dd0d24a48197b2785e34fa674d5da2e3": {
+            "text": "Hervorgehoben"
         }
     }
 }

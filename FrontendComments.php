@@ -18,6 +18,8 @@
     use ProcessWire\Field;
     use ProcessWire\Page;
     use FrontendForms\TextElements;
+    use ProcessWire\WireException;
+    use ProcessWire\WirePermissionException;
     use function ProcessWire\wire as wire;
 
     class FrontendComments extends Wire
@@ -32,8 +34,8 @@
         protected TextElements $commentsHeadline;
 
         /**
-         * @throws \ProcessWire\WireException
-         * @throws \ProcessWire\WirePermissionException
+         * @throws WireException
+         * @throws WirePermissionException
          */
         public function __construct(FrontendCommentArray $comments)
         {
@@ -63,7 +65,7 @@
 
         /**
          * Get the headline object of the commenting list for further manipulations
-         * @return \FrontendForms\TextElements
+         * @return TextElements
          */
         public function getCommentsHeadline(): TextElements
         {
@@ -72,13 +74,13 @@
 
         /**
          * Get all published (visible) comments as a WireArray
-         * @param \FrontendComments\FrontendCommentArray $comments
+         * @param FrontendCommentArray $comments
          * @param int $parentid
-         * @param \FrontendComments\FrontendCommentArray|null $commentArray
+         * @param FrontendCommentArray|null $commentArray
          * @param int $level
          * @param bool|int $reverse
-         * @return \FrontendComments\FrontendCommentArray
-         * @throws \ProcessWire\WireException
+         * @return FrontendCommentArray
+         * @throws WireException
          */
         public static function getCommentListArray(FrontendCommentArray $comments, int $parentid = 0, FrontendCommentArray $commentArray = null, int $level = 0, bool|int $reverse = false): FrontendCommentArray
         {
@@ -87,9 +89,12 @@
                 $commentArray = wire(new FrontendCommentArray());
 
             // find the comments
-            $parentComments = $comments->find('parent_id=' . $parentid . ',status=' . FieldtypeFrontendComments::approved . '|' . FieldtypeFrontendComments::spamReplies. '|' . FieldtypeFrontendComments::featured . ',sort=sort');
+            $parentComments = $comments->find('parent_id=' . $parentid . ',status=' . FieldtypeFrontendComments::approved . '|' . FieldtypeFrontendComments::featured . ',sort=sort');
 
-            if ($parentComments) {
+
+            if ($parentComments->count()) {
+
+
 
                 // reverse the comment order on level 0 if set
                 if (($parentid === 0) && ($reverse)) {
@@ -97,6 +102,7 @@
                 }
 
                 $total = count($parentComments);
+
 
                 foreach ($parentComments as $key => $data) {
 
@@ -110,6 +116,7 @@
                     $commentArray->add($data);
 
                     // start the recursion to get the children
+                    if(!is_null($data->id))
                     self::getCommentListArray($comments, $data->id, $commentArray, $level + 1, $reverse);
 
                 }
@@ -162,15 +169,15 @@
         /**
          * Get the FrontendCommentArray containing all comments for displaying on a page depending on pagination
          * settings Slices the array if necessary
-         * @return \FrontendComments\FrontendCommentArray
-         * @throws \ProcessWire\WireException
+         * @return FrontendCommentArray
+         * @throws WireException
          */
         protected
         function getCommentsForDisplay(): FrontendCommentArray
         {
 
             // first, remove all comments which are not approved or spam (status 0 or 4)
-            $this->comments->filter('status='.FieldtypeFrontendComments::approved.'|'.FieldtypeFrontendComments::featured.'|'.FieldtypeFrontendComments::spamReplies);
+            $this->comments->filter('status='.FieldtypeFrontendComments::approved.'|'.FieldtypeFrontendComments::featured);
 
             // overwrite the pagination number if set inside the template
             $this->num_comments_on_page = $this->field->get('input_fc_pagnumber');
@@ -215,7 +222,7 @@
         /**
          * Render the comments as a list of divs
          * @return string
-         * @throws \ProcessWire\WireException
+         * @throws WireException
          */
         public
         function ___renderCommentsDiv(): string
@@ -256,7 +263,7 @@
         /**
          * Alias method for the renderCommentsDiv() method
          * @return string
-         * @throws \ProcessWire\WireException
+         * @throws WireException
          */
         public
         function ___render(): string
@@ -266,7 +273,7 @@
 
         /**
          * @return string
-         * @throws \ProcessWire\WireException
+         * @throws WireException
          */
         public
         function __toString(): string

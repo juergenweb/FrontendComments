@@ -12,11 +12,10 @@
 
 use Exception;
 use FrontendComments\FrontendComment;
-use FrontendComments\FrontendComments;
 use FrontendComments\FrontendCommentArray;
+use FrontendComments\FrontendComments;
 use FrontendComments\Notifications;
 use PDO;
-
 
 class FieldtypeFrontendComments extends FieldtypeMulti
 {
@@ -26,7 +25,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     const pendingApproval = 0; // status waiting for approval
     const approved = 1; // status approved
     const spam = 2; // status SPAM
-    const spamReplies = 3; // status SPAM but comment has replies and therefore is not allowed to delete
     const featured = 4; // approved, but special marked as important
     const queueTable = 'fc_comments_queues';
     protected FrontendForms $frontendForms;
@@ -34,8 +32,8 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     protected string|int $input_fc_queue_batch = 20;
 
     /**
-     * @throws \ProcessWire\WireException
-     * @throws \ProcessWire\WirePermissionException
+     * @throws WireException
+     * @throws WirePermissionException
      */
     public function __construct()
     {
@@ -77,61 +75,174 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $this->addHookAfter('LazyCron::every2Minutes', $this, 'sendQueuedEmails');
         $this->addHookAfter('ProcessField::fieldDeleted', $this, 'deleteVotesTable');
         $this->addHookBefore('Page::render', $this, 'noEmailWarning');
-        $this->addHookAfter('Page::changed', $this, 'updateQueueTableOnStatusChangeOnBackend');
         $this->addHookAfter('LazyCron::everyDay', $this, 'deleteSpam');
         $this->addHookBefore('InputfieldTextarea::processInput', $this, 'validateEmailAddresses');
-        $this->addHookAfter('Pages::saved', $this, 'deleteComments');
+        $this->addHookBefore('FieldtypeMulti::savePageField', $this, 'correctStatusValues');
+        $this->addHookAfter('FieldtypeMulti::savePageField', $this, 'updateTables');
 
     }
 
-
-        /**
-     * Delete a comment if the option "Delete the comment" is selected inside the comments' tab
-     * @param \ProcessWire\HookEvent $event
-     * @return void
-     * @throws \ProcessWire\WireException
-     * @throws \ProcessWire\WirePermissionException
+    /**
+     * Array containing the texts for each status
+     * @return array
      */
-    protected function deleteComments(HookEvent $event): void
+    public static function statusTexts(): array
+    {
+        return [
+            0 => __('pending approval'),
+            1 => __('approved'),
+            2 => __('SPAM'),
+            4 => __('featured')
+        ];
+    }
+
+    /**
+     * Check and change the status value before saving the comments again
+     * This method runs before the savePageField method and validates the status value
+     * @param HookEvent $event
+     * @return void
+     * @throws WireException
+     */
+    public function correctStatusValues(HookEvent $event): void
     {
 
-        $page = $event->arguments(0);
-        $deleted = false;
-        $commentFields = self::getAllCommentFields();
-        $fieldNames = array_column($commentFields, 'name');
+        // run only on FieldtypeFrontendComments
+        if ($event->object instanceof FieldtypeFrontendComments) {
 
-        foreach ($fieldNames as $fname) {
-            if ($page->hasField($fname)) {
+            $page = $event->arguments(0);
+            $field = $event->arguments(1);
+            $fieldName = $field->name;
+            $comments = $page->$fieldName;
 
-                if ($page->get($fname)->count()) {
-                    $fieldsToDelete = new WireArray();
-                    $field = $this->wire('fields')->get($fname);
+            // run only if there is at least 1 status change of a comment inside the comments
+            if ($comments->isChanged('statuschange')) {
 
-                    foreach ($page->get($fname) as $comment) {
+                $n = 1;
 
-                        $fieldName = $fname . '_status_' . $comment->id;
-                        if ($this->wire('input')->post($fieldName) === 'delete') {
+                foreach ($comments as $comment) {
+                    $text = null;
 
-                            if (!$comment->hasChildren()) {
-                                $fieldsToDelete->add($comment);
-                            } else {
-                                // change status
-                                $comment->updateStatus(self::spamReplies);
+                    // run only if the status of this comment has been changed
+                    if ($comment->isChanged('status')) {
+
+                        // add remote flag 2 if status has been changed for the first time in backend and no remote flag is present
+                        if ($this->wire('page')->rootParent->get('id') === 2) {
+                            if (!$comment->remote_flag) {
+                                $comment->remote_flag = 2;
                             }
                         }
-                    }
 
-                    if ($fieldsToDelete->count() > 0) {
-                        $deleted = $this->deletePageFieldRows($page, $field, $fieldsToDelete);
-                    }
+                        $oldStatus = $comment->get('old_status');
+                        $newStatus = $comment->get('status');
 
+                        // run only if comment has children (replies)
+                        if ($comment->hasReplies()) {
+
+                            switch ($newStatus) {
+                                case (FieldtypeFrontendComments::pendingApproval):
+                                    if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
+                                        $text = sprintf($this->_('The comment #%s cannot be set to the status "%s" because answers already exist. Therefore, the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::pendingApproval], self::statusTexts()[$oldStatus]);
+                                    }
+                                    break;
+                                case ('delete'):
+                                    if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
+                                        $text = sprintf($this->_('Comment #%s cannot be deleted because there are already replies to this comment. Therefore, the status remains at "%s".'), $n, self::statusTexts()[$oldStatus]);
+                                        $text .= ' ' . $this->_('You must first delete all replies before you can delete this comment.');
+                                    }
+                                    break;
+                                case(FieldtypeFrontendComments::spam):
+                                    $text = sprintf($this->_('The comment #%s cannot be set to the status "%s" because answers already exist. Therefore, the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::spam], self::statusTexts()[$oldStatus]);
+                                    $text .= ' ' . $this->_('You must first delete all replies before you can mark this comment as SPAM.');
+                                    break;
+                            }
+                            if (!is_null($text)) {
+                                $comment->set('status', $oldStatus);
+                                $this->warning($text);
+                                $this->wire('session')->set('statuswarning-' . $comment->get('id'), $comment->get('id'));
+                                $this->wire('session')->set('statuswarningtext-' . $comment->get('id'), $text);
+                            }
+
+                        } else {
+                            if ($newStatus === 'delete') {
+                                $comments->remove($comment);
+                            } else {
+                                // add the status as property to the object
+                                $comment->set('statusChange', $newStatus);
+                                $comment->set('updateQueue', 1);
+                            }
+
+                        }
+
+                    }
+                    $n++;
+                }
+
+            }
+
+            //add the changed comment array to the page object
+            $page->$fieldName = $comments;
+            $event->arguments(0, $page);
+        }
+
+    }
+
+    /**
+     * Add or delete entries in the fc_comments_queues table and the votes table
+     * This method runs after the savePageField method and deletes or changes values inside the queue and votes tables
+     * @param HookEvent $event
+     * @return void
+     */
+    protected function updateTables(HookEvent $event): void
+    {
+
+        // run only on FieldtypeFrontendComments
+        if ($event->object instanceof FieldtypeFrontendComments) {
+
+            $page = $event->arguments(0);
+            $field = $event->arguments(1);
+            $comments = $page->get($field->name);
+
+            // get all comments where the status have been updated
+            foreach ($comments->find('updateQueue=1') as $comment) {
+                $status = $comment->get('status');
+                if ($status === self::approved || $status === self::featured) {
+                    // add comment to the queue table
+                    $comment->addCommentToQueueTable();
+                } else {
+                    // remove comment from the queue and votes table
+                    $comment->deleteEntriesInQueueTable();
+                    $comment->deleteEntriesInVotesTable();
                 }
             }
-        }
-        if ($deleted) {
-            $this->wire()->message($this->_('The comments you selected to delete have been deleted.'));
-        }
 
+            // add all new comments to the queue table if status is published
+            foreach ($comments->getItemsAdded() as $comment) {
+
+                // get the id property of the newly added comment from the database
+                $id = $comment->getCommentIDFromDatabase();
+
+                if (is_int($id)) {
+
+                    $comment->set('id', $id);
+                    if ($comment->isPublished()) {
+                        $comment->addCommentToQueueTable();
+                    }
+                }
+
+            }
+
+            // remove all deleted comments from the queue table
+            foreach ($comments->getItemsRemoved() as $comment) {
+                $comment->deleteEntriesInQueueTable();
+                $comment->deleteEntriesInVotesTable();
+            }
+
+            // get all comments where the status have been updated
+            foreach ($comments->find('notificationStop=1') as $comment) {
+                $comment->deleteEmailsInQueueTable();
+            }
+
+        }
     }
 
     /**
@@ -161,7 +272,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $url = wire('config')->urls->get('FieldtypeFrontendComments') . 'assets/';
 
         // path to the assets folder
-        $pathToCSSFile = wire('config')->paths->siteModules.'FrontendComments/assets/';
+        $pathToCSSFile = wire('config')->paths->siteModules . 'FrontendComments/assets/';
 
         // get module version
         $moduleVersion = wire('modules')->getModuleInfo('FieldtypeFrontendComments')['version'];
@@ -170,17 +281,16 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $frameworkFile = FieldtypeFrontendComments::getFrontendFormsConfigValues()['input_framework'];
         $frameworkName = pathinfo($frameworkFile, PATHINFO_FILENAME);
 
-
-        $out = '<link rel="stylesheet" type="text/css" href="' . $url . 'frontendcommentsmain.css?v=' . $moduleVersion. '">' . PHP_EOL;
+        $out = '<link rel="stylesheet" type="text/css" href="' . $url . 'frontendcommentsmain.css?v=' . $moduleVersion . '">' . PHP_EOL;
 
         // check if CSS file exists for the given framework setting
-        if(file_exists($pathToCSSFile.'frontendcomments'.$frameworkName . '.css')){
+        if (file_exists($pathToCSSFile . 'frontendcomments' . $frameworkName . '.css')) {
             // add CSS file
-            $out .= '<link rel="stylesheet" type="text/css" href="' . $url.'frontendcomments'.$frameworkName . '.css?v=' . $moduleVersion.'">' . PHP_EOL;
+            $out .= '<link rel="stylesheet" type="text/css" href="' . $url . 'frontendcomments' . $frameworkName . '.css?v=' . $moduleVersion . '">' . PHP_EOL;
         }
 
         // add star-rating if enabled
-        if($useStarRating)
+        if ($useStarRating)
             $out .= '<link rel="stylesheet" type="text/css" href="' . $url . 'star-rating.css?v=' . $moduleVersion . '">' . PHP_EOL;
 
         return $out;
@@ -197,18 +307,15 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         // url to FrontendComments asset folder
         $url = wire('config')->urls->get('FieldtypeFrontendComments') . 'assets/';
 
-        // path to the assets folder
-        $pathToCSSFile = wire('config')->paths->siteModules.'FrontendComments/assets/';
-
         // get module version
         $moduleVersion = wire('modules')->getModuleInfo('FieldtypeFrontendComments')['version'];
 
-        $out = '<script src="' . $url . 'frontendcomments.js?v=' . $moduleVersion.'"></script>' . PHP_EOL;
+        $out = '<script src="' . $url . 'frontendcomments.js?v=' . $moduleVersion . '"></script>' . PHP_EOL;
 
         // add star rating JS to the frontend if enabled
         if ($useStarRating) {
             $out .= '<script src="' . $url . 'star-rating.min.js?v=' . $moduleVersion . ' "></script>' . PHP_EOL;
-            $out .= "<script>var stars = new StarRating('.fcm-star-rating');</script>" . PHP_EOL;
+            $out .= "<script>let stars = new StarRating('.fcm-star-rating');</script>" . PHP_EOL;
         }
         return $out;
     }
@@ -216,20 +323,21 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     /**
      * Return all featured comments as a WireArray sitewide
      * @param int $limit
-     * @return void
+     * @return WireArray
+     * @throws WireException
      */
     public static function getAllFeaturedComments(int $limit = 0): WireArray
     {
 
         $selects = [];
-        $featured = SELF::featured;
+        $featured = self::featured;
         foreach (self::getAllCommentFields() as $field) {
             $selects[] = "SELECT * FROM $field->table WHERE status=$featured";
         }
 
         $statement = implode(' UNION ', $selects);
         $statement .= ' ORDER BY created DESC';
-        if($limit > 0){
+        if ($limit > 0) {
             $statement .= ' LIMIT ' . $limit;
         }
 
@@ -241,7 +349,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $comments[] = $row;
         }
 
-        $featured_comments = New WireArray();
+        $featured_comments = new WireArray();
         foreach ($comments as $comment) {
             $featured_comments[] = $comment;
         }
@@ -251,11 +359,12 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     /**
      * Get all queued emails from the database and send the emails in batches of 20 mails at once
      * @return void
-     * @throws \ProcessWire\WireException
-     * @throws \ProcessWire\WirePermissionException
+     * @throws WireException
+     * @throws WirePermissionException
      */
     protected function sendQueuedEmails(): void
     {
+
         // do not send notification mails if a stopqueue session is present
         if ($this->wire('session')->get('stopqueue')) {
             $this->wire('session')->remove('stopqueue');
@@ -290,7 +399,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
             $statement = implode(' UNION ', $statements);
 
-
             $query = $this->database->prepare($statement);
             $query->execute();
 
@@ -304,7 +412,10 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
                 $page = $this->wire('pages')->get($comment['pages_id']);
                 $field = $this->wire('fields')->get($comment['field_id']);
-                
+
+                // create a FrontendComment object out of the array
+                $comment = $this->makeComment($page, $field, $comment);
+
                 // create a notification object
                 require_once(__DIR__ . '/Notifications.php');
                 $notifications = new Notifications($comments, $field, $page);
@@ -312,6 +423,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
                     // get the appropriate queued list item and delete it from the table
                     $statement = "DELETE FROM fc_comments_queues WHERE comment_id=:id ";
+
                     try {
                         $query = $this->database->prepare($statement);
                         $query->bindValue(":id", $comment['id'], PDO::PARAM_INT);
@@ -327,7 +439,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     /**
      * Delete the votes table of this comment field after the field has been deleted
      *
-     * @param \ProcessWire\HookEvent $event
+     * @param HookEvent $event
      * @return void
      */
     protected function deleteVotesTable(HookEvent $event): void
@@ -341,22 +453,25 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
     /**
      * Get all fields of the type "FieldtypeFrontendComments"
-     * @return array
+     * @return WireArray
+     * @throws WireException
      */
-    public static function getAllCommentFields(): array
+    public static function getAllCommentFields(): WireArray
     {
-        $fields = [];
-        $fieldTypes = wire('fields')->find('type=FieldtypeFrontendComments');
-        foreach ($fieldTypes as $field) {
-            $fields[] = $field;
+        $items = new WireArray();
+        $fields = wire('fields')->findByType('FieldtypeFrontendComments');
+        if ($fields) {
+            foreach ($fields as $field) {
+                $items->add($field);
+            }
         }
-        return $fields;
+        return $items;
     }
 
     /**
      * Get all fields of the type "FieldtypeFrontendComments" that have no notification email added
      * @return array
-     * @throws \ProcessWire\WireException
+     * @throws WireException
      */
     protected function getCommentFieldsWithoutNotificationEmail(): array
     {
@@ -365,9 +480,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
         $commentFields = self::getAllCommentFields();
 
-        if ($commentFields) {
+        if ($commentFields->count()) {
 
-            $ids = array_column($commentFields, 'id');
+            $ids = array_column($commentFields->getArray(), 'id');
 
             // check if we are on a field config page
             $currentUrl = $this->wire('input')->url(['withQueryString' => true]);
@@ -420,7 +535,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      * configuration of this module
      * addHookBefore Page::render
      * @return void
-     * @throws \ProcessWire\WireException
+     * @throws WireException
      */
     protected function noEMailWarning(): void
     {
@@ -439,141 +554,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
     /**
-     * Delete all entries of a specific comment inside the queue table
-     * @param \FrontendComments\FrontendComment $comment
-     * @param \ProcessWire\Page $page
-     * @param \ProcessWire\Field $field
-     * @return void
-     */
-    protected static function deleteEntriesInQueueTable(FrontendComment $comment, Page $page, Field $field): void
-    {
-        $table = self::queueTable;
-
-        // delete the entry from the queue table
-        $statement = "DELETE FROM $table WHERE comment_id=:id AND field_id=:field_id AND page_id=:page_id";
-
-        $query = wire('database')->prepare($statement);
-        $query->bindValue(":id", $comment->get('id'), PDO::PARAM_INT);
-        $query->bindValue(":field_id", $field->get('id'), PDO::PARAM_INT);
-        $query->bindValue(":page_id", $page->get('id'), PDO::PARAM_INT);
-
-        try {
-            $query->execute();
-        } catch (Exception) {
-            // not used at the moment
-        }
-
-    }
-
-    /**
-     * If a new comment has been posted, write all notification emails in the database table "fields_comments_queues"
-     * for queued sending of notification mails
-     * @param \FrontendComments\FrontendComment $newComment
-     * @param \ProcessWire\Page $page
-     * @param \ProcessWire\Field $field
-     * @return void
-     */
-    public static function writeEntryInQueueTable(FrontendComment $newComment, Page $page, Field $field): void
-    {
-
-        $database = wire('database');
-        $commentsTable = $field->table; // set the comment table name
-        $notificationEmails = []; // array containing all email addresses for replies
-
-        // 1) Get the mail addresses of all users that have chosen to get informed about all new comments and the mail address of the parent commenter if he has reply notification enabled
-        $statement = "SELECT email FROM $commentsTable WHERE (pages_id=:page_id AND notification=:notification) OR (id=:parent_id AND notification=:parent_notification)";
-        $query = wire('database')->prepare($statement);
-        $query->bindValue(":page_id", $page->id, PDO::PARAM_INT);
-        $query->bindValue(":notification", FrontendComment::flagNotifyAll, PDO::PARAM_INT);
-        $query->bindValue(":parent_id", $newComment->get('parent_id'), PDO::PARAM_INT);
-        $query->bindValue(":parent_notification", FrontendComment::flagNotifyReply, PDO::PARAM_INT);
-
-        try {
-            $query->execute();
-            $results = $query->fetchAll();
-            foreach ($results as $row) {
-                $notificationEmails[] = $row['email'];
-            }
-        } catch (Exception) {
-            // not used at the moment
-        }
-
-        // 2) remove the email address of the current commenter from the array
-        $notificationEmails = array_diff($notificationEmails, [$newComment->get('email')]);
-
-        // 3) remove double entries if present
-        $notificationEmails = array_unique($notificationEmails);
-
-        // 4) write all mail addresses into the queue table
-
-        if ($notificationEmails) {
-
-            // write all receivers into the queue table for later sending of emails
-            $table = self::queueTable;
-            // create the value string for the data
-            $sendingData = [];
-            foreach ($notificationEmails as $email) {
-                //$sendingData[] = '(' . $newComment->get('parent_id') . ',' . $newComment->get('id') . ',\'' . $email . '\', ' . $newComment->field->id . ', ' . $newComment->page->id . ')';
-                $sendingData[] = '(' . $newComment->get('parent_id') . ',' . $newComment->get('id') . ',\'' . $email . '\', ' . $field->id . ', ' . $page->id . ')';
-            }
-            $valuesString = 'VALUES' . implode(',', $sendingData);
-
-            // create the SQL statement and save the entries to the database
-            $statement = "INSERT INTO $table (parent_id, comment_id, email, field_id, page_id) $valuesString";
-            $query = $database->prepare($statement);
-
-            try {
-                $query->execute();
-            } catch (Exception) {
-                // not used at the moment
-            }
-
-        }
-
-    }
-
-    /**
-     * Change the queue table if the status of a comment has been changed
-     * If a comment status has been changed to approve, then all email addresses will be added to the queue table
-     * Otherwise, all entries for this comment will be deleted from the queue table
-     * @param \ProcessWire\HookEvent $event
-     * @return void
-     * @throws \ProcessWire\WireException
-     */
-    public static function updateQueueTableOnStatusChangeOnBackend(HookEvent $event): void
-    {
-        // run only in the backend
-        $page = $event->object;
-
-        // run only in the backend
-        if (str_starts_with($_SERVER['REQUEST_URI'], wire('config')->urls->admin)) {
-
-            // get a comment field on the page if exist
-            $template = $page->template();
-            $fields = $template->fieldgroup;
-
-            foreach ($fields as $field) {
-                if ($field->type->className() === 'FieldtypeFrontendComments') {
-
-                    $comments = $page->get($field->name);
-                    if ($comments->getChanges()) {
-                        foreach ($comments as $comment) {
-                            if ($comment->getChanges()) {
-                                if (in_array('status', $comment->getChanges())) {
-                                    self::updateQueueTableOnStatusChange($comment, $comment->status, $page, $field);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Delete all comments that are marked as spam after a given time period
      * @return void
-     * @throws \ProcessWire\WireException
+     * @throws WireException
      */
     protected function deleteSpam(): void
     {
@@ -619,7 +602,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
     /**
      * Validate all email addresses that have been entered for sending notification emails to
-     * @param \ProcessWire\HookEvent $event
+     * @param HookEvent $event
      * @return void
      */
     protected function validateEmailAddresses(HookEvent $event): void
@@ -644,28 +627,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
     /**
-     * Add or remove entries from the queue table if the status of a comment has been changed
-     * If a comment status has been changed to approve, then all email addresses will be added to the queue table
-     * Otherwise, all entries for this comment will be deleted from the queue table
-     * @param FrontendComment $comment
-     * @param int $status
-     * @param \ProcessWire\Page $page
-     * @param \ProcessWire\Field $field
-     * @return void
-     */
-    public static function updateQueueTableOnStatusChange(FrontendComment $comment, int|string $status, Page $page, Field $field): void
-    {
-        if (!is_string($status)) {
-            if ($status !== FieldtypeFrontendComments::approved) {
-                self::deleteEntriesInQueueTable($comment, $page, $field);
-            } else {
-                // add the entries to the queue table
-                self::writeEntryInQueueTable($comment, $page, $field);
-            }
-        }
-    }
-
-    /**
      * Get the info data about this module
      * @return array
      */
@@ -679,7 +640,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             'icon' => 'comments',
             'installs' => ['InputfieldFrontendComments'],
             'permanent' => false,
-            'version' => '1.0.2',
+            'version' => '1.0.4',
             'requires' => [
                 'FrontendForms>=2.2.35',
                 'PHP>=8.0',
@@ -772,7 +733,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      *
      * @param Field $field
      * @return array
-     * @throws \ProcessWire\WireException
+     * @throws WireException
      */
     public function getDatabaseSchema(Field $field): array
     {
@@ -841,8 +802,8 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      *
      * @param Page $page
      * @param Field $field
-     * @return \ProcessWire\_Module|\ProcessWire\Inputfield|\ProcessWire\Module|null
-     * @throws \ProcessWire\WirePermissionException
+     * @return _Module|Inputfield|Module|null
+     * @throws WirePermissionException
      */
     public function getInputfield(Page $page, Field $field): null|_Module|Inputfield|Module
     {
@@ -854,46 +815,62 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      *
      * @param Page $page
      * @param Field $field
-     * @return \FrontendComments\FrontendCommentArray
-     * @throws \ProcessWire\WireException
+     * @return FrontendCommentArray
+     * @throws WireException
      */
     public function getBlankValue(Page $page, Field $field): FrontendCommentArray
     {
         $commentArray = $this->wire(new FrontendCommentArray());
         $commentArray->setPage($page);
         $commentArray->setField($field);
-        $commentArray->setTrackChanges(); // enable tracking of changes
+        $commentArray->setTrackChanges(Wire::trackChangesValues); // enable tracking of changes
         return $commentArray;
     }
 
-
-    public function getCommentByID(Page $page, Field $field, int $id) {
+    /**
+     * Get a specific comment by its ID
+     * @param Page $page
+     * @param Field $field
+     * @param int $id
+     * @return Comment|null
+     * @throws WireException
+     */
+    public function getCommentByID(Page $page, Field $field, int $id): FrontendComment|null
+    {
         $pages = $this->wire()->pages;
-        if(empty($id)) return null;
-        if($page && !is_object($page)) {
-            $page = $pages->get((int) $page);
-            if(!$page->id) return null;
-        }
-        if(!is_object($field) && $field) {
-            $field = $this->wire()->fields->get($this->wire()->sanitizer->fieldName($field));
-        }
-        if(!$field || !$field->type instanceof FieldtypeFrontendComments) return null;
+        if (empty($id)) return null;
+
+        $page = $pages->get((int)$page);
+        if (!$page->id) return null;
+
+        $field = $this->wire()->fields->get($this->wire()->sanitizer->fieldName($field));
+
+        if (!$field || !$field->type instanceof FieldtypeFrontendComments) return null;
         $table = $field->getTable();
         $sql = "SELECT * FROM `$table` WHERE id=:id ";
-        if($page) $sql .= "AND pages_id=:pageID";
+        if ($page) $sql .= "AND pages_id=:pageID";
         $query = $this->wire()->database->prepare($sql);
-        $query->bindValue(':id', (int) $id, \PDO::PARAM_INT);
-        if($page) $query->bindValue(':pageID', $page->id, \PDO::PARAM_INT);
-        if(!$query->execute()) return null;
-        if(!$query->rowCount()) return null;
-        $data = $query->fetch(\PDO::FETCH_ASSOC);
-        if(!$page) {
-            $page = $pages->get((int) $data['pages_id']);
+        $query->bindValue(':id', $id, PDO::PARAM_INT);
+        if ($page) $query->bindValue(':pageID', $page->id, PDO::PARAM_INT);
+        if (!$query->execute()) return null;
+        if (!$query->rowCount()) return null;
+        $data = $query->fetch(PDO::FETCH_ASSOC);
+        if (!$page) {
+            $page = $pages->get((int)$data['pages_id']);
         }
         return $this->makeComment($page, $field, $data);
     }
 
-    protected function makeComment($page, $field, array $data) {
+    /**
+     * Create a new FrontendComment object
+     * @param $page
+     * @param $field
+     * @param array $data
+     * @return FrontendComment
+     * @throws WireException
+     */
+    protected function makeComment($page, $field, array $data): FrontendComment
+    {
 
         $comments = $this->getBlankValue($page, $field);
         /** @var Comment $comment */
@@ -901,8 +878,8 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $comment->page = $page;
         $comment->field = $field;
 
-        foreach($data as $key => $val) {
-            if($key === 'data') {
+        foreach ($data as $key => $val) {
+            if ($key === 'data') {
                 $key = 'text';
             }
             $comment->set($key, $val);
@@ -919,7 +896,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      * @param Field $field
      * @param FrontendComments $value
      * @return FrontendCommentArray
-     * @throws \ProcessWire\WireException
+     * @throws WireException
      */
     public function sanitizeValue(Page $page, Field $field, $value): FrontendCommentArray
     {
@@ -972,8 +949,8 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      * @param Page $page
      * @param Field $field
      * @param $value
-     * @return \FrontendComments\FrontendCommentArray
-     * @throws \ProcessWire\WireException
+     * @return FrontendCommentArray
+     * @throws WireException
      */
     public function ___wakeupValue(Page $page, Field $field, $value): FrontendCommentArray
     {
@@ -995,28 +972,28 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         // create new comment objects from each item in the array
         foreach ($value as $item) {
 
+
             if (!is_array($item)) continue;
 
             $comment = $this->wire(new $comment_class($commentArray, $item, $frontendFormsConfig));
-
+            $comment->setTrackChanges(true);
+            $comment->set('old_status', $comment->status);
+            $comment->set('pages_id', $page->id);
             // add every comment independent of the status to the commentArray
             $commentArray->add($comment);
 
         }
-
-        // tell it to start tracking changes from this point forward
-        $commentArray->resetTrackChanges();
-
+        $commentArray->setTrackChanges(true); // track changes of this comment array
         return $commentArray;
     }
 
     /**
      * Prepare the comments for storage in the database
-     * @param \ProcessWire\Page $page
-     * @param \ProcessWire\Field $field
+     * @param Page $page
+     * @param Field $field
      * @param $value
      * @return array
-     * @throws \ProcessWire\WireException
+     * @throws WireException
      */
     public function ___sleepValue(Page $page, Field $field, $value): array
     {
@@ -1024,7 +1001,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         if (!$value instanceof WireArray) return $sleepValue;
 
         $sanitizer = $this->wire()->sanitizer;
-
 
         // convert each Comment to an array within sleepValue
         foreach ($value as $comment) {
@@ -1117,8 +1093,8 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
     /**
-     * @throws \ProcessWire\WireException
-     * @throws \ProcessWire\WirePermissionException
+     * @throws WireException
+     * @throws WirePermissionException
      */
     public static function getFieldConfigLangValue($field, string $propname): null|string
     {
@@ -1409,8 +1385,8 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $statusnotification = $modules->get('InputfieldCheckboxes');
         $name = 'input_fc_status_change_notification';
         $statusnotification->attr('name+id', $name);
-        $statusnotification->addOption(FieldtypeFrontendComments::approved, sprintf($this->_('Send notification email if status has been changed to approved'), InputfieldFrontendComments::statusTexts()[FieldtypeFrontendComments::approved]));
-        $statusnotification->addOption(FieldtypeFrontendComments::spam, sprintf($this->_('Send notification email if status has been changed to SPAM'), InputfieldFrontendComments::statusTexts()[FieldtypeFrontendComments::approved]));
+        $statusnotification->addOption(FieldtypeFrontendComments::approved, sprintf($this->_('Send notification email if status has been changed to approved'), FieldtypeFrontendComments::statusTexts()[FieldtypeFrontendComments::approved]));
+        $statusnotification->addOption(FieldtypeFrontendComments::spam, sprintf($this->_('Send notification email if status has been changed to SPAM'), FieldtypeFrontendComments::statusTexts()[FieldtypeFrontendComments::approved]));
         $statusnotification->attr('value', $this->getConfigValue($field, $statusnotification));
         $statusnotification->set('label', $this->_('Send a notification email to the author of a comment on status change'));
         $statusnotification->set('description', $this->_('If a moderator changes the status of a comment, select on which status change the author should be informed via email.'));
@@ -2017,7 +1993,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
     /**
      * Helper function to set the default value for a field
-     * @param \ProcessWire\Field $field
+     * @param Field $field
      * @param $inputfield
      * @return mixed
      */
@@ -2028,3 +2004,4 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
 }
+

@@ -5,17 +5,11 @@
         "3cd6e6d75ce5d7a458bc41e60e8b1505": {
             "text": "Sie haben bereits den Empfang von Antwortbenachrichtigungen zu diesem Kommentar deaktiviert."
         },
-        "46ddfb6e2a6fb175c91bd81e62276cd2": {
-            "text": "Sie haben den Erhalt von Benachrichtigungs-Emails zu Anworten auf Kommentare erfolgreich deaktiviert."
-        },
         "4b09de74c9d21f989f680f65fc33200d": {
             "text": "Leider wurde zu diesem Code kein passender Kommentar gefunden."
         },
         "50fa6a080936b165819c911a03fc71aa": {
             "text": "Kommentar anzeigen"
-        },
-        "98f08734a957c975c70d8fb27529f3be": {
-            "text": "Leider wurde der Status dieses Kommentars bereits per Remote-Link ge\u00e4ndert."
         },
         "fe057de6fb874e1c1518ada871ca530e": {
             "text": "Aus Sicherheitsgr\u00fcnden kann der Status eines Kommentars nur einmal per Remote-Link ge\u00e4ndert werden. Sie m\u00fcssen sich im Backend anmelden, um den Status dieses Kommentars abermals zu \u00e4ndern."
@@ -38,6 +32,15 @@
         "57d563f11d78936043f9900c32205580": {
             "text": "Leider ist w\u00e4hrend des Update-Prozesses des Status ein Fehler aufgetreten."
         },
+        "01e4673bc90d92d03c35a86ef82ccc63": {
+            "text": "Es sieht so aus als ob Sie diesen Kommentar bereits innerhalb der letzten %s Tage bewertet haben."
+        },
+        "77dcd195d263dd3dec28f8d716ad886e": {
+            "text": "Es sieht so aus als ob Sie diesen Kommentar bereits innerhalb des letzten Tages bewertet haben."
+        },
+        "619bccb1d2e85cb472bb415a0f682641": {
+            "text": "In diesem Fall d\u00fcrfen Sie keine Bewertung mehr abgeben."
+        },
         "3c077e0b71b62f9479f04f9d34490158": {
             "text": "Es tut uns leid, aber dieser Kommentar wurde nicht gefunden. Es ist m\u00f6glich, dass dieser Kommentar bereits gel\u00f6scht oder noch nicht ver\u00f6ffentlicht wurde."
         },
@@ -47,14 +50,23 @@
         "cfc5f738c1561a355c69686f616206bb": {
             "text": "Bitte loggen Sie sich ein, um einen Kommentar abzugeben."
         },
-        "01e4673bc90d92d03c35a86ef82ccc63": {
-            "text": "Es sieht so aus als ob Sie diesen Kommentar bereits innerhalb der letzten %s Tage bewertet haben."
+        "57ede60cbc6b2bdd54f90e8f6016fc51": {
+            "text": "Bitte melden Sie sich im Backend an und entfernen Sie den Text manuell aus diesem Kommentar, anstatt den Status auf \"SPAM\" zu setzen!"
         },
-        "77dcd195d263dd3dec28f8d716ad886e": {
-            "text": "Es sieht so aus als ob Sie diesen Kommentar bereits innerhalb des letzten Tages bewertet haben."
+        "88a6cb7838ab087d67820fdfc0628cb6": {
+            "text": "Der Status dieses Kommentars wurde bereits per Remote-Link ge\u00e4ndert."
         },
-        "619bccb1d2e85cb472bb415a0f682641": {
-            "text": "In diesem Fall d\u00fcrfen Sie keine Bewertung mehr abgeben."
+        "463640c99e5acf495bd10241a5755de7": {
+            "text": "Der Status dieses Kommentars wurde bereits im Backend ge\u00e4ndert. Aus diesem Grund ist es nicht m\u00f6glich, den Status per Remote-Link noch einmal zu \u00e4ndern."
+        },
+        "0bdea26619a3fbfcc5acd41844f970df": {
+            "text": "Wenn Sie den Status wieder \u00e4ndern m\u00f6chten, loggen Sie sich bitte im Backend ein und \u00e4ndern Sie den Status dort."
+        },
+        "b9e9ff2f37f81f86498b8bd8aa201cf5": {
+            "text": "Sie haben den Empfang von Benachrichtigungsmails f\u00fcr neue Kommentare erfolgreich beendet."
+        },
+        "d6ff9a5ffc7ee0f510916fe97be590c6": {
+            "text": "Leider wurden keine Kommentare mit der angegebenen E-Mail-Adresse gefunden."
         }
     }
 }
