@@ -640,7 +640,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             'icon' => 'comments',
             'installs' => ['InputfieldFrontendComments'],
             'permanent' => false,
-            'version' => '1.0.3',
+            'version' => '1.0.4',
             'requires' => [
                 'FrontendForms>=2.2.35',
                 'PHP>=8.0',
@@ -2004,3 +2004,4 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
 }
+
