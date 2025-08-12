@@ -51,6 +51,7 @@ Live example: [http://www.schulfreund.at](https://www.schulfreund.at/nachhilfeku
 * [Hooking to change markup](#hooking-to-change-markup)
 * [Overwriting CSS styles with your custom values](#overwriting-css-styles-with-your-custom-values)
 * [Adding CSS and JS files manually to the template](#adding-css-and-js-files-manually-to-the-website)
+* [Comments manager](#comments-manager)
   
 
 ## Configurations
@@ -275,6 +276,16 @@ echo FieldtypeFrontendComments::renderJSFiles(); // render all JS files
 echo FieldtypeFrontendComments::renderJSFiles(false); // exclude the JS files for the star rating
 ```
 
-ToDo:
+## Comments manager
+
+The comment manager is an additional module that is not installed by default, so you will need to install it manually. The big advantage is that this module paginates all comments, thereby reducing loading time.
+
+The other major advantage is that you can edit many more values of a comment than with inline editing of comments within a page template.
+
+It is recommended to use the comment manager instead of editing comments inline.
+
+After installing the module, you will find a new entry under “Settings.” Click on the new entry to be redirected to the comment manager dashboard.
+
+
+## ToDo:
 * Doing more testing
-* Creating a module manager for managing comments in one place
