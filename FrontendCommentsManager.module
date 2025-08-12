@@ -343,7 +343,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
     /**
      * Render a single comment
-     * @param WireArray $comment
+     * @param FrontendComment $comment
      * @param InputfieldForm $form
      * @param int $number
      * @return void
@@ -370,11 +370,11 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         // editing links
         $pre = '<div id="changed-' . $comment->get('id') . '" class="comment-changed" style="display:none;" data-status="false" data-feedback="false">' . $this->_('Changed') . '!</div>';
         $pre .= '<ul class="fcm-link-nav">';
-        $pre .= '<li><span class="fcm-edit"><a class="pw-tooltip" title="' . $this->_('Edit this comment') . '" href="' . $this->wire('config')->urls->admin . 'setup/fc-comments-manager/edit/' . $comment->get('field')->id . '/?edit=' . $comment->id . '&page=' . $comment->get('page')->id . '"><i class="fa fa-pencil"></i>' . $this->_('Edit Comment') . '</a></span></li>';
+        $pre .= '<li><span class="fcm-edit"><a class="pw-tooltip" title="' . $this->_('Edit this comment') . '" href="' . $this->wire('config')->urls->admin . 'setup/fc-comments-manager/edit/' . $comment->get('field')->id . '/?edit=' . $comment->get('id') . '&page=' . $comment->get('page')->id . '"><i class="fa fa-pencil"></i>' . $this->_('Edit Comment') . '</a></span></li>';
         $pre .= '<li><span class="fcm-edit-page"><a class="pw-tooltip" title="' . $this->_('Edit the page where the comment is located') . '" href="' . $this->wire('pages')->get($comment->get('page')->id)->editUrl() . '"><i class="fa fa-pencil"></i>' . $this->_('Edit page') . '</a></span></li>';
 
         $pageURL = $comment->get('page')->url;
-        $queryString = '?comment-redirect=' . $comment->id . '#' . $comment->get('field')->name . '-' . $comment->get('page')->id . '-redirect-alert';
+        $queryString = '?comment-redirect=' . $comment->get('id') . '#' . $comment->get('field')->name . '-' . $comment->get('page')->id . '-redirect-alert';
         $editURL = $pageURL . $queryString;
 
         $pre .= '<li><span class="fcm-view"><a class="pw-tooltip" title="' . $this->_('View this comment on the frontend') . '" href="' . $editURL . '" target="_blank"><i class="fa fa-eye"></i>' . $this->_('View') . '</a></span></li>';
@@ -408,7 +408,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $app .= '</tr>';
 
         $app .= '<tr>';
-        $app .= '<td><i class="fa fa-envelope"></i>' . $this->selectorNames['email'] . '</td><td><a class="fcm-filter pw-tooltip" title="' . sprintf($this->_('Show all comments from the author with the email %s'), $comment->email) . '" href="' . $this->createAdditionalFilterLink('email=' . urlencode($comment->email)) . '">' . $comment->email . '</a></td>';
+        $app .= '<td><i class="fa fa-envelope"></i>' . $this->selectorNames['email'] . '</td><td><a class="fcm-filter pw-tooltip" title="' . sprintf($this->_('Show all comments from the author with the email %s'), $comment->get('email')) . '" href="' . $this->createAdditionalFilterLink('email=' . urlencode($comment->get('email'))) . '">' . $comment->get('email') . '</a></td>';
         $app .= '</tr>';
 
         $app .= '<tr>';
@@ -454,7 +454,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
         $pre .= '<div class="fcm-comment-text">';
         $pre .= '<h3>' . $this->_('Comment') . '</h3>';
-        $pre .= $comment->text;
+        $pre .= $comment->get('text');
         $pre .= '</div>';
 
         $pre .= '<div class="fcm-comment-feedback">';
@@ -553,6 +553,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         // Create a new paginated array out of the db query result
         $comments = new FrontendCommentArray();
         $comments->setField($field);
+
         try {
             $query = $this->database->prepare($statement);
             $this->createBindValues($query, $selector);
@@ -581,7 +582,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         } catch (Exception) {
 
         }
-        $comments->setTrackChanges(true);
+        $comments->setTrackChanges();
         $this->comments = $comments;
         return $comments;
     }
@@ -695,6 +696,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
     /**
      * Validate and process the edit form for a single comment
+     * @param FrontendCommentArray $comments
      * @param FrontendComment $comment
      * @param InputfieldForm $form
      * @return bool
