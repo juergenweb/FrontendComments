@@ -1,5 +1,216 @@
 {
     "file": "site\/modules\/FrontendComments\/FrontendCommentsManager.module",
     "textdomain": "site--modules--frontendcomments--frontendcommentsmanager-module",
-    "translations": []
+    "translations": {
+        "b1c94ca2fbc3e78fc30069c8d0f01680": {
+            "text": "Alle"
+        },
+        "6f8063417ab31f38d864c28302f3de2f": {
+            "text": "Best\u00e4tigt"
+        },
+        "2d13df6f8b5e4c5af9f87e0dc39df69d": {
+            "text": "Wartend"
+        },
+        "e9dfd31cc505d51fc26975250750deab": {
+            "text": "="
+        },
+        "15422d54ec0d47000dc86a9820a5237e": {
+            "text": "Hervorgehoben"
+        },
+        "a517747c3d12f99244ae598910d979c5": {
+            "text": "Autor"
+        },
+        "1cbd7dd7d2ae88cea04cb9641dbf488a": {
+            "text": "Seite (ID)"
+        },
+        "dda9c06f33071c9b6fc237ee164109d8": {
+            "text": "Bewertung"
+        },
+        "a12a3079e14ced46e69ba52b8a90b21a": {
+            "text": "="
+        },
+        "767b0c6f7a678eabc9cd330c96d4d92b": {
+            "text": "Kommentarfeld"
+        },
+        "d1c8a5ab99c33eb6434b49448816fb74": {
+            "text": "Nach Status sortieren"
+        },
+        "caf7d4ce2b5f1589e4f239c752f1b234": {
+            "text": "Nach Datum sortieren"
+        },
+        "ad015091c99fbd97ab93cbb5bacdb188": {
+            "text": "Von neu zu alt"
+        },
+        "9761167c9ee8ae1c8bed06dca5c3f6f8": {
+            "text": "Von alt nach neu"
+        },
+        "0f2898ac15073825a5c5d88723264685": {
+            "text": "Anzahl der Kommentare"
+        },
+        "4f5d5f295ddc8fd8673e74dd5fbe114a": {
+            "text": "pro Seite"
+        },
+        "53c8be9b4b33ea115ed76b2582d8bf03": {
+            "text": "Zus\u00e4tzlich angewandte Filter"
+        },
+        "013c7dd8e3fd7bc18df282c8bedb4608": {
+            "text": "Sie k\u00f6nnen jeden zus\u00e4tzlichen Filter entfernen, indem Sie auf das Tag klicken."
+        },
+        "6d15f5886ec45345c0cf407cdf5fceaa": {
+            "text": "Derzeit sind keine zus\u00e4tzlichen Filter angewendet."
+        },
+        "8b65190a6dde38b110f896879325fc55": {
+            "text": "Sie k\u00f6nnen die folgenden Filter anwenden, indem Sie auf die entsprechenden Links in den Kommentaren unten klicken: %s."
+        },
+        "d822ed4022085b030bdd4bd4a3f55422": {
+            "text": "Kommentar #%s"
+        },
+        "820dbd2b8f606aff866c0bbfb6b737c1": {
+            "text": "Ge\u00e4ndert"
+        },
+        "ee6ddd648ece1a395506fefa4c25a388": {
+            "text": "Diesen Kommentar bearbeiten"
+        },
+        "04486591c35a6fd6654a1f8180631138": {
+            "text": "Bearbeiten Sie die Seite, auf der sich der Kommentar befindet."
+        },
+        "d63d0d4351bd9320e30b912173327989": {
+            "text": "Diesen Kommentar im Frontend anzeigen"
+        },
+        "ec53a8c4f07baed5d8825072c89799be": {
+            "text": "="
+        },
+        "cb6a6354f331f2c943f3016fb1161303": {
+            "text": "Alle Kommentare des Autors mit dem Namen %s anzeigen"
+        },
+        "8ec06459f82e795bcb6b5febfad5c2ef": {
+            "text": "Alle Kommentare anzeigen, die \u00fcber die IP-Adresse %s gesendet wurden."
+        },
+        "44749712dbec183e983dcd78a7736c41": {
+            "text": "Datum"
+        },
+        "f5dcd842cd614833c0e101bc52131b29": {
+            "text": "Alle Kommentare des Autors mit der E-Mail-Adresse %s anzeigen"
+        },
+        "563eccaf954ed4fd94c68a469c2b851e": {
+            "text": "Nicht bewertet"
+        },
+        "2620a6bab99fa4dfe3125ebded4d94ca": {
+            "text": "Alle Kommentare mit einer Bewertung von %s anzeigen"
+        },
+        "dbd7ea69964860f24ffcb9104bd1238a": {
+            "text": "Seitentitel \/ ID"
+        },
+        "e75931ae4327ec2de7560cd1dddb2ce7": {
+            "text": "Anzahl der Antworten"
+        },
+        "f2a6c498fb90ee345d997f888fce3b18": {
+            "text": "L\u00f6schen"
+        },
+        "0be8406951cdfda82f00f79328cf4efc": {
+            "text": "Kommentar"
+        },
+        "bea4c2c8eb82d05891ddd71584881b56": {
+            "text": "="
+        },
+        "d52b9a5366c59d106520f1bc0d3901f1": {
+            "text": "Es gibt keine Kommentare"
+        },
+        "444028f2ccc7d0a41407d2301047ddb9": {
+            "text": "Bei der Verarbeitung Ihres Formulars ist ein Fehler aufgetreten."
+        },
+        "4f85d037300d5f7efcf7fdc3f973db7f": {
+            "text": "Unbekanntes Feld"
+        },
+        "29c7cf08976e4b259c4a59aa0e414f63": {
+            "text": "Sie haben keine Berechtigung, diesen Kommentar zu bearbeiten."
+        },
+        "515513ee9449fdd7745af0fcb0e1b078": {
+            "text": "Keine Kommentare gefunden"
+        },
+        "fd2a30da4345a772c11da99bf064ccfb": {
+            "text": "Unbekannter Kommentar"
+        },
+        "d1633d5cdf231d266431022aed10026d": {
+            "text": "W\u00e4hrend des Vorgangs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+        },
+        "ce8ae9da5b7cd6c3df2929543a9af92d": {
+            "text": "E-Mail"
+        },
+        "15bbb9d0bbf25e8d2978de1168c749dc": {
+            "text": "Webseite"
+        },
+        "54e7ab179a80b1a740e405cbeca670ff": {
+            "text": "%s Stern"
+        },
+        "65cd4b972052588b238e55d5ddad73da": {
+            "text": "%s Sterne"
+        },
+        "b8e2c23a15e49a10d6f0562a3dce2538": {
+            "text": "Wartet auf Genehmigung"
+        },
+        "c72beebe6ecbdddff71b846c4858ebcb": {
+            "text": "="
+        },
+        "851777bf0529c4d9d9d0bad0f792cd25": {
+            "text": "Kommentar l\u00f6schen"
+        },
+        "63e90287fd383e2e42e4778c0e9d7a71": {
+            "text": "Positive Wertungen"
+        },
+        "b45352aeca3646b5fb15baa385d44224": {
+            "text": "Negative Wertungen"
+        },
+        "1edcdad89b3a2245d759a169da1bf5a3": {
+            "text": "Nutzer-ID"
+        },
+        "96c88741d441f47bcb02024773dd7b6d": {
+            "text": "Eltern-ID"
+        },
+        "30722aa4ee66bd5b06a4abe892c9e963": {
+            "text": "Seiten-ID"
+        },
+        "daa6b483e9f6ca081ec7e0b4a352f9e9": {
+            "text": "\u00c4nderungen speichern"
+        },
+        "7eaa2e9465506f5ecd9b8fb21449bf18": {
+            "text": "Zur\u00fcck zur \u00dcbersicht"
+        },
+        "8bf8854bebe108183caeb845c7676ae4": {
+            "text": "von"
+        },
+        "d142ebe4786fbc0ffb437b1ed3c2d2c7": {
+            "text": "SQL-Anweisung"
+        },
+        "7df21df70ba404315cc66835a99899d9": {
+            "text": "Es sind keine FrontendComments-Felder installiert."
+        },
+        "c940d679fcdb70ce1c5430c453b303b1": {
+            "text": "Falscher Wert f\u00fcr den Status. Der Status kann nur die folgenden Werte haben: 0, 1, 2 oder 4."
+        },
+        "de409f1196a299b23fcbdfaf9efe0740": {
+            "text": "Den Kommentar-Manager anstelle des Inline-Editors verwenden?"
+        },
+        "33c3c08ba0fba5a5c7cf3200a45dd907": {
+            "text": "Wenn diese Option aktiviert ist, wird der Benutzer zum speziellen Kommentar-Manager weitergeleitet, um Kommentare zu bearbeiten."
+        },
+        "3857c404875aaaa89b52103fed3f5af6": {
+            "text": "Dies kann vorteilhaft sein, da der Kommentar-Manager \u00fcber mehr Funktionen verf\u00fcgt und eine Paginierung verwendet."
+        },
+        "e6cdd9466e5eb945e24fb667af223478": {
+            "text": "Kommentar-Manager"
+        },
+        "e7732e0f120a366180cf69faeaffa2f4": {
+            "text": "Eine benutzerdefinierte Seite f\u00fcr das FrontendComments-Modul, um alle Kommentare an einem Ort zu verwalten."
+        },
+        "13fe326d255dc633e2d4f2283aedce9b": {
+            "text": "FrontendComments Manager"
+        },
+        "4dfbb099eafd3c82e033bf92946d3ce6": {
+            "text": "E-Mail"
+        },
+        "112c6455adf5463fd1fe04c615982dae": {
+            "text": "Kommentar mit der ID #%s bearbeiten"
+        }
+    }
 }

@@ -361,6 +361,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      * @return void
      * @throws WireException
      * @throws WirePermissionException
+     * @throws WirePermissionException
      */
     protected function sendQueuedEmails(): void
     {
@@ -823,7 +824,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $commentArray = $this->wire(new FrontendCommentArray());
         $commentArray->setPage($page);
         $commentArray->setField($field);
-        $commentArray->setTrackChanges(Wire::trackChangesValues); // enable tracking of changes
+        $commentArray->setTrackChanges(); // enable tracking of changes
         return $commentArray;
     }
 
@@ -840,7 +841,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $pages = $this->wire()->pages;
         if (empty($id)) return null;
 
-        $page = $pages->get((int)$page);
+        //$page = $pages->get((int)$page);
         if (!$page->id) return null;
 
         $field = $this->wire()->fields->get($this->wire()->sanitizer->fieldName($field));

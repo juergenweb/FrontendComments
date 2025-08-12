@@ -138,7 +138,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $this->selectorNames = [
             'author' => $this->_('Author'),
             'pages_id' => $this->_('Page (ID)'),
-            'email' => $this->_('E-Mail'),
+            'email' => $this->_('Mail'),
             'stars' => $this->_('Rating'),
             'ip' => $this->_('IP'),
         ];
@@ -353,7 +353,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
     {
 
         // get all replies (children) to this comment
-        $replies = $comment->getAllReplies();
+        $replies = $comment->getReplies();
 
         $fieldset = $this->wire('modules')->get('InputfieldFieldset');
         $fieldset->set('label', sprintf($this->_('Comment #%s'), $number));
@@ -390,6 +390,10 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $app .= '</tr>';
 
         $app .= '<tr>';
+        $app .= '<td><i class="fa fa-hashtag"></i>ID</td><td>' . $comment->get('id') . '</td>';
+        $app .= '</tr>';
+
+        $app .= '<tr>';
         $app .= '<td><i class="fa fa-user"></i>' . $this->selectorNames['author'] . '</td><td><a class="pw-tooltip" title="' . sprintf($this->_('Show all comments from the author with the name %s'), $comment->get('author')) . '" href="' . $this->createAdditionalFilterLink('author=' . urlencode($comment->get('author'))) . '">' . $comment->get('author') . '</a></td>';
         $app .= '</tr>';
 
@@ -417,7 +421,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $app .= '</tr>';
 
         $app .= '<tr>';
-        $app .= '<td><i class="fa fa-comments"></i>' . $this->_('Number of replies') . '</td><td>'.$replies->count().'</td>';
+        $app .= '<td><i class="fa fa-comments"></i>' . $this->_('Number of replies') . '</td><td>' . $replies->count() . '</td>';
         $app .= '</tr>';
 
         $app .= '</tbody>';
@@ -547,6 +551,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
         // Create a new paginated array out of the db query result
         $comments = new FrontendCommentArray();
+        $comments->setField($field);
         try {
             $query = $this->database->prepare($statement);
             $this->createBindValues($query, $selector);
@@ -554,9 +559,14 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
             while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
                 $page = $this->wire('pages')->get($row['pages_id']);
-                $comment = new WireArray();
-                $comment->set('page', $page);
+                $comments->setPage($page);
+                // grab configuration values from the FrontendForms module
+                $frontendFormsConfig = FieldtypeFrontendComments::getFrontendFormsConfigValues();
+
+                $comment = new Frontendcomment($comments, [], $frontendFormsConfig);
                 $comment->set('field', $field);
+                $comment->set('page', $page);
+
                 foreach ($row as $key => $val) {
                     if ($key === 'data') {
                         $key = 'text';
@@ -570,6 +580,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         } catch (Exception) {
 
         }
+        $comments->setTrackChanges(true);
         $this->comments = $comments;
         return $comments;
     }
@@ -615,7 +626,6 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $out = '';
         $number = 1;
         foreach ($comments as $comment) {
-            bd($comment);
             $this->renderComment($comment, $form, $number);
             $number++;
         }
@@ -690,50 +700,56 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
      * @throws WireException
      * @throws WirePermissionException
      */
-    protected function processEditForm(FrontendComment $comment, InputfieldForm $form): bool
+    protected function processEditForm(FrontendCommentArray $comments, FrontendComment $comment, InputfieldForm $form): bool
     {
+        $input = $this->wire('input');
+        $sanitizer = $this->wire('sanitizer');
 
-        // validate the form
-        if ($this->input->post('submitedit')) {
+        $page = $comment->get('page');
+        $field = $comment->get('field');
+        $fieldName = $field->name;
 
-            $form->processInput($this->input->post);
+        if ($input->post('submitedit')) {
+
+            $oldStatus = $comment->get('status'); // the old status as stored inside the DB
+
+            // sanitize all values first and add them back to the FrontendComment
+            $comment->set('author', $sanitizer->string($input->post('author')));
+            $comment->set('email', $sanitizer->string($input->post('mail')));
+            $comment->set('website', $sanitizer->string($input->post('website')));
+            $comment->set('stars', $input->post('stars') ? $sanitizer->int($input->post('stars')) : NULL);
+            $comment->set('status', $sanitizer->int($input->post('status')));
+            $comment->set('upvotes', $sanitizer->int($input->post('upvotes')));
+            $comment->set('downvotes', $sanitizer->int($input->post('downvotes')));
+            $comment->set('user_id', $sanitizer->int($input->post('userid')));
+            $comment->set('parent_id', $sanitizer->int($input->post('parentid')));
+
+            // create date for storage in the database
+            $postDateString = $input->post('date') . ' ' . $input->post('date__time');
+            $comment->set('created', wire('datetime')->stringToTimestamp($postDateString, 'Y-m-d H:i:s'));
+
+            $comment->set('text', $sanitizer->string($input->post('comment')));
+            $comment->set('moderation_feedback', $sanitizer->string($input->post('feedback')));
+
+            // validate the form
+            $form->processInput($input->post());
             if (count($form->getErrors())) {
                 $this->error($this->_('There was an error processing your form.'));
                 return false;
             }
 
-            // create date for storage in the database
-            $postDateString = $this->input->post('date') . ' ' . $this->input->post('date__time');
-            $date = wire('datetime')->stringToTimestamp($postDateString, 'Y-m-d H:i:s');
-
-            $values = [
-                'author' => ['value' => $this->input->post('author'), 'type' => PDO::PARAM_STR, 'sanitizer' => 'string'],
-                'email' => ['value' => $this->input->post('mail'), 'type' => PDO::PARAM_STR, 'sanitizer' => 'string'],
-                'website' => ['value' => $this->input->post('website'), 'type' => PDO::PARAM_STR, 'sanitizer' => 'string'],
-                'created' => ['value' => $date, 'type' => PDO::PARAM_INT, 'sanitizer' => 'int'],
-                'status' => ['value' => $this->input->post('status'), 'type' => PDO::PARAM_INT, 'sanitizer' => 'int'],
-                'data' => ['value' => $this->input->post('comment'), 'type' => PDO::PARAM_STR, 'sanitizer' => 'string'],
-                'moderation_feedback' => ['value' => $this->input->post('feedback'), 'type' => PDO::PARAM_STR, 'sanitizer' => 'string'],
-                'upvotes' => ['value' => $this->input->post('upvotes'), 'type' => PDO::PARAM_INT, 'sanitizer' => 'int'],
-                'downvotes' => ['value' => $this->input->post('downvotes'), 'type' => PDO::PARAM_INT, 'sanitizer' => 'int'],
-                'user_id' => ['value' => $this->input->post('userid'), 'type' => PDO::PARAM_INT, 'sanitizer' => 'int'],
-                'parent_id' => ['value' => $this->input->post('parentid'), 'type' => PDO::PARAM_INT, 'sanitizer' => 'int'],
-                'pages_id' => ['value' => $this->input->post('pageid'), 'type' => PDO::PARAM_INT, 'sanitizer' => 'int'],
-            ];
-
-            // overwrite certain post values if they are empty
-            if ($this->input->post('stars')) {
-                $values['stars'] = ['value' => $this->input->post('stars'), 'type' => PDO::PARAM_INT, 'sanitizer' => 'int'];
-            } else {
-                $values['stars'] = ['value' => NULL, 'type' => PDO::PARAM_NULL, 'sanitizer' => null];
+            // add status track change for special treatment of status changes if status have been changed
+            if ($comment->get('status') !== $oldStatus) {
+                $comment->trackChange('status');
+                $comments->trackChange('statuschange');
             }
 
-            return FieldtypeFrontendComments::updateComment($comment, $values);
+            $page->$fieldName = $comments;
+            return $comments->saveComment($comment);
 
         } else {
             return true;
         }
-
     }
 
     /**
@@ -745,13 +761,18 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
     public function executeEdit(): string|FrontendCommentsManager
     {
         $out = '';
-        $field = $this->fields->get($this->sanitizer->fieldName($this->input->urlSegment2));
+
+        // check if field is type of FieldtypeFrontendComments first
+        $fieldName = $this->sanitizer->fieldName($this->input->urlSegment2);
+        $field = $this->fields->get($fieldName);
         if (!$field || !$field->type instanceof FieldtypeFrontendComments) {
             return $this->error($this->_('Unrecognized field'));
         }
 
         $commentID = $this->input->get('edit');
-        $this->headline(sprintf($this->_('Edit Comment #%s'), $commentID));
+        $pageID = $this->input->get('page');
+
+        $this->headline(sprintf($this->_('Edit Comment with the ID #%s'), $commentID));
 
         // Access control: check if user has permission to edit this comment
         if (!$this->wire('user')->hasPermission('page-edit')) {
@@ -759,17 +780,30 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         } else {
 
             $commentID = $this->sanitizer->int($commentID);
-            $pageID = $this->input->get('page');
             $pageID = $this->sanitizer->int($pageID);
             $page = $this->wire('pages')->get($pageID);
 
-            $frontendComment = new FieldtypeFrontendComments();
-            $comment = $frontendComment->getCommentByID($page, $field, $commentID);
+            // get all comments
+            $comments = $page->$fieldName;
+            if ($comments->count() === 0) {
+                return $this->error($this->_('No comments found'));
+            }
+
+            // get the comment with the given id
+            $comment = $comments->findOne('id=' . $commentID);
+            if (!$comment) {
+                return $this->error($this->_('Unrecognized comment'));
+            }
 
             // create the edit form
             $form = $this->wire('modules')->get('InputfieldForm');
             $form->attr('action', '');
             $form->attr('id', 'fcmm-edit-form');
+
+            // process the form
+            if (!$this->processEditForm($comments, $comment, $form)) {
+                $this->error($this->_('An error occurred during the process. Please try it once again.'));
+            }
 
             // author name
             $f = $this->modules->get('InputfieldText');
@@ -850,6 +884,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             $f->set('label', $this->_('Upvotes'));
             $f->attr('id|name', 'upvotes');
             $f->attr('value', $comment->get('upvotes'));
+            $f->attr('min', 0);
             $f->set('inputType', 'number');
             $form->add($f);
 
@@ -857,6 +892,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             $f->set('label', $this->_('Downvotes'));
             $f->attr('id|name', 'downvotes');
             $f->attr('value', $comment->get('downvotes'));
+            $f->attr('min', 0);
             $f->set('inputType', 'number');
             $form->add($f);
 
@@ -887,19 +923,12 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             $submit->attr('name', 'submitedit');
             $form->add($submit);
 
-            // show error message if something went wrong
-            if (!$this->processEditForm($comment, $form)) {
-                $this->error($this->_('An error occurred during the process. Please try it once again.'));
-            }
-
             $out .= $form->render();
 
         }
 
         // create the back button
-        if (array_key_exists('HTTP_REFERER', $_SERVER)) {
-            $out .= '<div id="fcm-backlink"><a class="pw-tooltip" title="' . $this->_('Back to the overview') . '" href="../../list/' . $field->get('id') . '/"><i class="fa fa-arrow-circle-left"></i> ' . $this->_('Back') . '</a></div>';
-        }
+        $out .= '<div id="fcm-backlink"><a class="pw-tooltip" title="' . $this->_('Back to the overview') . '" href="../../list/' . $field->get('id') . '/"><i class="fa fa-arrow-circle-left"></i> ' . $this->_('Back') . '</a></div>';
 
         return $out;
     }
@@ -1097,6 +1126,11 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
         $changes = [];
 
+        $page = $this->comments->getPage();
+        $field = $this->comments->getField();
+        $fieldName = $field->get('name');
+        $comments = $page->$fieldName;
+
         foreach ($input as $name => $value) {
             if (str_starts_with($name, 'changes-') && $value == 'true') {
                 $id = explode('-', $name)[1];
@@ -1104,44 +1138,50 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             }
         }
 
-
+        // loop over all comments that have been changed
         foreach ($changes as $id) {
 
-            $comment = $this->comments->findOne($id);
+            $comment = $comments->findOne((int)$id);
 
             if ($comment) {
-                // save status
+
+                $comment->setTrackChanges(true);
                 $status = $input->get('status-' . $id);
                 $oldStatus = $comment->get('status');
 
-                // run only if stored and current value are not the same
-                if ($status != $oldStatus) {
-                    if (ctype_digit($status)) {
-                        $status = (int)$status;
-                        if ($status <= 4 && $status >= 0) {
-                            FieldtypeFrontendComments::updateComment($comment, ['status' => ['value' => $status, 'type' => PDO::PARAM_INT, 'sanitizer' => 'int']]);
+                // validate status
+                if ($status === 'delete') {
+                    $comments->deleteComment();
+                } else {
+                    $status = (int)$status;
+                    // run only if stored and current value are not the same
+                    if ($status !== $oldStatus) {
+                        if ($status > 4 && $status < 0) {
+                            $this->error($this->_('Wrong value for status. Status can only have the following values: 0,1,2 or 4.'), Notice::allowMarkup);
                         } else {
-                            // throw an error
-                            $this->error($this->_('Wrong value for status. Status can only have the following values: 0,1,2,3 or 4.'), Notice::allowMarkup);
-                        }
-                    } else {
-                        if ($status === 'delete') {
-                            $comment = $this->comments->findOne($id);
-                            if ($comment) {
-                                $this->comments->deleteComment();
-                            }
+                            $comment->trackChange('status');
+                            $comment->set('status', $status);
+                            $comments->trackChange('statuschange');
                         }
                     }
                 }
 
-                // save feedback
+                // validate feedback
                 $feedback = $input->get('moderation_feedback_' . $id);
                 $oldfeedback = $comment->get('moderation_feedback');
 
                 // run only if stored and current value are not the same and comment should not be deleted
                 if ($feedback != $oldfeedback && $status != 'delete') {
-                    FieldtypeFrontendComments::updateComment($comment, ['moderation_feedback' => ['value' => $feedback, 'type' => PDO::PARAM_STR, 'sanitizer' => 'string']]);
+                    $comment->trackChange('feedback');
+                    $comment->set('moderation_feedback', $feedback);
+                    $comments->trackChange('feedbackchange');
                 }
+
+                if ($comment->getChanges()) {
+                    $page->$fieldName = $comments;
+                    $comments->saveComment($comment);
+                }
+
             }
 
         }

@@ -654,9 +654,9 @@ class FrontendCommentForm extends Form
                         $reloadLink->setUrl($this->wire('input')->url);
                         $reloadLink->setQueryString('comment-redirect=' . $commentID);
                         $reloadLink->setAnchor($this->field->name . '-' . $this->page->id . '-redirect-alert');
-                        $reloadLink->setLinkText($this->_('Reload the page'));
+                        $reloadLink->setLinkText($this->_('To the comment'));
                         $link = $reloadLink->render();
-                        $successMsg .= $this->_('To view your comment, you must reload the page by clicking on the link below:') . '<br>';
+                        $successMsg .= $this->_('To go directly to the comment, please click on the following link:') . '<br>';
                         $successMsg .= $link;
                         break;
 
