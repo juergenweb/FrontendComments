@@ -287,6 +287,6 @@ It is recommended to use the comment manager instead of editing comments inline.
 After installing the module, you will find a new entry under “Settings.” Click on the new entry to be redirected to the comment manager dashboard.
 
 
-ToDo:
+## ToDo:
 * Doing more testing
 * Creating a module manager for managing comments in one place
