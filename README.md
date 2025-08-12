@@ -289,4 +289,3 @@ After installing the module, you will find a new entry under “Settings.” Cli
 
 ## ToDo:
 * Doing more testing
-* Creating a module manager for managing comments in one place
