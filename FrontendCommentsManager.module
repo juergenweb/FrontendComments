@@ -1,0 +1,1218 @@
+<?php
+declare(strict_types=1);
+
+namespace ProcessWire;
+
+/*
+ * Class to create a comments manager for the FrontendComments fieldtype to manage all comments in one place
+ * A new custom admin page will be created under "Setup"
+ */
+
+use Exception;
+use FrontendComments\FrontendComment;
+use FrontendComments\FrontendCommentArray;
+use PDO;
+
+class FrontendCommentsManager extends Process implements ConfigurableModule
+{
+
+    // Declare all properties
+    protected WireArray $commentFields; // Wire array containing all FrontendComments field objects
+    protected array $classes = []; // the CSS classes different elements
+    protected array $statuses = []; // the different status types of a comment
+    protected array $statusOptions = []; // Array containing all status options as text
+    protected array $selectorNames = []; // array containing all selectors as human-readable text
+    protected int $limit = 10; // default number of comments per page
+    protected int|string $status = 'all'; // default status of comments on page load
+    protected string $sort = 'created'; // the default sort order
+    protected int|bool $showStatement = true; // show or hide the SQL statement
+    protected int $numberApproved = 0; // number of approved comments for the current field
+    protected int $numberPending = 0; // number of comments waiting for approval for the current field
+    protected int $numberSpam = 0; // number of spam comments for the current field
+    protected int $numberFeatured = 0; // number of featured comments for the current field
+    protected array $numberOfCommentsPerStatus = []; // array containing all number of comments per status
+    protected string $sqlStatement = '';
+    protected WireInput $input;
+    protected Sanitizer $sanitizer;
+    protected Session $session;
+    protected Page $page;
+    protected WireDatabasePDO $database;
+    protected FrontendCommentArray $comments;
+
+    /**
+     * @throws WireException
+     * @throws WirePermissionException
+     */
+    public function __construct()
+    {
+
+        parent::__construct();
+
+        $this->commentFields = FieldtypeFrontendComments::getAllCommentFields(); // get all FrontendComments fields site wide as a WireArray
+        $this->input = $this->wire('input');
+        $this->sanitizer = $this->wire('sanitizer');
+        $this->session = $this->wire('session');
+        $this->page = $this->wire('page');
+        $this->database = $this->wire('database');
+        $adminTheme = $this->wire('adminTheme');
+
+        // get all template CSS classes for certain elements
+        $classes = [];
+        if ($adminTheme instanceof AdminThemeFramework) {
+            $classes['input'] = $adminTheme->getClass('input');
+            $classes['input-small'] = $adminTheme->getClass('input-small');
+            $classes['textarea'] = $adminTheme->getClass('textarea');
+            $classes['radio'] = $adminTheme->getClass('input-radio');
+            $classes['checkbox'] = $adminTheme->getClass('input-checkbox');
+            $classes['table'] = $adminTheme->getClass('table');
+            $classes['select'] = $adminTheme->getClass('select');
+            $classes['select-small'] = $adminTheme->getClass('select-small');
+        }
+
+        $this->classes = $classes;
+
+        $this->statusOptions = [
+            'all' => $this->_('All'),
+            FieldtypeFrontendComments::approved => $this->_('Approved'),
+            FieldtypeFrontendComments::pendingApproval => $this->_('Pending'),
+            FieldtypeFrontendComments::spam => $this->_('Spam'),
+            FieldtypeFrontendComments::featured => $this->_('Featured'),
+        ];
+
+        $this->numberApproved = $this->numberOfCommentsPerStatus(FieldtypeFrontendComments::approved);
+        $this->numberPending = $this->numberOfCommentsPerStatus(FieldtypeFrontendComments::pendingApproval);
+        $this->numberSpam = $this->numberOfCommentsPerStatus(FieldtypeFrontendComments::spam);
+        $this->numberFeatured = $this->numberOfCommentsPerStatus(FieldtypeFrontendComments::featured);
+
+        $this->numberOfCommentsPerStatus = [
+            FieldtypeFrontendComments::approved => $this->numberApproved,
+            FieldtypeFrontendComments::pendingApproval => $this->numberPending,
+            FieldtypeFrontendComments::spam => $this->numberSpam,
+            FieldtypeFrontendComments::featured => $this->numberFeatured
+        ];
+
+    }
+
+    /**
+     * Array containing the module info data
+     * @return array
+     */
+    public static function getModuleinfo(): array
+    {
+        return [
+            'title' => __('Comments manager', __FILE__),
+            'summary' => __('A custom page for the FrontendComments module to manage all comments in one place', __FILE__),
+            'author' => 'Jürgen Kern',
+            'version' => '100',
+            'icon' => 'comments',
+            'permanent' => false,
+            'permission' => 'page-edit',
+            'page' => [
+                'name' => 'fc-comments-manager',
+                'title' => __('FrontendComments manager', __FILE__),
+                'parent' => 'setup'
+            ],
+            'requires' => [
+                'FieldtypeFrontendComments>=1.0.0',
+                'PHP>=8.0',
+                'ProcessWire>=3'
+            ],
+        ];
+    }
+
+    /**
+     * @throws WireException
+     */
+    public function init(): void
+    {
+        parent::init();
+
+        // needed for URL path parts to identify the comment status
+        $this->statuses = [
+            FieldtypeFrontendComments::approved => 'approved',
+            FieldtypeFrontendComments::pendingApproval => 'pending',
+            FieldtypeFrontendComments::spam => 'spam',
+            FieldtypeFrontendComments::featured => 'featured',
+        ];
+
+        $this->selectorNames = [
+            'author' => $this->_('Author'),
+            'pages_id' => $this->_('Page (ID)'),
+            'email' => $this->_('Mail'),
+            'stars' => $this->_('Rating'),
+            'ip' => $this->_('IP'),
+        ];
+
+        // add CSS and JS files (only on this module page)
+        if (str_contains($this->input->url, '/setup/fc-comments-manager')) {
+            $version = $this->getModuleInfo()['version'] . '-' . time();
+            $this->wire('config')->styles->add($this->wire('config')->urls->{$this->className} . 'assets/frontendcommentsmanager.css?v=' . $version . '&time=' . time());
+            $this->wire('config')->scripts->add($this->wire('config')->urls->{$this->className} . 'assets/frontendcommentsmanager.js?v=' . $version . '&time=' . time());
+        }
+
+    }
+
+    /**
+     * Create the top filter form containing field, status, date and number of comments filter
+     * @return string
+     * @throws WireException
+     * @throws WirePermissionException
+     */
+    protected function renderFilter(): string
+    {
+
+        $out = '<div id="fcm-filter-form">';
+        $fieldId = $this->sanitizer->int($this->input->urlSegment2);
+
+        // create class attribute string, depending on admin them
+        $selectClassAttribute = $this->classes['select'] ? ' class="' . $this->classes['select'] . '"' : '';
+
+        // 1) create the field select input
+        $fieldSelect = '<div class="first-item">';
+        $fieldSelect .= '<label for="fcm-field-select">' . $this->_('Comment field') . '</label>';
+        $fieldSelect .= '<select id="fcm-field-select"' . $selectClassAttribute . ' data-filter="true">';
+        foreach ($this->commentFields as $field) {
+            $selected = ($field->id === $fieldId) ? ' selected="selected"' : '';
+            $fieldSelect .= '<option value="' . $field->id . '"' . $selected . '>' . $field->name . '</option>';
+        }
+        $fieldSelect .= '</select>';
+        $fieldSelect .= '</div>';
+        $out .= $fieldSelect;
+
+        // 2) create the status select input
+        $statusSelect = '<div>';
+        $statusSelect .= '<label for="fcm-status-select">' . $this->_('Sort by Status') . '</label>';
+        $statusSelect .= '<select id="fcm-status-select"' . $selectClassAttribute . ' data-filter="true" data-filter-name="status">';
+
+        foreach ($this->statusOptions as $status => $label) {
+            $statusSelect .= '<option value="' . $status . '"';
+            if (!is_null($this->input->get('status'))) {
+                if ($this->input->get('status') == $status) {
+                    $statusSelect .= ' selected="selected"';
+                }
+            }
+            if ($status == 'all') {
+                $number = array_sum($this->numberOfCommentsPerStatus);
+            } else {
+                $number = $this->numberOfCommentsPerStatus[$status];
+            }
+            $statusSelect .= '>' . $label . ' (' . $number . ')</option>';
+        }
+        $statusSelect .= "</select>";
+        $statusSelect .= '</div>';
+        $out .= $statusSelect;
+
+        // create the sort select input
+        $sortSelect = '<div>';
+        $sortSelect .= '<label for="fcm-sort-select">' . $this->_('Sort by Date') . '</label>';
+        $sortSelect .= '<select id="fcm-sort-select"' . $selectClassAttribute . ' data-filter="true" data-filter-name="sort">';
+
+        $sortOptions = [
+            'created' => $this->_('From new to old'),
+            '-created' => $this->_('From old to new')
+        ];
+        foreach ($sortOptions as $sort => $label) {
+            $sortSelect .= '<option value="' . $sort . '"';
+            if ($this->input->get('sort') == $sort) {
+                $sortSelect .= ' selected="selected"';
+            }
+            $sortSelect .= '>' . $label . '</option>';
+        }
+        $sortSelect .= "</select>";
+        $sortSelect .= '</div>';
+        $out .= $sortSelect;
+
+        // create the comments limit select input for pagination
+        $limitSelect = '<div class="last-item">';
+        $limitSelect .= '<label for="fcm-field-select">' . $this->_('Number of comments') . '</label>';
+        $limitSelect .= '<select id="fcm-limit-select" data-filter="true" data-filter-name="limit"' . $selectClassAttribute . '>';
+
+        $limitOptions = [
+            '1' => '1 ' . $this->_('per page'),
+            '10' => '10 ' . $this->_('per page'),
+            '25' => '25 ' . $this->_('per page'),
+            '50' => '50 ' . $this->_('per page'),
+            '100' => '100 ' . $this->_('per page'),
+        ];
+
+        foreach ($limitOptions as $limit => $label) {
+            $limitSelect .= '<option value="' . $limit . '"';
+            if (!is_null($this->input->get('limit'))) {
+                if ($this->input->get('limit') == $limit) {
+                    $limitSelect .= ' selected="selected"';
+                }
+            } else {
+                if ($limit == $this->limit) {
+                    $limitSelect .= ' selected="selected"';
+                }
+            }
+            $limitSelect .= '>' . $label . '</option>';
+        }
+
+        $limitSelect .= '</select>';
+        $limitSelect .= '</div>';
+        $out .= $limitSelect;
+
+        $out .= '</div>';
+
+        return $out;
+    }
+
+    /**
+     * Get all keys of the query string parameters for the selectors
+     * @param $array
+     * @return array
+     */
+    protected function getKeys($array): array
+    {
+        $resultArr = array();
+        foreach ($array as $subArr) {
+            $resultArr = array_merge($resultArr, $subArr);
+        }
+        return array_keys($resultArr);
+    }
+
+    /**
+     * Render all filter selectors that have been applied as tags
+     * @param array $selectors
+     * @return string
+     */
+    protected function ___renderFilterTags(array $selectors): string
+    {
+
+        $allowedFilters = ['author', 'pages_id', 'email', 'stars', 'ip'];
+
+        $selectorsAdded = array_intersect($allowedFilters, $this->getKeys($selectors));
+        $out = '<h3>' . $this->_('Additional filters applied') . '</h3>';
+        if ($selectorsAdded) {
+
+            $out .= '<p>' . $this->_('You can remove each additional filter by clicking on the tag.') . '</p>';
+            $out .= '<ul id="fcm-filter-tags">';
+            foreach ($selectors as $selector) {
+                $selectorName = key($selector);
+                if (in_array($selectorName, $allowedFilters)) {
+                    $selectorTagName = $this->selectorNames[$selectorName];
+                    $value = $selector[$selectorName]['value'];
+                    if ($selectorName === 'pages_id') $selectorName = 'page';
+                    $out .= '<li data-type="' . $selectorName . '">' . $selectorTagName . ': ' . $value . '</li>';
+                }
+            }
+            $out .= '</ul>';
+
+        } else {
+            $out .= '<p>' . $this->_('At the moment there are no additional filters applied.') . '<br>';
+            $out .= sprintf($this->_('You can apply the following filters by clicking on the appropriate links in the comments below: %s.'), implode(', ', $this->selectorNames)) . '</p>';
+        }
+
+        return $out;
+    }
+
+    /**
+     * Create the url for the additional filter link
+     * @param string $query
+     * @return string
+     * @throws WireException
+     * @throws WirePermissionException
+     */
+    private function createAdditionalFilterLink(string $query): string
+    {
+        $currentURL = $_SERVER['REQUEST_URI'];
+        $urlParts = explode('?', $currentURL);
+        $queryStrings = '';
+        if (count($urlParts) > 1) {
+            $currentURL = $urlParts[0];
+            $queryStrings = '?' . $urlParts[1];
+        }
+        $path_parts = array_filter(explode('/', $currentURL));
+        if (count($path_parts) == 6) {
+            // pagination is active
+            $currentURL = str_replace($path_parts[6], '', $currentURL);
+        }
+
+        $currentURL = $currentURL . $queryStrings;
+
+        if (str_contains($currentURL, $query)) {
+            return $currentURL;
+        } else {
+            $selectorSeparator = ($this->wire('input')->get()->count()) ? '&' : '?';
+            $currentURL = $currentURL . $selectorSeparator;
+            return $currentURL . $query;
+        }
+    }
+
+    /**
+     * Render a single comment
+     * @param WireArray $comment
+     * @param InputfieldForm $form
+     * @param int $number
+     * @return void
+     * @throws WireException
+     * @throws WirePermissionException
+     */
+    protected function renderComment(FrontendComment $comment, InputfieldForm $form, int $number): void
+    {
+
+        // get all replies (children) to this comment
+        $replies = $comment->getReplies();
+
+        $fieldset = $this->wire('modules')->get('InputfieldFieldset');
+        $fieldset->set('label', sprintf($this->_('Comment #%s'), $number));
+        $fieldset->attr('id', 'fcmm-comment-fieldset-' . $comment->get('id'));
+        $fieldset->attr('class', 'fcmm-fieldset-list');
+        $fieldset->attr('data-status', 'false');
+        $fieldset->attr('data-feedback', 'false');
+        $fieldset->attr('data-change', 'false');
+
+        $userLangName = $this->wire('user')->language->name;
+        $pageTitle = $comment->get('page')->getLanguageValue($userLangName, 'title');
+
+        // editing links
+        $pre = '<div id="changed-' . $comment->get('id') . '" class="comment-changed" style="display:none;" data-status="false" data-feedback="false">' . $this->_('Changed') . '!</div>';
+        $pre .= '<ul class="fcm-link-nav">';
+        $pre .= '<li><span class="fcm-edit"><a class="pw-tooltip" title="' . $this->_('Edit this comment') . '" href="' . $this->wire('config')->urls->admin . 'setup/fc-comments-manager/edit/' . $comment->get('field')->id . '/?edit=' . $comment->id . '&page=' . $comment->get('page')->id . '"><i class="fa fa-pencil"></i>' . $this->_('Edit Comment') . '</a></span></li>';
+        $pre .= '<li><span class="fcm-edit-page"><a class="pw-tooltip" title="' . $this->_('Edit the page where the comment is located') . '" href="' . $this->wire('pages')->get($comment->get('page')->id)->editUrl() . '"><i class="fa fa-pencil"></i>' . $this->_('Edit page') . '</a></span></li>';
+
+        $pageURL = $comment->get('page')->url;
+        $queryString = '?comment-redirect=' . $comment->id . '#' . $comment->get('field')->name . '-' . $comment->get('page')->id . '-redirect-alert';
+        $editURL = $pageURL . $queryString;
+
+        $pre .= '<li><span class="fcm-view"><a class="pw-tooltip" title="' . $this->_('View this comment on the frontend') . '" href="' . $editURL . '" target="_blank"><i class="fa fa-eye"></i>' . $this->_('View') . '</a></span></li>';
+        $pre .= '</ul>';
+
+        // left column
+        $pre .= '<div class="fcm-comment-info">';
+        $pre .= '<table class="' . $this->classes['table'] . '">';
+        $pre .= '<tbody class="fcm-comment">';
+        $pre .= '<tr>';
+        $pre .= '<td><i class="fa fa-cog"></i>' . $this->_('Status') . '</td><td>';
+
+        $app = '</td>';
+        $app .= '</tr>';
+
+        $app .= '<tr>';
+        $app .= '<td><i class="fa fa-hashtag"></i>ID</td><td>' . $comment->get('id') . '</td>';
+        $app .= '</tr>';
+
+        $app .= '<tr>';
+        $app .= '<td><i class="fa fa-user"></i>' . $this->selectorNames['author'] . '</td><td><a class="pw-tooltip" title="' . sprintf($this->_('Show all comments from the author with the name %s'), $comment->get('author')) . '" href="' . $this->createAdditionalFilterLink('author=' . urlencode($comment->get('author'))) . '">' . $comment->get('author') . '</a></td>';
+        $app .= '</tr>';
+
+        $app .= '<tr>';
+        $app .= '<td><i class="fa fa-globe"></i>' . $this->selectorNames['ip'] . '</td><td><a class="pw-tooltip" title="' . sprintf($this->_('Show all comments that have been sent via the ip %s'), $comment->get('ip')) . '" href="' . $this->createAdditionalFilterLink('ip=' . urlencode($comment->get('ip'))) . '">' . $comment->get('ip') . '</a></td>';
+        $app .= '</tr>';
+
+        $app .= '<tr>';
+        $dateString = date('Y/m/d H:i', $comment->get('created')) . ' (' . wireRelativeTimeStr($comment->get('created')) . ')';
+        $app .= '<td><i class="fa fa-calendar"></i>' . $this->_('Date') . '</td><td>' . $dateString . '</td>';
+        $app .= '</tr>';
+
+        $app .= '<tr>';
+        $app .= '<td><i class="fa fa-envelope"></i>' . $this->selectorNames['email'] . '</td><td><a class="fcm-filter pw-tooltip" title="' . sprintf($this->_('Show all comments from the author with the email %s'), $comment->email) . '" href="' . $this->createAdditionalFilterLink('email=' . urlencode($comment->email)) . '">' . $comment->email . '</a></td>';
+        $app .= '</tr>';
+
+        $app .= '<tr>';
+        $ratingText = (is_null($comment->get('stars'))) ? $this->_('Not rated') : $comment->get('stars');
+        $ratingValue = (is_null($comment->get('stars'))) ? 0 : $comment->get('stars');
+        $app .= '<td><i class="fa fa-star"></i>' . $this->selectorNames['stars'] . '</td><td><a class="pw-tooltip"  title="' . sprintf($this->_('Show all comments with a rating value of  %s'), $ratingText) . '"class="fcm-filter" href="' . $this->createAdditionalFilterLink('stars=' . $ratingValue) . '">' . $ratingText . '</a></td>';
+        $app .= '</tr>';
+
+        $app .= '<tr>';
+        $app .= '<td><i class="fa fa-file"></i>' . $this->_('Page title / ID') . '</td><td><a class="pw-tooltip"  title="' . sprintf($this->_('Show all comments from the page with the ID %s'), $comment->get('page')->get('id')) . '"class="fcm-filter" href="' . $this->createAdditionalFilterLink('page=' . $comment->get('page')->get('id')) . '">' . $pageTitle . ' / ' . $comment->get('pages_id') . '</a></td>';
+        $app .= '</tr>';
+
+        $app .= '<tr>';
+        $app .= '<td><i class="fa fa-comments"></i>' . $this->_('Number of replies') . '</td><td>' . $replies->count() . '</td>';
+        $app .= '</tr>';
+
+        $app .= '</tbody>';
+        $app .= '</table>';
+        $app .= '</div>';
+
+        $f = $this->wire()->modules->get('InputfieldSelect');
+        $f->prependMarkup($pre);
+        $f->appendMarkup($app);
+        $f->set('columnWidth', '50%');
+        $f->set('class', 'fcmm-status');
+        $f->attr('data-comment', $comment->get('id'));
+        $f->set('id', 'status-' . $comment->get('id'));
+        $f->set('name', 'status-' . $comment->get('id'));
+        $f->set('required', true);
+        $f->set('value', $comment->get('status'));
+        $f->set('skipLabel', Inputfield::skipLabelHeader);
+        $f->set('collapsed', Inputfield::collapsedNever);
+
+        unset($this->statusOptions['all']);
+        $this->statusOptions['delete'] = $this->_('Delete');
+        foreach ($this->statusOptions as $status => $label) {
+            $f->addOption($status, $label);
+        }
+        $fieldset->add($f);
+
+        // right column
+        $pre = '<div class="fcm-comment-content">';
+
+        $pre .= '<div class="fcm-comment-text">';
+        $pre .= '<h3>' . $this->_('Comment') . '</h3>';
+        $pre .= $comment->text;
+        $pre .= '</div>';
+
+        $pre .= '<div class="fcm-comment-feedback">';
+        $pre .= '<h3>' . $this->_('Feedback') . '</h3>';
+
+        $app = '</div>';
+        $app .= '</div>';
+
+        // moderation feedback textfield
+        $f = $this->modules->get('InputfieldCKEditor');
+        $f->prependMarkup($pre);
+        $f->appendMarkup($app);
+        $f->attr('id|name', 'moderation_feedback_' . $comment->get('id'));
+        $f->set('class', 'fcmm-feedback');
+        $f->set('removePlugins', 'pwimage, sourcedialog');
+        $f->set('toolbar', 'Format, Bold, Italic, Underline, Blockquote, NumberedList, BulletedList, SpecialChar, PWLink');
+        $f->attr('data-comment', $comment->get('id'));
+        $f->attr('value', $comment->get('moderation_feedback'));
+        $f->set('columnWidth', '50%');
+        $f->set('rows', 3);
+        $f->set('skipLabel', Inputfield::skipLabelHeader);
+        $f->set('collapsed', Inputfield::collapsedNever);
+        $fieldset->add($f);
+
+        // create hidden input for storing changes
+        $hidden = $this->wire('modules')->get('InputfieldHidden');
+        $hidden->attr('id', 'changes-' . $comment->get('id'));
+        $hidden->attr('name', 'changes-' . $comment->get('id'));
+        $hidden->attr('value', 'false');
+        $fieldset->add($hidden);
+
+        $form->add($fieldset);
+
+    }
+
+    /**
+     * Get the number of comments with a given status from the current field
+     * @param int $status
+     * @param Field|null $field
+     * @return int
+     */
+    protected function numberOfCommentsPerStatus(int $status, Field|null $field = null): int
+    {
+        if (is_null($field)) {
+            if ($this->input->urlSegment2) {
+                $field = $this->fields->get($this->sanitizer->fieldName($this->input->urlSegment2));
+            } else {
+                // take the first comment field
+                $field = wire('fields')->find('type=FieldtypeFrontendComments')->first();
+            }
+        }
+
+        $result = 0;
+        $statement = 'SELECT COUNT(*) FROM ' . $field->table . ' WHERE status=:status';
+
+        try {
+            $query = $this->database->prepare($statement);
+            $query->bindValue(':status', $status, PDO::PARAM_INT);
+            $query->execute();
+            $result = $query->fetchColumn();
+        } catch (Exception) {
+
+        }
+        return $result;
+    }
+
+    /**
+     * Get all comments of a certain FrontendComments field depending on certain conditions
+     * @param Field $field
+     * @param array|null $selector
+     * @param string|null $sort
+     * @param string|null $limit
+     * @return PaginatedArray
+     */
+    protected function getComments(Field $field, array|null $selector = null, string|null $sort = null, string|null $limit = null): PaginatedArray
+    {
+        // create the WHERE string out of an array
+        $conditions = $this->createWhereConditionString($selector);
+
+        $clearConditions = $this->createWhereConditionString($selector, false);
+
+        if ($conditions) {
+            $selectorString = ' WHERE ' . $conditions;
+            $clearSelectorString = ' WHERE ' . $clearConditions;
+        } else {
+            $selectorString = '';
+            $clearSelectorString = '';
+        }
+
+        // create the LIMIT string if present
+        $limit = $limit ?? '';
+
+        $statement = 'SELECT * FROM ' . $field->table . $selectorString . $sort . $limit;
+        $this->sqlStatement = 'SELECT * FROM ' . $field->table . $clearSelectorString . $sort . $limit;
+
+        // Create a new paginated array out of the db query result
+        $comments = new FrontendCommentArray();
+        $comments->setField($field);
+        try {
+            $query = $this->database->prepare($statement);
+            $this->createBindValues($query, $selector);
+            $query->execute();
+
+            while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
+                $page = $this->wire('pages')->get($row['pages_id']);
+                $comments->setPage($page);
+                // grab configuration values from the FrontendForms module
+                $frontendFormsConfig = FieldtypeFrontendComments::getFrontendFormsConfigValues();
+
+                $comment = new Frontendcomment($comments, [], $frontendFormsConfig);
+                $comment->set('field', $field);
+                $comment->set('page', $page);
+
+                foreach ($row as $key => $val) {
+                    if ($key === 'data') {
+                        $key = 'text';
+                    }
+                    $comment->set($key, $val);
+                }
+
+                $comments->add($comment);
+            }
+
+        } catch (Exception) {
+
+        }
+        $comments->setTrackChanges(true);
+        $this->comments = $comments;
+        return $comments;
+    }
+
+    /**
+     * Get the total number of comments according to a given selector (without using the limit)
+     * @param Field $field
+     * @param array|null $selector
+     * @return int
+     */
+    protected function getTotalNumberOfComments(Field $field, array|null $selector): int
+    {
+        $result = 0; // default value
+        $conditions = $this->createWhereConditionString($selector);
+        if ($conditions) $selectorString = ' WHERE ' . $conditions;
+        $selectorString = $selectorString ?? '';
+        $statement = 'SELECT COUNT(*) FROM ' . $field->table . $selectorString;
+        try {
+            $query = $this->database->prepare($statement);
+            $this->createBindValues($query, $selector);
+            $query->execute();
+            $result = $query->fetch()[0];
+        } catch (Exception) {
+
+        }
+        return $result;
+    }
+
+    /**
+     * Render a list of comments
+     * @param $comments
+     * @param int $total
+     * @param InputfieldForm $form
+     * @return string
+     * @throws WireException
+     * @throws WirePermissionException
+     */
+    protected function renderComments($comments, int $total, InputfieldForm $form): string
+    {
+        if (!$total)
+            return '<p>' . $this->_('There are no Comments') . '</p>';
+
+        $out = '';
+        $number = 1;
+        foreach ($comments as $comment) {
+            $this->renderComment($comment, $form, $number);
+            $number++;
+        }
+
+        return $out;
+
+    }
+
+    /**
+     * Create a string of all WHERE conditions
+     * @param array $conditions
+     * @param bool $usePDO
+     * @return string
+     */
+    protected function createWhereConditionString(array $conditions, bool $usePDO = true): string
+    {
+        $string = [];
+
+        foreach ($conditions as $condition) {
+
+            $name = key($condition);
+
+            if ($usePDO) {
+                if ($condition[$name]['value'] != null) {
+                    $string[] = ' ' . $name . '=:' . $name;
+                } else {
+                    $string[] = $name . ' IS NULL';
+                }
+
+            } else {
+                if ($condition[$name]['value'] != null) {
+                    $string[] = $name . '=' . $condition[$name]['value'];
+                } else {
+                    $string[] = $name . ' IS NULL';
+                }
+
+            }
+        }
+        return implode(' AND ', $string);
+    }
+
+    /**
+     * Create the bind statement dynamically for each WHERE condition
+     * @param WireDatabasePDOStatement $query
+     * @param array $conditions
+     * @return void
+     */
+    protected function createBindValues(WireDatabasePDOStatement $query, array $conditions): void
+    {
+
+        foreach ($conditions as $condition) {
+            $name = ':' . key($condition);
+            $array = array_values($condition);
+            $values = array_shift($array);
+            $value = $values['value'];
+
+            if (array_key_exists('type', $values)) {
+                $type = $values['type'];
+                $query->bindValue($name, $value, $type);
+            } else {
+                $query->bindValue($name, $value);
+            }
+
+        }
+    }
+
+    /**
+     * Validate and process the edit form for a single comment
+     * @param FrontendComment $comment
+     * @param InputfieldForm $form
+     * @return bool
+     * @throws WireException
+     * @throws WirePermissionException
+     */
+    protected function processEditForm(FrontendCommentArray $comments, FrontendComment $comment, InputfieldForm $form): bool
+    {
+        $input = $this->wire('input');
+        $sanitizer = $this->wire('sanitizer');
+
+        $page = $comment->get('page');
+        $field = $comment->get('field');
+        $fieldName = $field->name;
+
+        if ($input->post('submitedit')) {
+
+            $oldStatus = $comment->get('status'); // the old status as stored inside the DB
+
+            // sanitize all values first and add them back to the FrontendComment
+            $comment->set('author', $sanitizer->string($input->post('author')));
+            $comment->set('email', $sanitizer->string($input->post('mail')));
+            $comment->set('website', $sanitizer->string($input->post('website')));
+            $comment->set('stars', $input->post('stars') ? $sanitizer->int($input->post('stars')) : NULL);
+            $comment->set('status', $sanitizer->int($input->post('status')));
+            $comment->set('upvotes', $sanitizer->int($input->post('upvotes')));
+            $comment->set('downvotes', $sanitizer->int($input->post('downvotes')));
+            $comment->set('user_id', $sanitizer->int($input->post('userid')));
+            $comment->set('parent_id', $sanitizer->int($input->post('parentid')));
+
+            // create date for storage in the database
+            $postDateString = $input->post('date') . ' ' . $input->post('date__time');
+            $comment->set('created', wire('datetime')->stringToTimestamp($postDateString, 'Y-m-d H:i:s'));
+
+            $comment->set('text', $sanitizer->string($input->post('comment')));
+            $comment->set('moderation_feedback', $sanitizer->string($input->post('feedback')));
+
+            // validate the form
+            $form->processInput($input->post());
+            if (count($form->getErrors())) {
+                $this->error($this->_('There was an error processing your form.'));
+                return false;
+            }
+
+            // add status track change for special treatment of status changes if status have been changed
+            if ($comment->get('status') !== $oldStatus) {
+                $comment->trackChange('status');
+                $comments->trackChange('statuschange');
+            }
+
+            $page->$fieldName = $comments;
+            return $comments->saveComment($comment);
+
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * Render the form for a single comment to be able to edit all values
+     * @return string|FrontendCommentsManager
+     * @throws WireException
+     * @throws WirePermissionException
+     */
+    public function executeEdit(): string|FrontendCommentsManager
+    {
+        $out = '';
+
+        // check if field is type of FieldtypeFrontendComments first
+        $fieldName = $this->sanitizer->fieldName($this->input->urlSegment2);
+        $field = $this->fields->get($fieldName);
+        if (!$field || !$field->type instanceof FieldtypeFrontendComments) {
+            return $this->error($this->_('Unrecognized field'));
+        }
+
+        $commentID = $this->input->get('edit');
+        $pageID = $this->input->get('page');
+
+        $this->headline(sprintf($this->_('Edit Comment with the ID #%s'), $commentID));
+
+        // Access control: check if user has permission to edit this comment
+        if (!$this->wire('user')->hasPermission('page-edit')) {
+            $out .= '<p>' . $this->_('You have not the permission to edit this comment') . '</p>';
+        } else {
+
+            $commentID = $this->sanitizer->int($commentID);
+            $pageID = $this->sanitizer->int($pageID);
+            $page = $this->wire('pages')->get($pageID);
+
+            // get all comments
+            $comments = $page->$fieldName;
+            if ($comments->count() === 0) {
+                return $this->error($this->_('No comments found'));
+            }
+
+            // get the comment with the given id
+            $comment = $comments->findOne('id=' . $commentID);
+            if (!$comment) {
+                return $this->error($this->_('Unrecognized comment'));
+            }
+
+            // create the edit form
+            $form = $this->wire('modules')->get('InputfieldForm');
+            $form->attr('action', '');
+            $form->attr('id', 'fcmm-edit-form');
+
+            // process the form
+            if (!$this->processEditForm($comments, $comment, $form)) {
+                $this->error($this->_('An error occurred during the process. Please try it once again.'));
+            }
+
+            // author name
+            $f = $this->modules->get('InputfieldText');
+            $f->set('label', $this->_('Author'));
+            $f->attr('id|name', 'author');
+            $f->attr('value', $comment->get('author'));
+            $f->set('required', true);
+            $form->add($f);
+
+            // author email
+            $f = $this->modules->get('InputfieldEmail');
+            $f->set('label', $this->_('Email'));
+            $f->attr('id|name', 'mail');
+            $f->attr('value', $comment->get('email'));
+            $f->set('required', true);
+            $form->add($f);
+
+            // author website
+            $f = $this->modules->get('InputfieldURL');
+            $f->set('label', $this->_('Website'));
+            $f->attr('id|name', 'website');
+            $f->attr('value', $comment->get('website'));
+            $form->add($f);
+
+            // date
+            $f = $this->modules->get('InputfieldDateTime');
+            $f->set('label', $this->_('Date'));
+            $f->attr('id|name', 'date');
+            $f->attr('value', $comment->get('created'));
+            $f->set('required', true);
+            $f->set('inputType', 'html');
+            $f->set('htmlType', 'datetime');
+            $form->add($f);
+
+            // stars
+            $f = $this->modules->get('InputfieldSelect');
+            $f->set('label', $this->_('Rating'));
+            $f->attr('id|name', 'stars');
+            $f->attr('value', $comment->get('stars'));
+            $f->addOption(1, sprintf($this->_('%s star'), '1'));
+            $f->addOption(2, sprintf($this->_('%s stars'), '2'));
+            $f->addOption(3, sprintf($this->_('%s stars'), '3'));
+            $f->addOption(4, sprintf($this->_('%s stars'), '4'));
+            $f->addOption(5, sprintf($this->_('%s stars'), '5'));
+            $form->add($f);
+
+            // status
+            $f = $this->modules->get('InputfieldSelect');
+            $f->set('label', $this->_('Status'));
+            $f->attr('id|name', 'status');
+            $f->attr('value', $comment->get('status'));
+            $f->addOption(FieldtypeFrontendComments::pendingApproval, $this->_('Pending approval'));
+            $f->addOption(FieldtypeFrontendComments::approved, $this->_('Approved'));
+            $f->addOption(FieldtypeFrontendComments::featured, $this->_('Featured'));
+            $f->addOption(FieldtypeFrontendComments::spam, $this->_('SPAM'));
+            $f->addOption('delete', $this->_('Delete the comment'));
+            $f->set('required', true);
+            $form->add($f);
+
+            // comment text
+            $f = $this->modules->get('InputfieldTextarea');
+            $f->set('label', $this->_('Comment'));
+            $f->attr('id|name', 'comment');
+            $f->attr('value', $comment->get('text'));
+            $f->set('required', true);
+            $form->add($f);
+
+            // feedback text
+            $f = $this->modules->get('InputfieldCKEditor');
+            $f->set('label', $this->_('Feedback'));
+            $f->attr('id|name', 'feedback');
+            $f->set('removePlugins', 'pwimage, sourcedialog');
+            $f->set('toolbar', 'Format, Bold, Italic, Underline, Blockquote, NumberedList, BulletedList, SpecialChar, PWLink');
+            $f->attr('value', $comment->get('moderation_feedback'));
+            $form->add($f);
+
+            $f = $this->modules->get('InputfieldInteger');
+            $f->set('label', $this->_('Upvotes'));
+            $f->attr('id|name', 'upvotes');
+            $f->attr('value', $comment->get('upvotes'));
+            $f->attr('min', 0);
+            $f->set('inputType', 'number');
+            $form->add($f);
+
+            $f = $this->modules->get('InputfieldInteger');
+            $f->set('label', $this->_('Downvotes'));
+            $f->attr('id|name', 'downvotes');
+            $f->attr('value', $comment->get('downvotes'));
+            $f->attr('min', 0);
+            $f->set('inputType', 'number');
+            $form->add($f);
+
+            $f = $this->modules->get('InputfieldInteger');
+            $f->set('label', $this->_('User ID'));
+            $f->attr('id|name', 'userid');
+            $f->attr('value', $comment->get('user_id'));
+            $f->set('required', true);
+            $form->add($f);
+
+            $f = $this->modules->get('InputfieldInteger');
+            $f->set('label', $this->_('Parent ID'));
+            $f->attr('id|name', 'parentid');
+            $f->attr('value', $comment->get('parent_id'));
+            $f->set('required', true);
+            $form->add($f);
+
+            $f = $this->modules->get('InputfieldInteger');
+            $f->set('label', $this->_('Page ID'));
+            $f->attr('id|name', 'pageid');
+            $f->attr('value', $comment->get('pages_id'));
+            $f->set('required', true);
+            $form->add($f);
+
+            $submit = $this->modules->get('InputfieldSubmit');
+            $submit->attr('value', $this->_('Save changes'));
+            $submit->attr('id', 'submitedit');
+            $submit->attr('name', 'submitedit');
+            $form->add($submit);
+
+            $out .= $form->render();
+
+        }
+
+        // create the back button
+        $out .= '<div id="fcm-backlink"><a class="pw-tooltip" title="' . $this->_('Back to the overview') . '" href="../../list/' . $field->get('id') . '/"><i class="fa fa-arrow-circle-left"></i> ' . $this->_('Back') . '</a></div>';
+
+        return $out;
+    }
+
+    /**
+     * @throws WireException
+     */
+    public function ___executeList(): string|FrontendCommentsManager
+    {
+
+        $modules = $this->wire()->modules;
+
+        $field = $this->fields->get($this->sanitizer->fieldName($this->input->urlSegment2));
+
+        if (!$field || !$field->type instanceof FieldtypeFrontendComments) {
+            return $this->error($this->_('Unrecognized field'));
+        }
+
+        $whereSelectors = []; // array containing all querystring parameters
+
+        //status selector
+        $statusFilter = $this->input->get('status');
+        if (!is_null($statusFilter)) {
+            if ($statusFilter != 'all') {
+                $statusFilter = $this->sanitizer->int($statusFilter, ['max' => 4]);
+                $whereSelectors[] = ['status' => ['value' => $statusFilter, 'type' => PDO::PARAM_INT]];
+            }
+        } else {
+            if ($this->status != 'all') {
+                $whereSelectors[] = ['status' => ['value' => $this->status, 'type' => PDO::PARAM_INT]];
+            }
+
+        }
+
+        // page selector
+        $pageFilter = $this->input->get('page');
+        if (!is_null($pageFilter)) {
+            $pageFilter = $this->sanitizer->int($this->input->get('page'));
+            if ($pageFilter > 0)
+                $whereSelectors[] = ['pages_id' => ['value' => $pageFilter, 'type' => PDO::PARAM_INT]];
+        }
+
+        // email selector
+        $emailFilter = $this->input->get('email');
+        if (!is_null($emailFilter)) {
+            $emailFilter = $this->sanitizer->email($emailFilter);
+            $whereSelectors[] = ['email' => ['value' => $emailFilter, 'type' => PDO::PARAM_STR]];
+        }
+
+        // author selector
+        $authorFilter = $this->input->get('author');
+        if (!is_null($authorFilter)) {
+            $authorFilter = $this->sanitizer->string($authorFilter);
+            $whereSelectors[] = ['author' => ['value' => $authorFilter, 'type' => PDO::PARAM_STR]];
+        }
+
+        // ip selector
+        $ipFilter = $this->input->get('ip');
+        if (!is_null($ipFilter)) {
+            $ipFilter = $this->sanitizer->string($ipFilter);
+            $whereSelectors[] = ['ip' => ['value' => $ipFilter, 'type' => PDO::PARAM_STR]];
+        }
+
+        // stars selector
+        $starsFilter = $this->input->get('stars');
+
+        if (!is_null($starsFilter)) {
+            $starsfilter = $this->sanitizer->int($starsFilter, ['max' => 5]);
+            if ($starsfilter == 0) {
+                $starsfilter = null;
+            }
+            $whereSelectors[] = ['stars' => ['value' => $starsfilter, 'type' => PDO::PARAM_INT]];
+        }
+
+        // get the pagination limit value
+        $limitFilter = $this->input->get('limit');
+        if (!is_null($limitFilter)) {
+            $limit = $this->sanitizer->int($this->input->get('limit'), ['min' => 1, 'max' => 100]);
+        } else {
+            $limit = $this->limit;
+        }
+
+        // get the date sorting value (ASC, DESC)
+        $sort = $this->sanitizer->string($this->input->get('sort'));
+        $sort = $this->sanitizer->option($sort, ['-created', 'created']);
+        if (is_null($sort)) $sort = $this->sort;
+
+        // get the start value for the pagination
+        $start = ($this->input->pageNum() - 1) * $limit;
+
+        //fe LIMIT 20, 10 ->starting from 20 to 30
+        $limitSelector = ' LIMIT ' . $start . ', ' . $limit;
+
+        $sortType = ($sort === '-created') ? 'ASC' : 'DESC';
+        $sortSelector = ' ORDER BY created ' . $sortType;
+
+        // all comments on this page using the pagination
+        $comments = $this->getComments($field, $whereSelectors, $sortSelector, $limitSelector);
+
+        // form was submitted so we process the form
+        if ($this->input->post->submitcomments) {
+
+            // user submitted the form, process it and check for errors
+            $this->processInput($this->input->post);
+
+        }
+        // the total number of comments
+        $total = $this->getTotalNumberOfComments($field, $whereSelectors);
+
+        $comments->setLimit($limit);
+        $comments->setStart($start);
+        $comments->setTotal($total);
+
+        /** @var MarkupPagerNav $pager */
+        $pager = $this->wire()->modules->get('MarkupPagerNav');
+        $pagerOut = $pager->render($comments, array(
+            'queryString' => '?' . $this->wire('input')->queryString(),
+            'baseUrl' => "./"
+        ));
+
+        // create the headline depending on status filter
+        $headline = $this->statusOptions['all'];
+        if (!is_null($this->wire('input')->get('status'))) {
+            $headline = $this->statusOptions[$this->wire('input')->get('status')];
+        }
+
+        $totalNumber = $total;
+        $first = $start + 1;
+        $last = $start + $limit;
+        if ($last > $totalNumber) {
+            $last = $totalNumber;
+        }
+        $this->headline($headline . ' (' . $first . '-' . $last . ' ' . $this->_('of') . ' ' . $total . ')');
+
+        $out = $pagerOut;
+        $out .= '<div id="fcmm-comment-list">';
+        $out .= $this->renderFilter();
+        $out .= $this->renderFilterTags($whereSelectors);
+
+        if ($this->showStatement && $this->sqlStatement) {
+            $out .= '<fieldset>';
+            $out .= '<legend>' . $this->_('SQL-Statement') . '</legend>';
+            $out .= '<pre>' . $this->sqlStatement . '</pre>';
+            $out .= '</fieldset>';
+        }
+
+        // create the form
+        $form = $this->wire('modules')->get('InputfieldForm');
+        $form->attr('method', 'post');
+        $form->attr('id', 'fcmm-comment-form');
+        $form->attr('action', '');
+
+        $out .= $this->renderComments($comments, $total, $form);
+
+        $submit = $modules->get('InputfieldSubmit');
+        $submit->attr('value', $this->_('Save changes'));
+        $submit->attr('id', 'submitcomments');
+        $submit->attr('name', 'submitcomments');
+        $form->add($submit);
+
+        $out .= $form->render();
+        $out .= $pagerOut;
+        $out .= '</div>';
+
+        return $out;
+
+    }
+
+    /**
+     * Render the first page
+     * @throws WireException
+     */
+    public function ___execute()
+    {
+        // no comment fields installed
+        if (!$this->commentFields->count())
+            return '<p>' . $this->_('There are no FrontendComments fields installed.') . '</p>';
+
+        // make a redirect on page load to the first comment field
+        if (!$this->input->urlSegment1) {
+            $firstFieldId = $this->commentFields->first()->get('id');
+            $this->wire()->session->redirect("./list/$firstFieldId/");
+        }
+    }
+
+    /**
+     * Sanitize and validate new values and store them inside the database or delete comments completely
+     * @param WireInputData $input
+     * @return void
+     * @throws WireException
+     * @throws WirePermissionException
+     */
+    public function ___processInput(WireInputData $input): void
+    {
+
+        $changes = [];
+
+        $page = $this->comments->getPage();
+        $field = $this->comments->getField();
+        $fieldName = $field->get('name');
+        $comments = $page->$fieldName;
+
+        foreach ($input as $name => $value) {
+            if (str_starts_with($name, 'changes-') && $value == 'true') {
+                $id = explode('-', $name)[1];
+                $changes[] = $id;
+            }
+        }
+
+        // loop over all comments that have been changed
+        foreach ($changes as $id) {
+
+            $comment = $comments->findOne((int)$id);
+
+            if ($comment) {
+
+                $comment->setTrackChanges(true);
+                $status = $input->get('status-' . $id);
+                $oldStatus = $comment->get('status');
+
+                // validate status
+                if ($status === 'delete') {
+                    $comments->deleteComment();
+                } else {
+                    $status = (int)$status;
+                    // run only if stored and current value are not the same
+                    if ($status !== $oldStatus) {
+                        if ($status > 4 && $status < 0) {
+                            $this->error($this->_('Wrong value for status. Status can only have the following values: 0,1,2 or 4.'), Notice::allowMarkup);
+                        } else {
+                            $comment->trackChange('status');
+                            $comment->set('status', $status);
+                            $comments->trackChange('statuschange');
+                        }
+                    }
+                }
+
+                // validate feedback
+                $feedback = $input->get('moderation_feedback_' . $id);
+                $oldfeedback = $comment->get('moderation_feedback');
+
+                // run only if stored and current value are not the same and comment should not be deleted
+                if ($feedback != $oldfeedback && $status != 'delete') {
+                    $comment->trackChange('feedback');
+                    $comment->set('moderation_feedback', $feedback);
+                    $comments->trackChange('feedbackchange');
+                }
+
+                if ($comment->getChanges()) {
+                    $page->$fieldName = $comments;
+                    $comments->saveComment($comment);
+                }
+
+            }
+
+        }
+
+        // make a redirect to show changes
+        $this->wire('session')->redirect($this->wire('page')->url);
+
+    }
+
+    /**
+     * Create the configuration fields
+     * @param InputfieldWrapper $inputfields
+     * @return void
+     * @throws WireException
+     * @throws WirePermissionException
+     */
+    public function getModuleConfigInputfields(InputfieldWrapper $inputfields): void
+    {
+
+        $modules = $this->wire()->modules;
+
+        $f = $modules->get('InputfieldToggle');
+        $f->attr('name', 'useManager');
+        $f->label = $this->_('Use comments manager rather than in-page editor?');
+        $f->set('description',
+            $this->_('When enabled user will be directed to the dedicated comments manager for editing comments.') . ' ' .
+            $this->_('This may be preferable because the comments manager has more features and uses pagination.'));
+        $value = (int)$this->get('useManager');
+        $f->val($value);
+        $inputfields->add($f);
+
+    }
+
+}

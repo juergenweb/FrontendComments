@@ -1,0 +1,71 @@
+en,de,description,file,hash
+All,Alle,,site/modules/FrontendComments/FrontendCommentsManager.module,b1c94ca2fbc3e78fc30069c8d0f01680
+Approved,Bestätigt,,site/modules/FrontendComments/FrontendCommentsManager.module,6f8063417ab31f38d864c28302f3de2f
+Pending,Wartend,,site/modules/FrontendComments/FrontendCommentsManager.module,2d13df6f8b5e4c5af9f87e0dc39df69d
+Spam,=,,site/modules/FrontendComments/FrontendCommentsManager.module,e9dfd31cc505d51fc26975250750deab
+Featured,Hervorgehoben,,site/modules/FrontendComments/FrontendCommentsManager.module,15422d54ec0d47000dc86a9820a5237e
+Author,Autor,,site/modules/FrontendComments/FrontendCommentsManager.module,a517747c3d12f99244ae598910d979c5
+"Page (ID)","Seite (ID)",,site/modules/FrontendComments/FrontendCommentsManager.module,1cbd7dd7d2ae88cea04cb9641dbf488a
+Mail,E-Mail,,site/modules/FrontendComments/FrontendCommentsManager.module,4dfbb099eafd3c82e033bf92946d3ce6
+Rating,Bewertung,,site/modules/FrontendComments/FrontendCommentsManager.module,dda9c06f33071c9b6fc237ee164109d8
+IP,=,,site/modules/FrontendComments/FrontendCommentsManager.module,a12a3079e14ced46e69ba52b8a90b21a
+"Comment field",Kommentarfeld,,site/modules/FrontendComments/FrontendCommentsManager.module,767b0c6f7a678eabc9cd330c96d4d92b
+"Sort by Status","Nach Status sortieren",,site/modules/FrontendComments/FrontendCommentsManager.module,d1c8a5ab99c33eb6434b49448816fb74
+"Sort by Date","Nach Datum sortieren",,site/modules/FrontendComments/FrontendCommentsManager.module,caf7d4ce2b5f1589e4f239c752f1b234
+"From new to old","Von neu zu alt",,site/modules/FrontendComments/FrontendCommentsManager.module,ad015091c99fbd97ab93cbb5bacdb188
+"From old to new","Von alt nach neu",,site/modules/FrontendComments/FrontendCommentsManager.module,9761167c9ee8ae1c8bed06dca5c3f6f8
+"Number of comments","Anzahl der Kommentare",,site/modules/FrontendComments/FrontendCommentsManager.module,0f2898ac15073825a5c5d88723264685
+"per page","pro Seite",,site/modules/FrontendComments/FrontendCommentsManager.module,4f5d5f295ddc8fd8673e74dd5fbe114a
+"Additional filters applied","Zusätzlich angewandte Filter",,site/modules/FrontendComments/FrontendCommentsManager.module,53c8be9b4b33ea115ed76b2582d8bf03
+"You can remove each additional filter by clicking on the tag.","Sie können jeden zusätzlichen Filter entfernen, indem Sie auf das Tag klicken.",,site/modules/FrontendComments/FrontendCommentsManager.module,013c7dd8e3fd7bc18df282c8bedb4608
+"At the moment there are no additional filters applied.","Derzeit sind keine zusätzlichen Filter angewendet.",,site/modules/FrontendComments/FrontendCommentsManager.module,6d15f5886ec45345c0cf407cdf5fceaa
+"You can apply the following filters by clicking on the appropriate links in the comments below: %s.","Sie können die folgenden Filter anwenden, indem Sie auf die entsprechenden Links in den Kommentaren unten klicken: %s.",,site/modules/FrontendComments/FrontendCommentsManager.module,8b65190a6dde38b110f896879325fc55
+"Comment #%s","Kommentar #%s",,site/modules/FrontendComments/FrontendCommentsManager.module,d822ed4022085b030bdd4bd4a3f55422
+Changed,Geändert,,site/modules/FrontendComments/FrontendCommentsManager.module,820dbd2b8f606aff866c0bbfb6b737c1
+"Edit this comment","Diesen Kommentar bearbeiten",,site/modules/FrontendComments/FrontendCommentsManager.module,ee6ddd648ece1a395506fefa4c25a388
+"Edit the page where the comment is located","Bearbeiten Sie die Seite, auf der sich der Kommentar befindet.",,site/modules/FrontendComments/FrontendCommentsManager.module,04486591c35a6fd6654a1f8180631138
+"View this comment on the frontend","Diesen Kommentar im Frontend anzeigen",,site/modules/FrontendComments/FrontendCommentsManager.module,d63d0d4351bd9320e30b912173327989
+Status,=,,site/modules/FrontendComments/FrontendCommentsManager.module,ec53a8c4f07baed5d8825072c89799be
+"Show all comments from the author with the name %s","Alle Kommentare des Autors mit dem Namen %s anzeigen",,site/modules/FrontendComments/FrontendCommentsManager.module,cb6a6354f331f2c943f3016fb1161303
+"Show all comments that have been sent via the ip %s","Alle Kommentare anzeigen, die über die IP-Adresse %s gesendet wurden.",,site/modules/FrontendComments/FrontendCommentsManager.module,8ec06459f82e795bcb6b5febfad5c2ef
+Date,Datum,,site/modules/FrontendComments/FrontendCommentsManager.module,44749712dbec183e983dcd78a7736c41
+"Show all comments from the author with the email %s","Alle Kommentare des Autors mit der E-Mail-Adresse %s anzeigen",,site/modules/FrontendComments/FrontendCommentsManager.module,f5dcd842cd614833c0e101bc52131b29
+"Not rated","Nicht bewertet",,site/modules/FrontendComments/FrontendCommentsManager.module,563eccaf954ed4fd94c68a469c2b851e
+"Show all comments with a rating value of  %s","Alle Kommentare mit einer Bewertung von %s anzeigen",,site/modules/FrontendComments/FrontendCommentsManager.module,2620a6bab99fa4dfe3125ebded4d94ca
+"Page title / ID","Seitentitel / ID",,site/modules/FrontendComments/FrontendCommentsManager.module,dbd7ea69964860f24ffcb9104bd1238a
+"Number of replies","Anzahl der Antworten",,site/modules/FrontendComments/FrontendCommentsManager.module,e75931ae4327ec2de7560cd1dddb2ce7
+Delete,Löschen,,site/modules/FrontendComments/FrontendCommentsManager.module,f2a6c498fb90ee345d997f888fce3b18
+Comment,Kommentar,,site/modules/FrontendComments/FrontendCommentsManager.module,0be8406951cdfda82f00f79328cf4efc
+Feedback,=,,site/modules/FrontendComments/FrontendCommentsManager.module,bea4c2c8eb82d05891ddd71584881b56
+"There are no Comments","Es gibt keine Kommentare",,site/modules/FrontendComments/FrontendCommentsManager.module,d52b9a5366c59d106520f1bc0d3901f1
+"There was an error processing your form.","Bei der Verarbeitung Ihres Formulars ist ein Fehler aufgetreten.",,site/modules/FrontendComments/FrontendCommentsManager.module,444028f2ccc7d0a41407d2301047ddb9
+"Unrecognized field","Unbekanntes Feld",,site/modules/FrontendComments/FrontendCommentsManager.module,4f85d037300d5f7efcf7fdc3f973db7f
+"Edit Comment with the ID #%s","Kommentar mit der ID #%s bearbeiten",,site/modules/FrontendComments/FrontendCommentsManager.module,112c6455adf5463fd1fe04c615982dae
+"You have not the permission to edit this comment","Sie haben keine Berechtigung, diesen Kommentar zu bearbeiten.",,site/modules/FrontendComments/FrontendCommentsManager.module,29c7cf08976e4b259c4a59aa0e414f63
+"No comments found","Keine Kommentare gefunden",,site/modules/FrontendComments/FrontendCommentsManager.module,515513ee9449fdd7745af0fcb0e1b078
+"Unrecognized comment","Unbekannter Kommentar",,site/modules/FrontendComments/FrontendCommentsManager.module,fd2a30da4345a772c11da99bf064ccfb
+"An error occurred during the process. Please try it once again.","Während des Vorgangs ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",,site/modules/FrontendComments/FrontendCommentsManager.module,d1633d5cdf231d266431022aed10026d
+Email,E-Mail,,site/modules/FrontendComments/FrontendCommentsManager.module,ce8ae9da5b7cd6c3df2929543a9af92d
+Website,Webseite,,site/modules/FrontendComments/FrontendCommentsManager.module,15bbb9d0bbf25e8d2978de1168c749dc
+"%s star","%s Stern",,site/modules/FrontendComments/FrontendCommentsManager.module,54e7ab179a80b1a740e405cbeca670ff
+"%s stars","%s Sterne",,site/modules/FrontendComments/FrontendCommentsManager.module,65cd4b972052588b238e55d5ddad73da
+"Pending approval","Wartet auf Genehmigung",,site/modules/FrontendComments/FrontendCommentsManager.module,b8e2c23a15e49a10d6f0562a3dce2538
+SPAM,=,,site/modules/FrontendComments/FrontendCommentsManager.module,c72beebe6ecbdddff71b846c4858ebcb
+"Delete the comment","Kommentar löschen",,site/modules/FrontendComments/FrontendCommentsManager.module,851777bf0529c4d9d9d0bad0f792cd25
+Upvotes,"Positive Wertungen",,site/modules/FrontendComments/FrontendCommentsManager.module,63e90287fd383e2e42e4778c0e9d7a71
+Downvotes,"Negative Wertungen",,site/modules/FrontendComments/FrontendCommentsManager.module,b45352aeca3646b5fb15baa385d44224
+"User ID",Nutzer-ID,,site/modules/FrontendComments/FrontendCommentsManager.module,1edcdad89b3a2245d759a169da1bf5a3
+"Parent ID",Eltern-ID,,site/modules/FrontendComments/FrontendCommentsManager.module,96c88741d441f47bcb02024773dd7b6d
+"Page ID",Seiten-ID,,site/modules/FrontendComments/FrontendCommentsManager.module,30722aa4ee66bd5b06a4abe892c9e963
+"Save changes","Änderungen speichern",,site/modules/FrontendComments/FrontendCommentsManager.module,daa6b483e9f6ca081ec7e0b4a352f9e9
+"Back to the overview","Zurück zur Übersicht",,site/modules/FrontendComments/FrontendCommentsManager.module,7eaa2e9465506f5ecd9b8fb21449bf18
+of,von,,site/modules/FrontendComments/FrontendCommentsManager.module,8bf8854bebe108183caeb845c7676ae4
+SQL-Statement,SQL-Anweisung,,site/modules/FrontendComments/FrontendCommentsManager.module,d142ebe4786fbc0ffb437b1ed3c2d2c7
+"There are no FrontendComments fields installed.","Es sind keine FrontendComments-Felder installiert.",,site/modules/FrontendComments/FrontendCommentsManager.module,7df21df70ba404315cc66835a99899d9
+"Wrong value for status. Status can only have the following values: 0,1,2 or 4.","Falscher Wert für den Status. Der Status kann nur die folgenden Werte haben: 0, 1, 2 oder 4.",,site/modules/FrontendComments/FrontendCommentsManager.module,c940d679fcdb70ce1c5430c453b303b1
+"Use comments manager rather than in-page editor?","Den Kommentar-Manager anstelle des Inline-Editors verwenden?",,site/modules/FrontendComments/FrontendCommentsManager.module,de409f1196a299b23fcbdfaf9efe0740
+"When enabled user will be directed to the dedicated comments manager for editing comments.","Wenn diese Option aktiviert ist, wird der Benutzer zum speziellen Kommentar-Manager weitergeleitet, um Kommentare zu bearbeiten.",,site/modules/FrontendComments/FrontendCommentsManager.module,33c3c08ba0fba5a5c7cf3200a45dd907
+"This may be preferable because the comments manager has more features and uses pagination.","Dies kann vorteilhaft sein, da der Kommentar-Manager über mehr Funktionen verfügt und eine Paginierung verwendet.",,site/modules/FrontendComments/FrontendCommentsManager.module,3857c404875aaaa89b52103fed3f5af6
+"Comments manager",Kommentar-Manager,,site/modules/FrontendComments/FrontendCommentsManager.module,e6cdd9466e5eb945e24fb667af223478
+"A custom page for the FrontendComments module to manage all comments in one place","Eine benutzerdefinierte Seite für das FrontendComments-Modul, um alle Kommentare an einem Ort zu verwalten.",,site/modules/FrontendComments/FrontendCommentsManager.module,e7732e0f120a366180cf69faeaffa2f4
+"FrontendComments manager","FrontendComments Manager",,site/modules/FrontendComments/FrontendCommentsManager.module,13fe326d255dc633e2d4f2283aedce9b

@@ -790,6 +790,7 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
         $field = $comment->get('field');
         $fieldtypeMulti = $this->wire('fieldtypes')->get('FrontendComments');
 
+        bd($this->getChanges());
         // check if it is a new or an updated comment
         if (!$comment->get('id')) {
             $this->add($comment); // new comment
