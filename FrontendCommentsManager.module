@@ -12,6 +12,7 @@ use Exception;
 use FrontendComments\FrontendComment;
 use FrontendComments\FrontendCommentArray;
 use PDO;
+use PDOStatement;
 
 class FrontendCommentsManager extends Process implements ConfigurableModule
 {
@@ -673,7 +674,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
      * @param array $conditions
      * @return void
      */
-    protected function createBindValues(WireDatabasePDOStatement $query, array $conditions): void
+    protected function createBindValues(PDOStatement $query, array $conditions): void
     {
 
         foreach ($conditions as $condition) {
