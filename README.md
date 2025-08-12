@@ -51,7 +51,7 @@ Live example: [http://www.schulfreund.at](https://www.schulfreund.at/nachhilfeku
 * [Hooking to change markup](#hooking-to-change-markup)
 * [Overwriting CSS styles with your custom values](#overwriting-css-styles-with-your-custom-values)
 * [Adding CSS and JS files manually to the template](#adding-css-and-js-files-manually-to-the-website)
-* [Adding CSS and JS files manually to the template](#adding-css-and-js-files-manually-to-the-website)
+* [Comments manager](#comments-manager)
   
 
 ## Configurations
