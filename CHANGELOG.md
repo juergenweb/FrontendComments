@@ -9,7 +9,5 @@ New status "featured" has been added. Can be used to create a list with selected
 
 Completely rewriting of the code base.
 
-## [1.0.5] - 2025-08-12
 
-Comment manager module added
 
