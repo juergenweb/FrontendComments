@@ -129,7 +129,6 @@ $comments->setDateFormat(0);
 $comments->setCaptchaType("none");
 $comments->setPaginationNumber(10);
 $comments->setPaginationAlignment("right");
-$comments->setSenderEmailAddress("myemailaddress@example.com");
 $comments->setSenderName("ProcessWire");
 $comments->setListHeadlineText("My comment list headline");
 $comments->setFormHeadlineText("My form headline");
