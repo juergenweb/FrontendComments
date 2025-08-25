@@ -52,8 +52,7 @@ class Notifications extends Tag
 
         // set the mail values
         $this->emailTemplate = $this->field->get('input_fc_emailTemplate');
-        $this->senderEmail = $this->getSenderEmail();
-        $this->senderName = $this->getSenderName();
+        $this->senderEmail = 'comment-notification@' . $this->wire('config')->httpHost;
 
     }
 
@@ -99,24 +98,6 @@ class Notifications extends Tag
             }
         }
         return $url;
-    }
-
-    /**
-     * Get the sender address of the mails
-     * @return string
-     * @throws WireException
-     * @throws WirePermissionException
-     */
-    protected function getSenderEmail(): string
-    {
-        $senderEmail = $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
-
-        $semail = FieldtypeFrontendComments::getFieldConfigLangValue($this->field, 'input_fc_from');
-        // get Value from global config
-        if ($semail)
-            $senderEmail = $semail;
-
-        return $senderEmail;
     }
 
     /**
@@ -487,8 +468,7 @@ class Notifications extends Tag
         $mail = new WireMail();
 
         // set the sender email address
-        $emailSender = FieldtypeFrontendComments::getFieldConfigLangValue($field, 'input_fc_from') ?? $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"];
-        $mail->from($emailSender);
+        $mail->from('comment-notification@' . $this->wire('config')->httpHost);
 
         // set from name if present
         if (FieldtypeFrontendComments::getFieldConfigLangValue($field, 'input_fc_from_name')) {
