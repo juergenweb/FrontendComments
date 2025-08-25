@@ -374,17 +374,6 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
     }
 
     /**
-     * Set the sender email address, which will be displayed as the sender of the emails
-     * @param string $senderEmailAddress
-     * @return $this
-     */
-    public function setSenderEmailAddress(string $senderEmailAddress): self
-    {
-        $this->getField()->set('input_fc_from', $senderEmailAddress);
-        return $this;
-    }
-
-    /**
      * Set the name of the sender of the mails
      * @param string $senderName
      * @return $this
@@ -604,7 +593,6 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
                 }
 
                 // update some values of this comment
-                //$comment->setTrackChanges(true);
                 $comment->set('status', $status);
                 $spamTS = ($status === 2) ? time() : null;
                 $comment->set('spam_update', $spamTS);// add timestamp to the database
@@ -789,8 +777,7 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
         $page = $comment->get('page');
         $field = $comment->get('field');
         $fieldtypeMulti = $this->wire('fieldtypes')->get('FrontendComments');
-
-        bd($this->getChanges());
+        
         // check if it is a new or an updated comment
         if (!$comment->get('id')) {
             $this->add($comment); // new comment
