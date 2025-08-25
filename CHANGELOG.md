@@ -13,6 +13,11 @@ Completely rewriting of the code base.
 
 Module comments manager added.
 
+## [1.0.6] - 2025-08-25
+
+Configuration field for sender email address removed, because a custom sender email address could prevent emails from beeing sent on shared hosts.
+
+
 
 
 
