@@ -79,7 +79,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $this->addHookBefore('InputfieldTextarea::processInput', $this, 'validateEmailAddresses');
         $this->addHookBefore('FieldtypeMulti::savePageField', $this, 'correctStatusValues');
         $this->addHookAfter('FieldtypeMulti::savePageField', $this, 'updateTables');
-
     }
 
     /**
@@ -145,6 +144,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                                     }
                                     break;
                                 case ('delete'):
+                                 
                                     if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
                                         $text = sprintf($this->_('Comment #%s cannot be deleted because there are already replies to this comment. Therefore, the status remains at "%s".'), $n, self::statusTexts()[$oldStatus]);
                                         $text .= ' ' . $this->_('You must first delete all replies before you can delete this comment.');
@@ -641,7 +641,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             'icon' => 'comments',
             'installs' => ['InputfieldFrontendComments'],
             'permanent' => false,
-            'version' => '1.0.5',
+            'version' => '1.0.6',
             'requires' => [
                 'FrontendForms>=2.2.35',
                 'PHP>=8.0',
@@ -715,7 +715,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             'input_fc_default_to' => ['$comments->setModerationEmail("email1@mydomain.com,email2@mydomain.com"); // add one or more email addresses as comma separated string'],
             'input_fc_comment_notification' => ['$comments->setReplyNotification(1); // 0, 1 or 2'],
             'input_fc_status_change_notification' => ['$comments->setStatusChangeNotification(["1","2"]); // can contain only 1 or 2'],
-            'input_fc_from' => ['$comments->setSenderEmailAddress("myemailaddress@example.com");'],
             'input_fc_from_name' => ['$comments->setSenderName("ProcessWire");'],
             'input_fc_showWebsite' => ['$comments->showWebsiteField(false); // true or false'],
             'input_fc_loggedin_only' => ['$comments->setLoginRequired(false); // true or false'],
@@ -1331,25 +1330,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $emailField->set('showIf', 'input_fc_emailtype=pwfield');
         $emailFieldset->add($emailField);
 
-        /** @var InputfieldEmail $emailFrom */
-        // enter the email address from where the emails should be sent (fe. no-reply@mycompany.com)
-        $emailFrom = $modules->get('InputfieldEmail');
-        $name = 'input_fc_from';
-        $emailFrom->attr('name+id', $name);
-        $emailFrom->attr('value', $field->$name); // no default value
-        if ($languages) {
-            $emailFrom->useLanguages = true;
-            foreach ($languages as $language) {
-                if ($language->isDefault()) continue;
-                $emailFrom->attr("value$language", (string)$field->get($name . $language->id));
-            }
-        }
-        $emailFrom->set('columnWidth', 50);
-        $emailFrom->set('label', $this->_('From email address'));
-        $emailFrom->set('description', $this->_('This email address will be displayed as the sender email address of the emails sent by this module.'));
-        $emailFrom->set('notes', sprintf($this->_('If no email address will be entered, %s will be displayed instead as the sender address.'), '"' . $this->_('comment-notification') . '@' . $_SERVER["SERVER_NAME"] . '"'));
-        $emailFieldset->add($emailFrom);
-
         /** @var InputfieldEmail $sender */
         // enter the sender of the emails (fe. My Company)
         $sender = $modules->get('InputfieldText');
@@ -1367,7 +1347,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $sender->set('label', $this->_('From name'));
         $sender->set('description', $this->_('This name will be displayed as the sender name of the emails sent by this module.'));
         $sender->set('notes', $this->_('If no sender name will be entered, than the sender email address will be used as the sender name.'));
-        $sender->set('columnWidth', 50);
         $emailFieldset->add($sender);
 
         /** @var InputfieldRadios $notification */
@@ -2005,5 +1984,4 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
 }
-
 
