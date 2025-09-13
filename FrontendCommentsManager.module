@@ -508,15 +508,18 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         }
 
         $result = 0;
-        $statement = 'SELECT COUNT(*) FROM ' . $field->table . ' WHERE status=:status';
 
-        try {
-            $query = $this->database->prepare($statement);
-            $query->bindValue(':status', $status, PDO::PARAM_INT);
-            $query->execute();
-            $result = $query->fetchColumn();
-        } catch (Exception) {
+        if (!is_null($field)) {
+            $statement = 'SELECT COUNT(*) FROM ' . $field->table . ' WHERE status=:status';
 
+            try {
+                $query = $this->database->prepare($statement);
+                $query->bindValue(':status', $status, PDO::PARAM_INT);
+                $query->execute();
+                $result = $query->fetchColumn();
+            } catch (Exception) {
+
+            }
         }
         return $result;
     }
@@ -1151,20 +1154,10 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
                 $oldStatus = $comment->get('status');
 
                 // validate status
-                if ($status === 'delete') {
-                    $comments->deleteComment();
-                } else {
-                    $status = (int)$status;
-                    // run only if stored and current value are not the same
-                    if ($status !== $oldStatus) {
-                        if ($status > 4 && $status < 0) {
-                            $this->error($this->_('Wrong value for status. Status can only have the following values: 0,1,2 or 4.'), Notice::allowMarkup);
-                        } else {
-                            $comment->trackChange('status');
-                            $comment->set('status', $status);
-                            $comments->trackChange('statuschange');
-                        }
-                    }
+                if ($status !== $oldStatus) {
+                    $comment->trackChange('status');
+                    $comment->set('status', $status);
+                    $comments->trackChange('statuschange');
                 }
 
                 // validate feedback
