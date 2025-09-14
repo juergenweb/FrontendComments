@@ -283,6 +283,8 @@ The other major advantage is that you can edit many more values of a comment tha
 
 It is recommended to use the comment manager instead of editing comments inline.
 
+By default, every user with page-edit permission can edit comments inside the FrontendCommentsManager, but you can create your own permission and select this new permission inside the module configuration. Afterwars only user which have this permission can edit the comments (except superusers, which are always allowed to edit them).
+
 After installing the module, you will find a new entry under “Settings.” Click on the new entry to be redirected to the comment manager dashboard.
 
 
