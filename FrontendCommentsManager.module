@@ -39,6 +39,8 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
     protected Page $page;
     protected WireDatabasePDO $database;
     protected FrontendCommentArray $comments;
+    protected bool $editPermission = false;
+    protected array $moduleConfig = [];
 
     /**
      * @throws WireException
@@ -56,6 +58,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $this->page = $this->wire('page');
         $this->database = $this->wire('database');
         $adminTheme = $this->wire('adminTheme');
+        $this->moduleConfig = $this->wire('modules')->getConfig($this);
 
         // get all template CSS classes for certain elements
         $classes = [];
@@ -92,6 +95,19 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             FieldtypeFrontendComments::featured => $this->numberFeatured
         ];
 
+        $user = $this->wire('user');
+        if ($user->isSuperuser()) {
+            $this->editPermission = true;
+        } else {
+            if (array_key_exists('editRoles', $this->moduleConfig)) {
+                $editPermissionId = $this->moduleConfig['editRoles'];
+                $editPermission = $this->wire('permissions')->get($editPermissionId)->name;
+            } else {
+                $editPermission = $this->wire('permissions')->find('name=page-edit')->first()->name;
+            }
+            $this->editPermission = $user->hasPermission($editPermission);
+        }
+
     }
 
     /**
@@ -100,11 +116,12 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
      */
     public static function getModuleinfo(): array
     {
+
         return [
-            'title' => __('Comments manager', __FILE__),
+            'title' => __('Comments manager'),
             'summary' => __('A custom page for the FrontendComments module to manage all comments in one place', __FILE__),
             'author' => 'Jürgen Kern',
-            'version' => '100',
+            'version' => '1.0.0',
             'icon' => 'comments',
             'permanent' => false,
             'permission' => 'page-edit',
@@ -343,7 +360,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
     /**
      * Render a single comment
-     * @param WireArray $comment
+     * @param FrontendComment $comment
      * @param InputfieldForm $form
      * @param int $number
      * @return void
@@ -370,11 +387,11 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         // editing links
         $pre = '<div id="changed-' . $comment->get('id') . '" class="comment-changed" style="display:none;" data-status="false" data-feedback="false">' . $this->_('Changed') . '!</div>';
         $pre .= '<ul class="fcm-link-nav">';
-        $pre .= '<li><span class="fcm-edit"><a class="pw-tooltip" title="' . $this->_('Edit this comment') . '" href="' . $this->wire('config')->urls->admin . 'setup/fc-comments-manager/edit/' . $comment->get('field')->id . '/?edit=' . $comment->id . '&page=' . $comment->get('page')->id . '"><i class="fa fa-pencil"></i>' . $this->_('Edit Comment') . '</a></span></li>';
+        $pre .= '<li><span class="fcm-edit"><a class="pw-tooltip" title="' . $this->_('Edit this comment') . '" href="' . $this->wire('config')->urls->admin . 'setup/fc-comments-manager/edit/' . $comment->get('field')->id . '/?edit=' . $comment->get('id') . '&page=' . $comment->get('page')->id . '"><i class="fa fa-pencil"></i>' . $this->_('Edit Comment') . '</a></span></li>';
         $pre .= '<li><span class="fcm-edit-page"><a class="pw-tooltip" title="' . $this->_('Edit the page where the comment is located') . '" href="' . $this->wire('pages')->get($comment->get('page')->id)->editUrl() . '"><i class="fa fa-pencil"></i>' . $this->_('Edit page') . '</a></span></li>';
 
         $pageURL = $comment->get('page')->url;
-        $queryString = '?comment-redirect=' . $comment->id . '#' . $comment->get('field')->name . '-' . $comment->get('page')->id . '-redirect-alert';
+        $queryString = '?comment-redirect=' . $comment->get('id') . '#' . $comment->get('field')->name . '-' . $comment->get('page')->id . '-redirect-alert';
         $editURL = $pageURL . $queryString;
 
         $pre .= '<li><span class="fcm-view"><a class="pw-tooltip" title="' . $this->_('View this comment on the frontend') . '" href="' . $editURL . '" target="_blank"><i class="fa fa-eye"></i>' . $this->_('View') . '</a></span></li>';
@@ -408,7 +425,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $app .= '</tr>';
 
         $app .= '<tr>';
-        $app .= '<td><i class="fa fa-envelope"></i>' . $this->selectorNames['email'] . '</td><td><a class="fcm-filter pw-tooltip" title="' . sprintf($this->_('Show all comments from the author with the email %s'), $comment->email) . '" href="' . $this->createAdditionalFilterLink('email=' . urlencode($comment->email)) . '">' . $comment->email . '</a></td>';
+        $app .= '<td><i class="fa fa-envelope"></i>' . $this->selectorNames['email'] . '</td><td><a class="fcm-filter pw-tooltip" title="' . sprintf($this->_('Show all comments from the author with the email %s'), $comment->get('email')) . '" href="' . $this->createAdditionalFilterLink('email=' . urlencode($comment->get('email'))) . '">' . $comment->get('email') . '</a></td>';
         $app .= '</tr>';
 
         $app .= '<tr>';
@@ -454,7 +471,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
         $pre .= '<div class="fcm-comment-text">';
         $pre .= '<h3>' . $this->_('Comment') . '</h3>';
-        $pre .= $comment->text;
+        $pre .= $comment->get('text');
         $pre .= '</div>';
 
         $pre .= '<div class="fcm-comment-feedback">';
@@ -584,7 +601,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         } catch (Exception) {
 
         }
-        $comments->setTrackChanges(true);
+        $comments->setTrackChanges();
         $this->comments = $comments;
         return $comments;
     }
@@ -627,6 +644,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         if (!$total)
             return '<p>' . $this->_('There are no Comments') . '</p>';
 
+        // check if user is moderator or superuser, otherwise do not show anything to edit
         $out = '';
         $number = 1;
         foreach ($comments as $comment) {
@@ -698,6 +716,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
     /**
      * Validate and process the edit form for a single comment
+     * @param FrontendCommentArray $comments
      * @param FrontendComment $comment
      * @param InputfieldForm $form
      * @return bool
@@ -766,9 +785,19 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
     {
         $out = '';
 
+        if (!$this->editPermission)
+            return $this->_('You do not have permission to edit this comment.');
+
         // check if field is type of FieldtypeFrontendComments first
-        $fieldName = $this->sanitizer->fieldName($this->input->urlSegment2);
-        $field = $this->fields->get($fieldName);
+        if($this->input->urlSegment2){
+            $field = $this->fields->get($this->sanitizer->fieldName($this->input->urlSegment2));
+        } else {
+            // take the first field
+            $field = $this->commentFields->first();
+        }
+
+        $fieldName = $field->name;
+
         if (!$field || !$field->type instanceof FieldtypeFrontendComments) {
             return $this->error($this->_('Unrecognized field'));
         }
@@ -782,6 +811,9 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         if (!$this->wire('user')->hasPermission('page-edit')) {
             $out .= '<p>' . $this->_('You have not the permission to edit this comment') . '</p>';
         } else {
+
+            if(!$commentID)
+                $this->wire('session')->redirect($this->wire('config')->urls->admin . 'setup/fc-comments-manager/list/');
 
             $commentID = $this->sanitizer->int($commentID);
             $pageID = $this->sanitizer->int($pageID);
@@ -945,11 +977,19 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
         $modules = $this->wire()->modules;
 
-        $field = $this->fields->get($this->sanitizer->fieldName($this->input->urlSegment2));
+        if($this->input->urlSegment2){
+            $field = $this->fields->get($this->sanitizer->fieldName($this->input->urlSegment2));
+        } else {
+            // take the first field
+            $field = $this->commentFields->first();
+        }
 
         if (!$field || !$field->type instanceof FieldtypeFrontendComments) {
             return $this->error($this->_('Unrecognized field'));
         }
+
+        if (!$this->editPermission)
+            return $this->_('You do not have permission to edit comments.');
 
         $whereSelectors = []; // array containing all querystring parameters
 
@@ -1149,7 +1189,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
             if ($comment) {
 
-                $comment->setTrackChanges(true);
+                $comment->setTrackChanges();
                 $status = $input->get('status-' . $id);
                 $oldStatus = $comment->get('status');
 
@@ -1197,6 +1237,14 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
         $modules = $this->wire()->modules;
 
+        $permissions = $this->wire('permissions');
+
+        $selectOptions = [];
+
+        foreach ($permissions as $permission) {
+            $selectOptions[$permission->id] = $permission->name;
+        }
+
         $f = $modules->get('InputfieldToggle');
         $f->attr('name', 'useManager');
         $f->label = $this->_('Use comments manager rather than in-page editor?');
@@ -1204,6 +1252,18 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             $this->_('When enabled user will be directed to the dedicated comments manager for editing comments.') . ' ' .
             $this->_('This may be preferable because the comments manager has more features and uses pagination.'));
         $value = (int)$this->get('useManager');
+        $f->val($value);
+        $inputfields->add($f);
+
+        $f = $modules->get('InputfieldSelect');
+        $f->attr('name', 'editRoles');
+        $f->label = $this->_('Select which permission a user must have to be allowed to edit comments with the FrontendCommentsManager');
+        $f->set('description', $this->_('Only users with this permission can edit comments from the comment manager (superusers always have permission to edit).'));
+        $f->set('notes', $this->_('By default, all users with page edit permission can edit comments using the FrontendCommentsManager. However, you can also create your own permission if you want.'));
+        $f->set('required', true);
+        $f->options = $selectOptions;
+        $value = (int)$this->get('editRoles');
+        if (!$value) $value = 32; // page edit
         $f->val($value);
         $inputfields->add($f);
 

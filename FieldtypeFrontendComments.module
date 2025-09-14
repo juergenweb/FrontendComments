@@ -144,7 +144,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                                     }
                                     break;
                                 case ('delete'):
-                                 
+
                                     if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
                                         $text = sprintf($this->_('Comment #%s cannot be deleted because there are already replies to this comment. Therefore, the status remains at "%s".'), $n, self::statusTexts()[$oldStatus]);
                                         $text .= ' ' . $this->_('You must first delete all replies before you can delete this comment.');
