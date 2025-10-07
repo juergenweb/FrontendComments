@@ -82,7 +82,7 @@
          * @return FrontendCommentArray
          * @throws WireException
          */
-        public static function getCommentListArray(FrontendCommentArray $comments, int $parentid = 0, FrontendCommentArray $commentArray = null, int $level = 0, bool|int $reverse = false): FrontendCommentArray
+        public static function getCommentListArray(FrontendCommentArray $comments, int $parentid = 0, FrontendCommentArray|null $commentArray = null, int $level = 0, bool|int $reverse = false): FrontendCommentArray
         {
 
             if (is_null($commentArray))
