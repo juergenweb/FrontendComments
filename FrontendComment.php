@@ -682,7 +682,7 @@ class FrontendComment extends WireData
      * @param int|null $status
      * @return int
      */
-    public function numberOfReplies(int $status = null): int
+    public function numberOfReplies(int|null $status = null): int
     {
         return $this->getReplies($status)->count();
     }
@@ -726,7 +726,6 @@ class FrontendComment extends WireData
      */
     public function getCommentIDFromDatabase(): int|null
     {
-        $page = $this->get('page');
         $field = $this->get('field');
         $database = $this->wire('database');
         $table = $field->table; // set the comment table name
