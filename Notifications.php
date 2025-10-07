@@ -245,7 +245,7 @@ class Notifications extends Tag
         string $bgColor,
         string $textColor,
         string $borderColor,
-        string $url = null,
+        string|null $url = null,
     ): string
     {
         $out = '<table style="padding-top:20px">';
