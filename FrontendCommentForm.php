@@ -68,7 +68,7 @@ class FrontendCommentForm extends Form
      * @throws WirePermissionException
      * @throws Exception
      */
-    public function __construct(FrontendCommentArray $comments, string $id = null, int $parentId = 0)
+    public function __construct(FrontendCommentArray $comments, string|null $id = null, int $parentId = 0)
     {
 
         // set default values
