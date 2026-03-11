@@ -21,8 +21,9 @@ Configuration field for sender email address removed, because a custom sender em
 
 According to a user issue report [here](https://processwire.com/talk/topic/31293-new-module-frontendcomments-a-comment-module-with-a-lot-of-features-based-on-frontendforms/#comment-251985), the following bugs have been fixed now:
 
-* FirstAndLastName sanitizer has been removed on author name input field, because the field has been validated wrong if the username was used. This has been fixed now
-* If the site is hosted on localhost, WireMail complains about the the domain localhost is not valid. This has been fixed now by adding".com" to the domain.
+* FirstAndLastName sanitizer has been removed on author name input field, because the field has been validated wrong if the username was used. This is fixed now.
+* If the site is hosted on localhost, WireMail complains about the the domain localhost is not valid. This is fixed now by adding".com" to the domain.
+
 
 
 
