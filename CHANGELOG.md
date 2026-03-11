@@ -17,6 +17,13 @@ Module comments manager added.
 
 Configuration field for sender email address removed, because a custom sender email address could prevent emails from beeing sent on shared hosts.
 
+## [1.0.7] - 2026-03-11
+
+According to a user issue report here, the following buts have been fixed:
+
+* FirstAndLastName sanitizer has been removed on author name input field, because the field has been validated wrong if the username was used. This has been fixed now
+* If the site is hosted on localhost, WireMail complains about the the domain localhost is not valid. This has been fixed now by adding".com" to the domain.
+
 
 
 
