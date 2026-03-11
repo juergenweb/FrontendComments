@@ -226,7 +226,6 @@ class FrontendCommentForm extends Form
 
         }
         $this->author->setRule('required');
-        $this->author->setRule('firstAndLastname');
         $this->author->setRule('lengthMax', 128)->setCustomFieldName($this->_('The name')); // DB storage maximum length
         return $this->author;
     }
