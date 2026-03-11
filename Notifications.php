@@ -52,7 +52,11 @@ class Notifications extends Tag
 
         // set the mail values
         $this->emailTemplate = $this->field->get('input_fc_emailTemplate');
-        $this->senderEmail = 'comment-notification@' . $this->wire('config')->httpHost;
+        $host = $this->wire('config')->httpHost;
+        if($host === 'localhost') {
+            $host = 'localhost.com';
+        }
+        $this->senderEmail = 'comment-notification@' . $host;
 
     }
 
@@ -468,7 +472,11 @@ class Notifications extends Tag
         $mail = new WireMail();
 
         // set the sender email address
-        $mail->from('comment-notification@' . $this->wire('config')->httpHost);
+        $host = $this->wire('config')->httpHost;
+        if($host === 'localhost') {
+            $host = 'localhost.com';
+        }
+        $mail->from('comment-notification@' . $host);
 
         // set from name if present
         if (FieldtypeFrontendComments::getFieldConfigLangValue($field, 'input_fc_from_name')) {
