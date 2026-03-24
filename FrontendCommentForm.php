@@ -94,9 +94,9 @@ class FrontendCommentForm extends Form
         parent::__construct($id);
 
         // TODO: set new values afterwards - only for dev purposes set to 0
-        $this->setMaxAttempts(0);
-        $this->setMinTime(0);
-        $this->setMaxTime(0);
+        //$this->setMaxAttempts(0);
+        $this->setMinTime(1);
+        //$this->setMaxTime(0);
 
         // grab configuration values from the FrontendForms module
         $this->frontendFormsConfig = FieldtypeFrontendComments::getFrontendFormsConfigValues();
@@ -273,6 +273,9 @@ class FrontendCommentForm extends Form
         $this->stars->addOption(self::$ratingValues[2], '2');
         $this->stars->addOption(self::$ratingValues[1], '1');
         $this->stars->setAttribute('class', 'fcm-star-rating');
+        if(FieldtypeFrontendComments::getFrameWork() === 'Bulma1'){
+            $this->stars->getSelectWrapper()->removeAttribute('class', 'select');
+        }
 
         // create data-options string
         $options = [];

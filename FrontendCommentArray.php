@@ -509,6 +509,12 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
             $form->getFormelementByName('reset')->setAttribute('class', 'uk-width-auto@s uk-margin-small-bottom');
         }
 
+        if ($classname === 'Bulma1') {
+            $select = $form->getFormelementByName('stars');
+            $select->getSelectWrapper()->removeAttribute('class', 'select');
+            //$form->getFormelementByName('stars')->removeAttribute('class', 'select');
+        }
+
         // enable or disable character counter depending on settings
         $form->getFormelementByName('text')->useCharacterCounter(!$this->field->get('input_fc_counter'));
 

@@ -559,6 +559,7 @@ class FrontendComment extends WireData
         $this->websiteLink->setAttribute('class', 'fc-comment-website');
         $this->websiteLink->setAttribute('title', $this->_('To the homepage of the author'));
         $this->websiteLink->setAttribute('rel', 'nofollow');
+        $this->websiteLink->setAttribute('target', '_blank');
         $this->websiteLink->prepend('<span class="author-homepagelink-label">' . $this->_('Homepage of the author:') . '</span> ');
         $this->websiteLink->wrap()->setAttribute('class', 'fc-website-link');
         return $this->websiteLink;

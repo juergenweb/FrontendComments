@@ -70,6 +70,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         require_once(__DIR__ . '/Pico2/FrontendCommentPico2.php');
         require_once(__DIR__ . '/Pico2/FrontendCommentPaginationPico2.php');
         require_once(__DIR__ . '/FrontendCommentArray.php');
+        require_once(__DIR__ . '/Bulma1/FrontendCommentBulma1.php');
+        require_once(__DIR__ . '/Bulma1/FrontendCommentPaginationBulma1.php');
+
 
         $this->addHookAfter('Inputfield::render', $this, 'overwriteExamplesNotes');
         $this->addHookAfter('LazyCron::every2Minutes', $this, 'sendQueuedEmails');
@@ -310,7 +313,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         // get module version
         $moduleVersion = wire('modules')->getModuleInfo('FieldtypeFrontendComments')['version'];
 
-        $out = '<script src="' . $url . 'frontendcomments.js?v=' . $moduleVersion . '"></script>' . PHP_EOL;
+        $out = '<script src="' . $url . 'frontendcomments.js?v=' . $moduleVersion. '"></script>' . PHP_EOL;
 
         // add star rating JS to the frontend if enabled
         if ($useStarRating) {
@@ -641,9 +644,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             'icon' => 'comments',
             'installs' => ['InputfieldFrontendComments'],
             'permanent' => false,
-            'version' => '1.0.7',
+            'version' => '1.0.6',
             'requires' => [
-                'FrontendForms>=2.2.35',
+                'FrontendForms>=2.3.12',
                 'PHP>=8.0',
                 'ProcessWire>=3',
                 'LazyCron'
@@ -1984,5 +1987,4 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
 }
-
 

@@ -44,6 +44,7 @@
 
             // Start page
             $this->getStartPageListitem()->removeAttribute('class');
+            $this->startPageLink->setAttribute('class', 'page-link');
 
             // Dots
             $this->getDotsListitem()->removeAttribute('class')->setAttribute('class', 'uk-disabled');
@@ -54,6 +55,7 @@
 
             // End page
             $this->getEndPageListitem()->removeAttribute('class');
+            $this->endPageLink->setAttribute('class', 'page-link');
 
             $this->pageOfText->setAttribute('class', 'mb-3');
 

@@ -121,7 +121,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             'title' => __('Comments manager'),
             'summary' => __('A custom page for the FrontendComments module to manage all comments in one place', __FILE__),
             'author' => 'Jürgen Kern',
-            'version' => '1.0.0',
+            'version' => '1.0.1',
             'icon' => 'comments',
             'permanent' => false,
             'permission' => 'page-edit',
