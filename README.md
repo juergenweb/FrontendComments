@@ -33,7 +33,7 @@ This module is early Alpha stage - so please use it with care!
 * Mapping of fields of the user template to form values (eg name, user image, homepage URL, email address)
 * No dependencies (except FrontendForms)
 * Supports pagination of comments on the frontend
-* Support for UiKit 3, Pico 2 and Bootstrap 5 CSS framework out of the box
+* Support for UiKit 3, Pico 2, Bulma 1 and Bootstrap 5 CSS framework out of the box
 * Changing markup via Hook
 * Support for RockLanguage
 
