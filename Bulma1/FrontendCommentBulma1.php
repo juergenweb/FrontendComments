@@ -1,6 +1,7 @@
 <?php
-    declare(strict_types=1);
-    namespace FrontendComments;
+declare(strict_types=1);
+
+namespace FrontendComments;
 
 /*
     * Class to create and render a single comment using Bulma 1 markup
@@ -28,7 +29,8 @@ class FrontendCommentBulma1 extends FrontendComment
         // User image
         if (!is_null($this->avatar)) {
             $this->avatar->removeWrap();
-            $this->avatar->setAttribute('class', 'rounded-circle shadow-1-strong me-3');
+            $this->avatar->prepend('<div class="media-left"><div class="image is-64x64 p-1 has-background-grey-light">');
+            $this->avatar->append('</div></div>');
             $this->avatar->removeAttributeValue('class', 'avatar');
         }
 
@@ -77,77 +79,35 @@ class FrontendCommentBulma1 extends FrontendComment
      */
     public function ___renderComment(string $levelnumber, int $level = 0): string
     {
-        /*$out = '<div class="box">';
-        $out .= '<article class="media">';
-
-        $out .= '<figure class="media-left is-64x64">';
-        $out .= $this->renderCommentAvatar();// Avatar
-        $out .= '</figure>';
-
-        $out .= '<div class="media-content">';
-
-        // head section
-        $out .= '<div class="comment-head mb-1">';
-        $out .= $this->renderCommentAuthor();
-        $out .= $this->renderCommentCreated();
-        $out .= $this->renderWebsiteLink();
-        $out .= '<div class="fcm-comment-box">' . $this->renderRating() . '</div>';
-
-        $out .= '</div>';
-
-        // text section
-        $out .= '<div class="content">';
-        $out .= $this->renderCommentText();
-        $out .= $this->renderFeedbackText();
-        $out .= $this->renderNoVoteAlertbox();
-        $out .= '</div>';
-
-        $out .= '</div>';
-
-        // footer section
-        $out .= '<nav class="is-clearfix"><div class="level-left">';
-        $out .= $this->renderVotes();
-        $out .= $this->renderReplyLink($level);
-        $out .= '</div></nav>';
-
-        $out .= $this->renderReplyForm();
-
-        $out .= '</article>';//card end
-        $out .= '</div>';//box end
-*/
 
         $out = '<div class="box"><article class="media">
-  <div class="media-left">
-    <div class="image is-64x64">
-      '.$this->renderCommentAvatar().'
-    </div>
-  </div>
+      ' . $this->renderCommentAvatar() . '
   <div class="media-content">
     <div class="content">
       <div class="pb-3">
         <div class="b-head">
-            <strong>'.$this->renderCommentAuthor().'</strong>
-            <small>'.$this->renderCommentCreated().'</small>
-            <small>'.$this->renderWebsiteLink().'</small>
+            ' . $this->renderCommentAuthor()
+            . $this->renderCommentCreated()
+            . $this->renderWebsiteLink() . '
         </div>
         <div class="fcm-comment-box mb-2">' . $this->renderRating() . '</div>
-        <div>'.
-        $this->renderCommentText().
-        $this->renderFeedbackText().
-        $this->renderNoVoteAlertbox().'
+        <div>' .
+            $this->renderCommentText() .
+            $this->renderFeedbackText() .
+            $this->renderNoVoteAlertbox() . '
       </div>
     </div>
     <nav class="level">
       <div class="level-left">
-      <span class="level-item">'.$this->renderVotes().'</span>
+      <span class="level-item">' . $this->renderVotes() . '</span>
       </div>
       <div class="level-right">
-      '.$this->renderReplyLink($level).'
+      ' . $this->renderReplyLink($level) . '
       </div>
     </nav>
   </div>
 </article>
-'.$this->renderReplyForm().'
+' . $this->renderReplyForm() . '
 </div>';
 
         return $out;
