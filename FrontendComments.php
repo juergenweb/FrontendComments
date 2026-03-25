@@ -53,6 +53,7 @@
 
             // set headline if set
             $headline = FieldtypeFrontendComments::getFieldConfigLangValue($this->field, 'input_fc_comments_headline');
+    
             if ($headline && $headline !== 'none') {
                 $this->commentsHeadline->setContent($headline);
             } else {
@@ -212,11 +213,11 @@
          */
         protected function renderCommentsHeadline(): string
         {
-
-            // set the headline text
-            $headline = $this->field->get('input_fc_comments_headline');
-            if ($headline && $headline !== 'none') $this->commentsHeadline->setText($headline);
-            return $this->commentsHeadline->render();
+            $out = '';
+            if($this->commentsHeadline) {
+                $out = $this->commentsHeadline->render();
+            }
+           return $out;
         }
 
         /**
