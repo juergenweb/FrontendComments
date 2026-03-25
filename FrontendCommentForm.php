@@ -718,7 +718,10 @@ class FrontendCommentForm extends Form
         // output the form
         $out = $this->renderHeadline();
         $out .= '<div id="' . $this->getID() . '-form-wrapper" class="fc-comment-form-wrapper">';
-        $this->getFormelementByName('notification')->getLabel()->removeAttribute('for');
+
+        if($this->getFormelementByName('notification'))
+            $this->getFormelementByName('notification')->getLabel()->removeAttribute('for');
+
         $out .= parent::render();
         $out .= '</div>';
 
