@@ -1035,7 +1035,7 @@ class FrontendCommentArray extends PaginatedArray implements WirePaginatable
      * @return string
      * @throws WireException
      */
-    protected function renderLoggedInForm(bool|null $loggedIn, Alert $loggedInAlert): string
+    protected function renderLoggedInForm(int|bool|null $loggedIn, Alert $loggedInAlert): string
     {
 
         $out = '';
