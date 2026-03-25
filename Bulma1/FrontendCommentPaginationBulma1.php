@@ -32,7 +32,7 @@
                 'right' => 'is-right'
             ];
 
-            $this->getPaginationWrapper()->setAttribute('class', $alignClasses[$this->alignment]);
+            $this->getPaginationWrapper()->setAttribute('class', $alignClasses[$this->alignment])->setAttribute('class', 'mb-3');
 
             $this->getPaginationList()->setAttribute('class', 'pagination-list');
 
