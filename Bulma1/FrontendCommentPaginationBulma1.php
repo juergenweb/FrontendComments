@@ -34,7 +34,7 @@
 
             $this->getPaginationWrapper()->setAttribute('class', $alignClasses[$this->alignment])->setAttribute('class', 'mb-3');
 
-            $this->getPaginationList()->setAttribute('class', 'pagination-list');
+            $this->getPaginationList()->removeAttribute('class')->setAttribute('class', 'pagination-list');
 
             // nav page list item
             $this->navPageLi->removeAttribute('class');
