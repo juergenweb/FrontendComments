@@ -1,0 +1,19 @@
+{
+    "name": "juergenweb/frontendcomments",
+    "description": "FrontendComments - a ProcessWire module for displaying and managing comments on the frontend, including a PHPUnit-based test suite for its core logic",
+    "type": "library",
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {}
+    }
+}

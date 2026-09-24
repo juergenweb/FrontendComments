@@ -14,14 +14,11 @@ a.fc-vote-link {
     border-bottom: 0;
 }
 
-span.uk-downvote:hover, span.uk-upvote:hover {
+span.uk-downvote:hover,
+span.uk-upvote:hover {
     opacity: 70%;
 }
 
 header.uk-comment-header {
     all: initial;
 }
-
-
-
-

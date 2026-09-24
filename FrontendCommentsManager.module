@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace ProcessWire;
@@ -16,22 +17,35 @@ use PDOStatement;
 
 class FrontendCommentsManager extends Process implements ConfigurableModule
 {
-
     // Declare all properties
-    protected WireArray $commentFields; // Wire array containing all FrontendComments field objects
-    protected array $classes = []; // the CSS classes different elements
-    protected array $statuses = []; // the different status types of a comment
-    protected array $statusOptions = []; // Array containing all status options as text
-    protected array $selectorNames = []; // array containing all selectors as human-readable text
-    protected int $limit = 10; // default number of comments per page
-    protected int|string $status = 'all'; // default status of comments on page load
-    protected string $sort = 'created'; // the default sort order
-    protected int|bool $showStatement = true; // show or hide the SQL statement
-    protected int $numberApproved = 0; // number of approved comments for the current field
-    protected int $numberPending = 0; // number of comments waiting for approval for the current field
-    protected int $numberSpam = 0; // number of spam comments for the current field
-    protected int $numberFeatured = 0; // number of featured comments for the current field
-    protected array $numberOfCommentsPerStatus = []; // array containing all number of comments per status
+    protected WireArray $commentFields;
+    // Wire array containing all FrontendComments field objects
+    protected array $classes = [];
+    // the CSS classes different elements
+    protected array $statuses = [];
+    // the different status types of a comment
+    protected array $statusOptions = [];
+    // Array containing all status options as text
+    protected array $selectorNames = [];
+    // array containing all selectors as human-readable text
+    protected int $limit = 10;
+    // default number of comments per page
+    protected int|string $status = 'all';
+    // default status of comments on page load
+    protected string $sort = 'created';
+    // the default sort order
+    protected int|bool $showStatement = true;
+    // show or hide the SQL statement
+    protected int $numberApproved = 0;
+    // number of approved comments for the current field
+    protected int $numberPending = 0;
+    // number of comments waiting for approval for the current field
+    protected int $numberSpam = 0;
+    // number of spam comments for the current field
+    protected int $numberFeatured = 0;
+    // number of featured comments for the current field
+    protected array $numberOfCommentsPerStatus = [];
+    // array containing all number of comments per status
     protected string $sqlStatement = '';
     protected WireInput $input;
     protected Sanitizer $sanitizer;
@@ -50,8 +64,8 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
     {
 
         parent::__construct();
-
-        $this->commentFields = FieldtypeFrontendComments::getAllCommentFields(); // get all FrontendComments fields site wide as a WireArray
+        $this->commentFields = FieldtypeFrontendComments::getAllCommentFields();
+        // get all FrontendComments fields site wide as a WireArray
         $this->input = $this->wire('input');
         $this->sanitizer = $this->wire('sanitizer');
         $this->session = $this->wire('session');
@@ -107,7 +121,6 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             }
             $this->editPermission = $user->hasPermission($editPermission);
         }
-
     }
 
     /**
@@ -121,7 +134,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             'title' => __('Comments manager'),
             'summary' => __('A custom page for the FrontendComments module to manage all comments in one place', __FILE__),
             'author' => 'Jürgen Kern',
-            'version' => '1.0.1',
+            'version' => '1.0.2',
             'icon' => 'comments',
             'permanent' => false,
             'permission' => 'page-edit',
@@ -167,7 +180,6 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             $this->wire('config')->styles->add($this->wire('config')->urls->{$this->className} . 'assets/frontendcommentsmanager.css?v=' . $version . '&time=' . time());
             $this->wire('config')->scripts->add($this->wire('config')->urls->{$this->className} . 'assets/frontendcommentsmanager.js?v=' . $version . '&time=' . time());
         }
-
     }
 
     /**
@@ -303,7 +315,6 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $selectorsAdded = array_intersect($allowedFilters, $this->getKeys($selectors));
         $out = '<h3>' . $this->_('Additional filters applied') . '</h3>';
         if ($selectorsAdded) {
-
             $out .= '<p>' . $this->_('You can remove each additional filter by clicking on the tag.') . '</p>';
             $out .= '<ul id="fcm-filter-tags">';
             foreach ($selectors as $selector) {
@@ -311,12 +322,18 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
                 if (in_array($selectorName, $allowedFilters)) {
                     $selectorTagName = $this->selectorNames[$selectorName];
                     $value = $selector[$selectorName]['value'];
-                    if ($selectorName === 'pages_id') $selectorName = 'page';
-                    $out .= '<li data-type="' . $selectorName . '">' . $selectorTagName . ': ' . $value . '</li>';
+                    if ($selectorName === 'pages_id') {
+                        $selectorName = 'page';
+                    }
+                    // $value comes straight from the query string (author/email/ip/stars filters,
+                    // see the input->get() calls above) - $sanitizer->string()/->email()/->int()
+                    // there do not remove "<", ">" or quotes, so this must be escaped here too,
+                    // otherwise a crafted filter link (e.g. ?author=<script>...) is a reflected XSS
+                    // against whoever opens it.
+                    $out .= '<li data-type="' . $this->sanitizer->entities($selectorName) . '"><span class="fcm-filter-tag-label">' . $selectorTagName . ':</span> ' . $this->sanitizer->entities((string)$value) . '</li>';
                 }
             }
             $out .= '</ul>';
-
         } else {
             $out .= '<p>' . $this->_('At the moment there are no additional filters applied.') . '<br>';
             $out .= sprintf($this->_('You can apply the following filters by clicking on the appropriate links in the comments below: %s.'), implode(', ', $this->selectorNames)) . '</p>';
@@ -342,9 +359,20 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             $queryStrings = '?' . $urlParts[1];
         }
         $path_parts = array_filter(explode('/', $currentURL));
-        if (count($path_parts) == 6) {
-            // pagination is active
-            $currentURL = str_replace($path_parts[6], '', $currentURL);
+        // Detect the pagination segment (eg. "page2") by its shape instead of counting the
+        // total number of URL segments: counting was fragile and gave wrong results depending
+        // on the installation's folder depth (eg. ProcessWire installed in a subdirectory
+        // instead of directly at the domain root would shift the count and either strip the
+        // field-id segment by mistake on page 1, or fail to strip a real pagination segment on
+        // page 2+). Also note that array_filter() here keeps the original array keys, so the
+        // last segment must be read with end() rather than a fixed numeric index.
+        // The pagination segment always ends in a digit but - unlike the preceding, purely
+        // numeric field-id segment - is not purely numeric itself, regardless of a customized
+        // page-number prefix.
+        $lastPathPart = end($path_parts);
+        if ($lastPathPart && preg_match('/\d$/', $lastPathPart) && !preg_match('/^\d+$/', $lastPathPart)) {
+        // pagination is active
+            $currentURL = str_replace($lastPathPart, '', $currentURL);
         }
 
         $currentURL = $currentURL . $queryStrings;
@@ -411,21 +439,34 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $app .= '<td><i class="fa fa-hashtag"></i>ID</td><td>' . $comment->get('id') . '</td>';
         $app .= '</tr>';
 
+        // "author", "ip" and "email" below all come from the public comment form (submitted by
+        // anonymous visitors) and are embedded here via plain string concatenation into markup
+        // that is injected verbatim through prependMarkup()/appendMarkup() (no automatic escaping
+        // happens anywhere in that path) - so every value must be entity-encoded here, otherwise a
+        // crafted author name/comment text is a stored XSS against every moderator who opens this
+        // list.
+        $author = $this->sanitizer->entities($comment->get('author'));
         $app .= '<tr>';
-        $app .= '<td><i class="fa fa-user"></i>' . $this->selectorNames['author'] . '</td><td><a class="pw-tooltip" title="' . sprintf($this->_('Show all comments from the author with the name %s'), $comment->get('author')) . '" href="' . $this->createAdditionalFilterLink('author=' . urlencode($comment->get('author'))) . '">' . $comment->get('author') . '</a></td>';
+        $app .= '<td><i class="fa fa-user"></i>' . $this->selectorNames['author'] . '</td><td><a class="pw-tooltip" title="' . sprintf($this->_('Show all comments from the author with the name %s'), $author) . '" href="' . $this->createAdditionalFilterLink('author=' . urlencode($comment->get('author'))) . '">' . $author . '</a></td>';
+        $app .= '</tr>';
+
+        $ip = $this->sanitizer->entities($comment->get('ip'));
+        $app .= '<tr>';
+        $app .= '<td><i class="fa fa-globe"></i>' . $this->selectorNames['ip'] . '</td><td><a class="pw-tooltip" title="' . sprintf($this->_('Show all comments that have been sent via the ip %s'), $ip) . '" href="' . $this->createAdditionalFilterLink('ip=' . urlencode($comment->get('ip'))) . '">' . $ip . '</a></td>';
         $app .= '</tr>';
 
         $app .= '<tr>';
-        $app .= '<td><i class="fa fa-globe"></i>' . $this->selectorNames['ip'] . '</td><td><a class="pw-tooltip" title="' . sprintf($this->_('Show all comments that have been sent via the ip %s'), $comment->get('ip')) . '" href="' . $this->createAdditionalFilterLink('ip=' . urlencode($comment->get('ip'))) . '">' . $comment->get('ip') . '</a></td>';
-        $app .= '</tr>';
-
-        $app .= '<tr>';
-        $dateString = date('Y/m/d H:i', $comment->get('created')) . ' (' . wireRelativeTimeStr($comment->get('created')) . ')';
+        // getComments() populates $comment from a raw PDO fetch, so 'created' comes back as a
+        // string under ProcessWire's default PDO settings (emulated prepares) rather than a
+        // native int - date() requires a real int under strict_types, otherwise it throws
+        $createdTimestamp = (int)$comment->get('created');
+        $dateString = date('Y/m/d H:i', $createdTimestamp) . ' (' . wireRelativeTimeStr($createdTimestamp) . ')';
         $app .= '<td><i class="fa fa-calendar"></i>' . $this->_('Date') . '</td><td>' . $dateString . '</td>';
         $app .= '</tr>';
 
+        $email = $this->sanitizer->entities($comment->get('email'));
         $app .= '<tr>';
-        $app .= '<td><i class="fa fa-envelope"></i>' . $this->selectorNames['email'] . '</td><td><a class="fcm-filter pw-tooltip" title="' . sprintf($this->_('Show all comments from the author with the email %s'), $comment->get('email')) . '" href="' . $this->createAdditionalFilterLink('email=' . urlencode($comment->get('email'))) . '">' . $comment->get('email') . '</a></td>';
+        $app .= '<td><i class="fa fa-envelope"></i>' . $this->selectorNames['email'] . '</td><td><a class="fcm-filter pw-tooltip" title="' . sprintf($this->_('Show all comments from the author with the email %s'), $email) . '" href="' . $this->createAdditionalFilterLink('email=' . urlencode($comment->get('email'))) . '">' . $email . '</a></td>';
         $app .= '</tr>';
 
         $app .= '<tr>';
@@ -471,7 +512,8 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
         $pre .= '<div class="fcm-comment-text">';
         $pre .= '<h3>' . $this->_('Comment') . '</h3>';
-        $pre .= $comment->get('text');
+        // the raw comment body from an anonymous visitor - must be escaped, see note above
+        $pre .= nl2br($this->sanitizer->entities($comment->get('text')));
         $pre .= '</div>';
 
         $pre .= '<div class="fcm-comment-feedback">';
@@ -504,7 +546,6 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $fieldset->add($hidden);
 
         $form->add($fieldset);
-
     }
 
     /**
@@ -519,7 +560,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             if ($this->input->urlSegment2) {
                 $field = $this->fields->get($this->sanitizer->fieldName($this->input->urlSegment2));
             } else {
-                // take the first comment field
+            // take the first comment field
                 $field = wire('fields')->find('type=FieldtypeFrontendComments')->first();
             }
         }
@@ -533,9 +574,12 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
                 $query = $this->database->prepare($statement);
                 $query->bindValue(':status', $status, PDO::PARAM_INT);
                 $query->execute();
-                $result = $query->fetchColumn();
+                // fetchColumn() returns a string (or false) under ProcessWire's default PDO
+                // settings (emulated prepares), never a native int - cast explicitly, otherwise
+                // this method's "int" return type throws a TypeError under strict_types
+                $fetched = $query->fetchColumn();
+                $result = ($fetched === false) ? 0 : (int)$fetched;
             } catch (Exception) {
-
             }
         }
         return $result;
@@ -597,9 +641,7 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
                 $comments->add($comment);
             }
-
         } catch (Exception) {
-
         }
         $comments->setTrackChanges();
         $this->comments = $comments;
@@ -614,18 +656,24 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
      */
     protected function getTotalNumberOfComments(Field $field, array|null $selector): int
     {
-        $result = 0; // default value
+        $result = 0;
+        // default value
         $conditions = $this->createWhereConditionString($selector);
-        if ($conditions) $selectorString = ' WHERE ' . $conditions;
+        if ($conditions) {
+            $selectorString = ' WHERE ' . $conditions;
+        }
         $selectorString = $selectorString ?? '';
         $statement = 'SELECT COUNT(*) FROM ' . $field->table . $selectorString;
         try {
             $query = $this->database->prepare($statement);
             $this->createBindValues($query, $selector);
             $query->execute();
-            $result = $query->fetch()[0];
+            // fetch()[0] returns a string under ProcessWire's default PDO settings (emulated
+            // prepares), never a native int - cast explicitly, otherwise this method's "int"
+            // return type throws a TypeError under strict_types
+            $fetched = $query->fetch();
+            $result = ($fetched === false) ? 0 : (int)$fetched[0];
         } catch (Exception) {
-
         }
         return $result;
     }
@@ -641,8 +689,9 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
      */
     protected function renderComments($comments, int $total, InputfieldForm $form): string
     {
-        if (!$total)
+        if (!$total) {
             return '<p>' . $this->_('There are no Comments') . '</p>';
+        }
 
         // check if user is moderator or superuser, otherwise do not show anything to edit
         $out = '';
@@ -653,7 +702,6 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         }
 
         return $out;
-
     }
 
     /**
@@ -667,7 +715,6 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $string = [];
 
         foreach ($conditions as $condition) {
-
             $name = key($condition);
 
             if ($usePDO) {
@@ -676,14 +723,12 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
                 } else {
                     $string[] = $name . ' IS NULL';
                 }
-
             } else {
                 if ($condition[$name]['value'] != null) {
                     $string[] = $name . '=' . $condition[$name]['value'];
                 } else {
                     $string[] = $name . ' IS NULL';
                 }
-
             }
         }
         return implode(' AND ', $string);
@@ -710,7 +755,42 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             } else {
                 $query->bindValue($name, $value);
             }
+        }
+    }
 
+    /**
+     * Update the "modified"/"modified_users_id" columns of the given page's own row in the
+     * "pages" table, unless the given comment field has "quiet_save" (input_fc_quiet_save)
+     * enabled.
+     *
+     * This mirrors FrontendCommentForm::render()'s own handling of the very same setting for the
+     * frontend comment form (see the "update the pages table" block there) - without this, saving
+     * or deleting a comment through this Comments Manager never touched "modified" at all,
+     * regardless of quiet_save, because FrontendCommentArray::saveComment()/deleteComment() go
+     * through Fieldtype::savePageField() directly and never call Pages::save(). Calling this
+     * explicitly here makes quiet_save behave consistently: "on" keeps the timestamp untouched
+     * everywhere a comment can be saved (frontend, Comments Manager, and the standard Page Edit
+     * screen - see FieldtypeFrontendComments::quietPageEditSaveForCommentsOnly()), "off" updates
+     * it everywhere, exactly like the frontend already did.
+     * @param Page $page
+     * @param Field $field
+     * @return void
+     */
+    protected function updatePageModifiedUnlessQuiet(Page $page, Field $field): void
+    {
+        if ($field->get('input_fc_quiet_save')) {
+            return;
+        }
+
+        $statement = "UPDATE pages SET modified_users_id=:userid, modified=CURRENT_TIMESTAMP() WHERE id=:id";
+        $query = $this->database->prepare($statement);
+        $query->bindValue(":userid", $this->wire('user')->id, PDO::PARAM_INT);
+        $query->bindValue(":id", $page->id, PDO::PARAM_INT);
+
+        try {
+            $query->execute();
+        } catch (Exception $e) {
+            $this->log('Message: ' . $e->getMessage());
         }
     }
 
@@ -733,27 +813,46 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $fieldName = $field->name;
 
         if ($input->post('submitedit')) {
-
-            $oldStatus = $comment->get('status'); // the old status as stored inside the DB
+            $oldStatus = $comment->get('status');
+            // the old status as stored inside the DB
+            $newStatus = $input->post('status');
+            // "delete" is a sentinel value added to the status dropdown (see executeEdit()) and
+            // must not be sanitized as an int, which would silently turn it into 0 ("pending
+            // approval") instead of actually deleting the comment - consistent with how the
+            // "delete" status is handled in ___processInput() below and in
+            // InputfieldFrontendComments.module
+            if ($newStatus === 'delete') {
+                $deleted = $comments->deleteComment($comment);
+                if (is_null($deleted)) {
+                    // deleteComment() returns null specifically when the comment still has
+                    // replies (deletion is forbidden in that case), as opposed to false, which
+                    // means an actual save/database error occurred
+                    $this->error(sprintf($this->_('Comment #%s cannot be deleted because there are already replies to this comment. You must first delete all replies before you can delete this comment.'), $comment->get('id')));
+                    return true;
+                // the form was handled correctly - deletion was deliberately declined, not a processing error
+                }
+                if ($deleted) {
+                    $this->updatePageModifiedUnlessQuiet($page, $field);
+                }
+                return $deleted;
+            }
 
             // sanitize all values first and add them back to the FrontendComment
             $comment->set('author', $sanitizer->string($input->post('author')));
             $comment->set('email', $sanitizer->string($input->post('mail')));
             $comment->set('website', $sanitizer->string($input->post('website')));
-            $comment->set('stars', $input->post('stars') ? $sanitizer->int($input->post('stars')) : NULL);
-            $comment->set('status', $sanitizer->int($input->post('status')));
+            $comment->set('stars', $input->post('stars') ? $sanitizer->int($input->post('stars')) : null);
+            $comment->set('status', $sanitizer->int($newStatus));
             $comment->set('upvotes', $sanitizer->int($input->post('upvotes')));
             $comment->set('downvotes', $sanitizer->int($input->post('downvotes')));
             $comment->set('user_id', $sanitizer->int($input->post('userid')));
             $comment->set('parent_id', $sanitizer->int($input->post('parentid')));
-
             // create date for storage in the database
             $postDateString = $input->post('date') . ' ' . $input->post('date__time');
             $comment->set('created', wire('datetime')->stringToTimestamp($postDateString, 'Y-m-d H:i:s'));
 
             $comment->set('text', $sanitizer->string($input->post('comment')));
             $comment->set('moderation_feedback', $sanitizer->string($input->post('feedback')));
-
             // validate the form
             $form->processInput($input->post());
             if (count($form->getErrors())) {
@@ -768,8 +867,11 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             }
 
             $page->$fieldName = $comments;
-            return $comments->saveComment($comment);
-
+            $saved = $comments->saveComment($comment);
+            if ($saved) {
+                $this->updatePageModifiedUnlessQuiet($page, $field);
+            }
+            return $saved;
         } else {
             return true;
         }
@@ -784,15 +886,15 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
     public function executeEdit(): string|FrontendCommentsManager
     {
         $out = '';
-
-        if (!$this->editPermission)
+        if (!$this->editPermission) {
             return $this->_('You do not have permission to edit this comment.');
+        }
 
         // check if field is type of FieldtypeFrontendComments first
-        if($this->input->urlSegment2){
+        if ($this->input->urlSegment2) {
             $field = $this->fields->get($this->sanitizer->fieldName($this->input->urlSegment2));
         } else {
-            // take the first field
+        // take the first field
             $field = $this->commentFields->first();
         }
 
@@ -811,14 +913,13 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         if (!$this->wire('user')->hasPermission('page-edit')) {
             $out .= '<p>' . $this->_('You have not the permission to edit this comment') . '</p>';
         } else {
-
-            if(!$commentID)
+            if (!$commentID) {
                 $this->wire('session')->redirect($this->wire('config')->urls->admin . 'setup/fc-comments-manager/list/');
+            }
 
             $commentID = $this->sanitizer->int($commentID);
             $pageID = $this->sanitizer->int($pageID);
             $page = $this->wire('pages')->get($pageID);
-
             // get all comments
             $comments = $page->$fieldName;
             if ($comments->count() === 0) {
@@ -960,7 +1061,6 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             $form->add($submit);
 
             $out .= $form->render();
-
         }
 
         // create the back button
@@ -976,11 +1076,10 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
     {
 
         $modules = $this->wire()->modules;
-
-        if($this->input->urlSegment2){
+        if ($this->input->urlSegment2) {
             $field = $this->fields->get($this->sanitizer->fieldName($this->input->urlSegment2));
         } else {
-            // take the first field
+        // take the first field
             $field = $this->commentFields->first();
         }
 
@@ -988,10 +1087,12 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             return $this->error($this->_('Unrecognized field'));
         }
 
-        if (!$this->editPermission)
+        if (!$this->editPermission) {
             return $this->_('You do not have permission to edit comments.');
+        }
 
-        $whereSelectors = []; // array containing all querystring parameters
+        $whereSelectors = [];
+        // array containing all querystring parameters
 
         //status selector
         $statusFilter = $this->input->get('status');
@@ -1004,15 +1105,15 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
             if ($this->status != 'all') {
                 $whereSelectors[] = ['status' => ['value' => $this->status, 'type' => PDO::PARAM_INT]];
             }
-
         }
 
         // page selector
         $pageFilter = $this->input->get('page');
         if (!is_null($pageFilter)) {
             $pageFilter = $this->sanitizer->int($this->input->get('page'));
-            if ($pageFilter > 0)
+            if ($pageFilter > 0) {
                 $whereSelectors[] = ['pages_id' => ['value' => $pageFilter, 'type' => PDO::PARAM_INT]];
+            }
         }
 
         // email selector
@@ -1058,7 +1159,9 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         // get the date sorting value (ASC, DESC)
         $sort = $this->sanitizer->string($this->input->get('sort'));
         $sort = $this->sanitizer->option($sort, ['-created', 'created']);
-        if (is_null($sort)) $sort = $this->sort;
+        if (is_null($sort)) {
+            $sort = $this->sort;
+        }
 
         // get the start value for the pagination
         $start = ($this->input->pageNum() - 1) * $limit;
@@ -1074,10 +1177,8 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
         // form was submitted so we process the form
         if ($this->input->post->submitcomments) {
-
             // user submitted the form, process it and check for errors
             $this->processInput($this->input->post);
-
         }
         // the total number of comments
         $total = $this->getTotalNumberOfComments($field, $whereSelectors);
@@ -1137,8 +1238,10 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $out .= $pagerOut;
         $out .= '</div>';
 
-        return $out;
+        // pass the translated warning text to frontendcommentsmanager.js (shown when leaving the page with unsaved changes)
+        $out .= '<script>window.unsavedChangesText = ' . json_encode($this->_('You have unsaved changes. Are you sure you want to leave?')) . ';</script>';
 
+        return $out;
     }
 
     /**
@@ -1148,8 +1251,9 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
     public function ___execute()
     {
         // no comment fields installed
-        if (!$this->commentFields->count())
+        if (!$this->commentFields->count()) {
             return '<p>' . $this->_('There are no FrontendComments fields installed.') . '</p>';
+        }
 
         // make a redirect on page load to the first comment field
         if (!$this->input->urlSegment1) {
@@ -1184,15 +1288,34 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
         // loop over all comments that have been changed
         foreach ($changes as $id) {
-
             $comment = $comments->findOne((int)$id);
 
             if ($comment) {
-
                 $comment->setTrackChanges();
                 $status = $input->get('status-' . $id);
                 $oldStatus = $comment->get('status');
+                // "delete" is a sentinel value added to the per-comment status dropdown (see
+                // renderComment()) and must trigger an actual deletion instead of being saved
+                // as a status value - consistent with how the "delete" status is handled in
+                // processEditForm() above and in InputfieldFrontendComments.module
+                if ($status === 'delete') {
+                    $deleted = $comments->deleteComment($comment);
+                    if (is_null($deleted)) {
+                        // deleteComment() returns null specifically when the comment still has
+                        // replies (deletion is forbidden in that case); this notice is preserved
+                        // across the redirect at the end of this method by ProcessWire's Notices
+                        // system, so it still shows up after the page reloads
+                        $this->error(sprintf($this->_('Comment #%s cannot be deleted because there are already replies to this comment. You must first delete all replies before you can delete this comment.'), $comment->get('id')));
+                    } elseif ($deleted) {
+                        $this->updatePageModifiedUnlessQuiet($page, $field);
+                    }
+                    continue;
+                }
 
+                // normalize to int before comparing/storing: $status always comes in as a
+                // string from the request, while $oldStatus is a real int, so comparing them
+                // with the strict operator used below would otherwise always report a change
+                $status = $this->sanitizer->int($status);
                 // validate status
                 if ($status !== $oldStatus) {
                     $comment->trackChange('status');
@@ -1203,9 +1326,8 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
                 // validate feedback
                 $feedback = $input->get('moderation_feedback_' . $id);
                 $oldfeedback = $comment->get('moderation_feedback');
-
-                // run only if stored and current value are not the same and comment should not be deleted
-                if ($feedback != $oldfeedback && $status != 'delete') {
+                // run only if stored and current value are not the same
+                if ($feedback != $oldfeedback) {
                     $comment->trackChange('feedback');
                     $comment->set('moderation_feedback', $feedback);
                     $comments->trackChange('feedbackchange');
@@ -1213,16 +1335,15 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
 
                 if ($comment->getChanges()) {
                     $page->$fieldName = $comments;
-                    $comments->saveComment($comment);
+                    if ($comments->saveComment($comment)) {
+                        $this->updatePageModifiedUnlessQuiet($page, $field);
+                    }
                 }
-
             }
-
         }
 
         // make a redirect to show changes
         $this->wire('session')->redirect($this->wire('page')->url);
-
     }
 
     /**
@@ -1248,9 +1369,11 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $f = $modules->get('InputfieldToggle');
         $f->attr('name', 'useManager');
         $f->label = $this->_('Use comments manager rather than in-page editor?');
-        $f->set('description',
+        $f->set(
+            'description',
             $this->_('When enabled user will be directed to the dedicated comments manager for editing comments.') . ' ' .
-            $this->_('This may be preferable because the comments manager has more features and uses pagination.'));
+            $this->_('This may be preferable because the comments manager has more features and uses pagination.')
+        );
         $value = (int)$this->get('useManager');
         $f->val($value);
         $inputfields->add($f);
@@ -1263,10 +1386,10 @@ class FrontendCommentsManager extends Process implements ConfigurableModule
         $f->set('required', true);
         $f->options = $selectOptions;
         $value = (int)$this->get('editRoles');
-        if (!$value) $value = 32; // page edit
+        if (!$value) {
+            $value = 32;
+        } // page edit
         $f->val($value);
         $inputfields->add($f);
-
     }
-
 }

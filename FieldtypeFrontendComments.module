@@ -1,4 +1,6 @@
-<?php namespace ProcessWire;
+<?php
+
+namespace ProcessWire;
 
 /*
  * Comments Fieldtype for storing user comments for a page
@@ -17,18 +19,45 @@ use FrontendComments\FrontendComments;
 use FrontendComments\Notifications;
 use PDO;
 
-class FieldtypeFrontendComments extends FieldtypeMulti
+class FieldtypeFrontendComments extends FieldtypeMulti implements ConfigurableModule
 {
-    const moderateNone = 0; // no moderation - all comments will be published immediately
-    const moderateAll = 1; // all comments need to be approved
-    const moderateNew = 2; // only new comments need to be approved
-    const pendingApproval = 0; // status waiting for approval
-    const approved = 1; // status approved
-    const spam = 2; // status SPAM
-    const featured = 4; // approved, but special marked as important
-    const queueTable = 'fc_comments_queues';
+    public const moderateNone = 0; // no moderation - all comments will be published immediately
+    public const moderateAll = 1; // all comments need to be approved
+    public const moderateNew = 2; // only new comments need to be approved
+    public const pendingApproval = 0; // status waiting for approval
+    public const approved = 1; // status approved
+    public const spam = 2; // status SPAM
+    public const featured = 4; // approved, but special marked as important
+    public const queueTable = 'fc_comments_queues';
+
+    // How long (in seconds) a "claimed" queue row is considered still in progress. LazyCron
+    // is triggered by whichever visitor's request happens to be due for it, so two overlapping
+    // requests could otherwise both pick up and send the same queued notification. A row whose
+    // claim is older than this is treated as abandoned (e.g. the run that claimed it crashed or
+    // timed out before finishing) and becomes eligible to be claimed and retried again.
+    public const queueClaimStaleAfter = 300;
+
+    /**
+     * Directory where site developers may place their own theme template files to override the
+     * ones shipped with the module, relative to $config->paths->assets (= /site/assets/ by default).
+     * A file placed at <this path>/<theme>/<filename> (e.g. FrontendComments/templates/Bootstrap5/comment.php)
+     * takes precedence over the module's own frameworks/Bootstrap5/templates/comment.php - see resolveTemplateFile().
+     *
+     * Note: this deliberately lives directly under site/assets/ and not under site/assets/files/,
+     * because the latter is reserved by ProcessWire for page-attached files (Pagefiles, organized by
+     * page ID). Change this constant if you prefer a different location, e.g. 'FrontendComments/' if
+     * you want it resolved relative to $config->paths->templates instead - see resolveTemplateFile().
+     */
+    public const templateOverridePath = 'FrontendComments/templates/';
+
     protected FrontendForms $frontendForms;
     protected array $frontendFormsConfig = [];
+
+    // Number of queued notification emails sent per LazyCron run (see sendQueuedEmails()).
+    // This is a module-wide setting (the queue can hold entries from several different comment
+    // fields at once), configurable via getModuleConfigInputfields() below; ProcessWire
+    // automatically populates this property from the saved module configuration, falling back to
+    // this default of 20 when nothing has been saved yet.
     protected string|int $input_fc_queue_batch = 20;
 
     /**
@@ -48,7 +77,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
         // set database object
         $this->database = $this->wire()->database;
-
     }
 
     /**
@@ -60,18 +88,18 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         parent::init();
 
         require_once(__DIR__ . '/FrontendComments.php');
-        require_once(__DIR__ . '/Uikit3/FrontendCommentsUikit3.php');
+        require_once(__DIR__ . '/frameworks/Uikit3/FrontendCommentsUikit3.php');
         require_once(__DIR__ . '/FrontendComment.php');
-        require_once(__DIR__ . '/Uikit3/FrontendCommentUikit3.php');
+        require_once(__DIR__ . '/frameworks/Uikit3/FrontendCommentUikit3.php');
         require_once(__DIR__ . '/FrontendCommentPagination.php');
-        require_once(__DIR__ . '/Uikit3/FrontendCommentPaginationUikit3.php');
-        require_once(__DIR__ . '/Bootstrap5/FrontendCommentBootstrap5.php');
-        require_once(__DIR__ . '/Bootstrap5/FrontendCommentPaginationBootstrap5.php');
-        require_once(__DIR__ . '/Pico2/FrontendCommentPico2.php');
-        require_once(__DIR__ . '/Pico2/FrontendCommentPaginationPico2.php');
+        require_once(__DIR__ . '/frameworks/Uikit3/FrontendCommentPaginationUikit3.php');
+        require_once(__DIR__ . '/frameworks/Bootstrap5/FrontendCommentBootstrap5.php');
+        require_once(__DIR__ . '/frameworks/Bootstrap5/FrontendCommentPaginationBootstrap5.php');
+        require_once(__DIR__ . '/frameworks/Pico2/FrontendCommentPico2.php');
+        require_once(__DIR__ . '/frameworks/Pico2/FrontendCommentPaginationPico2.php');
         require_once(__DIR__ . '/FrontendCommentArray.php');
-        require_once(__DIR__ . '/Bulma1/FrontendCommentBulma1.php');
-        require_once(__DIR__ . '/Bulma1/FrontendCommentPaginationBulma1.php');
+        require_once(__DIR__ . '/frameworks/Bulma1/FrontendCommentBulma1.php');
+        require_once(__DIR__ . '/frameworks/Bulma1/FrontendCommentPaginationBulma1.php');
 
 
         $this->addHookAfter('Inputfield::render', $this, 'overwriteExamplesNotes');
@@ -79,9 +107,11 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $this->addHookAfter('ProcessField::fieldDeleted', $this, 'deleteVotesTable');
         $this->addHookBefore('Page::render', $this, 'noEmailWarning');
         $this->addHookAfter('LazyCron::everyDay', $this, 'deleteSpam');
+        $this->addHookAfter('LazyCron::everyDay', $this, 'sendPendingReminders');
         $this->addHookBefore('InputfieldTextarea::processInput', $this, 'validateEmailAddresses');
         $this->addHookBefore('FieldtypeMulti::savePageField', $this, 'correctStatusValues');
         $this->addHookAfter('FieldtypeMulti::savePageField', $this, 'updateTables');
+        $this->addHookBefore('Pages::save', $this, 'quietPageEditSaveForCommentsOnly');
     }
 
     /**
@@ -110,7 +140,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
         // run only on FieldtypeFrontendComments
         if ($event->object instanceof FieldtypeFrontendComments) {
-
             $page = $event->arguments(0);
             $field = $event->arguments(1);
             $fieldName = $field->name;
@@ -118,7 +147,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
             // run only if there is at least 1 status change of a comment inside the comments
             if ($comments->isChanged('statuschange')) {
-
                 $n = 1;
 
                 foreach ($comments as $comment) {
@@ -126,7 +154,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
                     // run only if the status of this comment has been changed
                     if ($comment->isChanged('status')) {
-
                         // add remote flag 2 if status has been changed for the first time in backend and no remote flag is present
                         if ($this->wire('page')->rootParent->get('id') === 2) {
                             if (!$comment->remote_flag) {
@@ -137,56 +164,158 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                         $oldStatus = $comment->get('old_status');
                         $newStatus = $comment->get('status');
 
-                        // run only if comment has children (replies)
-                        if ($comment->hasReplies()) {
-
-                            switch ($newStatus) {
-                                case (FieldtypeFrontendComments::pendingApproval):
-                                    if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
-                                        $text = sprintf($this->_('The comment #%s cannot be set to the status "%s" because answers already exist. Therefore, the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::pendingApproval], self::statusTexts()[$oldStatus]);
-                                    }
-                                    break;
-                                case ('delete'):
-
-                                    if ($comment->getReplies(FieldtypeFrontendComments::approved)->count()) {
-                                        $text = sprintf($this->_('Comment #%s cannot be deleted because there are already replies to this comment. Therefore, the status remains at "%s".'), $n, self::statusTexts()[$oldStatus]);
-                                        $text .= ' ' . $this->_('You must first delete all replies before you can delete this comment.');
-                                    }
-                                    break;
-                                case(FieldtypeFrontendComments::spam):
-                                    $text = sprintf($this->_('The comment #%s cannot be set to the status "%s" because answers already exist. Therefore, the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::spam], self::statusTexts()[$oldStatus]);
-                                    $text .= ' ' . $this->_('You must first delete all replies before you can mark this comment as SPAM.');
-                                    break;
+                        // Two of the three special status values need to be blocked under certain
+                        // conditions, each for a different reason - so each uses its own guard,
+                        // rather than a single "has any replies" gate (that gate used to wrap both
+                        // cases below, but its check inside each case only ever counted approved
+                        // replies, so a comment whose replies existed but were e.g. only pending or
+                        // spam - or only featured, for the "delete" case - silently fell through
+                        // both the blocking AND the statusChange/updateQueue bookkeeping further
+                        // down: neither the revert nor the queue update ever happened):
+                        if ($newStatus === FieldtypeFrontendComments::pendingApproval) {
+                            // Reverting to "pending approval" removes this comment from the
+                            // rendered tree entirely (see FrontendComments::getCommentsForDisplay()),
+                            // which would make any already-visible (approved/featured) reply
+                            // beneath it unreachable too. Only block when that would actually
+                            // happen - a comment whose replies are themselves not yet visible has
+                            // nothing to lose by reverting.
+                            if ($comment->hasVisibleReplies()) {
+                                $text = sprintf($this->_('The comment #%s cannot be set to the status "%s" because answers already exist. Therefore, the status remains at "%s".'), $n, self::statusTexts()[FieldtypeFrontendComments::pendingApproval], self::statusTexts()[$oldStatus]);
                             }
-                            if (!is_null($text)) {
-                                $comment->set('status', $oldStatus);
-                                $this->warning($text);
-                                $this->wire('session')->set('statuswarning-' . $comment->get('id'), $comment->get('id'));
-                                $this->wire('session')->set('statuswarningtext-' . $comment->get('id'), $text);
+                        } elseif ($newStatus === 'delete') {
+                            // Deleting physically removes the database row, so this must be
+                            // blocked whenever ANY reply still references it via parent_id -
+                            // regardless of that reply's own status - consistent with the
+                            // stricter guard already used by FrontendCommentArray::deleteComment().
+                            if ($comment->hasReplies()) {
+                                $text = sprintf($this->_('Comment #%s cannot be deleted because there are already replies to this comment. Therefore, the status remains at "%s".'), $n, self::statusTexts()[$oldStatus]);
+                                $text .= ' ' . $this->_('You must first delete all replies before you can delete this comment.');
                             }
-
-                        } else {
-                            if ($newStatus === 'delete') {
-                                $comments->remove($comment);
-                            } else {
-                                // add the status as property to the object
-                                $comment->set('statusChange', $newStatus);
-                                $comment->set('updateQueue', 1);
-                            }
-
                         }
+                        // SPAM is deliberately not handled above - such a comment is kept in the
+                        // rendered tree and shown as a placeholder instead of its real content
+                        // (see FrontendComment::isSpamPlaceholder() / hasVisibleReplies()), so its
+                        // status change never needs to be blocked and always falls through to the
+                        // normal bookkeeping in the final "else" below, like any other accepted
+                        // status change.
 
+                        if (!is_null($text)) {
+                            // blocked: revert the status change and warn
+                            $comment->set('status', $oldStatus);
+                            $this->warning($text);
+                            $this->wire('session')->set('statuswarning-' . $comment->get('id'), $comment->get('id'));
+                            $this->wire('session')->set('statuswarningtext-' . $comment->get('id'), $text);
+                        } elseif ($newStatus === 'delete') {
+                            // not blocked -> actually remove it
+                            $comments->remove($comment);
+                        } else {
+                            // any other accepted status change (approved, featured, spam, or
+                            // pending when there are no visible replies to orphan) -> normal
+                            // queue/votes-table bookkeeping
+                            $comment->set('statusChange', $newStatus);
+                            $comment->set('updateQueue', 1);
+
+                            // A comment being (re-)opened for moderation - reset the "already
+                            // reminded" flag so sendPendingReminders() treats it as a fresh pending
+                            // comment again and will notify moderators about it once more after the
+                            // configured number of days, instead of silently never reminding about
+                            // it again just because it happened to be pending once before (e.g. an
+                            // approved comment that was reverted back to pending approval).
+                            if ($newStatus === FieldtypeFrontendComments::pendingApproval) {
+                                $comment->set('reminder_sent', 0);
+                            }
+                        }
                     }
                     $n++;
                 }
-
             }
 
             //add the changed comment array to the page object
             $page->$fieldName = $comments;
             $event->arguments(0, $page);
         }
+    }
 
+    /**
+     * "quiet_save" (input_fc_quiet_save, see getModuleConfigInputfields()) is meant to keep a
+     * page's own "modified"/"modified_users_id" columns untouched whenever ONLY comment activity
+     * happens - no matter whether that happens through the frontend comment form
+     * (FrontendCommentForm::render() already honors it directly) or through the backend.
+     *
+     * On the backend there are two different paths, though, and only one of them ever goes
+     * through this hook: FrontendCommentsManager saves a comment via
+     * FrontendCommentArray::saveComment() -> Fieldtype::savePageField() directly, which never
+     * calls Pages::save() at all and therefore never touches "modified" in the first place - so
+     * quiet_save is a non-issue there. But a comments field can ALSO be edited directly on the
+     * standard Page Edit screen (InputfieldFrontendComments::___render()/___processInput(), used
+     * whenever the "Comments Manager" option is disabled) - and saving a page there always goes
+     * through Pages::save(), which (per ProcessWire core) unconditionally bumps "modified"/
+     * "modified_users_id" unless its own $options['quiet'] is true. Without this hook, editing,
+     * approving or deleting a comment on that screen would always bump "modified", completely
+     * ignoring quiet_save.
+     *
+     * This hook fixes exactly that gap - and only that gap: it forces $options['quiet'] = true
+     * for a Pages::save() call if, and only if, EVERY FrontendComments field on the page that
+     * actually had comment activity in this request has quiet_save enabled, AND no other field on
+     * the page changed at all. If an admin edits the page's title (or any other field) in the same
+     * save, "modified" is left alone as usual - quiet_save only ever suppresses the bump caused by
+     * comment activity itself, never a genuine edit to something else.
+     *
+     * @param HookEvent $event
+     * @return void
+     */
+    protected function quietPageEditSaveForCommentsOnly(HookEvent $event): void
+    {
+        $page = $event->arguments(0);
+        $options = $event->arguments(1);
+        if (!is_array($options)) {
+            $options = [];
+        }
+        if (!empty($options['quiet'])) {
+            return; // already quiet - nothing to do
+        }
+
+        // Whether comment activity happened at all on this page in this request is read from the
+        // FrontendCommentArray's OWN change tracking (the same "isChanged('statuschange')"/etc.
+        // bookkeeping InputfieldFrontendComments::___processInput() and correctStatusValues() above
+        // already rely on) - not from $page->getChanges(), which may or may not list this
+        // field (its items are mutated in place rather than the field being wholesale replaced).
+        $commentChangeHappened = false;
+
+        foreach ($this->wire('fields') as $field) {
+            if (!($field->type instanceof self)) {
+                continue;
+            }
+
+            $fieldName = $field->name;
+            $comments = $page->$fieldName;
+            if (!($comments instanceof FrontendCommentArray) || !$comments->isChanged()) {
+                continue;
+            }
+
+            if (!$field->get('input_fc_quiet_save')) {
+                return; // this field wants normal "modified" tracking -> leave the whole save alone
+            }
+            $commentChangeHappened = true;
+        }
+
+        if (!$commentChangeHappened) {
+            return; // no comment activity in this save at all -> leave default behavior alone
+        }
+
+        // Comment activity happened, and every affected comments field wants quiet_save - now make
+        // sure nothing ELSE on the page changed too (a title edit alongside a comment edit, say).
+        // $page->getChanges() is authoritative for ordinary fields (title, etc.), whatever it does
+        // or doesn't report for our own field above.
+        foreach ($page->getChanges() as $changedFieldName) {
+            $changedField = $this->wire('fields')->get($changedFieldName);
+            if (!$changedField || !($changedField->type instanceof self)) {
+                return; // some other, non-comments field also changed -> leave "modified" tracking alone
+            }
+        }
+
+        $options['quiet'] = true;
+        $event->arguments(1, $options);
     }
 
     /**
@@ -200,7 +329,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
         // run only on FieldtypeFrontendComments
         if ($event->object instanceof FieldtypeFrontendComments) {
-
             $page = $event->arguments(0);
             $field = $event->arguments(1);
             $comments = $page->get($field->name);
@@ -220,18 +348,15 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
             // add all new comments to the queue table if status is published
             foreach ($comments->getItemsAdded() as $comment) {
-
                 // get the id property of the newly added comment from the database
                 $id = $comment->getCommentIDFromDatabase();
 
                 if (is_int($id)) {
-
                     $comment->set('id', $id);
                     if ($comment->isPublished()) {
                         $comment->addCommentToQueueTable();
                     }
                 }
-
             }
 
             // remove all deleted comments from the queue table
@@ -244,7 +369,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             foreach ($comments->find('notificationStop=1') as $comment) {
                 $comment->deleteEmailsInQueueTable();
             }
-
         }
     }
 
@@ -293,8 +417,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         }
 
         // add star-rating if enabled
-        if ($useStarRating)
+        if ($useStarRating) {
             $out .= '<link rel="stylesheet" type="text/css" href="' . $url . 'star-rating.css?v=' . $moduleVersion . '">' . PHP_EOL;
+        }
 
         return $out;
     }
@@ -313,7 +438,10 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         // get module version
         $moduleVersion = wire('modules')->getModuleInfo('FieldtypeFrontendComments')['version'];
 
-        $out = '<script src="' . $url . 'frontendcomments.js?v=' . $moduleVersion. '"></script>' . PHP_EOL;
+        $out = '<script src="' . $url . 'frontendcomments.js?v=' . $moduleVersion . '"></script>' . PHP_EOL;
+
+        // pass the translated alert text to frontendcomments.js (shown if the Ajax reply form fails to load)
+        $out .= '<script>window.loadingAlertText = ' . json_encode(__('Something went wrong!')) . ';</script>' . PHP_EOL;
 
         // add star rating JS to the frontend if enabled
         if ($useStarRating) {
@@ -360,7 +488,8 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
     /**
-     * Get all queued emails from the database and send the emails in batches of 20 mails at once
+     * Get all queued emails from the database and send the emails in batches (see
+     * input_fc_queue_batch / getModuleConfigInputfields()) at once
      * @return void
      * @throws WireException
      * @throws WirePermissionException
@@ -375,35 +504,87 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             return;
         }
 
-        // get the first 20 entries from the queue table
-        $select = "SELECT comment_id, email, field_id FROM fc_comments_queues ORDER BY id LIMIT :limit";
+        // LazyCron is triggered by whichever visitor's request happens to be due for it, so two
+        // overlapping requests could in principle both reach this method around the same time.
+        // To prevent them from picking up and sending the same queued notification twice, rows
+        // are "claimed" (a timestamp is written to their claimed column) before they are worked
+        // on, and only rows this run actually managed to claim are processed further below.
+        $now = time();
+        $staleBefore = $now - self::queueClaimStaleAfter;
+
+        // 1) find candidate rows: the oldest unclaimed ones, or ones whose claim is stale (a
+        // previous run claimed them but never finished - e.g. it crashed or timed out - so they
+        // are eligible to be retried)
+        $select = "SELECT id FROM fc_comments_queues WHERE claimed = 0 OR claimed < :stale ORDER BY id LIMIT :limit";
         $query = $this->database->prepare($select);
+        $query->bindValue(":stale", $staleBefore, PDO::PARAM_INT);
         $query->bindValue(":limit", $this->input_fc_queue_batch, PDO::PARAM_INT);
         $query->execute();
 
-        $mailinglist = [];
+        $candidateIds = [];
         while ($row = $query->fetch(PDO::FETCH_ASSOC)) {
-            $mailinglist[] = $row;
+            $candidateIds[] = (int)$row['id'];
+        }
+
+        $mailinglist = [];
+
+        if ($candidateIds) {
+            // 2) actually claim only the candidates that are still eligible right now. If a
+            // concurrent run claimed some of them in the meantime, this simply won't match those
+            // rows - each row can only end up claimed by whichever run's UPDATE reaches it first.
+            $idPlaceholders = implode(',', array_fill(0, count($candidateIds), '?'));
+            $claimStatement = "UPDATE fc_comments_queues SET claimed=? WHERE id IN ($idPlaceholders) AND (claimed = 0 OR claimed < ?)";
+            $claimQuery = $this->database->prepare($claimStatement);
+            $claimQuery->execute([$now, ...$candidateIds, $staleBefore]);
+
+            // 3) read back exactly the rows this run actually claimed (a row is only in this
+            // result if it is both one of our candidates AND now carries our own claim timestamp)
+            $select2 = "SELECT id, comment_id, email, field_id FROM fc_comments_queues WHERE id IN ($idPlaceholders) AND claimed = ? ORDER BY id";
+            $query2 = $this->database->prepare($select2);
+            $query2->execute([...$candidateIds, $now]);
+
+            while ($row = $query2->fetch(PDO::FETCH_ASSOC)) {
+                $mailinglist[] = $row;
+            }
         }
 
         if ($mailinglist) {
-
             // group the entries by the field id
             $list = $this->groupBy($mailinglist, 'field_id');
 
             $statements = [];
-            foreach ($list as $field_id => $data) {
+            $bindings = [];
+            $groupIndex = 0;
 
+            foreach ($list as $field_id => $data) {
                 $field = $this->wire('fields')->get($field_id);
                 // get the table
                 $commentTable = $this->database->escapeTable($field->table);
-                $statements[] = "SELECT fc_comments_queues.email, fc_comments_queues.field_id, $commentTable.id, $commentTable.pages_id, $commentTable.author, $commentTable.data, $commentTable.created, $commentTable.code FROM fc_comments_queues INNER JOIN $commentTable ON $commentTable.id=fc_comments_queues.comment_id AND fc_comments_queues.page_id=$commentTable.pages_id";
 
+                // Restrict this SELECT to exactly the queue row ids fetched above for this field.
+                // Without the "WHERE ... IN (...)" below, this join would pull in every pending
+                // queue row for the field regardless of the batch size set above, which defeated
+                // the whole point of batching (a busy field could end up sending its entire
+                // backlog of queued emails in a single LazyCron run).
+                $paramNames = [];
+                foreach ($data as $i => $queueRow) {
+                    $paramName = "qid{$groupIndex}_{$i}";
+                    $paramNames[] = ":$paramName";
+                    $bindings[$paramName] = (int)$queueRow['id'];
+                }
+                $placeholders = implode(',', $paramNames);
+
+                $statements[] = "SELECT fc_comments_queues.id AS queue_id, fc_comments_queues.email, fc_comments_queues.field_id, $commentTable.id, $commentTable.pages_id, $commentTable.author, $commentTable.data, $commentTable.created, $commentTable.code FROM fc_comments_queues INNER JOIN $commentTable ON $commentTable.id=fc_comments_queues.comment_id AND fc_comments_queues.page_id=$commentTable.pages_id WHERE fc_comments_queues.id IN ($placeholders)";
+
+                $groupIndex++;
             }
 
             $statement = implode(' UNION ', $statements);
 
             $query = $this->database->prepare($statement);
+            foreach ($bindings as $paramName => $value) {
+                $query->bindValue(":$paramName", $value, PDO::PARAM_INT);
+            }
             $query->execute();
 
             $comments = [];
@@ -411,27 +592,26 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                 $comments[] = $row;
             }
 
-            $numberOfMails = count($comments);
-            foreach ($comments as $comment) {
-
-                $page = $this->wire('pages')->get($comment['pages_id']);
-                $field = $this->wire('fields')->get($comment['field_id']);
+            foreach ($comments as $row) {
+                $queueId = $row['queue_id'];
+                $page = $this->wire('pages')->get($row['pages_id']);
+                $field = $this->wire('fields')->get($row['field_id']);
 
                 // create a FrontendComment object out of the array
-                $comment = $this->makeComment($page, $field, $comment);
+                $comment = $this->makeComment($page, $field, $row);
 
                 // create a notification object
                 require_once(__DIR__ . '/Notifications.php');
                 $notifications = new Notifications($comments, $field, $page);
                 if ($notifications->sendNotificationAboutNewReply($comment)) {
-
-                    // get the appropriate queued list item and delete it from the table
-                    $statement = "DELETE FROM fc_comments_queues WHERE comment_id=:id ";
+                    // Delete exactly this one queue row, identified by its own primary key -
+                    // never affects any other recipient still waiting for their notification.
+                    $statement = "DELETE FROM fc_comments_queues WHERE id=:id";
 
                     try {
-                        $query = $this->database->prepare($statement);
-                        $query->bindValue(":id", $comment['id'], PDO::PARAM_INT);
-                        $query->execute();
+                        $deleteQuery = $this->database->prepare($statement);
+                        $deleteQuery->bindValue(":id", $queueId, PDO::PARAM_INT);
+                        $deleteQuery->execute();
                     } catch (Exception) {
                         // not used at the moment
                     }
@@ -450,7 +630,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     {
         $field = $event->arguments(0);
 
-        if ($field->type->className() !== 'FieldtypeFrontendComments') return;
+        if ($field->type->className() !== 'FieldtypeFrontendComments') {
+            return;
+        }
         $tableName = $field->table . '_votes';
         $this->database->query("DROP TABLE IF EXISTS $tableName");
     }
@@ -485,7 +667,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $commentFields = self::getAllCommentFields();
 
         if ($commentFields->count()) {
-
             $ids = array_column($commentFields->getArray(), 'id');
 
             // check if we are on a field config page
@@ -528,7 +709,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                         $result = $field->get('input_fc_emailfield');
                     }
                 }
-                if (!$result) $fields[] = $field;
+                if (!$result) {
+                    $fields[] = $field;
+                }
             }
         }
         return $fields;
@@ -543,7 +726,12 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      */
     protected function noEMailWarning(): void
     {
-        if ($this->wire('user')->isLoggedin()) {
+        // NOTE: this used to check only isLoggedin() - that shows this warning (including a direct
+        // link to the field's backend configuration page under setup/field/edit) to EVERY logged-in
+        // frontend user, e.g. any registered site member, not just admins/moderators. Editing a
+        // field's configuration in ProcessWire (setup/field/edit) requires superuser access, so the
+        // warning itself - and the link to fix it - is only relevant/actionable for a superuser.
+        if ($this->wire('user')->isSuperuser()) {
             $fields = self::getCommentFieldsWithoutNotificationEmail();
             foreach ($fields as $field) {
                 $url = $this->wire('config')->urls->admin . 'setup/field/edit?id=' . $field->id;
@@ -567,14 +755,30 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         // get all FrontendComments fields across the site
 
         $fields = $this->wire('fields')->findByType('FieldtypeFrontendComments');
-        if (!$fields) return;
+        if (!$fields) {
+            return;
+        }
 
         // loop through all FrontendComments fields and delete all old spam entries
         foreach ($fields as $field) {
-
-            $days = $field->data['input_fc_spam'];
+            $days = (int)$field->data['input_fc_spam'];
             if ($days > 0) {
-                $statement = "DELETE FROM $field->table WHERE status=2 AND created >= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL $days DAY));";
+                // NOTE: this used to delete ALL old spam rows unconditionally, including ones that
+                // still have replies attached (via parent_id) - physically removing such a row
+                // would orphan its replies (they'd still exist in the table but their parent row,
+                // and with it the tombstone placeholder that keeps them reachable in the rendered
+                // tree, would be gone). This is inconsistent with the stricter guard already used
+                // everywhere else in this module (FrontendCommentArray::deleteComment() and the
+                // "delete" status-change guard above both block deletion whenever ANY reply still
+                // references the comment via parent_id, regardless of that reply's own status), so
+                // apply the same guard here via a NOT EXISTS subquery.
+                $statement = "DELETE FROM $field->table
+                    WHERE status=2
+                    AND created <= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL $days DAY))
+                    AND NOT EXISTS (
+                        SELECT 1 FROM (SELECT parent_id FROM $field->table WHERE parent_id != 0) AS replies
+                        WHERE replies.parent_id = $field->table.id
+                    );";
                 $query = $this->wire('database')->prepare($statement);
 
                 try {
@@ -587,13 +791,88 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     }
 
     /**
+     * Remind the moderator(s) about comments that are still waiting for approval after the
+     * configurable number of days set in "input_fc_pendingReminderDays" (0 = disabled, the
+     * default - see getDefaultData() / ___getConfigInputfields()).
+     *
+     * Each comment is only ever reminded about once - the "reminder_sent" column (see
+     * getDatabaseSchema()) tracks this. It is reset back to 0 whenever a comment's status is
+     * (re-)set to "pending approval" again (see correctStatusValues()), so a comment that gets
+     * reopened for moderation becomes eligible for a fresh reminder too, instead of being
+     * silently skipped forever just because it was pending once before.
+     * @return void
+     * @throws WireException
+     */
+    protected function sendPendingReminders(): void
+    {
+        // get all FrontendComments fields across the site
+        $fields = $this->wire('fields')->findByType('FieldtypeFrontendComments');
+        if (!$fields) {
+            return;
+        }
+
+        $pending = self::pendingApproval;
+        $pages = $this->wire('pages');
+
+        foreach ($fields as $field) {
+            $days = (int)$field->data['input_fc_pendingReminderDays'];
+            if ($days <= 0) {
+                continue;
+            }
+
+            $statement = "SELECT * FROM $field->table
+                WHERE status=$pending
+                AND reminder_sent=0
+                AND created <= UNIX_TIMESTAMP(DATE_SUB(NOW(), INTERVAL $days DAY))";
+            $query = $this->wire('database')->prepare($statement);
+
+            try {
+                $query->execute();
+            } catch (Exception) {
+                // reminder_sent column not present yet on a site that hasn't run the 1.0.9
+                // migration for this field's table (see ___upgrade()) - skip this field for now
+                // rather than fataling the whole cron run for every other field too
+                continue;
+            }
+
+            foreach ($query->fetchAll(PDO::FETCH_ASSOC) as $data) {
+                $page = $pages->get((int)$data['pages_id']);
+
+                // a page this comment belongs to may have been deleted without the comment row
+                // itself being cleaned up - nothing sensible to notify about, so just mark it
+                // handled so it stops being selected on every future run
+                if ($page && $page->id) {
+                    $comments = $this->getBlankValue($page, $field);
+                    $moderationEmails = $comments->getModerationEmail();
+
+                    if ($moderationEmails) {
+                        // Note: $data is passed on as the raw database row, not turned into a full
+                        // FrontendComment via makeComment() - the reminder mail only ever needs a
+                        // handful of plain fields (author/email/text/created/code), so building the
+                        // full, heavy comment object (avatar, links, vote widgets, ...) here would be
+                        // pure overhead for a mail that never renders any of it.
+                        $notifications = $this->wire(new Notifications($comments, $field, $page));
+                        $notifications->sendPendingReminderMail($data, $moderationEmails, $days);
+                    }
+                }
+
+                $update = $this->wire('database')->prepare("UPDATE $field->table SET reminder_sent=1 WHERE id=:id");
+                $update->bindValue(':id', (int)$data['id'], PDO::PARAM_INT);
+                $update->execute();
+            }
+        }
+    }
+
+    /**
      * Sanitize the textarea that there is only on item in one line and return the cleaned array
      * @param string|null $value
      * @return array
      */
     protected function sanitizeMultilineTextarea(string|null $value): array
     {
-        if ($value == null) return [];
+        if ($value == null) {
+            return [];
+        }
 
         // create an array of string with separator \n
         $items = explode("\n", $value);
@@ -618,8 +897,10 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             //validate if all array items contain a valid IP address
             foreach ($dataArray as $key => $email) {
                 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                    $this->wire->error(sprintf($this->_('%s is not a valid email address and has therefore been deleted.'),
-                        $email));
+                    $this->wire->error(sprintf(
+                        $this->_('%s is not a valid email address and has therefore been deleted.'),
+                        $email
+                    ));
                     unset($dataArray[$key]);
                 }
             }
@@ -638,21 +919,53 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     {
         return array(
             'title' => __('FrontendComments', __FILE__),
-            'summary' => __('Field that let you store user comments on a page using the FrontendForms module.',
-                __FILE__),
+            'summary' => __(
+                'Field that let you store user comments on a page using the FrontendForms module.',
+                __FILE__
+            ),
             'href' => 'https://github.com/juergenweb/FieldtypeFrontendComments',
             'icon' => 'comments',
             'installs' => ['InputfieldFrontendComments'],
             'permanent' => false,
-            'version' => '1.0.6',
+            'version' => '2.0.0',
             'requires' => [
-                'FrontendForms>=2.3.12',
+                'FrontendForms>=3.0.2',
                 'PHP>=8.0',
                 'ProcessWire>=3',
                 'LazyCron'
             ],
             'author' => 'Jürgen Kern'
         );
+    }
+
+    /**
+     * Get the configuration fields for the module itself (Modules > Configure > FieldtypeFrontendComments),
+     * as opposed to ___getConfigInputfields() below, which configures a single field of this type.
+     * This currently holds only the notification queue batch size, since that setting applies across
+     * every comment field on the site (the queue table is shared by all of them) rather than to one field.
+     * @param array $data
+     * @return InputfieldWrapper
+     * @throws WireException
+     * @throws WirePermissionException
+     */
+    public static function getModuleConfigInputfields(array $data): InputfieldWrapper
+    {
+        $inputfields = wire(new InputfieldWrapper());
+        $name = 'input_fc_queue_batch';
+
+        /** @var InputfieldInteger $queueBatch */
+        $queueBatch = wire('modules')->get('InputfieldInteger');
+        $queueBatch->attr('name+id', $name);
+        $queueBatch->attr('type', 'number');
+        $queueBatch->attr('value', $data[$name] ?? 20);
+        $queueBatch->attr('min', 1);
+        $queueBatch->set('required', true);
+        $queueBatch->set('label', __('Number of notification emails to send per run'));
+        $queueBatch->set('description', __('New comment notifications are queued in a database table and sent out in batches every 2 minutes via LazyCron, instead of being sent immediately while a visitor waits for their comment to be saved. Enter how many queued emails should be sent per run.'));
+        $queueBatch->set('notes', __('A lower value keeps each run fast on sites with a lot of comment traffic; a higher value clears the queue faster on quieter sites.'));
+        $inputfields->add($queueBatch);
+
+        return $inputfields;
     }
 
     /**
@@ -675,8 +988,11 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     protected function createAdditionalNotesText(array $methods): string
     {
         // create singular/plural default text
-        $text = $this->_n($this->_('This can be overwritten on each comment field by using this method'),
-            $this->_('This can be overwritten on each comment field by using these methods'), count($methods));
+        $text = $this->_n(
+            $this->_('This can be overwritten on each comment field by using this method'),
+            $this->_('This can be overwritten on each comment field by using these methods'),
+            count($methods)
+        );
         $methodsMarkup = [];
         foreach ($methods as $method) {
             $methodsMarkup[] = '<b>' . $method . '</b>';
@@ -758,6 +1074,24 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $schema['code'] = "varchar(128) NOT NULL default ''";
         $schema['remote_flag'] = "tinyint(3) NOT NULL default 0";
         $schema['notification'] = "tinyint(3) NOT NULL default 0";
+        // Whether the address stored in "email" has actually confirmed that it wants to receive
+        // notification emails (double opt-in), separate from the notification preference itself:
+        // "notification" alone only records what the commenter TICKED, but the commenter could have
+        // typed in somebody else's email address - so notification emails must not go out based on
+        // "notification" alone until the owner of that address has confirmed it via a confirmation
+        // link (see FrontendCommentArray::confirmNotificationRemote()). Auto-migrated by
+        // ProcessWire's own Fieldtype/FieldtypeMulti machinery, like every other column here - no
+        // manual ___upgrade() ALTER TABLE is needed for this table (unlike the separate, manually
+        // managed fc_comments_queues table below).
+        $schema['notification_confirmed'] = "tinyint(3) NOT NULL default 0";
+        // Whether a reminder email about this comment still waiting for approval has already been
+        // sent to the moderator(s) (see sendPendingReminders(), hooked to LazyCron::everyDay). Kept
+        // separate from "notification" / "notification_confirmed" above (which are about the
+        // commenter's own reply notifications, not this). Reset back to 0 whenever a comment's
+        // status is (re-)set to "pending approval" (see correctStatusValues()), so a comment that
+        // is reopened for moderation gets its own fresh reminder cycle rather than
+        // being silently skipped forever because it was already reminded about once in the past.
+        $schema['reminder_sent'] = "tinyint(3) NOT NULL default 0";
         $schema['stars'] = "tinyint(3) unsigned default NULL";
         $schema['upvotes'] = "int unsigned default 0";
         $schema['downvotes'] = "int unsigned default 0";
@@ -777,7 +1111,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         // create a table for storing the up- and down-votes user data (user id, browser, date/time,...)
         // This table is for checking if a user has voted within a given time period
         if (!$this->database->tableExists("{$field->getTable()}_votes")) {
-
             $sql = '
             CREATE TABLE ' . $field->getTable() . '_votes (
                 id int unsigned NOT NULL auto_increment,
@@ -841,22 +1174,36 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     public function getCommentByID(Page $page, Field $field, int $id): FrontendComment|null
     {
         $pages = $this->wire()->pages;
-        if (empty($id)) return null;
+        if (empty($id)) {
+            return null;
+        }
 
         //$page = $pages->get((int)$page);
-        if (!$page->id) return null;
+        if (!$page->id) {
+            return null;
+        }
 
         $field = $this->wire()->fields->get($this->wire()->sanitizer->fieldName($field));
 
-        if (!$field || !$field->type instanceof FieldtypeFrontendComments) return null;
+        if (!$field || !$field->type instanceof FieldtypeFrontendComments) {
+            return null;
+        }
         $table = $field->getTable();
         $sql = "SELECT * FROM `$table` WHERE id=:id ";
-        if ($page) $sql .= "AND pages_id=:pageID";
+        if ($page) {
+            $sql .= "AND pages_id=:pageID";
+        }
         $query = $this->wire()->database->prepare($sql);
         $query->bindValue(':id', $id, PDO::PARAM_INT);
-        if ($page) $query->bindValue(':pageID', $page->id, PDO::PARAM_INT);
-        if (!$query->execute()) return null;
-        if (!$query->rowCount()) return null;
+        if ($page) {
+            $query->bindValue(':pageID', $page->id, PDO::PARAM_INT);
+        }
+        if (!$query->execute()) {
+            return null;
+        }
+        if (!$query->rowCount()) {
+            return null;
+        }
         $data = $query->fetch(PDO::FETCH_ASSOC);
         if (!$page) {
             $page = $pages->get((int)$data['pages_id']);
@@ -904,7 +1251,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     public function sanitizeValue(Page $page, Field $field, $value): FrontendCommentArray
     {
         // if given an invalid value, return a valid blank value
-        if (!$value instanceof FrontendCommentArray) return $this->getBlankValue($page, $field);
+        if (!$value instanceof FrontendCommentArray) {
+            return $this->getBlankValue($page, $field);
+        }
         return $value;
     }
 
@@ -937,13 +1286,18 @@ class FieldtypeFrontendComments extends FieldtypeMulti
      */
     public function findParents(int $parent_id, array $parents = []): array
     {
-        if (!$parents)
-            $parents = [];
-        if ($parent_id == 0) {
+        if ($parent_id === 0) {
             $parents[] = 0;
-        } else {
-            $this->findParents($parent_id, $parents);
+            return $parents;
         }
+
+        $parents[] = $parent_id;
+
+        // NOTE: this method has no way to look up parent_id's own parent from just an int -
+        // there is no data source here (no $pages/$comments lookup), so it cannot climb further
+        // than the id it was given. It is currently unused anywhere in this codebase; if you intend
+        // to use it, it likely needs an explicit source (e.g. $pages->get($parent_id)->parent->id,
+        // or a comment lookup) passed in or fetched here - let me know which and I'll wire it up.
         return $parents;
     }
 
@@ -959,24 +1313,30 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     {
 
         // if value ist type of FrontendCommentArray -> return it
-        if ($value instanceof FrontendCommentArray) return $value;
+        if ($value instanceof FrontendCommentArray) {
+            return $value;
+        }
 
         // if no Comment Array value is present ->
         // instantiate a new object with blank values if no value is present
         $commentArray = $this->getBlankValue($page, $field);
 
-        if (empty($value)) return $commentArray;
+        if (empty($value)) {
+            return $commentArray;
+        }
 
-        if (!is_array($value)) $value = [$value];
+        if (!is_array($value)) {
+            $value = [$value];
+        }
 
         $comment_class = self::checkForClass('FrontendComment', 'FrontendComments');
         $frontendFormsConfig = self::getFrontendFormsConfigValues();
 
         // create new comment objects from each item in the array
         foreach ($value as $item) {
-
-
-            if (!is_array($item)) continue;
+            if (!is_array($item)) {
+                continue;
+            }
 
             $comment = $this->wire(new $comment_class($commentArray, $item, $frontendFormsConfig));
             $comment->setTrackChanges(true);
@@ -984,7 +1344,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $comment->set('pages_id', $page->id);
             // add every comment independent of the status to the commentArray
             $commentArray->add($comment);
-
         }
         $commentArray->setTrackChanges(true); // track changes of this comment array
         return $commentArray;
@@ -1001,13 +1360,14 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     public function ___sleepValue(Page $page, Field $field, $value): array
     {
         $sleepValue = [];
-        if (!$value instanceof WireArray) return $sleepValue;
+        if (!$value instanceof WireArray) {
+            return $sleepValue;
+        }
 
         $sanitizer = $this->wire()->sanitizer;
 
         // convert each Comment to an array within sleepValue
         foreach ($value as $comment) {
-
             // sanitize especially values that will be submitted via the form
             $a = array(
                 'id' => $comment->id,
@@ -1023,16 +1383,28 @@ class FieldtypeFrontendComments extends FieldtypeMulti
                 'code' => $comment->code,
                 'remote_flag' => $comment->remote_flag,
                 'notification' => $comment->notification,
+                // Bug found in this session: this column (added for the double opt-in feature) was
+                // never added to this list. Without it, FrontendCommentArray::
+                // confirmNotificationRemote() setting $comment->notification_confirmed = 1 in memory
+                // had no effect at all on the database - savePageField() rebuilds every comment's row
+                // from THIS array on every save, silently dropping any property not listed here. The
+                // confirm link would still find the comment and show a success message, but the very
+                // next page load (or any other save) would revert it back to unconfirmed.
+                'notification_confirmed' => $sanitizer->int($comment->notification_confirmed),
                 'created' => $comment->created,
                 'stars' => $comment->stars,
                 'upvotes' => $comment->upvotes,
                 'downvotes' => $comment->downvotes,
                 'spam_update' => $comment->spam_update,
-                'moderation_feedback' => $sanitizer->string($comment->moderation_feedback)
+                // was $sanitizer->string(...), which strips all HTML - since this field is edited
+                // via InputfieldCKEditor (Bold, Italic, Underline, Blockquote, lists, links), that
+                // silently flattened every formatting choice a moderator made back to plain text on
+                // every save. purify() keeps a safe HTML subset instead, matching what the editor
+                // actually offers.
+                'moderation_feedback' => $sanitizer->purify($comment->moderation_feedback)
             );
 
             $sleepValue[] = $a;
-
         }
 
         return $sleepValue;
@@ -1045,6 +1417,32 @@ class FieldtypeFrontendComments extends FieldtypeMulti
     public static function getFrameWork(): string
     {
         return ucfirst(pathinfo(self::getFrontendFormsConfigValues()['input_framework'], PATHINFO_FILENAME));
+    }
+
+    /**
+     * Resolve which template file should actually be used to render a theme markup file:
+     * a site-level override if one exists, otherwise the module's own default file.
+     *
+     * Lookup order:
+     * 1. site/assets/{self::templateOverridePath}/{$theme}/{$relativeFile}
+     * 2. $moduleDefault (the module's shipped file, passed in by the caller)
+     *
+     * This lets a site developer override a single theme template (e.g. the markup of a single
+     * comment) without touching or copying the whole module - they only need to place a file at
+     * the override path above, using the exact same filename as the one shipped with the module.
+     * The override survives module updates since nothing under site/assets/ is touched by them.
+     *
+     * @param string $relativeFile filename of the template, e.g. 'comment.php'
+     * @param string $moduleDefault absolute path to the module's own file, used as fallback
+     * @param string|null $theme theme name, e.g. 'Bootstrap5'; defaults to the active framework
+     * @return string absolute path to the file that should be used
+     * @throws WireException
+     */
+    public static function resolveTemplateFile(string $relativeFile, string $moduleDefault, ?string $theme = null): string
+    {
+        $theme = $theme ?? self::getFrameWork();
+        $overrideFile = wire('config')->paths->assets . self::templateOverridePath . $theme . '/' . $relativeFile;
+        return is_file($overrideFile) ? $overrideFile : $moduleDefault;
     }
 
     /**
@@ -1274,7 +1672,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             $emailTemplate->set('description', $this->_('Select if you want to use a HTML template for the notification emails or not.'));
             $emailTemplate->set('notes', $this->_('Inherit from FrontendForms will take the setting from this module.'));
             $emailFieldset->add($emailTemplate);
-
         }
 
         /** @var InputfieldSelect $emailtype */
@@ -1342,7 +1739,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         if ($languages) {
             $sender->useLanguages = true;
             foreach ($languages as $language) {
-                if ($language->isDefault()) continue;
+                if ($language->isDefault()) {
+                    continue;
+                }
                 $sender->attr("value$language", (string)$field->get($name . $language->id));
             }
         }
@@ -1369,12 +1768,28 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $name = 'input_fc_status_change_notification';
         $statusnotification->attr('name+id', $name);
         $statusnotification->addOption(FieldtypeFrontendComments::approved, sprintf($this->_('Send notification email if status has been changed to approved'), FieldtypeFrontendComments::statusTexts()[FieldtypeFrontendComments::approved]));
-        $statusnotification->addOption(FieldtypeFrontendComments::spam, sprintf($this->_('Send notification email if status has been changed to SPAM'), FieldtypeFrontendComments::statusTexts()[FieldtypeFrontendComments::approved]));
+        $statusnotification->addOption(FieldtypeFrontendComments::spam, sprintf($this->_('Send notification email if status has been changed to SPAM'), FieldtypeFrontendComments::statusTexts()[FieldtypeFrontendComments::spam]));
         $statusnotification->attr('value', $this->getConfigValue($field, $statusnotification));
         $statusnotification->set('label', $this->_('Send a notification email to the author of a comment on status change'));
         $statusnotification->set('description', $this->_('If a moderator changes the status of a comment, select on which status change the author should be informed via email.'));
         $statusnotification->set('notes', $this->_('If a box is checked, the commenter will receive an email if the comment status will be changed by a moderator in the backend or via email link. You can disable the sending of emails by unchecking a box.'));
         $emailFieldset->add($statusnotification);
+
+        /** @var InputfieldInteger $pendingReminderDays */
+        // number of days a comment may stay "pending approval" before the moderator(s) are reminded
+        // about it again via email (see sendPendingReminders(), hooked to LazyCron::everyDay)
+        $pendingReminderDays = $this->modules->get('InputfieldInteger');
+        $name = 'input_fc_pendingReminderDays';
+        $pendingReminderDays->attr('name+id', $name);
+        $pendingReminderDays->attr('type', 'number');
+        $pendingReminderDays->attr('value', $this->getConfigValue($field, $pendingReminderDays));
+        $pendingReminderDays->attr('size', 10);
+        $pendingReminderDays->attr('min', 0);
+        $pendingReminderDays->set('required', true);
+        $pendingReminderDays->set('label', $this->_('Remind moderator(s) about pending comments after this many days'));
+        $pendingReminderDays->set('description', $this->_('If a comment is still waiting for approval after the specified number of days, a reminder email is sent once to the moderator(s) configured above.'));
+        $pendingReminderDays->set('notes', $this->_('If you want to disable this reminder, please select 0. Each comment is reminded about only once - if you change the status back to "pending approval" later on, it becomes eligible for a reminder again after this many days.'));
+        $emailFieldset->add($pendingReminderDays);
 
         $inputfields->append($emailFieldset);
 
@@ -1423,11 +1838,14 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         if ($languages) {
             $formHead->set('useLanguages', true);
             foreach ($languages as $language) {
-                if ($language->isDefault()) continue;
+                if ($language->isDefault()) {
+                    continue;
+                }
                 $formHead->attr("value$language", (string)$field->get($name . $language->id));
             }
-            if ($languages->count() > 1)
+            if ($languages->count() > 1) {
                 $disableFormHead = $this->_('To disable the display of the default heading, enter "none" inside the input field of the default language.');
+            }
         }
         $formHead->set('description', $this->_('This heading appears at the top of the comment form.'));
         $formHead->set('columnWidth', 100);
@@ -1557,7 +1975,9 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         if ($languages && $this->wire('modules')->isInstalled('FieldtypeURLLanguage')) {
             $externalPage->useLanguages = true;
             foreach ($languages as $language) {
-                if ($language->isDefault()) continue;
+                if ($language->isDefault()) {
+                    continue;
+                }
                 $externalPage->attr("value$language", (string)$field->get($name . $language->id));
             }
         }
@@ -1586,11 +2006,14 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         if ($languages) {
             $commentHead->set('useLanguages', true);
             foreach ($languages as $language) {
-                if ($language->isDefault()) continue;
+                if ($language->isDefault()) {
+                    continue;
+                }
                 $commentHead->attr("value$language", (string)$field->get($name . $language->id));
             }
-            if ($languages->count() > 1)
+            if ($languages->count() > 1) {
                 $disableCommentHead = $this->_('To disable the display of the heading enter "none" inside the input field of the default language.');
+            }
         }
         $commentHead->set('columnWidth', 100);
         $commentHead->set('label', $this->_('Comment list headline'));
@@ -1716,7 +2139,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         // Remove CSS on Frontend
         $removeCSS = $this->wire('modules')->get('InputfieldCheckbox');
         $name = 'input_removeFrontendCommentsCSS';
-        $removeCSS->attr('name', $name);
+        $removeCSS->attr('name+id', $name);
         $removeCSS->attr('checked', $field->$name == 1 ? 'checked' : '');
         $removeCSS->set('columnWidth', 50);
         $removeCSS->set('label', $this->_('CSS setting'));
@@ -1757,8 +2180,10 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $captcha->attr('name+id', $name);
         // grab CAPTCHA types from the FrontendForms module
         $modulePath = $this->wire('config')->get('paths')->siteModules . 'FrontendForms/';
-        $captchaTypes = $this->wire('files')->find($modulePath . 'Formelements/Captcha/variants/',
-            ['recursive' => 0]);
+        $captchaTypes = $this->wire('files')->find(
+            $modulePath . 'Formelements/Captcha/variants/',
+            ['recursive' => 0]
+        );
         $captcha->addOption('inherit', $this->_('Inherit from FrontendForms'));
         $captcha->addOption('none', $this->_('No CAPTCHA'));
         foreach ($captchaTypes as $file) {
@@ -1859,7 +2284,7 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $text .= '$comments->setFormHeadlineText("My form headline");<br>';
         $text .= '$comments->showFormAfterComments(false);<br>';
         $text .= '$comments->removeJS(true);<br>';
-        $text .= '$comments->useCSS(false);<br>';
+        $text .= '$comments->removeCSS(false);<br>';
         $text .= '$comments->setFormHeadlineText("none");<br>';
         $text .= 'echo $comments->render();';
         $text .= '</code></pre>';
@@ -1874,7 +2299,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
         // output all input fields (parent and custom)
         return $inputfields;
-
     }
 
     /**
@@ -1886,17 +2310,18 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
         // create a table for queuing emails that will be sent to users
         if (!$this->database->tableExists(self::queueTable)) {
-
             $sql = '
             CREATE TABLE ' . self::queueTable . ' (
                 id int unsigned NOT NULL auto_increment,
                 parent_id int unsigned NOT NULL,
-                comment_id int unsigned NOT NULL,              
+                comment_id int unsigned NOT NULL,
                 email varchar(255) NOT NULL,
                 page_id int unsigned NOT NULL,
                 field_id int unsigned NOT NULL,
+                claimed int unsigned NOT NULL default 0,
                 PRIMARY KEY (id),
-                INDEX created (comment_id)
+                INDEX created (comment_id),
+                INDEX claimed (claimed)
             )
             ';
 
@@ -1917,7 +2342,92 @@ class FieldtypeFrontendComments extends FieldtypeMulti
 
         // delete the queue table
         $this->database->query("DROP TABLE IF EXISTS " . self::queueTable);
+    }
 
+    /**
+     * Runs automatically when ProcessWire detects that the installed module version is older
+     * than this file's version (see getModuleInfo()['version'])
+     * @param string|int $fromVersion
+     * @param string|int $toVersion
+     * @return void
+     */
+    public function ___upgrade($fromVersion, $toVersion): void
+    {
+        // 1.0.7: add the "claimed" column to the queue table for sites that installed this
+        // module before that column existed (see queueTableHasClaimedColumn() / sendQueuedEmails())
+        if ($this->database->tableExists(self::queueTable) && !$this->queueTableHasClaimedColumn()) {
+            $this->database->exec("ALTER TABLE " . self::queueTable . " ADD COLUMN claimed int unsigned NOT NULL default 0 AFTER field_id, ADD INDEX claimed (claimed)");
+        }
+
+        // 1.0.8: add the "notification_confirmed" column (double opt-in for notification emails,
+        // see getDatabaseSchema()) to every EXISTING comment field's own table. A brand new comment
+        // field created after this version gets the column automatically, straight from
+        // getDatabaseSchema() - but a comment field's table that already existed before this
+        // version does NOT get retroactively altered just because this file's version number went
+        // up: ProcessWire only compares/syncs a Fieldtype-managed table's schema against
+        // getDatabaseSchema() when that specific FIELD is saved (Setup > Fields > field > Save),
+        // not on every request or module upgrade. Without this loop, any query referencing the new
+        // column (e.g. FrontendComment::addCommentToQueueTable()) fails with "Unknown column" on
+        // every site that updated the module code without also re-saving each comment field.
+        foreach ($this->wire('fields') as $field) {
+            if (!($field->type instanceof self)) {
+                continue;
+            }
+            $table = $field->table;
+            if ($table && $this->database->tableExists($table) && !$this->fieldTableHasNotificationConfirmedColumn($table)) {
+                $this->database->exec("ALTER TABLE " . $this->database->escapeTable($table) . " ADD COLUMN notification_confirmed tinyint(3) NOT NULL default 0");
+            }
+        }
+
+        // 1.0.9: add the "reminder_sent" column (see getDatabaseSchema() / sendPendingReminders())
+        // to every EXISTING comment field's own table, for the exact same reason and via the exact
+        // same mechanism as the "notification_confirmed" migration right above.
+        foreach ($this->wire('fields') as $field) {
+            if (!($field->type instanceof self)) {
+                continue;
+            }
+            $table = $field->table;
+            if ($table && $this->database->tableExists($table) && !$this->fieldTableHasReminderSentColumn($table)) {
+                $this->database->exec("ALTER TABLE " . $this->database->escapeTable($table) . " ADD COLUMN reminder_sent tinyint(3) NOT NULL default 0");
+            }
+        }
+    }
+
+    /**
+     * Check whether the queue table already has the "claimed" column
+     * (used by ___upgrade() to migrate sites that installed this module before that column existed)
+     * @return bool
+     */
+    protected function queueTableHasClaimedColumn(): bool
+    {
+        $result = $this->database->query("SHOW COLUMNS FROM " . self::queueTable . " LIKE 'claimed'");
+        return (bool)$result->rowCount();
+    }
+
+    /**
+     * Check whether a given comment field's own table already has the "notification_confirmed"
+     * column (used by ___upgrade() to migrate sites that installed/updated this module before that
+     * column existed - see the 1.0.8 block above)
+     * @param string $table
+     * @return bool
+     */
+    protected function fieldTableHasNotificationConfirmedColumn(string $table): bool
+    {
+        $result = $this->database->query("SHOW COLUMNS FROM " . $this->database->escapeTable($table) . " LIKE 'notification_confirmed'");
+        return (bool)$result->rowCount();
+    }
+
+    /**
+     * Check whether a given comment field's own table already has the "reminder_sent" column
+     * (used by ___upgrade() to migrate sites that installed/updated this module before that column
+     * existed - see the 1.0.9 block above)
+     * @param string $table
+     * @return bool
+     */
+    protected function fieldTableHasReminderSentColumn(string $table): bool
+    {
+        $result = $this->database->query("SHOW COLUMNS FROM " . $this->database->escapeTable($table) . " LIKE 'reminder_sent'");
+        return (bool)$result->rowCount();
     }
 
     /**
@@ -1940,27 +2450,22 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             'input_fc_emailTemplate' => 'inherit',
             'input_fc_emailtype' => 'text',
             'input_fc_default_to' => '',
-            'input_fc_defaultPWField_to' => '',
-            'input_fc_email' => '',
-            'input_fc_sender' => '',
+            'input_fc_emailfield' => '',
+            'input_fc_from_name' => '',
             'input_fc_comment_notification' => 1,
-            'input_fc_status_change_notification' => 1,
-            'input_fc_showLinkGuidelines' => 0,
-            'input_fc_outputorder' => 1,
-            'input_fc_formheadline' => '',
+            'input_fc_status_change_notification' => [],
+            'input_fc_pendingReminderDays' => 1,
+            'input_fc_form_headline' => '',
             'input_fc_form_tag_headline' => 'h2',
             'input_fc_privacy_show' => 2,
             'input_fc_stars' => 0,
             'input_fc_counter' => 0,
-            'input_privacy_type' => 2,
             'input_guidelines_type' => 0,
-            'input_fc_commentsheadline' => '',
+            'input_fc_comments_headline' => '',
             'input_fc_comments_tag_headline' => 'h2',
-            'input_fc_depth' => 3,
             'input_fc_sort' => 0,
-            'input_fc_voting' => 0,
+            'input_fc_vote' => 0,
             'input_fc_voting_lock' => 3,
-            'input_dateformatcomment' => 0,
             'input_removeFrontendCommentsJS' => 0,
             'input_removeFrontendCommentsCSS' => 0,
             'input_fc_reverse_output' => 0,
@@ -1971,7 +2476,6 @@ class FieldtypeFrontendComments extends FieldtypeMulti
             'input_fc_reply_depth' => 3,
             'input_fc_dateformat' => 0
         ];
-
     }
 
     /**
@@ -1985,6 +2489,4 @@ class FieldtypeFrontendComments extends FieldtypeMulti
         $name = $inputfield->name;
         return $field->$name ?? $this->getDefaultData()[$name];
     }
-
 }
-

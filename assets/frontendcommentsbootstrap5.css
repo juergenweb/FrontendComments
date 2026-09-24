@@ -9,10 +9,10 @@ a.fc-vote-link:hover {
 }
 
 @media (max-width: 600px) {
-
-    .fc-comment-button, .fc-comment-resetbutton, .fc-cancel-button {
+    .fc-comment-button,
+    .fc-comment-resetbutton,
+    .fc-cancel-button {
         margin-bottom: 5px;
         width: 100%;
     }
-
 }

@@ -67,6 +67,18 @@
         },
         "d6ff9a5ffc7ee0f510916fe97be590c6": {
             "text": "Leider wurden keine Kommentare mit der angegebenen E-Mail-Adresse gefunden."
+        },
+        "7e68f9bd756a96830989da2bd6a06116": {
+            "text": "F\u00fcr diesen Kommentar gibt es nichts zu best\u00e4tigen \u2013 es wurden keine Benachrichtigungen angefordert."
+        },
+        "1120db22385a5f54c7268d3649cd555a": {
+            "text": "Diese Benachrichtigungsanfrage wurde bereits best\u00e4tigt."
+        },
+        "e0a545fe4de7caa33d92f1662ec798f3": {
+            "text": "Vielen Dank \u2013 Ihre E-Mail-Adresse wurde best\u00e4tigt. Sie erhalten nun wie gew\u00fcnscht Benachrichtigungs-E-Mails."
+        },
+        "e0db42553862b1263e46d8c6359a6970": {
+            "text": "Leider ist beim Best\u00e4tigen dieser Benachrichtigungsanfrage ein Fehler aufgetreten."
         }
     }
 }

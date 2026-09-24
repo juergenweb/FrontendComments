@@ -1,6 +1,7 @@
 /* FrontendComments field for Pico 2 Markup */
 
-article.pico-comment header h6, article.pico-comment header p {
+article.pico-comment header h6,
+article.pico-comment header p {
     margin-bottom: 0;
 }
 
@@ -9,11 +10,10 @@ article.pico-comment header {
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(1, 1fr);
     gap: 0;
-
 }
 
-article.pico-comment .avatar img  {
-        border-radius: 50%;
+article.pico-comment .avatar img {
+    border-radius: 50%;
 }
 
 article.pico-comment .meta {
@@ -24,7 +24,8 @@ article.pico-comment footer {
     text-align: right;
 }
 
-article.pico-comment footer .fc-reply-form-wrapper, article.pico-comment footer .fc-novote {
+article.pico-comment footer .fc-reply-form-wrapper,
+article.pico-comment footer .fc-novote {
     text-align: left;
 }
 
@@ -34,7 +35,7 @@ a.fc-vote-link {
 }
 
 .fcm-avatar {
-    text-align:center;
+    text-align: center;
 }
 
 a.fc-comment-reply {
@@ -45,12 +46,13 @@ a.fc-comment-reply {
     font-weight: bold;
 }
 
-.website-link, .creation-date {
+.website-link,
+.creation-date {
     font-size: 70%;
 }
 
 div.votes {
-    display:inline-block;
+    display: inline-block;
 }
 
 article.pico-comment footer span {
@@ -58,7 +60,7 @@ article.pico-comment footer span {
 }
 
 article.pico-comment .fc-votebadge {
-    background-color: #FF1493;
+    background-color: #ff1493;
     color: #fff;
     padding: 4px 8px;
     text-align: center;
@@ -67,7 +69,7 @@ article.pico-comment .fc-votebadge {
 }
 
 article.pico-comment .fc-votebadge.upvote {
-    background-color: #64DD17;
+    background-color: #64dd17;
 }
 
 article.pico-comment .star-rating-result .star {
@@ -76,14 +78,14 @@ article.pico-comment .star-rating-result .star {
 
 article.pico-comment .comment-feedback {
     margin-top: 15px;
-    background: rgb(231, 234, 239.5);
+    background: rgb(231, 234, 240);
 }
 
-article.pico-comment .comment-feedback >* {
+article.pico-comment .comment-feedback > * {
     font-style: italic;
 }
 
-    /** Pagination */
+/** Pagination */
 
 .page-of-text {
     margin-bottom: 15px;
@@ -111,9 +113,11 @@ ul.pagination {
     border: 0;
     list-style-type: none;
 }
+
 .pagination li:last-child {
     margin: 0;
 }
+
 .pagination li a {
     width: 100%;
     height: 40px;
@@ -121,21 +125,20 @@ ul.pagination {
     text-align: center;
     line-height: 40px;
     font-weight: 400;
-
-    color: #2E2929;
+    color: #2e2929;
     cursor: pointer;
     border-radius: 3px;
     background: #ddd;
-    transition: background-color .25s ease-in-out;
-}
-.pagination li a:hover, .pagination li.currentpage a {
-    background-color: #FF1493;
-    color: #FFF;
+    transition: background-color 0.25s ease-in-out;
 }
 
+.pagination li a:hover,
+.pagination li.currentpage a {
+    background-color: #ff1493;
+    color: #fff;
+}
 
 @media (max-width: 600px) {
-
     article.pico-comment .meta {
         grid-column: 3 / span 3;
     }

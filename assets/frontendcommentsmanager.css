@@ -1,80 +1,153 @@
+#fcm-filter-form > div {
+    margin-bottom: 10px;
+}
 
+.fcm-link-nav {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 35px;
+}
 
-#fcm-filter-form > div {margin-bottom: 10px}
-.fcm-link-nav {list-style-type: none; padding-left: 0;margin-top: 35px;}
-.fcm-link-nav li {display:inline;}
-.fcm-link-nav li span::after {content: "|"; padding-right: 10px;}
-.fcm-link-nav li:last-child span::after {content: none;}
-.fcm-link-nav a {margin-right: 12px;}
+.fcm-link-nav li {
+    display: inline;
+}
+
+.fcm-link-nav li span::after {
+    content: "|";
+    padding-right: 10px;
+}
+
+.fcm-link-nav li:last-child span::after {
+    content: none;
+}
+
+.fcm-link-nav a {
+    margin-right: 12px;
+}
+
 .comment-changed {
     position: absolute;
-    top:0;
-    padding: 5px 0;
-}
-.fcm-comment .fa, .fcm-link-nav .fa {margin-right: 5px;}
-.fcm-comment td {vertical-align: middle;}
-.fcm-comment-content {padding: 10px 0;}
-.fcm-comment-feedback {margin-top: 30px; }
-.fcm-comment-feedback-text {background:#fff;}
-.fcm-comment-wrapper {padding-bottom: 20px; border-bottom: 1px dashed #000;}
-.fcm-comment-wrapper:last-child {border-bottom: none;}
-#fcmm-comment-list pre {
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    text-align: justify;
-}
-#fcm-filter-tags {list-style-type: none; padding-left: 0}
-#fcm-filter-tags li {display:inline-block;
-    margin: 0 10px 5px 0;
-    border: 1px solid #dee2e5;
-    background-color: #fff;
-    border-radius: 10px;
-    padding: 6px 15px;
-    color: #a9b1b5;
-    transition: all 300ms ease-in-out;
-}
-
-.comment-changed {
+    top: 0;
     padding: 2px 5px;
-    display:inline-block;
-    background: #F26D20;
+    display: inline-block;
+    background: #f26d20;
     color: #fff;
     margin: 5px 0;
     border-radius: 5px;
 }
 
+.fcm-comment .fa,
+.fcm-link-nav .fa {
+    margin-right: 5px;
+}
+
+.fcm-comment td {
+    vertical-align: middle;
+}
+
+.fcm-comment-content {
+    padding: 10px 0;
+}
+
+.fcm-comment-feedback {
+    margin-top: 30px;
+}
+
+.fcm-comment-feedback-text {
+    background: #fff;
+}
+
+.fcm-comment-wrapper {
+    padding-bottom: 20px;
+    border-bottom: 1px dashed #000;
+}
+
+.fcm-comment-wrapper:last-child {
+    border-bottom: none;
+}
+
+#fcmm-comment-list pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    text-align: justify;
+}
+
+#fcm-filter-tags {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+#fcm-filter-tags li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 5px 8px 5px 14px;
+    border: 1px solid #dee2e5;
+    background-color: #f5f7f8;
+    border-radius: 999px;
+    color: #5c6770;
+    font-size: 0.9em;
+    line-height: 1.4;
+    cursor: pointer;
+    transition:
+        background-color 200ms ease-in-out,
+        border-color 200ms ease-in-out,
+        color 200ms ease-in-out;
+}
+
+#fcm-filter-tags li .fcm-filter-tag-label {
+    font-weight: 600;
+    color: #333;
+}
+
 #fcm-filter-tags li::after {
-    content: 'X';
-    display:inline-block;
-    text-align:center;
-    background: red;
-    color: #fff;
-    margin-left: 5px;
+    content: "";
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    line-height: 20px;
+    background-color: #b9c0c5;
+    /* a hand-drawn X (two crossed lines) instead of the "\00d7" text glyph used previously - a
+       glyph's ink is rarely centered exactly on its own line box (depends on font metrics/
+       rendering engine), which is why it used to sit visibly off-center inside the circle; an SVG
+       cross drawn with explicit coordinates and centered via background-position is pixel-perfect
+       in every browser regardless of the font in use. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round'%3E%3Cline x1='6' y1='6' x2='18' y2='18'/%3E%3Cline x1='18' y1='6' x2='6' y2='18'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 9px 9px;
+    transition: background-color 200ms ease-in-out;
 }
 
-#fcm-filter-tags li:hover{
-    color: #fff;
-    cursor:pointer;
-    background-color: #63d3e1;
+#fcm-filter-tags li:hover {
+    border-color: #63d3e1;
+    background-color: #eaf9fb;
 }
 
+#fcm-filter-tags li:hover .fcm-filter-tag-label {
+    color: #24333d;
+}
 
-
+#fcm-filter-tags li:hover::after {
+    background-color: #e04b4b;
+}
 
 /** =====================
 * Responsive
 ========================*/
 @media only screen and (min-width: 760px) {
+    #fcm-filter-form {
+        display: flex;
+        gap: 30px;
+    }
 
-    #fcm-filter-form {display:flex; gap: 30px;}
-
-    #fcm-filter-form > div {flex: 1 1 0;}
-
-
-
-
+    #fcm-filter-form > div {
+        flex: 1 1 0;
+    }
 }

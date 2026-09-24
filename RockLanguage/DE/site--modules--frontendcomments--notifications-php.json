@@ -2,9 +2,6 @@
     "file": "site\/modules\/FrontendComments\/Notifications.php",
     "textdomain": "site--modules--frontendcomments--notifications-php",
     "translations": {
-        "cb4e3114336d9bafb764a393cde7fcda": {
-            "text": "kommentar-benachrichtigung"
-        },
         "e64cbfaa522a2c58dffcc4644da8381c": {
             "text": "Benachrichtigung nur bei Antworten auf diesen Kommentar"
         },
@@ -97,6 +94,42 @@
         },
         "b78bfc5bef9c917ed75e46a535922c8d": {
             "text": "Wenn Sie keine weiteren Mails mehr \u00fcber neue Kommentare erhalten m\u00f6chten, klicken Sie bitte auf den nachfolgenden Link."
+        },
+        "d5348b9543b798d12f3f750c8d57705b": {
+            "text": "Erinnerung: Ein Kommentar wartet noch auf Genehmigung."
+        },
+        "aeba44daa2be8a29174eab425dbd26e5": {
+            "text": "Bitte \u00fcberpr\u00fcfen Sie diesen ausstehenden Kommentar."
+        },
+        "0214e0f6645e1745bcb690158737f37e": {
+            "text": "Ein Kommentar wartet noch auf Genehmigung."
+        },
+        "49ee3087348e8d44e1feda1917443987": {
+            "text": "="
+        },
+        "ce8ae9da5b7cd6c3df2929543a9af92d": {
+            "text": "E-Mail"
+        },
+        "0be8406951cdfda82f00f79328cf4efc": {
+            "text": "Kommentar"
+        },
+        "08347dc032a37146e12215cd8dbb40de": {
+            "text": "Geschrieben am"
+        },
+        "fdb4db9fad09fb7844943f645db276da": {
+            "text": "Bitte best\u00e4tigen Sie Ihre E-Mail-Adresse."
+        },
+        "f055f93ee3a1231ce8e13ae9476cf71d": {
+            "text": "Jemand hat diese E-Mail-Adresse verwendet, um Benachrichtigungen \u00fcber neue Kommentare auf einer Website anzufordern. Wenn Sie dies waren, best\u00e4tigen Sie diese Anfrage bitte, indem Sie auf die Schaltfl\u00e4che unten klicken."
+        },
+        "33e85cc28680dac20ee31aaa9de9f732": {
+            "text": "Wenn Sie diese Anfrage nicht gestellt haben, k\u00f6nnen Sie diese E-Mail einfach ignorieren \u2013 es werden keine weiteren E-Mails an Sie gesendet, solange diese Anfrage nicht best\u00e4tigt wird."
+        },
+        "253d73eb3bcb3a9731d113df98b08d6c": {
+            "text": "Benachrichtigungsanfrage best\u00e4tigen"
+        },
+        "1f617d4ee31e9079683591b1eccca566": {
+            "text": "Bitte best\u00e4tigen Sie Ihre Benachrichtigungsanfrage."
         }
     }
 }

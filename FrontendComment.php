@@ -1,16 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FrontendComments;
 
 /*
-     * Class to create and render a single comment including the reply form
-     *
-     * Created by Jürgen K.
-     * https://github.com/juergenweb
-     * File name: FrontendComment.php
-     * Created: 24.12.2024
-     */
+ * Class to create and render a single comment including the reply form
+ *
+ * Created by Jürgen K.
+ * https://github.com/juergenweb
+ * File name: FrontendComment.php
+ * Created: 24.12.2024
+ */
 
 use Exception;
 use FrontendForms\Button;
@@ -24,17 +25,18 @@ use ProcessWire\Field;
 use ProcessWire\FieldtypeFrontendComments;
 use ProcessWire\Page;
 use ProcessWire\PageImage;
+use ProcessWire\TemplateFile;
 use ProcessWire\WireData;
 use ProcessWire\WireException;
 use ProcessWire\WirePermissionException;
+
 use function ProcessWire\wire;
 
 class FrontendComment extends WireData
 {
-
-    const flagNotifyNone = 0; // Flag to indicate that the author of this comment does not want to be notified of replies
-    const flagNotifyReply = 1; //Flag to indicate the author of this comment wants to be notified of replies to their comment
-    const flagNotifyAll = 2; // Flag to indicate the author of this comment wants to be notified of all comments on the page
+    public const flagNotifyNone = 0; // Flag to indicate that the author of this comment does not want to be notified of replies
+    public const flagNotifyReply = 1; //Flag to indicate the author of this comment wants to be notified of replies to their comment
+    public const flagNotifyAll = 2; // Flag to indicate the author of this comment wants to be notified of all comments on the page
 
     protected Page $page; // the page object the comment lives on
     protected Field $field; // the field object the comment is part of
@@ -53,6 +55,14 @@ class FrontendComment extends WireData
     protected TextElements $feedbackText;
     protected Link $replyLink;
     protected Link $websiteLink;
+
+    /**
+     * Absolute path to a theme-specific template file used to compose the markup of a single comment.
+     * Set this in a theme subclass' constructor (e.g. __DIR__ . '/templates/comment.php') to switch
+     * ___renderComment() from PHP string concatenation to a plain HTML template with placeholders.
+     * Left empty, renderCommentTemplate() falls through to the caller-supplied $fallback markup.
+     */
+    protected string $commentTemplateFile = '';
 
     /**
      * Create a new comment object
@@ -74,7 +84,9 @@ class FrontendComment extends WireData
         $this->frontendFormsConfig = $frontendFormsConfig;
 
         foreach ($comment as $name => $value) {
-            if ($name === 'data') $name = 'text';
+            if ($name === 'data') {
+                $name = 'text';
+            }
             // add "Guest" as the name if no name is entered
             if ($name === 'author') {
                 $value = ($value == '') ? $this->_('Guest') : $value;
@@ -82,7 +94,6 @@ class FrontendComment extends WireData
             $this->set('page', $comments->getPage());
             $this->set('field', $comments->getField());
             $this->set($name, $value);
-
         }
 
         // Create all comment objects
@@ -96,13 +107,22 @@ class FrontendComment extends WireData
         $this->createCommentFeedback();
         $this->createReplyLink();
 
+        // Markup of a single comment lives in templates/comment.php (module root, next to this file) -
+        // this is the "None"/no-framework default, the same mechanism the theme subclasses use. A theme
+        // subclass (FrontendCommentBootstrap5 etc.) calls parent::__construct() first and then overwrites
+        // this with its own template path right after, so this default only takes effect when no theme
+        // subclass is involved at all - see FieldtypeFrontendComments::resolveTemplateFile().
+        $this->commentTemplateFile = FieldtypeFrontendComments::resolveTemplateFile(
+            'comment.php',
+            __DIR__ . '/templates/comment.php'
+        );
     }
 
     /**
      * Get the creation date of the comment depending on the settings
      * @param int|string $date
      * @param int|null $format
-     * @return FrontendComment
+     * @return string
      * @throws WireException
      */
     protected function getFormattedCommentCreationDate(int|string $date, null|int $format): string
@@ -242,7 +262,12 @@ class FrontendComment extends WireData
     {
         $this->commentAuthor = $this->wire(new TextElements());
         $this->commentAuthor->setTag('h6');
-        $this->commentAuthor->setContent($this->get('author'));
+        // FrontendForms\Tag::setContent()/renderNonSelfclosingTag() does not escape its content at
+        // all (only attribute values go through htmlspecialchars() there) - "author" is a free-text
+        // value submitted by anonymous visitors via the public comment form, so it must be escaped
+        // here before it reaches setContent(), otherwise a crafted author name is a stored XSS
+        // against every visitor of this page.
+        $this->commentAuthor->setContent($this->wire('sanitizer')->entities($this->get('author')));
         $this->commentAuthor->setAttribute('class', 'fcm-comment-name fcm-by-author');
         return $this->commentAuthor;
     }
@@ -276,7 +301,6 @@ class FrontendComment extends WireData
         $avatar = $this->getUserImage();
         $this->avatar = null;
         if (!is_null($avatar)) {
-
             // create the cropped and resized image first
             $imgWidth = $this->imagesize;
             $thumb = $avatar->size($imgWidth, $imgWidth);
@@ -288,7 +312,6 @@ class FrontendComment extends WireData
             $this->avatar->setAttribute('src', $thumb->url);
             $this->avatar->setAttribute('class', 'avatar');
             $this->avatar->wrap()->setTag('span')->setAttribute('class', 'comment-avatar');
-
         }
         return $this->avatar;
     }
@@ -310,8 +333,9 @@ class FrontendComment extends WireData
     protected function ___renderCommentAvatar(): string
     {
         $out = '';
-        if ($this->getCommentAvatar())
+        if ($this->getCommentAvatar()) {
             $out = $this->getCommentAvatar()->render();
+        }
         return $out;
     }
 
@@ -325,8 +349,9 @@ class FrontendComment extends WireData
         $this->commentCreated = $this->wire(new TextElements());
         $this->commentCreated->setTag('span')->setAttribute('class', 'fcm-comment-created');
 
-        if (!$this->get('created'))
+        if (!$this->get('created')) {
             $this->set('created', time());
+        }
 
         $this->commentCreated->setContent($this->getFormattedCommentCreationDate($this->get('created'), $this->field->get('input_fc_dateformat')));
 
@@ -363,13 +388,14 @@ class FrontendComment extends WireData
     {
         $out = '';
 
-        if (!$show) return $out;
+        if (!$show) {
+            return $out;
+        }
 
         if ($showNull && $stars == null) {
             $stars = 0;
         }
         if (!is_null($stars)) {
-
             $stars = (float)$stars;
             $out = '<div class="fcm-star-rating-result">';
 
@@ -434,7 +460,10 @@ class FrontendComment extends WireData
     protected function createCommentText(): TextElements
     {
         $this->commentText = $this->wire(new TextElements());
-        $this->commentText->setContent($this->get('text'));
+        // see createCommentAuthor() above - setContent() never escapes, and "text" is the visitor's
+        // own free-text comment body, so it must be escaped here (this is the actual stored-XSS
+        // vector: the whole point of this module is to display this value to every site visitor).
+        $this->commentText->setContent($this->wire('sanitizer')->entities($this->get('text')));
         $this->commentText->setAttribute('class', 'fcm-comment-content');
         return $this->commentText;
     }
@@ -506,7 +535,6 @@ class FrontendComment extends WireData
         $this->replyLink->setAttribute('data-field', $this->field->name);
         $this->replyLink->setAttribute('data-parent_id', $this->get('parent_id'));
         $this->replyLink->setAttribute('data-id', $this->get('id'));
-        $this->replyLink->setAttribute('data-ajax', $this->submitAjax ?? '0');
         $this->replyLink->setLinkText($this->_('Reply'));
         return $this->replyLink;
     }
@@ -532,7 +560,6 @@ class FrontendComment extends WireData
 
         // check if the reply link should be shown or not
         if ($level < $this->field->get('input_fc_reply_depth')) {
-
             // check if only logged-in users are allowed to write comments
             if (!$this->field->get('input_fc_loggedin_only')) {
                 $out = $this->getReplyLink()->render();
@@ -699,24 +726,50 @@ class FrontendComment extends WireData
         return (bool)$this->numberOfReplies($status);
     }
 
+    /**
+     * Check if this comment has at least one reply that would actually be rendered on the
+     * frontend (status approved or featured - anything else never reaches display anyway).
+     * Used to decide whether a SPAM-marked comment must still remain reachable in the rendered
+     * tree instead of being fully hidden, see FrontendComments::getCommentListArray() and
+     * isSpamPlaceholder() below.
+     * @return bool
+     */
+    public function hasVisibleReplies(): bool
+    {
+        return $this->numberOfReplies(FieldtypeFrontendComments::approved) > 0
+            || $this->numberOfReplies(FieldtypeFrontendComments::featured) > 0;
+    }
+
     /** Check if the comment is published (true) or not (false)
      * @return bool
      */
     public function isPublished(): bool
     {
-        if (($this->get('status') === FieldtypeFrontendComments::approved) || ($this->get('status') === FieldtypeFrontendComments::featured))
+        if (($this->get('status') === FieldtypeFrontendComments::approved) || ($this->get('status') === FieldtypeFrontendComments::featured)) {
             return true;
+        }
         return false;
     }
 
     /**
      * Get the previous status of a comment if the status has changed now
+     *
+     * NOTE: this used to read $this->getChanges(true)['status'][0], which never actually worked -
+     * ProcessWire only returns real previous values from getChanges(true) when
+     * Wire::trackChangesValues has been explicitly enabled (see Wire::setTrackChanges()); this
+     * module only ever calls setTrackChanges(true)/setTrackChanges(), which enables mere
+     * "did it change" tracking, not value history. The rest of the codebase already works around
+     * this by manually storing the original value in a plain 'old_status' property right after
+     * construction (see FieldtypeFrontendComments::init(), where 'old_status' is set from the
+     * freshly loaded 'status') - this method now reads that same, already-working value instead.
+     * Like the rest of the codebase, it only returns a meaningful value for comment objects that
+     * went through that code path; for any others it returns null.
      * @return int|null
      */
     public function getPreviousCommentStatus(): int|null
     {
-        if (!$this->isChanged('status')) return null;
-        return $this->getChanges(true)['status'][0];
+        $oldStatus = $this->get('old_status');
+        return is_null($oldStatus) ? null : (int)$oldStatus;
     }
 
     /**
@@ -739,7 +792,12 @@ class FrontendComment extends WireData
             $query->execute();
             $results = $query->fetchAll();
             if ($results) {
-                return $results[0]['id'];
+                // PDO (emulated prepares, ProcessWire's own default - see WireDatabasePDO) returns
+                // numeric columns as strings, not ints - under this file's declare(strict_types=1),
+                // returning that raw string from a method typed ": int|null" throws a TypeError, so
+                // it must be cast explicitly here (see FrontendCommentArray::getLastID() for the
+                // same reasoning).
+                return (int)$results[0]['id'];
             } else {
                 return null;
             }
@@ -754,7 +812,7 @@ class FrontendComment extends WireData
      * @return bool|null -> bool if comment has been tried to add to the database, null if comment does not fullfill requirements
      * @throws WireException
      */
-    protected function addCommentToQueueTable(): ?bool
+    public function addCommentToQueueTable(): ?bool
     {
 
         $page = $this->get('page');
@@ -765,7 +823,10 @@ class FrontendComment extends WireData
         $notificationEmails = []; // array containing all email addresses for replies
 
         // 1) Get the mail addresses of all users that have chosen to get informed about new comments
-        $statement = "SELECT email FROM $commentsTable WHERE (pages_id=:page_id AND notification=:notification) OR (pages_id=:page_id AND id=:parent_id AND notification=:parent_notification)";
+        // AND have confirmed (double opt-in, see notification_confirmed in getDatabaseSchema()) that
+        // they actually own that email address - otherwise anyone could tick "notify me" while
+        // typing in someone else's address and have that person receive emails they never asked for.
+        $statement = "SELECT email FROM $commentsTable WHERE (pages_id=:page_id AND notification=:notification AND notification_confirmed=1) OR (pages_id=:page_id AND id=:parent_id AND notification=:parent_notification AND notification_confirmed=1)";
         $query = $database->prepare($statement);
         $query->bindValue(":page_id", $page->get('id'), PDO::PARAM_INT);
         $query->bindValue(":notification", self::flagNotifyAll, PDO::PARAM_INT);
@@ -781,7 +842,6 @@ class FrontendComment extends WireData
                     $notificationEmails[] = $row['email'];
                 }
             }
-
         } catch (Exception $e) {
             $this->log('Message: ' . $e->getMessage());
             return false;
@@ -795,61 +855,73 @@ class FrontendComment extends WireData
         $notificationEmails = array_unique($notificationEmails);
 
         // 4) write all mail addresses into the queue table
-        if ($notificationEmails) {
-
-            // write all receivers into the queue table for later sending of emails
-            $table = FieldtypeFrontendComments::queueTable;
-
-            // create the value string for the data
-            $sendingData = [];
-            foreach ($notificationEmails as $email) {
-
-                //$commentID = $this->get('id') ?? $this->comments->getLastID($this);
-                $commentID = $this->get('id') ?? $this->getCommentIDFromDatabase();
-                $sendingData[] = '(' . $this->get('parent_id') . ',' . $commentID . ',\'' . $email . '\', ' . $field->get('id') . ', ' . $page->get('id') . ')';
-            }
-            $valuesString = 'VALUES' . implode(',', $sendingData);
-
-            // check first if this comment is in the fc_comments_queue table
-            $statement = "SELECT id FROM $table WHERE parent_id=:parent_id AND comment_id=:comment_id AND email=:email AND page_id=:page_id AND field_id=:field_id";
-
-            $query = $database->prepare($statement);
-            $query->bindValue(":parent_id", $this->get('parent_id'), PDO::PARAM_INT);
-            $query->bindValue(":comment_id", $this->get('id'), PDO::PARAM_INT);
-            $query->bindValue(":email", $email, PDO::PARAM_STR);
-            $query->bindValue(":page_id", $page->get('id'), PDO::PARAM_INT);
-            $query->bindValue(":field_id", $field->get('id'), PDO::PARAM_INT);
-
-            $result = false;
-            try {
-                $query->execute();
-                $result = $query->fetch();
-
-            } catch (Exception $e) {
-                $this->log('Message: ' . $e->getMessage());
-            }
-
-            if (!$result) {
-
-                // create the SQL statement and save the entries to the database
-                $statement = "INSERT INTO $table (parent_id, comment_id, email, field_id, page_id) $valuesString";
-
-                $query = $database->prepare($statement);
-
-                try {
-
-                    $query->execute();
-                } catch (Exception $e) {
-                    $this->log('Message: ' . $e->getMessage());
-                    return false;
-                }
-
-                return true;
-            }
+        if (!$notificationEmails) {
             return null;
         }
 
-        return null;
+        // write all receivers into the queue table for later sending of emails
+        $table = FieldtypeFrontendComments::queueTable;
+        $commentID = $this->get('id') ?? $this->getCommentIDFromDatabase();
+
+        $insertedAny = false;
+        $hadError = false;
+
+        // Check + insert PER recipient. Previously, the "is this recipient already queued?"
+        // check ran only once, AFTER the loop that built the list of recipients - by then
+        // $email (the loop variable) still held only the LAST recipient's address, so every
+        // other recipient's "already queued?" state was never actually checked, while the
+        // batched, string-concatenated INSERT below inserted rows for ALL recipients
+        // regardless. That duplicated earlier recipients on repeated runs, or - if the last
+        // recipient happened to already be queued - silently skipped inserting anyone at all,
+        // including brand-new recipients. Checking and inserting per recipient here fixes both
+        // issues, and every value is bound as a parameter instead of being concatenated
+        // straight into the SQL string.
+        foreach ($notificationEmails as $email) {
+            $checkStatement = "SELECT id FROM $table WHERE parent_id=:parent_id AND comment_id=:comment_id AND email=:email AND page_id=:page_id AND field_id=:field_id";
+            $checkQuery = $database->prepare($checkStatement);
+            $checkQuery->bindValue(":parent_id", $this->get('parent_id'), PDO::PARAM_INT);
+            $checkQuery->bindValue(":comment_id", $commentID, PDO::PARAM_INT);
+            $checkQuery->bindValue(":email", $email, PDO::PARAM_STR);
+            $checkQuery->bindValue(":page_id", $page->get('id'), PDO::PARAM_INT);
+            $checkQuery->bindValue(":field_id", $field->get('id'), PDO::PARAM_INT);
+
+            $result = false;
+            try {
+                $checkQuery->execute();
+                $result = $checkQuery->fetch();
+            } catch (Exception $e) {
+                $this->log('Message: ' . $e->getMessage());
+                $hadError = true;
+                continue;
+            }
+
+            if ($result) {
+                // this recipient is already queued for this comment - nothing to do
+                continue;
+            }
+
+            $insertStatement = "INSERT INTO $table (parent_id, comment_id, email, field_id, page_id) VALUES (:parent_id, :comment_id, :email, :field_id, :page_id)";
+            $insertQuery = $database->prepare($insertStatement);
+            $insertQuery->bindValue(":parent_id", $this->get('parent_id'), PDO::PARAM_INT);
+            $insertQuery->bindValue(":comment_id", $commentID, PDO::PARAM_INT);
+            $insertQuery->bindValue(":email", $email, PDO::PARAM_STR);
+            $insertQuery->bindValue(":field_id", $field->get('id'), PDO::PARAM_INT);
+            $insertQuery->bindValue(":page_id", $page->get('id'), PDO::PARAM_INT);
+
+            try {
+                $insertQuery->execute();
+                $insertedAny = true;
+            } catch (Exception $e) {
+                $this->log('Message: ' . $e->getMessage());
+                $hadError = true;
+            }
+        }
+
+        if ($hadError && !$insertedAny) {
+            return false;
+        }
+
+        return $insertedAny ? true : null;
     }
 
     /**
@@ -874,7 +946,6 @@ class FrontendComment extends WireData
         } catch (Exception $e) {
             $this->log('Message: ' . $e->getMessage());
         }
-
     }
 
     /**
@@ -887,19 +958,24 @@ class FrontendComment extends WireData
     {
         $table = FieldtypeFrontendComments::queueTable;
 
-        // delete the entry from the queue table with the give email address
-        $statement = "DELETE FROM $table WHERE email=:email";
+        // Scoped to the page and field this comment belongs to. This method is called when a
+        // user cancels notifications via the remote unsubscribe link, which itself is scoped to
+        // one page (see FrontendCommentArray::saveReplyNotificationRemote(), matched by email +
+        // page id). Previously this DELETE matched only the email address, so unsubscribing on
+        // one page also silently deleted this person's still-pending, unrelated queue entries for
+        // every other page/field where they remain legitimately subscribed.
+        $statement = "DELETE FROM $table WHERE email=:email AND page_id=:page_id AND field_id=:field_id";
 
         $query = $this->wire('database')->prepare($statement);
         $query->bindValue(":email", $this->get('email'), PDO::PARAM_STR);
+        $query->bindValue(":page_id", $this->page->get('id'), PDO::PARAM_INT);
+        $query->bindValue(":field_id", $this->field->get('id'), PDO::PARAM_INT);
 
         try {
             $query->execute();
-            bd('email removed from queue table');
         } catch (Exception $e) {
             $this->log('Message: ' . $e->getMessage());
         }
-
     }
 
     /**
@@ -923,7 +999,6 @@ class FrontendComment extends WireData
         } catch (Exception $e) {
             $this->log('Message: ' . $e->getMessage());
         }
-
     }
 
     /**
@@ -942,7 +1017,6 @@ class FrontendComment extends WireData
         $user = $this->wire('user');
 
         if (!$saveQuiet) {
-
             // update modification time and user of the page where the comment belongs to
             $statement = "UPDATE pages SET modified=:modified, modified_users_id=:userid WHERE id=:id";
             $query = $this->wire('database')->prepare($statement);
@@ -950,7 +1024,6 @@ class FrontendComment extends WireData
             $query->bindValue(":userid", $user->get('id'), PDO::PARAM_INT);
             $query->bindValue(":id", $page->get('id'), PDO::PARAM_INT);
             $query->execute();
-
         }
 
         // update comment inside the database
@@ -964,7 +1037,6 @@ class FrontendComment extends WireData
         $statement = "UPDATE $table SET $valuesString WHERE id=:id AND pages_id=:pages_id;";
         $query = $this->wire('database')->prepare($statement);
         foreach ($values as $key => $data) {
-
             // sanitize value first
             $sanitizer = $data['sanitizer'];
             if (!is_null($sanitizer)) {
@@ -991,7 +1063,108 @@ class FrontendComment extends WireData
     }
 
     /**
-     * Render the comment without using a framework markup
+     * True when this comment's real content must be hidden and replaced by a short "marked as spam"
+     * placeholder (see buildSpamPlaceholderVars() below), instead of showing its actual author/text/etc.
+     *
+     * A SPAM comment normally never reaches render at all - FrontendComments::getCommentsForDisplay()
+     * and getCommentListArray() only keep it in the tree in the first place when it still has approved
+     * or featured replies underneath it (hasVisibleReplies() above), so those replies stay reachable.
+     * This method is what turns that "kept in the tree" decision into "shown as a placeholder" here.
+     * @return bool
+     */
+    public function isSpamPlaceholder(): bool
+    {
+        return $this->get('status') === FieldtypeFrontendComments::spam;
+    }
+
+    /**
+     * Replace the identity- and interaction-revealing template variables (author, avatar, rating,
+     * votes, website link, reply link/form, moderation feedback) with an empty string, and the comment
+     * text itself with a neutral "marked as spam" notice. The timestamp, level/position and status
+     * class are left as they were, so the reply thread underneath still renders in the right place.
+     * @param array $vars
+     * @return array
+     */
+    protected function buildSpamPlaceholderVars(array $vars): array
+    {
+        $suppressed = ['author', 'avatar', 'rating', 'votes', 'websiteLink', 'replyLink', 'replyForm', 'feedbackText', 'noVoteAlert'];
+        foreach ($suppressed as $key) {
+            if (array_key_exists($key, $vars)) {
+                $vars[$key] = '';
+            }
+        }
+
+        if (array_key_exists('commentText', $vars)) {
+            $placeholder = $this->wire(new TextElements());
+            $placeholder->setContent($this->_('This comment has been marked as spam. Its content is no longer shown, but replies to it remain visible below.'));
+            // fcm-comment-spam already exists in frontendcommentsmain.css (background: #eee) - it
+            // was defined there but never actually applied anywhere in the markup until now
+            $placeholder->setAttribute('class', 'fcm-comment-content fcm-comment-spam');
+            $vars['commentText'] = $placeholder->render();
+        }
+
+        if (array_key_exists('statusClass', $vars)) {
+            $vars['statusClass'] = trim($vars['statusClass'] . ' fcm-comment-spam');
+        }
+
+        return $vars;
+    }
+
+    /**
+     * Render a single comment via $this->commentTemplateFile instead of building the markup with string
+     * concatenation in PHP. Every array key in $vars becomes a variable of the same name inside the
+     * template file (e.g. $vars['commentText'] becomes $commentText there).
+     *
+     * Themes with completely different markup (different wrapper tags, different nesting - not just
+     * different CSS classes) can therefore keep their HTML in a real, readable template file instead of
+     * a chain of $out .= '...' lines.
+     *
+     * $commentTemplateFile === '' (never set) is the ONLY case that silently returns $fallback - that is
+     * the legacy/"none" theme, which intentionally does not use a template file. If a theme DID set
+     * $commentTemplateFile but the resulting path does not exist (wrong folder, typo, file not deployed,
+     * broken site-level override path in resolveTemplateFile()), that is a misconfiguration, not a valid
+     * fallback case - it throws instead of silently rendering an empty comment, which is much easier to
+     * miss (no error, just an empty <div class="fc-listitem"> in the markup).
+     *
+     * @param array $vars associative array of pre-rendered markup snippets / scalars for the template
+     * @param string $fallback markup to return when $commentTemplateFile was never set at all
+     * @return string
+     * @throws WireException
+     */
+    protected function renderCommentTemplate(array $vars, string $fallback = ''): string
+    {
+        // Every theme (the "None" default and every framework subclass) funnels its ___renderComment()
+        // through this one method with the same set of $vars keys, so intercepting the spam placeholder
+        // here - instead of in each ___renderComment() override - applies it everywhere at once.
+        if ($this->isSpamPlaceholder()) {
+            $vars = $this->buildSpamPlaceholderVars($vars);
+        }
+
+        if ($this->commentTemplateFile === '') {
+            return $fallback;
+        }
+
+        if (!is_file($this->commentTemplateFile)) {
+            throw new WireException(sprintf(
+                'Comment template file not found: "%s". The theme class (%s) set $commentTemplateFile to this path, but no such file exists - check that it was deployed to the right location, or that resolveTemplateFile() is not pointing at a broken site-level override path.',
+                $this->commentTemplateFile,
+                static::class
+            ));
+        }
+
+        $t = new TemplateFile($this->commentTemplateFile);
+        foreach ($vars as $name => $value) {
+            $t->set($name, $value);
+        }
+
+        return $t->render();
+    }
+
+    /**
+     * Render the comment without using a framework markup.
+     * The actual HTML lives in templates/comment.php (module root) - this method only supplies the
+     * pre-rendered building blocks (avatar, author, votes, ...) as template variables, exactly like
+     * the theme subclasses (FrontendCommentBootstrap5 etc.) do for their own templates.
      * @param string $levelnumber
      * @param int $level
      * @return string
@@ -999,27 +1172,26 @@ class FrontendComment extends WireData
      */
     public function ___renderComment(string $levelnumber, int $level = 0): string
     {
-
         $statusClasses = [
             FieldtypeFrontendComments::featured => 'fcm-featured',
             FieldtypeFrontendComments::approved => 'fcm-approved',
         ];
 
-        $out = '<div class="fcm-comment-box ' . $statusClasses[$this->get('status')] . '"><div class="fcm-comment-head">';
-        $out .= $this->renderNoVoteAlertbox();
-        $out .= $this->renderCommentAvatar();
-        $out .= $this->renderCommentAuthor();
-        $out .= $this->renderCommentCreated();
-        $out .= $this->renderRating();
-        $out .= $this->renderReplyLink($level);
-        $out .= $this->renderVotes();
-        $out .= '</div>';
-        $out .= $this->renderCommentText();
-        $out .= $this->renderFeedbackText();
-        $out .= $this->renderWebsiteLink();
-        $out .= $this->renderReplyForm();
-        $out .= '</div>';
-        return $out;
+        return $this->renderCommentTemplate([
+            'levelnumber' => $levelnumber,
+            'level' => $level,
+            'statusClass' => $statusClasses[$this->get('status')] ?? '',
+            'noVoteAlert' => $this->renderNoVoteAlertbox(),
+            'avatar' => $this->renderCommentAvatar(),
+            'author' => $this->renderCommentAuthor(),
+            'created' => $this->renderCommentCreated(),
+            'rating' => $this->renderRating(),
+            'replyLink' => $this->renderReplyLink($level),
+            'votes' => $this->renderVotes(),
+            'commentText' => $this->renderCommentText(),
+            'feedbackText' => $this->renderFeedbackText(),
+            'websiteLink' => $this->renderWebsiteLink(),
+            'replyForm' => $this->renderReplyForm(),
+        ]);
     }
-
 }

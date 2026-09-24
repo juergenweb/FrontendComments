@@ -185,9 +185,6 @@
         "7df21df70ba404315cc66835a99899d9": {
             "text": "Es sind keine FrontendComments-Felder installiert."
         },
-        "c940d679fcdb70ce1c5430c453b303b1": {
-            "text": "Falscher Wert f\u00fcr den Status. Der Status kann nur die folgenden Werte haben: 0, 1, 2 oder 4."
-        },
         "de409f1196a299b23fcbdfaf9efe0740": {
             "text": "Den Kommentar-Manager anstelle des Inline-Editors verwenden?"
         },
@@ -211,6 +208,24 @@
         },
         "112c6455adf5463fd1fe04c615982dae": {
             "text": "Kommentar mit der ID #%s bearbeiten"
+        },
+        "0cd369dba00e2cff92ce8c9f608e5163": {
+            "text": "Kommentar #%s kann nicht gel\u00f6scht werden, da bereits Antworten auf diesen Kommentar vorhanden sind. Sie m\u00fcssen zuerst alle Antworten l\u00f6schen, bevor Sie diesen Kommentar l\u00f6schen k\u00f6nnen."
+        },
+        "f1f2dcf79a673500deda3fe76b60f278": {
+            "text": "Sie haben keine Berechtigung, diesen Kommentar zu bearbeiten."
+        },
+        "bc3c81cef5a58e41c35044734cd1ee03": {
+            "text": "Sie haben keine Berechtigung, Kommentare zu bearbeiten."
+        },
+        "b2c87920dd2f2d4261df6f260bdacc2d": {
+            "text": "W\u00e4hlen Sie aus, \u00fcber welche Berechtigung ein Benutzer verf\u00fcgen muss, um Kommentare mit dem FrontendCommentsManager bearbeiten zu d\u00fcrfen."
+        },
+        "9534693cfc2eecb0832c56e1b70c1e85": {
+            "text": "Nur Benutzer mit dieser Berechtigung k\u00f6nnen Kommentare \u00fcber den Kommentar-Manager bearbeiten (Superuser haben immer die Berechtigung zum Bearbeiten)."
+        },
+        "c80c46ac470408a9845b4780f021d593": {
+            "text": "Standardm\u00e4\u00dfig k\u00f6nnen alle Benutzer mit der Berechtigung zum Bearbeiten von Seiten Kommentare \u00fcber den FrontendCommentsManager bearbeiten. Sie k\u00f6nnen jedoch auch eine eigene Berechtigung erstellen, wenn Sie dies m\u00f6chten."
         }
     }
 }

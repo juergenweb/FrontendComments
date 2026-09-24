@@ -530,9 +530,6 @@
         "cb487bd3a925abfee5e6547913762c70": {
             "text": "Sie m\u00fcssen zuerst alle Antworten l\u00f6schen, bevor Sie diesen Kommentar l\u00f6schen k\u00f6nnen."
         },
-        "bca7a54fd8d1a225879aa80d4911e78f": {
-            "text": "Sie m\u00fcssen zuerst alle Antworten l\u00f6schen, bevor Sie diesen Kommentar als SPAM markieren k\u00f6nnen."
-        },
         "e2702e8b9c1efdd2e4662873c3114be2": {
             "text": "Genehmigung ausstehend"
         },
@@ -544,6 +541,24 @@
         },
         "dd0d24a48197b2785e34fa674d5da2e3": {
             "text": "Hervorgehoben"
+        },
+        "36d03b40639fb73b55332350f12ca958": {
+            "text": "Moderatoren nach dieser Anzahl von Tagen an ausstehende Kommentare erinnern"
+        },
+        "2781dfd0e51552817a56334396590ffe": {
+            "text": "Wenn ein Kommentar nach der angegebenen Anzahl von Tagen noch auf die Genehmigung wartet, wird einmalig eine Erinnerungs-E-Mail an die oben konfigurierten Moderatoren gesendet."
+        },
+        "ea07c6518492dcc265e00a6e779fc632": {
+            "text": "Wenn du diese Erinnerung deaktivieren m\u00f6chtest, w\u00e4hle bitte 0 aus. Jeder Kommentar wird nur einmal daran erinnert \u2013 wenn du den Status sp\u00e4ter wieder auf \"Genehmigung ausstehend\" \u00e4nderst, ist er nach so vielen Tagen wieder f\u00fcr eine Erinnerung berechtigt."
+        },
+        "d5feb9236d250987127b93f55c44551b": {
+            "text": "Anzahl der Benachrichtigungs-E-Mails, die pro Durchlauf gesendet werden"
+        },
+        "fb57c24cdde3ac86cfb1327768092e89": {
+            "text": "Neue Kommentarbenachrichtigungen werden in einer Datenbanktabelle in eine Warteschlange gelegt und alle zwei Minuten in Batches \u00fcber LazyCron verschickt, anstatt sofort gesendet zu werden, w\u00e4hrend ein Besucher auf das Speichern seines Kommentars wartet. Gib ein, wie viele Warteschlange-E-Mails pro Ausf\u00fchrung gesendet werden sollten."
+        },
+        "63a3f5d8cca0e36225186fbe39fb3a41": {
+            "text": "Ein niedrigerer Wert sorgt daf\u00fcr, dass jeder Durchlauf auf Seiten mit vielen Kommentaren schnell ist; ein h\u00f6herer Wert baut die Warteschlange auf Seiten mit wenig Kommentarverkehr schneller ab."
         }
     }
 }

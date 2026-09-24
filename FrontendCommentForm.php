@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FrontendComments;
@@ -40,27 +41,44 @@ use PDO;
 
 class FrontendCommentForm extends Form
 {
-    protected array $frontendFormsConfig = []; // array containing all FrontendForms config values
-    protected int|null $privacyType = null; // the privacy setting of the FrontendCommentArray
+    protected array $frontendFormsConfig = [];
+    // array containing all FrontendForms config values
+    protected int|null $privacyType = null;
+    // the privacy setting of the FrontendCommentArray
     protected int $level = 0;
 
     /** class objects */
-    protected Email $email; // the email field object
-    protected InputText $author; // the author field object
-    protected InputText $website; // the website of the author field object
-    protected Textarea $comment; // the comment text field object
-    protected Select $stars; // the number field for star rating
-    protected InputRadioMultiple $notify; // "notify me about new comments" field object
-    protected Privacy $privacy; // the accept privacy checkbox object
-    protected PrivacyText $privacyText; // the accept privacy text object
-    protected Button $button; // the submission button object
-    protected ResetButton $resetButton; // the reset button object
-    protected FrontendCommentArray $comments; // the array containing all comments of this page
-    protected Page $page; // the page where the form is embedded/displayed
-    protected Field $field; // the field of the FrontendComments Fieldtype
-    protected Link $guidelines; // The guideline link object for the comments
+    protected Email $email;
+    // the email field object
+    protected InputText $author;
+    // the author field object
+    protected InputText $website;
+    // the website of the author field object
+    protected Textarea $comment;
+    // the comment text field object
+    protected Select $stars;
+    // the number field for star rating
+    protected InputRadioMultiple $notify;
+    // "notify me about new comments" field object
+    protected Privacy $privacy;
+    // the accept privacy checkbox object
+    protected PrivacyText $privacyText;
+    // the accept privacy text object
+    protected Button $button;
+    // the submission button object
+    protected ResetButton $resetButton;
+    // the reset button object
+    protected FrontendCommentArray $comments;
+    // the array containing all comments of this page
+    protected Page $page;
+    // the page where the form is embedded/displayed
+    protected Field $field;
+    // the field of the FrontendComments Fieldtype
+    protected Link $guidelines;
+    // The guideline link object for the comments
     protected Notifications $notifications;
-    protected WireDatabasePDO $database; // the ProcessWire database object
+    protected WireDatabasePDO $database;
+    // the ProcessWire database object
     public static array $ratingValues = [];
 
     /**
@@ -72,10 +90,14 @@ class FrontendCommentForm extends Form
     {
 
         // set default values
-        $this->comments = $comments; // the comment text object
-        $this->page = $comments->getPage(); // the current page object, which contains the comment field
-        $this->field = $comments->getField(); // Processwire comment field object
-        $this->database = $this->wire('database'); // the database object
+        $this->comments = $comments;
+        // the comment text object
+        $this->page = $comments->getPage();
+        // the current page object, which contains the comment field
+        $this->field = $comments->getField();
+        // Processwire comment field object
+        $this->database = $this->wire('database');
+        // the database object
 
 
         self::$ratingValues = [
@@ -93,10 +115,9 @@ class FrontendCommentForm extends Form
 
         parent::__construct($id);
 
-        // TODO: set new values afterwards - only for dev purposes set to 0
-        //$this->setMaxAttempts(0);
+        // require at least 1 second between form display and submission (basic bot/spam protection);
+        // the other FrontendForms anti-spam limits (max attempts, max time) are left at their defaults
         $this->setMinTime(1);
-        //$this->setMaxTime(0);
 
         // grab configuration values from the FrontendForms module
         $this->frontendFormsConfig = FieldtypeFrontendComments::getFrontendFormsConfigValues();
@@ -160,7 +181,6 @@ class FrontendCommentForm extends Form
         // instantiate the Notifications object for creating the mail body text
         require_once(__DIR__ . '/Notifications.php');
         $this->notifications = new Notifications($this->comments, $this->field, $this->page);
-
     }
 
     /**
@@ -197,7 +217,8 @@ class FrontendCommentForm extends Form
             $this->email->setDefaultValue($this->user->email);
             $this->email->setAttribute('readonly');
         }
-        $this->email->setRule('lengthMax', 255)->setCustomFieldName($this->_('The email address')); // DB storage maximum length
+        $this->email->setRule('lengthMax', 255)->setCustomFieldName($this->_('The email address'));
+        // DB storage maximum length
         return $this->email;
     }
 
@@ -211,7 +232,6 @@ class FrontendCommentForm extends Form
     {
         $this->author->setLabel($this->_('Name'));
         if ($this->user->isLoggedin()) {
-
             $authorFieldValue = '';
 
             if ($this->field->get('input_fc_author') !== 'none') {
@@ -223,10 +243,10 @@ class FrontendCommentForm extends Form
                 $this->author->setAttribute('readonly');
                 $this->author->setAttribute('value', $authorFieldValue);
             }
-
         }
         $this->author->setRule('required');
-        $this->author->setRule('lengthMax', 128)->setCustomFieldName($this->_('The name')); // DB storage maximum length
+        $this->author->setRule('lengthMax', 128)->setCustomFieldName($this->_('The name'));
+        // DB storage maximum length
         return $this->author;
     }
 
@@ -237,7 +257,8 @@ class FrontendCommentForm extends Form
     public function ___getWebsiteField(): InputUrl
     {
         $this->website->setLabel($this->_('Homepage'));
-        $this->website->setRule('lengthMax', 255)->setCustomFieldName($this->_('The Homepage URL')); // DB storage maximum length
+        $this->website->setRule('lengthMax', 255)->setCustomFieldName($this->_('The Homepage URL'));
+        // DB storage maximum length
         return $this->website;
     }
 
@@ -251,7 +272,8 @@ class FrontendCommentForm extends Form
         $this->comment->setLabel($this->_('Comment'));
         $this->comment->setRule('required')->setCustomFieldName($this->_('The comment'));
         $this->comment->setRule('lengthMax', 1024);
-        $this->comment->setSanitizer('maxLength'); // limit the length of the comment
+        $this->comment->setSanitizer('maxLength');
+        // limit the length of the comment
         $this->comment->setNotes($this->_('HTML is not allowed.'));
         return $this->comment;
     }
@@ -273,28 +295,37 @@ class FrontendCommentForm extends Form
         $this->stars->addOption(self::$ratingValues[2], '2');
         $this->stars->addOption(self::$ratingValues[1], '1');
         $this->stars->setAttribute('class', 'fcm-star-rating');
-        if(FieldtypeFrontendComments::getFrameWork() === 'Bulma1'){
+        if (FieldtypeFrontendComments::getFrameWork() === 'Bulma1') {
             $this->stars->getSelectWrapper()->removeAttribute('class', 'select');
         }
 
-        // create data-options string
+        // create data-options array
         $options = [];
         // add translatable string for the default "Select a rating" text
         $tooltip = $this->_('Select a rating');
 
         if ($this->field->get('input_fc_showtooltip')) {
-            // disable tooltip
+        // disable tooltip
             $tooltip = false;
         }
         // set tooltip option depending on the settings
-        $options[] = '&quot;tooltip&quot;:&quot;' . $tooltip . '&quot;';
+        $options['tooltip'] = $tooltip;
         // set clear-able to true
-        $options[] = '&quot;clearable&quot;:true';
+        $options['clearable'] = true;
 
         if ($options) {
-            // create the data-options attribute
-            $optionString = implode(',', $options);
-            $this->stars->setAttribute('data-options', '{' . $optionString . '}');
+            // Real bug found and fixed: this used to hand-build the JSON string with manually
+            // written &quot; HTML entities (e.g. '&quot;tooltip&quot;:&quot;...&quot;') instead of
+            // real double quotes. setAttribute() below HTML-escapes whatever value it is given via
+            // htmlspecialchars(..., ENT_QUOTES) (see Tag::renderAttributes() in FrontendForms) - so
+            // the '&' of each already-written "&quot;" got escaped a second time into "&amp;quot;".
+            // Browsers only decode HTML entities once when parsing an attribute, so
+            // getAttribute('data-options') in JS returned the literal, un-parseable text "&quot;"
+            // instead of a real '"' character - causing exactly the reported
+            // "Uncaught SyntaxError: JSON.parse: expected property name or '}' at line 1 column 2".
+            // json_encode() now produces real JSON with real quotes, and setAttribute()'s own
+            // htmlspecialchars() call is left to do the (correct, single-pass) HTML-escaping.
+            $this->stars->setAttribute('data-options', json_encode($options));
         }
         return $this->stars;
     }
@@ -406,16 +437,21 @@ class FrontendCommentForm extends Form
 
         // create and add the privacy notice type
         switch ($this->privacyType) {
-            case(1): // a checkbox has been selected
+            case (1): // a checkbox has been selected
                 // remove PrivacyText element
+
                 $this->remove($this->privacyText);
+
                 break;
-            case(2): // text only has been selected
+            case (2): // text only has been selected
                 //  to remove the Privacy element;
+
                 $this->remove($this->privacy);
+
                 break;
             default: // show none of them has been selected
                 //  to remove both
+
                 $this->remove($this->privacyText);
                 $this->remove($this->privacy);
         }
@@ -453,9 +489,11 @@ class FrontendCommentForm extends Form
     protected function setWebsiteField(): void
     {
         if ($this->field->get('input_fc_showWebsite')) {
-            $this->setWebsiteFieldValues(); // show a website field and add pre-defined values
+            $this->setWebsiteFieldValues();
+        // show a website field and add pre-defined values
         } else {
-            $this->remove($this->website);// remove the website field if set
+            $this->remove($this->website);
+        // remove the website field if set
         }
     }
 
@@ -477,13 +515,64 @@ class FrontendCommentForm extends Form
                 break;
             case 2:
                 // check if a user with the given mail address has posted a published comment in the past
-                $commenter = $this->comments->find('email=' . $email . ',status=1');
+                // $email is the value just submitted via the public comment form - wrap it in
+                // selectorValue() before concatenating it into the selector string to prevent
+                // selector injection (e.g. via a crafted email containing a comma, which is the
+                // selector's AND-separator, allowing an attacker to inject additional clauses such
+                // as an OR-able status match that bypasses the "new commenter needs moderation" check).
+                $commenter = $this->comments->find('email=' . $this->wire('sanitizer')->selectorValue($email) . ',status=1');
                 if ($commenter->count()) {
                     $status = 1; // set status to publish
                 }
                 break;
         }
         return $status;
+    }
+
+    /**
+     * Check whether the double opt-in confirmation (notification_confirmed, see
+     * FieldtypeFrontendComments::getDatabaseSchema()) for a notification request by the given email
+     * address has already been given before, for a PREVIOUS comment on this exact field on this
+     * exact page - so a repeat commenter with the same address is not asked to click a fresh
+     * confirmation link again with every comment they post here.
+     *
+     * $this->comments only ever holds the comments already stored for THIS field on THIS page (see
+     * Fieldtype::loadPageField()), so this check is automatically scoped correctly: the same field
+     * used on a different page has its own, separate $comments, and therefore still requires its own
+     * confirmation there.
+     *
+     * @param string $email
+     * @return bool
+     */
+    protected function notificationAlreadyConfirmedForEmail(string $email): bool
+    {
+        if ($email === '') {
+            return false;
+        }
+        // see getCommentStatusForStorage() above for why selectorValue() wraps the (user-supplied)
+        // email before it is concatenated into the selector string
+        $confirmed = $this->comments->find('email=' . $this->wire('sanitizer')->selectorValue($email) . ',notification_confirmed=1');
+        return (bool)$confirmed->count();
+    }
+
+    /**
+     * Whether a notification request by this (not yet saved) new comment can be treated as
+     * already confirmed - i.e. whether the double opt-in confirmation mail can be skipped for it
+     * entirely. This is the case when either:
+     * - the commenter is logged in: their email address is already unambiguously theirs (it is
+     *   read-only and taken straight from their account, see ___getEmailField()), so there is
+     *   nothing to confirm, or
+     * - the same email address already confirmed a notification request for a previous comment on
+     *   this exact field on this exact page (see notificationAlreadyConfirmedForEmail() above).
+     * @param FrontendComment $newComment
+     * @return bool
+     */
+    protected function notificationConfirmationCanBeSkipped(FrontendComment $newComment): bool
+    {
+        if ($this->wire('user')->isLoggedin()) {
+            return true;
+        }
+        return $this->notificationAlreadyConfirmedForEmail((string)$newComment->get('email'));
     }
 
     /**
@@ -502,7 +591,7 @@ class FrontendCommentForm extends Form
                 // remove the reply fields completely
                 $this->remove($replyField);
                 break;
-            case(1):
+            case (1):
                 // remove field with value 2
                 if (!$levels) {
                     $this->remove($replyField);
@@ -536,12 +625,15 @@ class FrontendCommentForm extends Form
     {
 
         $type = $this->field->get('input_guidelines_type');
-        if ($type === 0)
+        if ($type === 0) {
             return false;
-        if ($type === 1) { // internal page
+        }
+        if ($type === 1) {
+            // internal page
             $page_id = $this->field->get('input_fc_internalPage')[0];
             $url = $this->wire('pages')->get($page_id)->url;
-        } else { // external page
+        } else {
+        // external page
             $url = $this->field->get('input_fc_externalPage');
             $link->setAttribute('rel', 'nofollow');
         }
@@ -575,7 +667,8 @@ class FrontendCommentForm extends Form
 
         // add the guideline link if set
         $guidelines_url = $this->getCommunityGuidelinesURL($this->guidelines);
-        if ($guidelines_url) { // set the url of the guideline link
+        if ($guidelines_url) {
+        // set the url of the guideline link
             $this->guidelines->setUrl($guidelines_url);
             $link = $this->guidelines->render();
             $notesText = $this->getFormelementByName('text')->getNotes()->getContent();
@@ -584,18 +677,17 @@ class FrontendCommentForm extends Form
 
         // add in array validator for email notification field -> checks for allowed values
         $allowedValues = $this->setCommentNotificationField();
-        if ($allowedValues)
+        if ($allowedValues) {
             $this->notify->setRule('in', $allowedValues);
+        }
 
         // set default form validation status
         $valid = false;
 
         if ($this->isValid()) {
             $valid = true;
-
             // get the name of the comment field
             $fieldName = $this->field->name;
-
             // create an array for saving the data to the database
             $values = [];
 
@@ -604,13 +696,14 @@ class FrontendCommentForm extends Form
 
                 if ($name === "text") {
                     $database_name = "data";
-                } else if ($name === "parent-id") {
+                } elseif ($name === "parent-id") {
                     $database_name = "parent_id";
                 } else {
                     $database_name = $name;
                 }
-                if ($name === 'stars')
-                    $value = ($value == '') ? NULL : $value;
+                if ($name === 'stars') {
+                    $value = ($value == '') ? null : $value;
+                }
 
                 // check if a column with this name exists inside the database and add the name to the array
                 if ($this->database->columnExists('field_' . $fieldName, $database_name)) {
@@ -622,29 +715,46 @@ class FrontendCommentForm extends Form
             $newComment = $this->wire(new FrontendComment($this->comments, $values, $this->frontendFormsConfig));
             $newComment->page = $this->page;
             $newComment->field = $this->field;
-
             // add additional values to it, which are not part of the post-values
-            $newComment->pages_id = $this->page->id; // set the page id
-            $newComment->user_id = $this->wire('user')->id; // set the user id
-            $newComment->ip = $this->wire('session')->getIP(); // get the IP address of the user
-            $newComment->user_agent = $_SERVER['HTTP_USER_AGENT']; // get the user agent header
-            $newComment->sort = count($this->comments) + 1; // increase the sort
-            $newComment->created = time(); // set the current timestamp
-            $newComment->status = $this->getCommentStatusForStorage($newComment->get('email')); // set the status
+            $newComment->pages_id = $this->page->id;
+            // set the page id
+            $newComment->user_id = $this->wire('user')->id;
+            // set the user id
+            $newComment->ip = $this->wire('session')->getIP();
+            // get the IP address of the user
+            $newComment->user_agent = $_SERVER['HTTP_USER_AGENT'];
+            // get the user agent header
+            $newComment->sort = count($this->comments) + 1;
+            // increase the sort
+            $newComment->created = time();
+            // set the current timestamp
+            $newComment->status = $this->getCommentStatusForStorage($newComment->get('email'));
+            // set the status
             // create random codes for remote links inside emails
             $random = new WireRandom();
             $newComment->code = $random->alphanumeric(120);
 
+            // Double opt-in (notification_confirmed, see FieldtypeFrontendComments::
+            // getDatabaseSchema()): decide, before this comment is even saved, whether this
+            // particular notification request still actually needs a confirmation mail, so the
+            // correct value is written in the very same save as everything else instead of a second
+            // write later - see notificationConfirmationCanBeSkipped() above for the two cases in
+            // which no confirmation mail is needed.
+            if (
+                    (int)$newComment->get('notification') !== FrontendComment::flagNotifyNone
+                && $this->notificationConfirmationCanBeSkipped($newComment)
+            ) {
+                $newComment->notification_confirmed = 1;
+            }
+
             // save it to the database
             if ($this->comments->saveComment($newComment)) {
-
                 // create a success message text depending on status
                 $successMsg = $this->_('Thank you for your comment!') . '<br>';
 
                 switch ($newComment->status) {
                     case 0:
                         $successMsg .= $this->_('Please be patient. Your comment must be approved by a moderator before it will be published on the page.');
-
                         if ($this->field->get('input_fc_status_change_notification')) {
                             $successMsg .= '<br>' . $this->_('You will be notified by email as soon as your comment has been reviewed by a moderator.');
                         }
@@ -661,7 +771,6 @@ class FrontendCommentForm extends Form
                         $successMsg .= $this->_('To go directly to the comment, please click on the following link:') . '<br>';
                         $successMsg .= $link;
                         break;
-
                 }
                 // set the message text to the alert
                 $this->getAlert()->setContent($successMsg);
@@ -672,30 +781,42 @@ class FrontendCommentForm extends Form
                 //Send notification mail to all moderators if a new comment has been posted
                 $this->notifications->sendModerationNotificationMail($values, $newComment, $this);
 
-                /*
-                // get the id of the current saved comment inside the comment field table
-                $table = $this->database->escapeTable($this->field->get('table'));
-                $statement = "SELECT max(id) AS `lastid` FROM $table WHERE pages_id=:pages_id";
-
-                try {
-                    $query = $this->database->prepare($statement);
-                    $query->bindValue(":pages_id", $newComment->pages_id, PDO::PARAM_INT);
-                    $query->execute();
-                    $row = $query->fetchAll();
-                    $last_comment_id = $row[0]['lastid'];
-                    $newComment->id = $last_comment_id;
-
-
-                    $newComment->addCommentToQueueTable();
-                    $this->wire('session')->set('stopqueue', '1'); // this is to prevent long execution times (sending mails and writing in the database at the same time)
-                } catch (Exception) {
-                    // not used at the moment
+                // If the commenter chose to be notified about replies/new comments, and that address
+                // has not already been confirmed to actually belong to them (see the
+                // notification_confirmed pre-check right before saveComment() above, and
+                // FrontendComment::addCommentToQueueTable()) - send a confirmation (double opt-in)
+                // mail asking them to confirm the request before any notification mails are ever sent
+                // to it.
+                if (
+                    (int)$newComment->get('notification') !== FrontendComment::flagNotifyNone
+                    && (int)$newComment->get('notification_confirmed') !== 1
+                ) {
+                    $this->notifications->sendNotificationConfirmationMail($newComment);
                 }
-                */
 
-                // update the "pages" table (modified_users_id, modified) if "quiet save" is not enabled
+        /*
+        // get the id of the current saved comment inside the comment field table
+        $table = $this->database->escapeTable($this->field->get('table'));
+        $statement = "SELECT max(id) AS `lastid` FROM $table WHERE pages_id=:pages_id";
+
+        try {
+            $query = $this->database->prepare($statement);
+            $query->bindValue(":pages_id", $newComment->pages_id, PDO::PARAM_INT);
+            $query->execute();
+            $row = $query->fetchAll();
+            $last_comment_id = $row[0]['lastid'];
+            $newComment->id = $last_comment_id;
+
+
+            $newComment->addCommentToQueueTable();
+            $this->wire('session')->set('stopqueue', '1'); // this is to prevent long execution times (sending mails and writing in the database at the same time)
+        } catch (Exception) {
+                    // not used at the moment
+        }
+        */
+
+        // update the "pages" table (modified_users_id, modified) if "quiet save" is not enabled
                 if (!$this->field->get('input_fc_quiet_save')) {
-
                     $statement = "UPDATE pages SET modified_users_id=:userid, modified=CURRENT_TIMESTAMP() WHERE id=:id";
                     $query = $this->wire('database')->prepare($statement);
                     $query->bindValue(":userid", $this->wire('user')->id, PDO::PARAM_INT);
@@ -706,21 +827,18 @@ class FrontendCommentForm extends Form
                     } catch (Exception $e) {
                         $this->log('Message: ' . $e->getMessage());
                     }
-
                 }
                 // this is to prevent long execution times (sending mails and writing new comment in the database at the same time)
                 $this->wire('session')->set('stopqueue', '1');
-
             }
-
         }
 
         // output the form
         $out = $this->renderHeadline();
         $out .= '<div id="' . $this->getID() . '-form-wrapper" class="fc-comment-form-wrapper">';
-
-        if($this->getFormelementByName('notification'))
+        if ($this->getFormelementByName('notification')) {
             $this->getFormelementByName('notification')->getLabel()->removeAttribute('for');
+        }
 
         $out .= parent::render();
         $out .= '</div>';
@@ -733,5 +851,4 @@ class FrontendCommentForm extends Form
 
         return $out;
     }
-
 }
