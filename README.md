@@ -69,7 +69,7 @@ No, it's not. This module runs on its own codebase and has not been copied from 
 
 ## Installation and Quick-start guide
 1. First of all, you need to download and install the FrontendForms module from the [module directory](https://processwire.com/modules/frontend-forms/) if you have not installed it.
-2. After that, download and extract this module and put the folder inside site/modules. Be aware that the folder name must be FrontendComments and not FrontendComments-main or FrontendComments-master. GitHub adds this suffix by default, so make sure to remove it before you put the folder inside the modules folder.
+2. After that, download and extract this module and put the folder inside site/modules. Be aware that the folder name must be FieldtypeFrontendComments and not FieldtypeFrontendComments-main or FieldtypeFrontendComments-master. GitHub adds this suffix by default, so make sure to remove it before you put the folder inside the modules folder. Alternatively you can install this module via the ProcessWire modules directory (recommended).
 3. Login to your admin area and refresh all modules.
 4. Find this module and install it.
 5. Then you need to create your first comment field and name it e.g. "comments".
