@@ -64,6 +64,7 @@ Downvotes,"Negative Wertungen",,site/modules/FrontendComments/FrontendCommentsMa
 "You do not have permission to edit comments.","Sie haben keine Berechtigung, Kommentare zu bearbeiten.",,site/modules/FrontendComments/FrontendCommentsManager.module,bc3c81cef5a58e41c35044734cd1ee03
 of,von,,site/modules/FrontendComments/FrontendCommentsManager.module,8bf8854bebe108183caeb845c7676ae4
 SQL-Statement,SQL-Anweisung,,site/modules/FrontendComments/FrontendCommentsManager.module,d142ebe4786fbc0ffb437b1ed3c2d2c7
+"You have unsaved changes. Are you sure you want to leave?","Sie haben ungespeicherte Änderungen. Sind Sie sicher, dass sie die Seite verlassen möchten?",,site/modules/FrontendComments/FrontendCommentsManager.module,6f16223613fda356ecef1b571eb371fd
 "There are no FrontendComments fields installed.","Es sind keine FrontendComments-Felder installiert.",,site/modules/FrontendComments/FrontendCommentsManager.module,7df21df70ba404315cc66835a99899d9
 "Use comments manager rather than in-page editor?","Den Kommentar-Manager anstelle des Inline-Editors verwenden?",,site/modules/FrontendComments/FrontendCommentsManager.module,de409f1196a299b23fcbdfaf9efe0740
 "When enabled user will be directed to the dedicated comments manager for editing comments.","Wenn diese Option aktiviert ist, wird der Benutzer zum speziellen Kommentar-Manager weitergeleitet, um Kommentare zu bearbeiten.",,site/modules/FrontendComments/FrontendCommentsManager.module,33c3c08ba0fba5a5c7cf3200a45dd907
