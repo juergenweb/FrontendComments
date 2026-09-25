@@ -130,6 +130,12 @@
         },
         "1f617d4ee31e9079683591b1eccca566": {
             "text": "Bitte best\u00e4tigen Sie Ihre Benachrichtigungsanfrage."
+        },
+        "d7a8116ea1caef0890bbe9f04ee346b3": {
+            "text": "Dieser Kommentar wartet seit mindestens einem Tag auf die Genehmigung. Bitte \u00fcberpr\u00fcfe Sie diesen."
+        },
+        "7ca0c20b8968b307f3d1b1f49fe67910": {
+            "text": "Dieser Kommentar wartet seit mindestens mehreren Tagen auf die Genehmigung. Bitte \u00fcberpr\u00fcfen Sie ihn."
         }
     }
 }
