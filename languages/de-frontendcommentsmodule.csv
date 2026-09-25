@@ -180,6 +180,7 @@ docs,Docs,,site/modules/FrontendComments/FieldtypeFrontendComments.module,e3e2a9
 approved,Genehmigt,,site/modules/FrontendComments/FieldtypeFrontendComments.module,787d5f05953ec39b108869dfdd7733e6
 SPAM,=,,site/modules/FrontendComments/FieldtypeFrontendComments.module,c72beebe6ecbdddff71b846c4858ebcb
 featured,Hervorgehoben,,site/modules/FrontendComments/FieldtypeFrontendComments.module,dd0d24a48197b2785e34fa674d5da2e3
+"Something went wrong!","Irgendetwas ist schief gelaufen!",,site/modules/FrontendComments/FieldtypeFrontendComments.module,c6701602de1528fd79d5eff3e8eb1edd
 FrontendComments,=,,site/modules/FrontendComments/FieldtypeFrontendComments.module,6b8c682577d63258030293d8bac4919b
 "Field that let you store user comments on a page using the FrontendForms module.","Eingabefeld, welches auf Basis des FrontendForms-Modul Kommentare auf einer Seite anzeigen kann",,site/modules/FrontendComments/FieldtypeFrontendComments.module,bbe8f47078082191d89866cabaad534d
 "Number of notification emails to send per run","Anzahl der Benachrichtigungs-E-Mails, die pro Durchlauf gesendet werden",,site/modules/FrontendComments/FieldtypeFrontendComments.module,d5feb9236d250987127b93f55c44551b
